@@ -1,10 +1,17 @@
-﻿:root {
+﻿/* Estilos globais do site */
+:root {
     --sidebar-width: 250px;
     --topbar-height: 60px;
     --primary-color: #3b5998;
     --secondary-color: #f8f9fa;
     --sidebar-bg: #2c3e50;
     --sidebar-hover: #34495e;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 body {
@@ -24,7 +31,7 @@ body {
     color: white;
     z-index: 1030;
     transition: all 0.3s;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
 }
 
@@ -167,39 +174,36 @@ body {
     border-top-right-radius: 0.5rem !important;
 }
 
-/* Dashboard cards */
-.dashboard-card {
-    border-left: 0.25rem solid;
-    border-radius: 0.5rem;
+/* Elementos personalizados */
+.icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.dashboard-card-primary {
-    border-left-color: var(--primary-color);
+    .icon-circle.bg-primary {
+        background-color: #3b5998;
+    }
+
+    .icon-circle.bg-success {
+        background-color: #1cc88a;
+    }
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3b5998;
 }
 
-.dashboard-card-success {
-    border-left-color: #1cc88a;
-}
-
-.dashboard-card-info {
-    border-left-color: #36b9cc;
-}
-
-.dashboard-card-warning {
-    border-left-color: #f6c23e;
-}
-
-.dashboard-card-icon {
-    font-size: 2rem;
-    opacity: 0.3;
-}
-
-/* Tables */
-.table-responsive {
-    border-radius: 0.5rem;
-    overflow: hidden;
-}
-
+/* Tabelas */
 .table {
     margin-bottom: 0;
 }
@@ -213,6 +217,27 @@ body {
         letter-spacing: 0.05rem;
     }
 
+/* Botões extras */
+.btn-outline-primary {
+    color: #3b5998;
+    border-color: #3b5998;
+}
+
+    .btn-outline-primary:hover {
+        background-color: #3b5998;
+        color: white;
+    }
+
+.btn-outline-success {
+    color: #1cc88a;
+    border-color: #1cc88a;
+}
+
+    .btn-outline-success:hover {
+        background-color: #1cc88a;
+        color: white;
+    }
+
 /* Responsive */
 @media (max-width: 992px) {
     .menu-toggle {
@@ -223,6 +248,10 @@ body {
         left: calc(-1 * var(--sidebar-width));
     }
 
+        .sidebar.show {
+            left: 0;
+        }
+
     .topbar, .main-content {
         left: 0;
         margin-left: 0;
@@ -230,11 +259,11 @@ body {
 }
 
 @media (max-width: 576px) {
-    .dashboard-card .h5 {
-        font-size: 1rem;
+    .card-title {
+        font-size: 1.1rem;
     }
 
-    .dashboard-card-icon {
+    h2 {
         font-size: 1.5rem;
     }
 }
