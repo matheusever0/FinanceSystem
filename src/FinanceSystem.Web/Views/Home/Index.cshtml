@@ -12,7 +12,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="welcome-message mb-4">
+                            <div class="mb-4">
                                 <h2>Olá, @User.Identity.Name!</h2>
                                 <p class="text-muted">
                                     Bem-vindo ao seu sistema de gerenciamento. Você está logado como
@@ -20,8 +20,8 @@
                                 </p>
                             </div>
 
-                            <div class="user-info mb-4">
-                                <h5>Informações do Usuário</h5>
+                            <div class="mb-4">
+                                <h5 class="mb-3">Informações do Usuário</h5>
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="user-avatar me-3">
                                         <i class="fas fa-user fa-2x"></i>
@@ -38,7 +38,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <h5>Acesso Rápido</h5>
+                            <h5 class="mb-3">Acesso Rápido</h5>
 
                             <div class="row">
                                 @if (User.IsInRole("Admin"))
@@ -90,25 +90,3 @@
         </div>
     </div>
 </div>
-
-<style>
-    .icon-circle {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .user-avatar {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background-color: #e9ecef;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #3b5998;
-    }
-</style>

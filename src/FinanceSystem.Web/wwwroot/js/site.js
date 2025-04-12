@@ -2,6 +2,7 @@
  * Scripts principais do site Finance System
  */
 
+// Aguardar que o DOM esteja completamente carregado
 document.addEventListener('DOMContentLoaded', function () {
     // Elementos do DOM
     const menuToggle = document.getElementById('menu-toggle');
@@ -11,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const alerts = document.querySelectorAll('.alert-dismissible');
 
     // Toggle do sidebar
-    if (menuToggle) {
+    if (menuToggle && sidebar) {
         menuToggle.addEventListener('click', function () {
             if (window.innerWidth < 992) {
                 // Em dispositivos móveis, apenas mostra/esconde o sidebar
@@ -19,8 +20,8 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 // Em desktop, colapsa o sidebar e ajusta o layout
                 sidebar.classList.toggle('collapsed');
-                topbar.classList.toggle('expanded');
-                mainContent.classList.toggle('expanded');
+                if (topbar) topbar.classList.toggle('expanded');
+                if (mainContent) mainContent.classList.toggle('expanded');
             }
         });
     }
@@ -30,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
         alerts.forEach(function (alert) {
             setTimeout(function () {
                 // Verificar se o Bootstrap está disponível
-                if (typeof bootstrap !== 'undefined') {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Alert) {
                     const bsAlert = new bootstrap.Alert(alert);
                     bsAlert.close();
                 } else {
@@ -45,13 +46,14 @@ document.addEventListener('DOMContentLoaded', function () {
 /**
  * Função para confirmar ação de exclusão
  * @param {string} formId - ID do formulário a ser submetido
- * @param {string} message - Mensagem de confirmação
+ * @param {string} message - Mensagem de confirmação opcional
  * @returns {boolean} - Resultado da confirmação
  */
 function confirmDelete(formId, message) {
     message = message || 'Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.';
     if (confirm(message)) {
-        document.getElementById(formId).submit();
+        const form = document.getElementById(formId);
+        if (form) form.submit();
     }
     return false;
 }
