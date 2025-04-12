@@ -1,16 +1,33 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var controllerName = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var actionName = ViewContext.RouteData.Values["Action"]?.ToString();
+
+    // Adiciona logs para diagnóstico
+    var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+    var username = User?.Identity?.Name ?? "não autenticado";
+    var token = Context.Session.GetString("JWToken") ?? "token ausente";
+    var debugInfo = $"Usuário: {username}, Autenticado: {isAuthenticated}, Token: {(string.IsNullOrEmpty(token) ? "ausente" : token.Substring(0, Math.Min(10, token.Length)))}";
+}
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Finance System</title>
 
-    <!-- Bootstrap e Font-Awesome por CDN (garantia de que funcionarão) -->
+    <!-- Debug info que aparecerá no código fonte para depuração -->
+    <!-- Debug: @debugInfo -->
+    <!-- Meta tags para evitar cache durante o desenvolvimento -->
+    <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+
+    <!-- Bootstrap e Font-Awesome por CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    <!-- Referência ao CSS do site (teste várias formas de path) -->
-    <link rel="stylesheet" href="/css/site.css" />
+    <!-- Referência ao CSS do site usando tag helper e caminho absoluto -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
     <!-- Sidebar -->
@@ -25,7 +42,7 @@
                     <i class="fas fa-user"></i>
                 </div>
                 <div>
-                    <div class="fw-bold">@User.Identity.Name</div>
+                    <div class="fw-bold">@User.Identity?.Name</div>
                     <small>@(User.IsInRole("Admin") ? "Administrador" : "Usuário")</small>
                 </div>
             </div>
@@ -34,7 +51,7 @@
         <div class="sidebar-menu">
             <div class="sidebar-menu-header">Menu Principal</div>
             <div class="sidebar-menu-item">
-                <a asp-controller="Home" asp-action="Index" class="sidebar-menu-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Home" && ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")">
+                <a asp-controller="Home" asp-action="Index" class="sidebar-menu-link @(controllerName == "Home" && actionName == "Index" ? "active" : "")">
                     <span class="sidebar-menu-icon"><i class="fas fa-home"></i></span>
                     <span>Início</span>
                 </a>
@@ -44,13 +61,13 @@
             {
                 <div class="sidebar-menu-header">Gerenciamento</div>
                 <div class="sidebar-menu-item">
-                    <a asp-controller="Users" asp-action="Index" class="sidebar-menu-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Users" ? "active" : "")">
+                    <a asp-controller="Users" asp-action="Index" class="sidebar-menu-link @(controllerName == "Users" ? "active" : "")">
                         <span class="sidebar-menu-icon"><i class="fas fa-users"></i></span>
                         <span>Usuários</span>
                     </a>
                 </div>
                 <div class="sidebar-menu-item">
-                    <a asp-controller="Roles" asp-action="Index" class="sidebar-menu-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Roles" ? "active" : "")">
+                    <a asp-controller="Roles" asp-action="Index" class="sidebar-menu-link @(controllerName == "Roles" ? "active" : "")">
                         <span class="sidebar-menu-icon"><i class="fas fa-user-tag"></i></span>
                         <span>Perfis</span>
                     </a>
@@ -59,11 +76,8 @@
 
             <div class="sidebar-menu-header">Conta</div>
             <div class="sidebar-menu-item">
-                <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display: none;"></form>
-                <a href="javascript:document.getElementById('logoutForm').submit();" class="sidebar-menu-link">
-                    <span class="sidebar-menu-icon"><i class="fas fa-sign-out-alt"></i></span>
-                    <span>Sair</span>
-                </a>
+                <!-- Usando o parcial LoginPartial em vez de código direto -->
+                <partial name="_LoginPartial" />
             </div>
         </div>
     </div>
@@ -76,18 +90,23 @@
         <div class="page-title">@ViewData["Title"]</div>
         <div>
             <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <span class="d-none d-md-inline-block me-2">@User.Identity.Name</span>
+                <span class="d-none d-md-inline-block me-2">@User.Identity?.Name</span>
                 <i class="fas fa-user-circle fs-5"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li>
                     <div class="dropdown-item-text">
-                        <div class="fw-bold">@User.Identity.Name</div>
+                        <div class="fw-bold">@User.Identity?.Name</div>
                         <div class="small text-muted">@(User.IsInRole("Admin") ? "Administrador" : "Usuário")</div>
                     </div>
                 </li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="javascript:document.getElementById('logoutForm').submit();"><i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i> Sair</a></li>
+                <li>
+                    <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display: none;"></form>
+                    <a class="dropdown-item" href="javascript:document.getElementById('logoutForm').submit();">
+                        <i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i> Sair
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
@@ -118,8 +137,57 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
-    <!-- Referência ao JavaScript do site (teste duas formas) -->
-    <script src="/js/site.js"></script>
+    <!-- Referência ao JavaScript do site usando tag helper -->
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Scripts para validação -->
+    <partial name="_ValidationScriptsPartial" />
+
+    <!-- Renderiza seção de scripts adicionais -->
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        // Script de inicialização garantido que será executado
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('_Layout.cshtml carregado com sucesso');
+
+            // Teste se o CSS foi carregado corretamente
+            var styleSheets = document.styleSheets;
+            var siteCssLoaded = false;
+
+            for (var i = 0; i < styleSheets.length; i++) {
+                if (styleSheets[i].href && styleSheets[i].href.includes('/css/site.css')) {
+                    siteCssLoaded = true;
+                    console.log('site.css carregado com sucesso');
+                    break;
+                }
+            }
+
+            if (!siteCssLoaded) {
+                console.error('ERRO: site.css não foi carregado corretamente!');
+                // Tenta carregar o CSS novamente
+                var link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = '/css/site.css?' + new Date().getTime(); // Adiciona timestamp para evitar cache
+                document.head.appendChild(link);
+            }
+
+            // Inicializa o menu toggle para dispositivos móveis
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', function() {
+                    if (window.innerWidth < 992) {
+                        sidebar.classList.toggle('show');
+                    } else {
+                        sidebar.classList.toggle('collapsed');
+                        document.getElementById('topbar').classList.toggle('expanded');
+                        document.getElementById('main-content').classList.toggle('expanded');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

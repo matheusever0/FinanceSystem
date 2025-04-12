@@ -56,7 +56,44 @@ else
 }
 
 app.UseHttpsRedirection();
+
+// Garante que os arquivos estáticos podem ser acessados
+app.UseStaticFiles(new StaticFileOptions
+{
+    ServeUnknownFileTypes = true
+});
+
+// Mantenha também a chamada padrão
 app.UseStaticFiles();
+
+// Loga os arquivos na pasta wwwroot para depuração
+if (app.Environment.IsDevelopment())
+{
+    var wwwrootPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+    Console.WriteLine($"Verificando arquivos em: {wwwrootPath}");
+
+    if (Directory.Exists(wwwrootPath))
+    {
+        var cssPath = Path.Combine(wwwrootPath, "css");
+        if (Directory.Exists(cssPath))
+        {
+            Console.WriteLine("Arquivos CSS encontrados:");
+            foreach (var file in Directory.GetFiles(cssPath))
+            {
+                Console.WriteLine($" - {file}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("AVISO: Pasta CSS não encontrada!");
+        }
+    }
+    else
+    {
+        Console.WriteLine("AVISO: Pasta wwwroot não encontrada!");
+    }
+}
+
 app.UseRouting();
 
 app.UseSession();

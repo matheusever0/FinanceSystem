@@ -120,6 +120,7 @@ body {
     transition: all 0.3s;
     padding: 20px;
     padding-top: calc(var(--topbar-height) + 20px);
+    min-height: 100vh;
 }
 
     .main-content.expanded {
@@ -148,7 +149,6 @@ body {
 
 .menu-toggle {
     cursor: pointer;
-    display: none;
     font-size: 1.5rem;
     margin-right: 1rem;
 }
