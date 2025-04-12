@@ -1,14 +1,15 @@
 using FinanceSystem.Web.Interfaces;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Adicionar serviços de MVC com suporte a controllers de API e views
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
+// Configurar sessão
 builder.Services.AddDistributedMemoryCache();
-
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -16,6 +17,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// Configuração de Autenticação via Cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -23,27 +25,33 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/Account/Logout";
         options.AccessDeniedPath = "/Account/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromHours(1);
-        options.SlidingExpiration = true; 
+        options.SlidingExpiration = true;
     });
 
-
+// Configuração do HttpClient para comunicação com a API
 builder.Services.AddHttpClient("FinanceAPI", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]);
-    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 })
 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 {
-    // IMPORTANTE: Apenas para desenvolvimento
     ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
 });
 
+// Registrar serviços de dependência
 builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 
+// Adicionar suporte a logging
+builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 var app = builder.Build();
 
+// Configurar pipeline de requisições HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -65,5 +73,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
+
+app.MapControllers();
+app.MapRazorPages();
 
 app.Run();
