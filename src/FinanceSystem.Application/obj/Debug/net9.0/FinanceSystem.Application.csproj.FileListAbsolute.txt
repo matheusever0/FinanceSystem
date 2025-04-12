@@ -1,0 +1,15 @@
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\bin\Debug\net9.0\FinanceSystem.Application.deps.json
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\bin\Debug\net9.0\FinanceSystem.Application.dll
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\bin\Debug\net9.0\FinanceSystem.Application.pdb
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\bin\Debug\net9.0\FinanceSystem.Domain.dll
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\bin\Debug\net9.0\FinanceSystem.Domain.pdb
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\FinanceSystem.Application.csproj.AssemblyReference.cache
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\FinanceSystem.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\FinanceSystem.Application.AssemblyInfoInputs.cache
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\FinanceSystem.Application.AssemblyInfo.cs
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\FinanceSystem.Application.csproj.CoreCompileInputs.cache
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\FinanceS.FF6CAA6C.Up2Date
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\FinanceSystem.Application.dll
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\refint\FinanceSystem.Application.dll
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\FinanceSystem.Application.pdb
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\ref\FinanceSystem.Application.dll

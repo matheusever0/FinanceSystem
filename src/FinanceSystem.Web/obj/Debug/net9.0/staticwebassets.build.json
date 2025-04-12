@@ -1,0 +1,702 @@
+{
+  "Version": 1,
+  "Hash": "M3x4E6QvbEzms/RF8fEtELUda/wflHPYgPVdszm+TAI=",
+  "Source": "FinanceSystem.Web",
+  "BasePath": "_content/FinanceSystem.Web",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "FinanceSystem.Web\\wwwroot",
+      "Source": "FinanceSystem.Web",
+      "ContentRoot": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\wwwroot\\",
+      "BasePath": "_content/FinanceSystem.Web",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\obj\\Debug\\net9.0\\compressed\\2n8i3o74gn-b1v7x3q43r.gz",
+      "SourceId": "FinanceSystem.Web",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\obj\\Debug\\net9.0\\compressed\\",
+      "BasePath": "_content/FinanceSystem.Web",
+      "RelativePath": "css/site#[.{fingerprint=b1v7x3q43r}]?.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\wwwroot\\css\\site.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "nfog3tcuok",
+      "Integrity": "s5b11SaVi0cb9kpMy9QSUPvWyJB1sXdmusT+RfiK13U=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\wwwroot\\css\\site.css"
+    },
+    {
+      "Identity": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\obj\\Debug\\net9.0\\compressed\\c441mmn35n-fccw1awf0m.gz",
+      "SourceId": "FinanceSystem.Web",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\obj\\Debug\\net9.0\\compressed\\",
+      "BasePath": "_content/FinanceSystem.Web",
+      "RelativePath": "js/site#[.{fingerprint=fccw1awf0m}]?.js.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\wwwroot\\js\\site.js",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "9jgcwr2odu",
+      "Integrity": "S5WaBp1muMSXKfGg7bIvTqMH4QfhBM6Ec2ZAy5No778=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\wwwroot\\js\\site.js"
+    },
+    {
+      "Identity": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\wwwroot\\css\\site.css",
+      "SourceId": "FinanceSystem.Web",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\wwwroot\\",
+      "BasePath": "_content/FinanceSystem.Web",
+      "RelativePath": "css/site#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "b1v7x3q43r",
+      "Integrity": "IRod9E9kTRzBy08vN/tn5L7oCTp10EwIeg9Tvdfknlg=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\site.css"
+    },
+    {
+      "Identity": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\wwwroot\\js\\site.js",
+      "SourceId": "FinanceSystem.Web",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\wwwroot\\",
+      "BasePath": "_content/FinanceSystem.Web",
+      "RelativePath": "js/site#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "fccw1awf0m",
+      "Integrity": "gTB1j8fHjh2HAc7vfxvPhGasRfTZ40uJh/2pkQfv0TM=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\site.js"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "css/site.b1v7x3q43r.css",
+      "AssetFile": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\obj\\Debug\\net9.0\\compressed\\2n8i3o74gn-b1v7x3q43r.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001663893511"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "600"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"s5b11SaVi0cb9kpMy9QSUPvWyJB1sXdmusT+RfiK13U=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 12 Apr 2025 16:26:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"IRod9E9kTRzBy08vN/tn5L7oCTp10EwIeg9Tvdfknlg=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "b1v7x3q43r"
+        },
+        {
+          "Name": "label",
+          "Value": "css/site.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-IRod9E9kTRzBy08vN/tn5L7oCTp10EwIeg9Tvdfknlg="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.b1v7x3q43r.css",
+      "AssetFile": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\wwwroot\\css\\site.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1520"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"IRod9E9kTRzBy08vN/tn5L7oCTp10EwIeg9Tvdfknlg=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 12 Apr 2025 16:26:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "b1v7x3q43r"
+        },
+        {
+          "Name": "label",
+          "Value": "css/site.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-IRod9E9kTRzBy08vN/tn5L7oCTp10EwIeg9Tvdfknlg="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.b1v7x3q43r.css.gz",
+      "AssetFile": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\obj\\Debug\\net9.0\\compressed\\2n8i3o74gn-b1v7x3q43r.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "600"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"s5b11SaVi0cb9kpMy9QSUPvWyJB1sXdmusT+RfiK13U=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 12 Apr 2025 16:26:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "b1v7x3q43r"
+        },
+        {
+          "Name": "label",
+          "Value": "css/site.css.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-s5b11SaVi0cb9kpMy9QSUPvWyJB1sXdmusT+RfiK13U="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.css",
+      "AssetFile": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\obj\\Debug\\net9.0\\compressed\\2n8i3o74gn-b1v7x3q43r.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001663893511"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "600"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"s5b11SaVi0cb9kpMy9QSUPvWyJB1sXdmusT+RfiK13U=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 12 Apr 2025 16:26:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"IRod9E9kTRzBy08vN/tn5L7oCTp10EwIeg9Tvdfknlg=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-IRod9E9kTRzBy08vN/tn5L7oCTp10EwIeg9Tvdfknlg="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.css",
+      "AssetFile": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\wwwroot\\css\\site.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1520"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"IRod9E9kTRzBy08vN/tn5L7oCTp10EwIeg9Tvdfknlg=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 12 Apr 2025 16:26:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-IRod9E9kTRzBy08vN/tn5L7oCTp10EwIeg9Tvdfknlg="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.css.gz",
+      "AssetFile": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\obj\\Debug\\net9.0\\compressed\\2n8i3o74gn-b1v7x3q43r.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "600"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"s5b11SaVi0cb9kpMy9QSUPvWyJB1sXdmusT+RfiK13U=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 12 Apr 2025 16:26:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-s5b11SaVi0cb9kpMy9QSUPvWyJB1sXdmusT+RfiK13U="
+        }
+      ]
+    },
+    {
+      "Route": "js/site.fccw1awf0m.js",
+      "AssetFile": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\obj\\Debug\\net9.0\\compressed\\c441mmn35n-fccw1awf0m.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001798561151"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "555"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"S5WaBp1muMSXKfGg7bIvTqMH4QfhBM6Ec2ZAy5No778=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 12 Apr 2025 16:28:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"gTB1j8fHjh2HAc7vfxvPhGasRfTZ40uJh/2pkQfv0TM=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "fccw1awf0m"
+        },
+        {
+          "Name": "label",
+          "Value": "js/site.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-gTB1j8fHjh2HAc7vfxvPhGasRfTZ40uJh/2pkQfv0TM="
+        }
+      ]
+    },
+    {
+      "Route": "js/site.fccw1awf0m.js",
+      "AssetFile": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\wwwroot\\js\\site.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1053"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"gTB1j8fHjh2HAc7vfxvPhGasRfTZ40uJh/2pkQfv0TM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 12 Apr 2025 16:28:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "fccw1awf0m"
+        },
+        {
+          "Name": "label",
+          "Value": "js/site.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-gTB1j8fHjh2HAc7vfxvPhGasRfTZ40uJh/2pkQfv0TM="
+        }
+      ]
+    },
+    {
+      "Route": "js/site.fccw1awf0m.js.gz",
+      "AssetFile": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\obj\\Debug\\net9.0\\compressed\\c441mmn35n-fccw1awf0m.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "555"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"S5WaBp1muMSXKfGg7bIvTqMH4QfhBM6Ec2ZAy5No778=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 12 Apr 2025 16:28:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "fccw1awf0m"
+        },
+        {
+          "Name": "label",
+          "Value": "js/site.js.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-S5WaBp1muMSXKfGg7bIvTqMH4QfhBM6Ec2ZAy5No778="
+        }
+      ]
+    },
+    {
+      "Route": "js/site.js",
+      "AssetFile": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\obj\\Debug\\net9.0\\compressed\\c441mmn35n-fccw1awf0m.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001798561151"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "555"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"S5WaBp1muMSXKfGg7bIvTqMH4QfhBM6Ec2ZAy5No778=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 12 Apr 2025 16:28:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"gTB1j8fHjh2HAc7vfxvPhGasRfTZ40uJh/2pkQfv0TM=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-gTB1j8fHjh2HAc7vfxvPhGasRfTZ40uJh/2pkQfv0TM="
+        }
+      ]
+    },
+    {
+      "Route": "js/site.js",
+      "AssetFile": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\wwwroot\\js\\site.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1053"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"gTB1j8fHjh2HAc7vfxvPhGasRfTZ40uJh/2pkQfv0TM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 12 Apr 2025 16:28:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-gTB1j8fHjh2HAc7vfxvPhGasRfTZ40uJh/2pkQfv0TM="
+        }
+      ]
+    },
+    {
+      "Route": "js/site.js.gz",
+      "AssetFile": "C:\\Projetos\\FinanceSystem\\src\\FinanceSystem.Web\\obj\\Debug\\net9.0\\compressed\\c441mmn35n-fccw1awf0m.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "555"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"S5WaBp1muMSXKfGg7bIvTqMH4QfhBM6Ec2ZAy5No778=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 12 Apr 2025 16:28:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-S5WaBp1muMSXKfGg7bIvTqMH4QfhBM6Ec2ZAy5No778="
+        }
+      ]
+    }
+  ]
+}
