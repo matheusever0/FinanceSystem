@@ -1,4 +1,0 @@
-C:\Projetos\FinanceSystem\src\FinanceSystem.Web\wwwroot\css\site.css
-C:\Projetos\FinanceSystem\src\FinanceSystem.Web\wwwroot\js\site.js
-wwwroot\css\site.css
-wwwroot\js\site.js
