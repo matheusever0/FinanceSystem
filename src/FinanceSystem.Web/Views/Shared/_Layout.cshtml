@@ -4,74 +4,116 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Finance System</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/FinanceSystem.Web.styles.css" asp-append-version="true" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="~/css/site.css" rel="stylesheet" asp-append-version="true">
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Finance System</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Dashboard</a>
-                            </li>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-chart-line me-2"></i>Finance System
+        </div>
 
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" asp-area="" asp-controller="Users" asp-action="Index">Usuários</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" asp-area="" asp-controller="Roles" asp-action="Index">Perfis</a>
-                                </li>
-                            }
-                        }
-                    </ul>
-                    <partial name="_LoginPartial" />
+        <div class="sidebar-header">
+            <div class="sidebar-user">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div class="fw-bold">@User.Identity.Name</div>
+                    <small>@(User.IsInRole("Admin") ? "Administrador" : "Usuário")</small>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
+        </div>
+
+        <div class="sidebar-menu">
+            <div class="sidebar-menu-header">Menu Principal</div>
+            <div class="sidebar-menu-item">
+                <a asp-controller="Home" asp-action="Index" class="sidebar-menu-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Home" && ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")">
+                    <span class="sidebar-menu-icon"><i class="fas fa-home"></i></span>
+                    <span>Início</span>
+                </a>
+            </div>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="sidebar-menu-header">Gerenciamento</div>
+                <div class="sidebar-menu-item">
+                    <a asp-controller="Users" asp-action="Index" class="sidebar-menu-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Users" ? "active" : "")">
+                        <span class="sidebar-menu-icon"><i class="fas fa-users"></i></span>
+                        <span>Usuários</span>
+                    </a>
+                </div>
+                <div class="sidebar-menu-item">
+                    <a asp-controller="Roles" asp-action="Index" class="sidebar-menu-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Roles" ? "active" : "")">
+                        <span class="sidebar-menu-icon"><i class="fas fa-user-tag"></i></span>
+                        <span>Perfis</span>
+                    </a>
+                </div>
+            }
+
+            <div class="sidebar-menu-header">Conta</div>
+            <div class="sidebar-menu-item">
+                <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display: none;"></form>
+                <a href="javascript:document.getElementById('logoutForm').submit();" class="sidebar-menu-link">
+                    <span class="sidebar-menu-icon"><i class="fas fa-sign-out-alt"></i></span>
+                    <span>Sair</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Topbar -->
+    <div class="topbar" id="topbar">
+        <div class="menu-toggle" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="page-title">@ViewData["Title"]</div>
+        <div>
+            <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="d-none d-md-inline-block me-2">@User.Identity.Name</span>
+                <i class="fas fa-user-circle fs-5"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <div class="dropdown-item-text">
+                        <div class="fw-bold">@User.Identity.Name</div>
+                        <div class="small text-muted">@(User.IsInRole("Admin") ? "Administrador" : "Usuário")</div>
+                    </div>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="javascript:document.getElementById('logoutForm').submit();"><i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i> Sair</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
         @if (TempData["SuccessMessage"] != null)
         {
-            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-                @TempData["SuccessMessage"]
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }
 
         @if (TempData["ErrorMessage"] != null)
         {
-            <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
-                @TempData["ErrorMessage"]
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }
 
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        <!-- Page Content -->
+        @RenderBody()
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - Finance System - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacidade</a>
-        </div>
-    </footer>
-
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
