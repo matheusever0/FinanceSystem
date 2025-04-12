@@ -197,3 +197,5 @@ C:\Projetos\FinanceSystem\src\FinanceSystem.API\bin\Debug\net9.0\ru\Microsoft.Co
 C:\Projetos\FinanceSystem\src\FinanceSystem.API\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 C:\Projetos\FinanceSystem\src\FinanceSystem.API\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 C:\Projetos\FinanceSystem\src\FinanceSystem.API\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+C:\Projetos\FinanceSystem\src\FinanceSystem.API\obj\Debug\net9.0\FinanceSystem.API.sourcelink.json
+C:\Projetos\FinanceSystem\src\FinanceSystem.API\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt

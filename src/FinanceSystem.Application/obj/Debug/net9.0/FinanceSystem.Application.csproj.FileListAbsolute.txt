@@ -13,3 +13,4 @@ C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\Finance
 C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\refint\FinanceSystem.Application.dll
 C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\FinanceSystem.Application.pdb
 C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\ref\FinanceSystem.Application.dll
+C:\Projetos\FinanceSystem\src\FinanceSystem.Application\obj\Debug\net9.0\FinanceSystem.Application.sourcelink.json

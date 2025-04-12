@@ -17,3 +17,4 @@ C:\Projetos\FinanceSystem\src\FinanceSystem.Infrastructure\obj\Debug\net9.0\refi
 C:\Projetos\FinanceSystem\src\FinanceSystem.Infrastructure\obj\Debug\net9.0\FinanceSystem.Infrastructure.pdb
 C:\Projetos\FinanceSystem\src\FinanceSystem.Infrastructure\obj\Debug\net9.0\FinanceSystem.Infrastructure.genruntimeconfig.cache
 C:\Projetos\FinanceSystem\src\FinanceSystem.Infrastructure\obj\Debug\net9.0\ref\FinanceSystem.Infrastructure.dll
+C:\Projetos\FinanceSystem\src\FinanceSystem.Infrastructure\obj\Debug\net9.0\FinanceSystem.Infrastructure.sourcelink.json

@@ -9,3 +9,4 @@ C:\Projetos\FinanceSystem\src\FinanceSystem.Domain\obj\Debug\net9.0\FinanceSyste
 C:\Projetos\FinanceSystem\src\FinanceSystem.Domain\obj\Debug\net9.0\refint\FinanceSystem.Domain.dll
 C:\Projetos\FinanceSystem\src\FinanceSystem.Domain\obj\Debug\net9.0\FinanceSystem.Domain.pdb
 C:\Projetos\FinanceSystem\src\FinanceSystem.Domain\obj\Debug\net9.0\ref\FinanceSystem.Domain.dll
+C:\Projetos\FinanceSystem\src\FinanceSystem.Domain\obj\Debug\net9.0\FinanceSystem.Domain.sourcelink.json

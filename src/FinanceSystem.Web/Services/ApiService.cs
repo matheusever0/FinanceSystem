@@ -41,20 +41,38 @@ namespace FinanceSystem.Web.Services
 
         public async Task<T> PostAsync<T>(string endpoint, object data, string token = null)
         {
-            var client = _httpClientFactory.CreateClient("FinanceAPI");
-            if (!string.IsNullOrEmpty(token))
+            try
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var client = _httpClientFactory.CreateClient("FinanceAPI");
+                if (!string.IsNullOrEmpty(token))
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
+
+                var json = JsonSerializer.Serialize(data);
+                _logger.LogInformation($"Enviando requisição para {endpoint}: {json}");
+
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(endpoint, content);
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                _logger.LogInformation($"Resposta do endpoint {endpoint}: {responseContent}");
+
+                response.EnsureSuccessStatusCode();
+
+                return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
             }
-
-            var json = JsonSerializer.Serialize(data);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await client.PostAsync(endpoint, content);
-            response.EnsureSuccessStatusCode();
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, $"Erro na requisição para {endpoint}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Erro geral na requisição para {endpoint}");
+                throw;
+            }
         }
 
         public async Task<T> PutAsync<T>(string endpoint, object data, string token = null)

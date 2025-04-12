@@ -38,3 +38,5 @@ C:\Projetos\FinanceSystem\src\FinanceSystem.Web\obj\Debug\net9.0\FinanceSystem.W
 C:\Projetos\FinanceSystem\src\FinanceSystem.Web\obj\Debug\net9.0\compressed\2n8i3o74gn-b1v7x3q43r.gz
 C:\Projetos\FinanceSystem\src\FinanceSystem.Web\obj\Debug\net9.0\compressed\c441mmn35n-fccw1awf0m.gz
 C:\Projetos\FinanceSystem\src\FinanceSystem.Web\obj\Debug\net9.0\FinanceS.91D712A9.Up2Date
+C:\Projetos\FinanceSystem\src\FinanceSystem.Web\obj\Debug\net9.0\FinanceSystem.Web.sourcelink.json
+C:\Projetos\FinanceSystem\src\FinanceSystem.Web\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt

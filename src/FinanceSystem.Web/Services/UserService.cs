@@ -18,17 +18,26 @@ namespace FinanceSystem.Web.Services
         {
             try
             {
-                return await _apiService.PostAsync<LoginResponseModel>("/api/auth/login", model);
+                _logger.LogInformation($"Tentando login via API para usuário: {model.Username}");
+
+                var response = await _apiService.PostAsync<LoginResponseModel>("/api/auth/login", model);
+
+                if (response == null)
+                {
+                    _logger.LogWarning($"Login falhou para {model.Username} - Resposta nula");
+                    throw new Exception("Não foi possível autenticar o usuário");
+                }
+
+                return response;
             }
             catch (HttpRequestException ex)
             {
-                // Registre informações detalhadas sobre a exceção
-                _logger.LogError(ex, "Erro de comunicação com a API durante o login");
+                _logger.LogError(ex, $"Erro de comunicação com a API durante login de {model.Username}");
                 throw new Exception("Não foi possível conectar ao servidor. Verifique sua conexão.", ex);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro geral durante o login");
+                _logger.LogError(ex, $"Erro geral durante o login de {model.Username}");
                 throw;
             }
         }

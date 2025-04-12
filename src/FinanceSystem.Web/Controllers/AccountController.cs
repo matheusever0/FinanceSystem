@@ -43,6 +43,7 @@ namespace FinanceSystem.Web.Controllers
 
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning($"Login inválido para usuário: {model.Username}");
                 return View(model);
             }
 
@@ -50,31 +51,35 @@ namespace FinanceSystem.Web.Controllers
             {
                 _logger.LogInformation($"Tentando login para usuário: {model.Username}");
 
-                // Tentar fazer login na API
                 var result = await _userService.LoginAsync(model);
 
-                if (result == null || string.IsNullOrEmpty(result.Token))
+                if (result == null)
                 {
-                    ModelState.AddModelError(string.Empty, "Falha na autenticação: token inválido");
+                    ModelState.AddModelError(string.Empty, "Falha na autenticação");
+                    _logger.LogWarning($"Login falhou para usuário: {model.Username} - Resultado nulo");
                     return View(model);
                 }
 
-                _logger.LogInformation($"Login bem-sucedido para {model.Username}. Token recebido.");
+                if (string.IsNullOrEmpty(result.Token))
+                {
+                    ModelState.AddModelError(string.Empty, "Token inválido");
+                    _logger.LogWarning($"Login falhou para usuário: {model.Username} - Token vazio");
+                    return View(model);
+                }
 
-                // Armazenar o token na sessão
+                _logger.LogInformation($"Login bem-sucedido para {model.Username}");
+
                 HttpContext.Session.SetString("JWToken", result.Token);
 
-                // Criar claims principal a partir do token
                 var principal = await _apiService.GetClaimsPrincipalFromToken(result.Token);
 
-                // Verificar se o principal foi criado corretamente
-                if (principal == null || !principal.Identity.IsAuthenticated)
+                if (principal == null)
                 {
-                    ModelState.AddModelError(string.Empty, "Falha ao gerar identidade de usuário");
+                    ModelState.AddModelError(string.Empty, "Falha ao gerar identidade");
+                    _logger.LogWarning($"Login falhou para usuário: {model.Username} - Principal nulo");
                     return View(model);
                 }
 
-                // Fazer login com cookies
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     principal,
@@ -84,24 +89,25 @@ namespace FinanceSystem.Web.Controllers
                         ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1)
                     });
 
-                _logger.LogInformation("Cookie de autenticação criado com sucesso");
-
                 TempData["SuccessMessage"] = "Login realizado com sucesso!";
 
-                // Redirecionamento após o login
-                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                {
-                    return Redirect(returnUrl);
-                }
-
-                return RedirectToAction("Index", "Home");
+                return RedirectToLocal(returnUrl);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro durante o processo de login");
-                ModelState.AddModelError(string.Empty, $"Erro de autenticação: {ex.Message}");
+                _logger.LogError(ex, $"Erro durante login para usuário {model.Username}");
+                ModelState.AddModelError(string.Empty, "Erro de autenticação: " + ex.Message);
                 return View(model);
             }
+        }
+
+        private IActionResult RedirectToLocal(string returnUrl)
+        {
+            if (Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpPost]
