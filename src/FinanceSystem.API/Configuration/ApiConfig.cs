@@ -1,10 +1,6 @@
 ﻿using FinanceSystem.API.Middlewares;
 using FinanceSystem.Application;
 using FinanceSystem.Infrastructure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
 
 namespace FinanceSystem.API.Configuration
 {

@@ -1,8 +1,5 @@
 ﻿using FinanceSystem.Web.Filters;
-using FinanceSystem.Web.Interfaces;
 using FinanceSystem.Web.Middlewares;
-using FinanceSystem.Web.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace FinanceSystem.Web.Configuration
 {

@@ -1,6 +1,5 @@
 ﻿using FinanceSystem.Application.DTOs;
 using FinanceSystem.Application.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceSystem.API.Controllers
