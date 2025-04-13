@@ -2,9 +2,6 @@
 using FinanceSystem.Domain.Interfaces.Repositories;
 using FinanceSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace FinanceSystem.Infrastructure.Repositories
 {

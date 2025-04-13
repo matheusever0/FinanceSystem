@@ -110,8 +110,6 @@ namespace FinanceSystem.Web.Services
             try
             {
                 var handler = new JwtSecurityTokenHandler();
-
-                // Verifica se o token é válido
                 if (!handler.CanReadToken(token))
                 {
                     _logger.LogError("Token JWT inválido");
@@ -119,18 +117,21 @@ namespace FinanceSystem.Web.Services
                 }
 
                 var jwtToken = handler.ReadJwtToken(token);
-
                 var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
 
-                // Adiciona todas as claims do token
+                // Garantir que as claims sejam mapeadas corretamente para seus tipos equivalentes do ClaimTypes
                 foreach (var claim in jwtToken.Claims)
                 {
-                    identity.AddClaim(claim);
-                }
+                    var claimType = claim.Type switch
+                    {
+                        "nameid" => ClaimTypes.NameIdentifier,
+                        "unique_name" => ClaimTypes.Name,
+                        "email" => ClaimTypes.Email,
+                        "role" => ClaimTypes.Role,
+                        _ => claim.Type
+                    };
 
-                if (!identity.Claims.Any())
-                {
-                    _logger.LogWarning("Token não contém claims");
+                    identity.AddClaim(new Claim(claimType, claim.Value));
                 }
 
                 var principal = new ClaimsPrincipal(identity);
