@@ -1,4 +1,5 @@
-﻿@model IEnumerable<FinanceSystem.Web.Models.UserModel>
+﻿@using FinanceSystem.Web.Helpers
+@model IEnumerable<FinanceSystem.Web.Models.UserModel>
 
 @{
     ViewData["Title"] = "Usuários";
@@ -6,9 +7,14 @@
 
 <h1>Gerenciamento de Usuários</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Novo Usuário</a>
-</p>
+@if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(Context, "users.create"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Novo Usuário
+        </a>
+    </p>
+}
 
 <div class="card">
     <div class="card-body">
@@ -44,9 +50,21 @@
                             <td>@(item.LastLogin.HasValue ? item.LastLogin.Value.ToString("dd/MM/yyyy HH:mm") : "Nunca")</td>
                             <td>
                                 <div class="btn-group">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Editar</a>
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Detalhes</a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Excluir</a>
+                                    @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(Context, "users.edit"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit me-1"></i>Editar
+                                        </a>
+                                    }
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+                                        <i class="fas fa-info-circle me-1"></i>Detalhes
+                                    </a>
+                                    @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(Context, "users.delete"))
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash me-1"></i>Excluir
+                                        </a>
+                                    }
                                 </div>
                             </td>
                         </tr>

@@ -1,12 +1,10 @@
-﻿@{
+﻿@using FinanceSystem.Web.Helpers
+@{
     var controllerName = ViewContext.RouteData.Values["Controller"]?.ToString();
     var actionName = ViewContext.RouteData.Values["Action"]?.ToString();
-
-    // Adiciona logs para diagnóstico
     var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
-    var username = User?.Identity?.Name.ToUpper() ?? "não autenticado";
+    var username = User?.Identity?.Name?.ToUpper() ?? "não autenticado";
     var token = Context.Session.GetString("JWToken") ?? "token ausente";
-    var debugInfo = $"Usuário: {username}, Autenticado: {isAuthenticated}, Token: {(string.IsNullOrEmpty(token) ? "ausente" : token.Substring(0, Math.Min(10, token.Length)))}";
 }
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -14,10 +12,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Finance System</title>
-
-    <!-- Debug info que aparecerá no código fonte para depuração -->
-    <!-- Debug: @debugInfo -->
-    <!-- Meta tags para evitar cache durante o desenvolvimento -->
     <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="expires" content="0" />
@@ -55,22 +49,31 @@
                 </a>
             </div>
 
-            @if (User.IsInRole("Admin") || User.IsInRole("Moderator"))
+            @if (User.IsInRole("Admin") || await PermissionHelper.UserHasAnyPermissionAsync(ViewContext.HttpContext, new[] { "users.view", "roles.view" }))
             {
                 <div class="sidebar-menu-header">Gerenciamento</div>
-                <div class="sidebar-menu-item">
-                    <a asp-controller="Users" asp-action="Index" class="sidebar-menu-link @(controllerName == "Users" ? "active" : "")">
-                        <span class="sidebar-menu-icon"><i class="fas fa-users"></i></span>
-                        <span>Usuários</span>
-                    </a>
-                </div>
-                <div class="sidebar-menu-item">
-                    <a asp-controller="Roles" asp-action="Index" class="sidebar-menu-link @(controllerName == "Roles" ? "active" : "")">
-                        <span class="sidebar-menu-icon"><i class="fas fa-user-tag"></i></span>
-                        <span>Perfis</span>
-                    </a>
-                </div>
-                @if (User.IsInRole("Admin"))
+
+                @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "users.view"))
+                {
+                    <div class="sidebar-menu-item">
+                        <a asp-controller="Users" asp-action="Index" class="sidebar-menu-link @(controllerName == "Users" ? "active" : "")">
+                            <span class="sidebar-menu-icon"><i class="fas fa-users"></i></span>
+                            <span>Usuários</span>
+                        </a>
+                    </div>
+                }
+
+                @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "roles.view"))
+                {
+                    <div class="sidebar-menu-item">
+                        <a asp-controller="Roles" asp-action="Index" class="sidebar-menu-link @(controllerName == "Roles" ? "active" : "")">
+                            <span class="sidebar-menu-icon"><i class="fas fa-user-tag"></i></span>
+                            <span>Perfis</span>
+                        </a>
+                    </div>
+                }
+
+                @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "permissions.manage"))
                 {
                     <div class="sidebar-menu-item">
                         <a asp-controller="Permissions" asp-action="Index" class="sidebar-menu-link @(controllerName == "Permissions" ? "active" : "")">

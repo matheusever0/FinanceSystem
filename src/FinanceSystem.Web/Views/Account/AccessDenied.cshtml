@@ -2,8 +2,28 @@
     ViewData["Title"] = "Acesso Negado";
 }
 
-<div class="text-center">
-    <h1 class="text-danger">Acesso Negado</h1>
-    <p class="text-danger">Você não tem permissão para acessar esta página.</p>
-    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Voltar para a página inicial</a>
+<link href="~/css/login.css" rel="stylesheet" asp-append-version="true">
+
+
+<div class="text-center my-5">
+    <div class="error-icon mb-4">
+        <i class="fas fa-lock fa-6x text-danger"></i>
+    </div>
+
+    <h1 class="display-4 text-danger mb-3">Acesso Negado</h1>
+
+    <div class="alert alert-warning mx-auto" style="max-width: 600px;">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        Você não possui permissão para acessar esta página. Se acredita que deveria ter acesso, entre em contato com o administrador do sistema.
+    </div>
+
+    <p class="lead mt-4">
+        Seu perfil atual não possui as permissões necessárias para visualizar o recurso solicitado.
+    </p>
+
+    <div class="mt-5">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg">
+            <i class="fas fa-home me-2"></i>Voltar para a página inicial
+        </a>
+    </div>
 </div>

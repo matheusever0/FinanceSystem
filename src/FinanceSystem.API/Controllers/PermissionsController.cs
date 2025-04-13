@@ -5,19 +5,21 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceSystem.API.Controllers
 {
-    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class PermissionsController : ControllerBase
     {
         private readonly IPermissionService _permissionService;
+        private readonly ILogger<PermissionsController> _logger;
 
-        public PermissionsController(IPermissionService permissionService)
+        public PermissionsController(IPermissionService permissionService, ILogger<PermissionsController> logger)
         {
             _permissionService = permissionService;
+            _logger = logger;
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> GetAll()
         {
             var permissions = await _permissionService.GetAllAsync();
@@ -25,6 +27,7 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> GetById(Guid id)
         {
             var permission = await _permissionService.GetByIdAsync(id);
@@ -32,6 +35,7 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> Create(CreatePermissionDto createPermissionDto)
         {
             var permission = await _permissionService.CreateAsync(createPermissionDto);
@@ -39,6 +43,7 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> Update(Guid id, UpdatePermissionDto updatePermissionDto)
         {
             var permission = await _permissionService.UpdateAsync(id, updatePermissionDto);
@@ -46,6 +51,7 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> Delete(Guid id)
         {
             await _permissionService.DeleteAsync(id);
@@ -53,13 +59,16 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpGet("role/{roleId}")]
+        [Authorize] // Qualquer usuário autenticado pode obter permissões de um perfil
         public async Task<ActionResult> GetPermissionsByRoleId(Guid roleId)
         {
+            _logger.LogInformation("Obtendo permissões para o perfil {RoleId}", roleId);
             var permissions = await _permissionService.GetPermissionsByRoleIdAsync(roleId);
             return Ok(permissions);
         }
 
         [HttpPost("role/{roleId}/permission/{permissionId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> AssignPermissionToRole(Guid roleId, Guid permissionId)
         {
             var result = await _permissionService.AssignPermissionToRoleAsync(roleId, permissionId);
@@ -67,6 +76,7 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpDelete("role/{roleId}/permission/{permissionId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> RemovePermissionFromRole(Guid roleId, Guid permissionId)
         {
             var result = await _permissionService.RemovePermissionFromRoleAsync(roleId, permissionId);
@@ -74,10 +84,20 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpGet("user/{userId}")]
+        [Authorize] // Permitir que qualquer usuário autenticado possa obter suas próprias permissões
         public async Task<ActionResult> GetPermissionsByUserId(Guid userId)
         {
-            var permissions = await _permissionService.GetPermissionsByUserIdAsync(userId);
-            return Ok(permissions);
+            _logger.LogInformation("Obtendo permissões para o usuário {UserId}", userId);
+            try
+            {
+                var permissions = await _permissionService.GetPermissionsByUserIdAsync(userId);
+                return Ok(permissions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter permissões para o usuário {UserId}", userId);
+                throw;
+            }
         }
     }
 }

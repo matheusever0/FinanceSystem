@@ -1,4 +1,5 @@
-﻿@model IEnumerable<FinanceSystem.Web.Models.RoleModel>
+﻿@using FinanceSystem.Web.Helpers
+@model IEnumerable<FinanceSystem.Web.Models.RoleModel>
 
 @{
     ViewData["Title"] = "Perfis";
@@ -6,9 +7,14 @@
 
 <h1>Gerenciamento de Perfis</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Novo Perfil</a>
-</p>
+@if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(Context, "roles.create"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Novo Perfil
+        </a>
+    </p>
+}
 
 <div class="card">
     <div class="card-body">
@@ -31,9 +37,27 @@
                             <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
                             <td>
                                 <div class="btn-group">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Editar</a>
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Detalhes</a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Excluir</a>
+                                    @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(Context, "roles.edit"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit me-1"></i>Editar
+                                        </a>
+                                    }
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+                                        <i class="fas fa-info-circle me-1"></i>Detalhes
+                                    </a>
+                                    @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(Context, "roles.delete"))
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash me-1"></i>Excluir
+                                        </a>
+                                    }
+                                    @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(Context, "permissions.manage"))
+                                    {
+                                        <a asp-action="ManagePermissions" asp-route-id="@item.Id" class="btn btn-sm btn-success">
+                                            <i class="fas fa-key me-1"></i>Permissões
+                                        </a>
+                                    }
                                 </div>
                             </td>
                         </tr>
