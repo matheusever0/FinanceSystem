@@ -1,6 +1,6 @@
 ﻿using FinanceSystem.Application.DTOs;
 
-namespace FinanceSystem.Application.Services.Interfaces
+namespace FinanceSystem.Application.Interfaces
 {
     public interface IRoleService
     {
@@ -9,5 +9,7 @@ namespace FinanceSystem.Application.Services.Interfaces
         Task<RoleDto> CreateAsync(CreateRoleDto createRoleDto);
         Task<RoleDto> UpdateAsync(Guid id, UpdateRoleDto updateRoleDto);
         Task DeleteAsync(Guid id);
+        Task<bool> HasPermissionAsync(Guid roleId, string permissionSystemName);
+        Task<RoleDto> UpdateRolePermissionsAsync(Guid roleId, List<Guid> permissionIds);
     }
 }

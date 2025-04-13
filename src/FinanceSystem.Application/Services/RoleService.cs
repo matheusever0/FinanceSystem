@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using FinanceSystem.Application.DTOs;
-using FinanceSystem.Application.Services.Interfaces;
+using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Entities;
 using FinanceSystem.Domain.Interfaces.Services;
 
@@ -19,7 +19,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<RoleDto> GetByIdAsync(Guid id)
         {
-            var role = await _unitOfWork.Roles.GetByIdAsync(id);
+            var role = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(id);
             if (role == null)
                 throw new KeyNotFoundException($"Role with ID {id} not found");
 
@@ -91,6 +91,58 @@ namespace FinanceSystem.Application.Services
 
             await _unitOfWork.Roles.DeleteAsync(role);
             await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task<bool> HasPermissionAsync(Guid roleId, string permissionSystemName)
+        {
+            var role = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(roleId);
+            if (role == null)
+                throw new KeyNotFoundException($"Role with ID {roleId} not found");
+
+            var permission = await _unitOfWork.Permissions.GetBySystemNameAsync(permissionSystemName);
+            if (permission == null)
+                return false;
+
+            return role.RolePermissions.Any(rp => rp.PermissionId == permission.Id);
+        }
+
+        public async Task<RoleDto> UpdateRolePermissionsAsync(Guid roleId, List<Guid> permissionIds)
+        {
+            var role = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(roleId);
+            if (role == null)
+                throw new KeyNotFoundException($"Role with ID {roleId} not found");
+
+            // Obter todas as permissões atuais do papel
+            var currentPermissionIds = role.RolePermissions.Select(rp => rp.PermissionId).ToList();
+
+            // Permissões a serem removidas (estão em currentPermissionIds, mas não em permissionIds)
+            var permissionsToRemove = currentPermissionIds.Except(permissionIds).ToList();
+
+            // Permissões a serem adicionadas (estão em permissionIds, mas não em currentPermissionIds)
+            var permissionsToAdd = permissionIds.Except(currentPermissionIds).ToList();
+
+            // Remover permissões
+            foreach (var permissionId in permissionsToRemove)
+            {
+                var permission = await _unitOfWork.Permissions.GetByIdAsync(permissionId);
+                if (permission != null)
+                {
+                    role.RemovePermission(permission);
+                }
+            }
+
+            // Adicionar permissões
+            foreach (var permissionId in permissionsToAdd)
+            {
+                var permission = await _unitOfWork.Permissions.GetByIdAsync(permissionId);
+                if (permission != null)
+                {
+                    role.AddPermission(permission);
+                }
+            }
+
+            await _unitOfWork.CompleteAsync();
+            return _mapper.Map<RoleDto>(role);
         }
     }
 }

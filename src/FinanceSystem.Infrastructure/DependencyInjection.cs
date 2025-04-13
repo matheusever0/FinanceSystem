@@ -1,5 +1,4 @@
-﻿// src/FinanceSystem.Infrastructure/DependencyInjection.cs
-using FinanceSystem.Domain.Interfaces.Services;
+﻿using FinanceSystem.Domain.Interfaces.Services;
 using FinanceSystem.Infrastructure.Data;
 using FinanceSystem.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +23,7 @@ namespace FinanceSystem.Infrastructure
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IDbInitializer, DbInitializer>();
+            services.AddScoped<IPermissionAuthorizationService, PermissionAuthorizationService>();
 
             // Registrar o inicializador de banco de dados
             services.AddHostedService<DatabaseInitializer>();

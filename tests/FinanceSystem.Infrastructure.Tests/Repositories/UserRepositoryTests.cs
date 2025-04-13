@@ -18,8 +18,7 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
 
         private ApplicationDbContext GetDbContext(DbContextOptions<ApplicationDbContext> options)
         {
-            var configurationMock = new Mock<IConfiguration>();
-            return new ApplicationDbContext(options, configurationMock.Object);
+            return new ApplicationDbContext(options);
         }
 
         [Fact]

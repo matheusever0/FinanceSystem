@@ -9,6 +9,7 @@ namespace FinanceSystem.Web.Interfaces
         Task<T> PostAsync<T>(string endpoint, object data, string token = null);
         Task<T> PutAsync<T>(string endpoint, object data, string token = null);
         Task DeleteAsync(string endpoint, string token = null);
+        Task<T> DeleteAsync<T>(string endpoint, string token = null);
         Task<ClaimsPrincipal> GetClaimsPrincipalFromToken(string token);
     }
 }

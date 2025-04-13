@@ -1,0 +1,47 @@
+﻿@model IEnumerable<FinanceSystem.Web.Models.PermissionModel>
+
+@{
+    ViewData["Title"] = "Permissões";
+}
+
+<h1>Gerenciamento de Permissões</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Nova Permissão</a>
+</p>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Nome do Sistema</th>
+                        <th>Descrição</th>
+                        <th>Data de Criação</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td><code>@item.SystemName</code></td>
+                            <td>@(string.IsNullOrEmpty(item.Description) ? "-" : item.Description)</td>
+                            <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Editar</a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Detalhes</a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Excluir</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

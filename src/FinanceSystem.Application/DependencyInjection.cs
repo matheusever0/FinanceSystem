@@ -1,6 +1,6 @@
-﻿using FinanceSystem.Application.Mappings;
+﻿using FinanceSystem.Application.Interfaces;
+using FinanceSystem.Application.Mappings;
 using FinanceSystem.Application.Services;
-using FinanceSystem.Application.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FinanceSystem.Application
@@ -13,6 +13,7 @@ namespace FinanceSystem.Application
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<IPermissionService, PermissionService>();
 
             return services;
         }

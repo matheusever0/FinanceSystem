@@ -36,5 +36,15 @@ namespace FinanceSystem.Web.Services
         {
             await _apiService.DeleteAsync($"/api/roles/{id}", token);
         }
+
+        public async Task<bool> HasPermissionAsync(string roleId, string permissionSystemName, string token)
+        {
+            return await _apiService.GetAsync<bool>($"/api/roles/{roleId}/has-permission/{permissionSystemName}", token);
+        }
+
+        public async Task<RoleModel> UpdateRolePermissionsAsync(string roleId, List<string> permissionIds, string token)
+        {
+            return await _apiService.PutAsync<RoleModel>($"/api/roles/{roleId}/permissions", permissionIds, token);
+        }
     }
 }

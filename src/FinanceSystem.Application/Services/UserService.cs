@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using FinanceSystem.Application.DTOs;
-using FinanceSystem.Application.Services.Interfaces;
+using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Entities;
 using FinanceSystem.Domain.Interfaces.Services;
 

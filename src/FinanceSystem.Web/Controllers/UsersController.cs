@@ -1,11 +1,12 @@
-﻿using FinanceSystem.Web.Models;
+﻿using FinanceSystem.Web.Filters;
+using FinanceSystem.Web.Models;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceSystem.Web.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class UsersController : Controller
     {
         private readonly IUserService _userService;
@@ -17,6 +18,7 @@ namespace FinanceSystem.Web.Controllers
             _roleService = roleService;
         }
 
+        [RequirePermission("users.view")]
         public async Task<IActionResult> Index()
         {
             try
@@ -32,6 +34,7 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
+        [RequirePermission("users.view")]
         public async Task<IActionResult> Details(string id)
         {
             try
@@ -47,6 +50,7 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
+        [RequirePermission("users.create")]
         public async Task<IActionResult> Create()
         {
             try
@@ -65,6 +69,7 @@ namespace FinanceSystem.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequirePermission("users.create")]
         public async Task<IActionResult> Create(CreateUserModel model, List<string> selectedRoles)
         {
             try
@@ -94,6 +99,7 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
+        [RequirePermission("users.edit")]
         public async Task<IActionResult> Edit(string id)
         {
             try
@@ -123,6 +129,7 @@ namespace FinanceSystem.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequirePermission("users.edit")]
         public async Task<IActionResult> Edit(string id, UpdateUserModel model, List<string> selectedRoles)
         {
             try
@@ -152,6 +159,7 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
+        [RequirePermission("users.delete")]
         public async Task<IActionResult> Delete(string id)
         {
             try
@@ -169,6 +177,7 @@ namespace FinanceSystem.Web.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RequirePermission("users.delete")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             try

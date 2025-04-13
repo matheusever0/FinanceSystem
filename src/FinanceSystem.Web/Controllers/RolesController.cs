@@ -1,20 +1,24 @@
-﻿using FinanceSystem.Web.Models;
+﻿using FinanceSystem.Web.Filters;
+using FinanceSystem.Web.Models;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceSystem.Web.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class RolesController : Controller
     {
         private readonly IRoleService _roleService;
+        private readonly IPermissionService _permissionService;
 
-        public RolesController(IRoleService roleService)
+        public RolesController(IRoleService roleService, IPermissionService permissionService)
         {
             _roleService = roleService;
+            _permissionService = permissionService;
         }
 
+        [RequirePermission("roles.view")]
         public async Task<IActionResult> Index()
         {
             try
@@ -30,12 +34,18 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
+        [RequirePermission("roles.view")]
         public async Task<IActionResult> Details(string id)
         {
             try
             {
                 var token = HttpContext.Session.GetString("JWToken");
                 var role = await _roleService.GetRoleByIdAsync(id, token);
+
+                // Obter as permissões atribuídas a este perfil
+                var permissions = await _permissionService.GetPermissionsByRoleIdAsync(id, token);
+                ViewBag.Permissions = permissions;
+
                 return View(role);
             }
             catch (Exception ex)
@@ -45,6 +55,7 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
+        [RequirePermission("roles.create")]
         public IActionResult Create()
         {
             return View();
@@ -52,6 +63,7 @@ namespace FinanceSystem.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequirePermission("roles.create")]
         public async Task<IActionResult> Create(CreateRoleModel model)
         {
             try
@@ -72,6 +84,7 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
+        [RequirePermission("roles.edit")]
         public async Task<IActionResult> Edit(string id)
         {
             try
@@ -96,6 +109,7 @@ namespace FinanceSystem.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequirePermission("roles.edit")]
         public async Task<IActionResult> Edit(string id, UpdateRoleModel model)
         {
             try
@@ -116,6 +130,7 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
+        [RequirePermission("roles.delete")]
         public async Task<IActionResult> Delete(string id)
         {
             try
@@ -133,6 +148,7 @@ namespace FinanceSystem.Web.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [RequirePermission("roles.delete")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             try
@@ -146,6 +162,53 @@ namespace FinanceSystem.Web.Controllers
             {
                 TempData["ErrorMessage"] = $"Erro ao excluir perfil: {ex.Message}";
                 return RedirectToAction(nameof(Index));
+            }
+        }
+
+        [RequirePermission("permissions.manage")]
+        public async Task<IActionResult> ManagePermissions(string id)
+        {
+            try
+            {
+                var token = HttpContext.Session.GetString("JWToken");
+                var role = await _roleService.GetRoleByIdAsync(id, token);
+                var allPermissions = await _permissionService.GetAllPermissionsAsync(token);
+                var rolePermissions = await _permissionService.GetPermissionsByRoleIdAsync(id, token);
+
+                ViewBag.Role = role;
+                ViewBag.AllPermissions = allPermissions;
+                ViewBag.RolePermissions = rolePermissions.Select(p => p.Id).ToList();
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Erro ao gerenciar permissões do perfil: {ex.Message}";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission("permissions.manage")]
+        public async Task<IActionResult> ManagePermissions(string id, List<string> selectedPermissions)
+        {
+            try
+            {
+                var token = HttpContext.Session.GetString("JWToken");
+
+                // Se não houver permissões selecionadas, usar uma lista vazia
+                var permissionList = selectedPermissions ?? new List<string>();
+
+                await _roleService.UpdateRolePermissionsAsync(id, permissionList, token);
+
+                TempData["SuccessMessage"] = "Permissões do perfil atualizadas com sucesso!";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Erro ao atualizar permissões do perfil: {ex.Message}";
+                return RedirectToAction(nameof(Details), new { id });
             }
         }
     }

@@ -1,5 +1,5 @@
 ﻿using FinanceSystem.Application.DTOs;
-using FinanceSystem.Application.Services.Interfaces;
+using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceSystem.API.Controllers

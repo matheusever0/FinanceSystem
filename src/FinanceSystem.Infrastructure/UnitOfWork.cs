@@ -10,6 +10,7 @@ namespace FinanceSystem.Infrastructure
         private readonly ApplicationDbContext _context;
         private IUserRepository _userRepository;
         private IRoleRepository _roleRepository;
+        private IPermissionRepository _permissionRepository;
         private bool _disposed = false;
 
         public UnitOfWork(ApplicationDbContext context)
@@ -20,6 +21,8 @@ namespace FinanceSystem.Infrastructure
         public IUserRepository Users => _userRepository ??= new UserRepository(_context);
 
         public IRoleRepository Roles => _roleRepository ??= new RoleRepository(_context);
+
+        public IPermissionRepository Permissions => _permissionRepository ??= new PermissionRepository(_context);
 
         public async Task<int> CompleteAsync()
         {

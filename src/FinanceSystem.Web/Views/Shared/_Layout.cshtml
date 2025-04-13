@@ -41,7 +41,7 @@
                 </div>
                 <div>
                     <div class="fw-bold">@username</div>
-                    <small>@(User.IsInRole("Admin") ? "Administrador" : "Usuário")</small>
+                    <small>@(User.IsInRole("Admin") ? "Administrador" : User.IsInRole("Moderator") ? "Moderador" : "Usuário")</small>
                 </div>
             </div>
         </div>
@@ -55,7 +55,7 @@
                 </a>
             </div>
 
-            @if (User.IsInRole("Admin"))
+            @if (User.IsInRole("Admin") || User.IsInRole("Moderator"))
             {
                 <div class="sidebar-menu-header">Gerenciamento</div>
                 <div class="sidebar-menu-item">
@@ -70,6 +70,15 @@
                         <span>Perfis</span>
                     </a>
                 </div>
+                @if (User.IsInRole("Admin"))
+                {
+                    <div class="sidebar-menu-item">
+                        <a asp-controller="Permissions" asp-action="Index" class="sidebar-menu-link @(controllerName == "Permissions" ? "active" : "")">
+                            <span class="sidebar-menu-icon"><i class="fas fa-key"></i></span>
+                            <span>Permissões</span>
+                        </a>
+                    </div>
+                }
             }
         </div>
     </div>
@@ -89,7 +98,7 @@
                 <li>
                     <div class="dropdown-item-text">
                         <div class="fw-bold">@username</div>
-                        <div class="small text-muted">@(User.IsInRole("Admin") ? "Administrador" : "Usuário")</div>
+                        <div class="small text-muted">@(User.IsInRole("Admin") ? "Administrador" : User.IsInRole("Moderator") ? "Moderador" : "Usuário")</div>
                     </div>
                 </li>
                 <li><hr class="dropdown-divider"></li>

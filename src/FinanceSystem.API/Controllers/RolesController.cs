@@ -1,5 +1,5 @@
 ﻿using FinanceSystem.Application.DTOs;
-using FinanceSystem.Application.Services.Interfaces;
+using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -50,6 +50,20 @@ namespace FinanceSystem.API.Controllers
         {
             await _roleService.DeleteAsync(id);
             return NoContent();
+        }
+
+        [HttpGet("{roleId}/has-permission/{permissionName}")]
+        public async Task<ActionResult> HasPermission(Guid roleId, string permissionName)
+        {
+            var result = await _roleService.HasPermissionAsync(roleId, permissionName);
+            return Ok(result);
+        }
+
+        [HttpPut("{roleId}/permissions")]
+        public async Task<ActionResult> UpdateRolePermissions(Guid roleId, [FromBody] List<Guid> permissionIds)
+        {
+            var role = await _roleService.UpdateRolePermissionsAsync(roleId, permissionIds);
+            return Ok(role);
         }
     }
 }

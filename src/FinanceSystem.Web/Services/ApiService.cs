@@ -103,7 +103,7 @@ namespace FinanceSystem.Web.Services
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 }
 
-                var json = JsonSerializer.Serialize(data);
+                var json = data != null ? JsonSerializer.Serialize(data) : "";
                 _logger.LogInformation($"Enviando requisição para {endpoint}: {json}");
 
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -180,6 +180,36 @@ namespace FinanceSystem.Web.Services
                 }
 
                 response.EnsureSuccessStatusCode();
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                await HandleUnauthorizedResponse();
+                throw new UnauthorizedAccessException("Sessão expirada ou inválida");
+            }
+        }
+
+        public async Task<T> DeleteAsync<T>(string endpoint, string token = null)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient("FinanceAPI");
+                if (!string.IsNullOrEmpty(token))
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
+
+                var response = await client.DeleteAsync(endpoint);
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    await HandleUnauthorizedResponse();
+                    throw new UnauthorizedAccessException("Sessão expirada ou inválida");
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
             {

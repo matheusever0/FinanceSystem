@@ -6,6 +6,7 @@ namespace FinanceSystem.Domain.Interfaces.Services
     {
         IUserRepository Users { get; }
         IRoleRepository Roles { get; }
+        IPermissionRepository Permissions { get; }
         Task<int> CompleteAsync();
     }
 }

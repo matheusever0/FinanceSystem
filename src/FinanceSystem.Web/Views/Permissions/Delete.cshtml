@@ -1,0 +1,33 @@
+﻿@model FinanceSystem.Web.Models.PermissionModel
+
+@{
+    ViewData["Title"] = "Excluir Permissão";
+}
+
+<h1>Excluir Permissão</h1>
+
+<div class="alert alert-danger">
+    <h3>Tem certeza que deseja excluir esta permissão?</h3>
+    <p>Esta ação não poderá ser desfeita.</p>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Nome</dt>
+            <dd class="col-sm-9">@Model.Name</dd>
+
+            <dt class="col-sm-3">Nome do Sistema</dt>
+            <dd class="col-sm-9"><code>@Model.SystemName</code></dd>
+
+            <dt class="col-sm-3">Descrição</dt>
+            <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.Description) ? "-" : Model.Description)</dd>
+        </dl>
+
+        <form asp-action="Delete">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger">Excluir</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>

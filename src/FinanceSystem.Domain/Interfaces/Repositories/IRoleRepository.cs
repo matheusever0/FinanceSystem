@@ -6,5 +6,6 @@ namespace FinanceSystem.Domain.Interfaces.Repositories
     {
         Task<Role?> GetByNameAsync(string name);
         Task<IEnumerable<Role?>> GetAllWithUsersAsync();
+        Task<Role?> GetRoleWithPermissionsAsync(Guid id);
     }
 }

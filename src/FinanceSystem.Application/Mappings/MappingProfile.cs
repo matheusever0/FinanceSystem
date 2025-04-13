@@ -14,7 +14,12 @@ namespace FinanceSystem.Application.Mappings
                     src.UserRoles.Select(ur => ur.Role.Name).ToList()));
 
             // Role -> RoleDto
-            CreateMap<Role, RoleDto>();
+            CreateMap<Role, RoleDto>()
+                .ForMember(dest => dest.Permissions, opt => opt.MapFrom(src =>
+                    src.RolePermissions.Select(rp => rp.Permission.SystemName).ToList()));
+
+            // Permission -> PermissionDto
+            CreateMap<Permission, PermissionDto>();
         }
     }
 }

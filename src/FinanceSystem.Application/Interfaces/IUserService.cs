@@ -1,6 +1,6 @@
 ﻿using FinanceSystem.Application.DTOs;
 
-namespace FinanceSystem.Application.Services.Interfaces
+namespace FinanceSystem.Application.Interfaces
 {
     public interface IUserService
     {
