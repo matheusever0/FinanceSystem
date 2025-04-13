@@ -37,7 +37,14 @@
                     <div class="form-check form-switch">
                         <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" id="IsActive">
                         <label class="form-check-label" for="IsActive">
-                            <span id="statusLabel" class="badge bg-success">Ativo</span>
+                            @if (Model.IsActive)
+                            {
+                                <span id="statusLabel" class="badge bg-success">Ativo</span>
+                            }
+                            else
+                            {
+                                <span id="statusLabel" class="badge bg-danger">Inativo</span>
+                            }
                         </label>
                     </div>
                 </div>
