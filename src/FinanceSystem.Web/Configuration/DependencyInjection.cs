@@ -1,5 +1,4 @@
-﻿using FinanceSystem.Domain.Interfaces.Services;
-using FinanceSystem.Web.Interfaces;
+﻿using FinanceSystem.Web.Interfaces;
 using FinanceSystem.Web.Services;
 
 namespace FinanceSystem.Web.Configuration
@@ -12,6 +11,7 @@ namespace FinanceSystem.Web.Configuration
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IPermissionService, PermissionService>();
+            services.AddScoped<IWebPermissionAuthorizationService, WebPermissionAuthorizationService>();
 
             return services;
         }

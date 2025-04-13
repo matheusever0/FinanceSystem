@@ -1,46 +1,32 @@
-﻿using FinanceSystem.Domain.Interfaces.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using FinanceSystem.Web.Interfaces;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc;
 
-namespace FinanceSystem.Web.Filters
+public class PermissionAuthorizationFilter : IAsyncAuthorizationFilter
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-    public class RequirePermissionAttribute : TypeFilterAttribute
+    private readonly IWebPermissionAuthorizationService _permissionAuthorizationService;
+    private readonly string _permissionSystemName;
+
+    public PermissionAuthorizationFilter(
+        IWebPermissionAuthorizationService permissionAuthorizationService,
+        string permissionSystemName)
     {
-        public RequirePermissionAttribute(string permissionSystemName) : base(typeof(PermissionAuthorizationFilter))
-        {
-            Arguments = new object[] { permissionSystemName };
-        }
+        _permissionAuthorizationService = permissionAuthorizationService;
+        _permissionSystemName = permissionSystemName;
     }
 
-    public class PermissionAuthorizationFilter : IAsyncAuthorizationFilter
+    public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
-        private readonly IPermissionAuthorizationService _permissionAuthorizationService;
-        private readonly string _permissionSystemName;
-
-        public PermissionAuthorizationFilter(
-            IPermissionAuthorizationService permissionAuthorizationService,
-            string permissionSystemName)
+        if (!context.HttpContext.User.Identity.IsAuthenticated)
         {
-            _permissionAuthorizationService = permissionAuthorizationService;
-            _permissionSystemName = permissionSystemName;
+            context.Result = new ChallengeResult();
+            return;
         }
 
-        public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
+        if (!await _permissionAuthorizationService.HasPermissionAsync(context.HttpContext.User, _permissionSystemName))
         {
-            // Verificar se o usuário está autenticado
-            if (!context.HttpContext.User.Identity.IsAuthenticated)
-            {
-                context.Result = new ChallengeResult();
-                return;
-            }
-
-            // Verificar se o usuário tem a permissão necessária
-            if (!await _permissionAuthorizationService.HasPermissionAsync(context.HttpContext.User, _permissionSystemName))
-            {
-                context.Result = new ForbidResult();
-                return;
-            }
+            context.Result = new ForbidResult();
+            return;
         }
     }
 }
