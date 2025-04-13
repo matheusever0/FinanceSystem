@@ -21,6 +21,6 @@ namespace FinanceSystem.Web.Models
         public List<string> Roles { get; set; } = new List<string>();
 
         [Display(Name = "Ativo")]
-        public bool? IsActive { get; set; }
+        public bool IsActive { get; set; } = true; 
     }
 }

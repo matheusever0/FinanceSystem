@@ -129,7 +129,7 @@ namespace FinanceSystem.Web.Controllers
                     Username = user.Username,
                     Email = user.Email,
                     IsActive = user.IsActive,
-                    Roles = user.Roles
+                    Roles = user.Roles ?? new List<string>()
                 };
 
                 return View(model);
@@ -151,14 +151,22 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.Session.GetString("JWToken");
 
+                // Garantir que as roles selecionadas sejam processadas
                 if (selectedRoles != null && selectedRoles.Any())
                 {
                     model.Roles = selectedRoles;
                 }
+                else
+                {
+                    // Se nenhuma role foi selecionada, garantir que a lista esteja vazia
+                    model.Roles = new List<string>();
+                }
 
                 if (ModelState.IsValid)
                 {
-                    _logger.LogInformation("Usuário {UserName} atualizando usuário {UserId}", User.Identity.Name, id);
+                    _logger.LogInformation("Usuário {UserName} atualizando usuário {UserId} - Status Ativo: {IsActive}",
+                        User.Identity.Name, id, model.IsActive);
+
                     await _userService.UpdateUserAsync(id, model, token);
                     TempData["SuccessMessage"] = "Usuário atualizado com sucesso!";
                     return RedirectToAction(nameof(Index));

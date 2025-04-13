@@ -4,23 +4,35 @@
 
 // Aguardar que o DOM esteja completamente carregado
 document.addEventListener('DOMContentLoaded', function () {
-    // Elementos do DOM
+    initializeSidebar();
+    initializeAlerts();
+    initializeAjaxInterceptors();
+});
+
+/**
+ * Inicializa a funcionalidade do sidebar
+ */
+function initializeSidebar() {
     const menuToggle = document.getElementById('menu-toggle');
     const sidebar = document.getElementById('sidebar');
     const topbar = document.getElementById('topbar');
     const mainContent = document.getElementById('main-content');
-    const alerts = document.querySelectorAll('.alert-dismissible');
 
-    // Toggle do sidebar
     if (menuToggle && sidebar) {
         menuToggle.addEventListener('click', function () {
             sidebar.classList.toggle('collapsed');
-            topbar.classList.toggle('expanded');
-            mainContent.classList.toggle('expanded');
+            if (topbar) topbar.classList.toggle('expanded');
+            if (mainContent) mainContent.classList.toggle('expanded');
         });
     }
+}
 
-    // Auto-fechar alertas após um tempo
+/**
+ * Inicializa o auto-fechamento dos alertas
+ */
+function initializeAlerts() {
+    const alerts = document.querySelectorAll('.alert-dismissible');
+
     if (alerts.length > 0) {
         alerts.forEach(function (alert) {
             setTimeout(function () {
@@ -35,7 +47,36 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 5000); // Alertas desaparecem após 5 segundos
         });
     }
-});
+}
+
+/**
+ * Inicializa os interceptores de AJAX e fetch
+ */
+function initializeAjaxInterceptors() {
+    // Interceptar erros de requisições jQuery AJAX
+    if (typeof $ !== 'undefined' && $.ajaxError) {
+        $(document).ajaxError(function (event, jqXHR, settings, thrownError) {
+            if (jqXHR.status === 401) {
+                window.location.href = '/Account/Login?expired=true';
+            }
+        });
+    }
+
+    // Interceptar erros de fetch API
+    const originalFetch = window.fetch;
+    if (originalFetch) {
+        window.fetch = function (url, options) {
+            return originalFetch(url, options)
+                .then(response => {
+                    if (response.status === 401) {
+                        window.location.href = '/Account/Login?expired=true';
+                        return Promise.reject('Unauthorized');
+                    }
+                    return response;
+                });
+        };
+    }
+}
 
 /**
  * Função para confirmar ação de exclusão
@@ -51,26 +92,3 @@ function confirmDelete(formId, message) {
     }
     return false;
 }
-
-// Interceptar erros de requisições AJAX
-$(document).ajaxError(function (event, jqXHR, settings, thrownError) {
-    if (jqXHR.status === 401) {
-        window.location.href = '/Account/Login?expired=true';
-    }
-});
-
-// Interceptar erros de fetch API
-(function () {
-    const originalFetch = window.fetch;
-
-    window.fetch = function (url, options) {
-        return originalFetch(url, options)
-            .then(response => {
-                if (response.status === 401) {
-                    window.location.href = '/Account/Login?expired=true';
-                    return Promise.reject('Unauthorized');
-                }
-                return response;
-            });
-    };
-})();

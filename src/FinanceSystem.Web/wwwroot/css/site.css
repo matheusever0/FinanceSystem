@@ -294,3 +294,51 @@ body {
         transform: scale(1);
     }
 }
+
+
+.status-toggle-container {
+    display: flex;
+    align-items: center;
+}
+
+.form-check.form-switch {
+    margin-bottom: 0;
+}
+
+.form-check-input[type="checkbox"] {
+    cursor: pointer;
+    height: 1.5rem;
+    width: 3rem;
+}
+
+.form-check-input:checked {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+#statusLabel {
+    margin-left: 10px;
+    font-size: 0.875rem;
+    padding: 0.35em 0.65em;
+    transition: all 0.3s ease;
+}
+
+.role-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+    .role-badge .remove-role {
+        font-size: 0.75rem;
+        transition: all 0.2s;
+    }
+
+        .role-badge .remove-role:hover {
+            opacity: 0.8;
+        }
+
+#selectedRolesContainer {
+    min-height: 40px;
+    padding: 5px 0;
+}
