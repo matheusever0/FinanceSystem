@@ -4,7 +4,7 @@
 
     // Adiciona logs para diagnóstico
     var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
-    var username = User?.Identity?.Name ?? "não autenticado";
+    var username = User?.Identity?.Name.ToUpper() ?? "não autenticado";
     var token = Context.Session.GetString("JWToken") ?? "token ausente";
     var debugInfo = $"Usuário: {username}, Autenticado: {isAuthenticated}, Token: {(string.IsNullOrEmpty(token) ? "ausente" : token.Substring(0, Math.Min(10, token.Length)))}";
 }
@@ -33,7 +33,8 @@
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <i class="fas fa-chart-line me-2"></i>Finance System
+            <i class="fas fa-chart-line"></i>
+            <span>Finance System</span>
         </div>
 
         <div class="sidebar-header">
@@ -42,7 +43,7 @@
                     <i class="fas fa-user"></i>
                 </div>
                 <div>
-                    <div class="fw-bold">@User.Identity?.Name</div>
+                    <div class="fw-bold">@username</div>
                     <small>@(User.IsInRole("Admin") ? "Administrador" : "Usuário")</small>
                 </div>
             </div>
@@ -139,49 +140,5 @@
 
     <!-- Renderiza seção de scripts adicionais -->
     @await RenderSectionAsync("Scripts", required: false)
-
-    <script>
-        // Script de inicialização garantido que será executado
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('_Layout.cshtml carregado com sucesso');
-
-            // Teste se o CSS foi carregado corretamente
-            var styleSheets = document.styleSheets;
-            var siteCssLoaded = false;
-
-            for (var i = 0; i < styleSheets.length; i++) {
-                if (styleSheets[i].href && styleSheets[i].href.includes('/css/site.css')) {
-                    siteCssLoaded = true;
-                    console.log('site.css carregado com sucesso');
-                    break;
-                }
-            }
-
-            if (!siteCssLoaded) {
-                console.error('ERRO: site.css não foi carregado corretamente!');
-                // Tenta carregar o CSS novamente
-                var link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = '/css/site.css?' + new Date().getTime(); // Adiciona timestamp para evitar cache
-                document.head.appendChild(link);
-            }
-
-            // Inicializa o menu toggle para dispositivos móveis
-            const menuToggle = document.getElementById('menu-toggle');
-            const sidebar = document.getElementById('sidebar');
-
-            if (menuToggle && sidebar) {
-                menuToggle.addEventListener('click', function() {
-                    if (window.innerWidth < 992) {
-                        sidebar.classList.toggle('show');
-                    } else {
-                        sidebar.classList.toggle('collapsed');
-                        document.getElementById('topbar').classList.toggle('expanded');
-                        document.getElementById('main-content').classList.toggle('expanded');
-                    }
-                });
-            }
-        });
-    </script>
 </body>
 </html>

@@ -1,4 +1,3 @@
-using FinanceSystem.Web;
 using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Interfaces;
 using FinanceSystem.Web.Middlewares;
@@ -41,6 +40,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+
 builder.Services.AddControllersWithViews(options => {
     options.Filters.Add<TokenCheckAttribute>();
 });

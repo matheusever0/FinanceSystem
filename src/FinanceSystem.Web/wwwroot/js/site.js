@@ -14,15 +14,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Toggle do sidebar
     if (menuToggle && sidebar) {
         menuToggle.addEventListener('click', function () {
-            if (window.innerWidth < 992) {
-                // Em dispositivos móveis, apenas mostra/esconde o sidebar
-                sidebar.classList.toggle('show');
-            } else {
-                // Em desktop, colapsa o sidebar e ajusta o layout
-                sidebar.classList.toggle('collapsed');
-                if (topbar) topbar.classList.toggle('expanded');
-                if (mainContent) mainContent.classList.toggle('expanded');
-            }
+            sidebar.classList.toggle('collapsed');
+            topbar.classList.toggle('expanded');
+            mainContent.classList.toggle('expanded');
         });
     }
 
