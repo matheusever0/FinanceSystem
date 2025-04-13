@@ -31,11 +31,6 @@ namespace FinanceSystem.Web.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            if (expired)
-            {
-                TempData["ErrorMessage"] = "Sua sessão expirou. Por favor, faça login novamente.";
-            }
-
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
