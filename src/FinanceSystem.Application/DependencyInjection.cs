@@ -9,10 +9,8 @@ namespace FinanceSystem.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            // Configurar AutoMapper
             services.AddAutoMapper(typeof(MappingProfile));
 
-            // Registrar serviços
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IRoleService, RoleService>();
 
