@@ -1,11 +1,13 @@
+using FinanceSystem.Web;
 using FinanceSystem.Web.Interfaces;
+using FinanceSystem.Web.Middlewares;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adicionar serviços ao container
-builder.Services.AddControllersWithViews();
+
+builder.Services.AddHttpContextAccessor();
 
 // Configurar serviços HTTP
 builder.Services.AddHttpClient("FinanceAPI", client =>
@@ -38,8 +40,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+
 
 // Configurar o pipeline de requisições HTTP
 if (app.Environment.IsDevelopment())
@@ -61,7 +66,9 @@ app.UseRouting();
 app.UseSession();
 
 app.UseAuthentication();
+app.UseAuthenticationMiddleware();
 app.UseAuthorization();
+
 
 app.MapControllerRoute(
     name: "default",

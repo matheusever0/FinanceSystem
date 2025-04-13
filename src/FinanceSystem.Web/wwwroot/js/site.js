@@ -57,3 +57,26 @@ function confirmDelete(formId, message) {
     }
     return false;
 }
+
+// Interceptar erros de requisições AJAX
+$(document).ajaxError(function (event, jqXHR, settings, thrownError) {
+    if (jqXHR.status === 401) {
+        window.location.href = '/Account/Login?expired=true';
+    }
+});
+
+// Interceptar erros de fetch API
+(function () {
+    const originalFetch = window.fetch;
+
+    window.fetch = function (url, options) {
+        return originalFetch(url, options)
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/Account/Login?expired=true';
+                    return Promise.reject('Unauthorized');
+                }
+                return response;
+            });
+    };
+})();

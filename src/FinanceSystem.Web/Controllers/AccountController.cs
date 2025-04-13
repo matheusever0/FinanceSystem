@@ -24,11 +24,16 @@ namespace FinanceSystem.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Login(string returnUrl = null, bool expired = false)
         {
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity!.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home");
+            }
+
+            if (expired)
+            {
+                TempData["ErrorMessage"] = "Sua sessão expirou. Por favor, faça login novamente.";
             }
 
             ViewData["ReturnUrl"] = returnUrl;
