@@ -6,10 +6,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddHttpContextAccessor();
 
-// Configurar serviços HTTP
 builder.Services.AddHttpClient("FinanceAPI", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]);
@@ -17,7 +15,6 @@ builder.Services.AddHttpClient("FinanceAPI", client =>
     client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 });
 
-// Configurar Session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -26,7 +23,6 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// Configurar Autenticação
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -36,7 +32,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.SlidingExpiration = true;
     });
 
-// Registrar serviços
 builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
@@ -48,8 +43,6 @@ builder.Services.AddControllersWithViews(options => {
 var app = builder.Build();
 
 
-
-// Configurar o pipeline de requisições HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -65,7 +58,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Importante: Session deve vir ANTES da autenticação e autorização
 app.UseSession();
 
 app.UseAuthentication();
