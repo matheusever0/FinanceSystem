@@ -12,6 +12,10 @@ namespace FinanceSystem.Web.Configuration
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IPermissionService, PermissionService>();
             services.AddScoped<IWebPermissionAuthorizationService, WebPermissionAuthorizationService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IPaymentTypeService, PaymentTypeService>();
+            services.AddScoped<IPaymentMethodService, PaymentMethodService>();
+            services.AddScoped<ICreditCardService, CreditCardService>();
 
             return services;
         }
