@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Web.Interfaces;
+﻿using FinanceSystem.Web.Extensions;
+using FinanceSystem.Web.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -24,7 +25,7 @@ namespace FinanceSystem.Web.Filters
         {
             _logger.LogInformation("Verificando permissão: {Permission}", _permissionSystemName);
 
-            if (!context.HttpContext.User.Identity.IsAuthenticated)
+            if (!context.HttpContext.IsUserAuthenticated())
             {
                 _logger.LogWarning("Acesso negado: usuário não autenticado tentando acessar recurso com permissão {Permission}", _permissionSystemName);
                 context.Result = new RedirectToActionResult("Login", "Account", new { returnUrl = context.HttpContext.Request.Path });
@@ -34,21 +35,21 @@ namespace FinanceSystem.Web.Filters
             if (context.HttpContext.User.IsInRole("Admin"))
             {
                 _logger.LogInformation("Acesso concedido: usuário admin {User} acessando recurso",
-                    context.HttpContext.User.Identity.Name);
+                    context.HttpContext.GetUserName());
                 return;
             }
 
             if (!await _permissionAuthorizationService.HasPermissionAsync(context.HttpContext.User, _permissionSystemName))
             {
                 _logger.LogWarning("Acesso negado: usuário {User} não possui permissão {Permission}",
-                    context.HttpContext.User.Identity.Name, _permissionSystemName);
+                    context.HttpContext.GetUserName(), _permissionSystemName);
 
                 context.Result = new RedirectToActionResult("AccessDenied", "Account", null);
                 return;
             }
 
             _logger.LogInformation("Acesso concedido: usuário {User} possui permissão {Permission}",
-                context.HttpContext.User.Identity.Name, _permissionSystemName);
+                context.HttpContext.GetUserName(), _permissionSystemName);
         }
     }
 }

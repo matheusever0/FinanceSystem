@@ -14,7 +14,7 @@
         protected User()
         {
 
-            UserRoles = new List<UserRole>();
+            UserRoles = [];
         }
 
         public User(string username, string email, string passwordHash)

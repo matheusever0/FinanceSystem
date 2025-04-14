@@ -63,7 +63,7 @@ namespace FinanceSystem.Web.Services
             }
         }
 
-        public async Task<T> GetAsync<T>(string endpoint, string token = null)
+        public async Task<T> GetAsync<T>(string endpoint, string token)
         {
             try
             {
@@ -84,7 +84,7 @@ namespace FinanceSystem.Web.Services
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<T>(content, _jsonOptions);
+                return JsonSerializer.Deserialize<T>(content, _jsonOptions)!;
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
             {
@@ -93,7 +93,7 @@ namespace FinanceSystem.Web.Services
             }
         }
 
-        public async Task<T> PostAsync<T>(string endpoint, object data, string token = null)
+        public async Task<T> PostAsync<T>(string endpoint, object? data = null, string token = "")
         {
             try
             {
@@ -119,7 +119,7 @@ namespace FinanceSystem.Web.Services
                 _logger.LogInformation($"Resposta do endpoint {endpoint}: {responseContent}");
 
                 response.EnsureSuccessStatusCode();
-                return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
+                return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions)!;
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
             {
@@ -128,7 +128,7 @@ namespace FinanceSystem.Web.Services
             }
         }
 
-        public async Task<T> PutAsync<T>(string endpoint, object data, string token = null)
+        public async Task<T> PutAsync<T>(string endpoint, object? data = null, string token = "")
         {
             try
             {
@@ -152,7 +152,7 @@ namespace FinanceSystem.Web.Services
                 response.EnsureSuccessStatusCode();
 
                 var responseContent = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
+                return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions)!;
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
             {
@@ -161,7 +161,7 @@ namespace FinanceSystem.Web.Services
             }
         }
 
-        public async Task DeleteAsync(string endpoint, string token = null)
+        public async Task DeleteAsync(string endpoint, string token)
         {
             try
             {
@@ -188,7 +188,7 @@ namespace FinanceSystem.Web.Services
             }
         }
 
-        public async Task<T> DeleteAsync<T>(string endpoint, string token = null)
+        public async Task<T> DeleteAsync<T>(string endpoint, string token)
         {
             try
             {
@@ -209,7 +209,7 @@ namespace FinanceSystem.Web.Services
                 response.EnsureSuccessStatusCode();
 
                 var responseContent = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
+                return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions)!;
             }
             catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
             {

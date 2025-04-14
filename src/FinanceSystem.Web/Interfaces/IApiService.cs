@@ -5,11 +5,11 @@ namespace FinanceSystem.Web.Interfaces
     public interface IApiService
     {
         Task<bool> VerifyTokenAsync(string token);
-        Task<T> GetAsync<T>(string endpoint, string token = null);
-        Task<T> PostAsync<T>(string endpoint, object data, string token = null);
-        Task<T> PutAsync<T>(string endpoint, object data, string token = null);
-        Task DeleteAsync(string endpoint, string token = null);
-        Task<T> DeleteAsync<T>(string endpoint, string token = null);
+        Task<T> GetAsync<T>(string endpoint, string token);
+        Task<T> PostAsync<T>(string endpoint, object? data = null, string token = "");
+        Task<T> PutAsync<T>(string endpoint, object? data = null, string token = "");
+        Task DeleteAsync(string endpoint, string token);
+        Task<T> DeleteAsync<T>(string endpoint, string token);
         Task<ClaimsPrincipal> GetClaimsPrincipalFromToken(string token);
     }
 }

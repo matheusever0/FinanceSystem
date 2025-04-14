@@ -11,10 +11,9 @@ namespace FinanceSystem.Infrastructure.Repositories
         {
         }
 
-        public async Task<Permission> GetBySystemNameAsync(string systemName)
+        public async Task<Permission?> GetBySystemNameAsync(string systemName)
         {
-            return await _dbSet
-                .FirstOrDefaultAsync(p => p.SystemName == systemName);
+            return await _dbSet.FirstOrDefaultAsync(p => p.SystemName == systemName);
         }
 
         public async Task<IEnumerable<Permission>> GetPermissionsByRoleIdAsync(Guid roleId)

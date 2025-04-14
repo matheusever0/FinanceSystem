@@ -24,7 +24,7 @@ namespace FinanceSystem.Domain.Tests.Entities
         {
             string name = "User";
 
-            var role = new Role(name);
+            var role = new Role(name, null);
 
             Assert.Equal(name, role.Name);
             Assert.Null(role.Description);
@@ -33,7 +33,7 @@ namespace FinanceSystem.Domain.Tests.Entities
         [Fact]
         public void UpdateName_WithValidName_ShouldUpdateName()
         {
-            var role = new Role("OldRole");
+            var role = new Role("OldRole", "");
             string newName = "NewRole";
 
             role.UpdateName(newName);

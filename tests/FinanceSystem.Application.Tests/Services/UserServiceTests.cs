@@ -170,9 +170,7 @@ namespace FinanceSystem.Application.Tests.Services
 
             var user = new User("olduser", "old@example.com", "oldhash");
 
-            typeof(User)
-    .GetProperty("Id")
-    .SetValue(user, userId);
+            typeof(User).GetProperty("Id").SetValue(user, userId);
 
             var mockUserRepository = new Mock<IUserRepository>();
             mockUserRepository

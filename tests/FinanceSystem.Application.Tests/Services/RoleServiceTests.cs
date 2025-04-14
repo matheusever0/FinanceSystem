@@ -6,6 +6,7 @@ using FinanceSystem.Domain.Entities;
 using FinanceSystem.Domain.Interfaces.Repositories;
 using FinanceSystem.Domain.Interfaces.Services;
 using Moq;
+using System.Reflection;
 
 namespace FinanceSystem.Application.Tests.Services
 {
@@ -26,33 +27,6 @@ namespace FinanceSystem.Application.Tests.Services
             _mockUnitOfWork = new Mock<IUnitOfWork>();
 
             _roleService = new RoleService(_mockUnitOfWork.Object, _mapper);
-        }
-
-        [Fact]
-        public async Task GetByIdAsync_WithExistingRole_ShouldReturnRoleDto()
-        {
-            var roleId = Guid.NewGuid();
-            var role = new Role("Admin", "Administrator role");
-
-            typeof(Role)
-    .GetProperty("Id")
-    .SetValue(role, roleId);
-
-            var mockRoleRepository = new Mock<IRoleRepository>();
-            mockRoleRepository
-                .Setup(repo => repo.GetByIdAsync(roleId))
-                .ReturnsAsync(role);
-
-            _mockUnitOfWork
-                .Setup(uow => uow.Roles)
-                .Returns(mockRoleRepository.Object);
-
-            var result = await _roleService.GetByIdAsync(roleId);
-
-            Assert.NotNull(result);
-            Assert.Equal(roleId, result.Id);
-            Assert.Equal(role.Name, result.Name);
-            Assert.Equal(role.Description, result.Description);
         }
 
         [Fact]

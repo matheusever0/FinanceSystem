@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
+using FinanceSystem.Web.Extensions;
 
 namespace FinanceSystem.Web.Filters
 {
@@ -11,9 +12,9 @@ namespace FinanceSystem.Web.Filters
         {
             var httpContext = context.HttpContext;
 
-            if (httpContext.User.Identity.IsAuthenticated)
+            if (httpContext.IsUserAuthenticated())
             {
-                var token = HttpContext.GetJwtToken();
+                var token = httpContext.GetJwtToken();
 
                 if (string.IsNullOrEmpty(token))
                 {

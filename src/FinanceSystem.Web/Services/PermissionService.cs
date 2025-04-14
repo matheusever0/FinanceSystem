@@ -69,7 +69,7 @@ namespace FinanceSystem.Web.Services
         public async Task<bool> AssignPermissionToRoleAsync(string roleId, string permissionId, string token)
         {
             _userPermissionsCache.Clear();
-            return await _apiService.PostAsync<bool>($"/api/permissions/role/{roleId}/permission/{permissionId}", null, token);
+            return await _apiService.PostAsync<bool>($"/api/permissions/role/{roleId}/permission/{permissionId}", token: token);
         }
 
         public async Task<bool> RemovePermissionFromRoleAsync(string roleId, string permissionId, string token)

@@ -79,7 +79,7 @@ namespace FinanceSystem.Application.Services
                 throw new KeyNotFoundException($"Role with ID {id} not found");
 
             var rolesWithUsers = await _unitOfWork.Roles.GetAllWithUsersAsync();
-            var roleWithUsers = rolesWithUsers.FirstOrDefault(r => r.Id == id);
+            var roleWithUsers = rolesWithUsers.FirstOrDefault(r => r?.Id == id);
             if (roleWithUsers != null && roleWithUsers.UserRoles.Any())
                 throw new InvalidOperationException("Cannot delete role because it is assigned to users");
 

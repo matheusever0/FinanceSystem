@@ -20,7 +20,7 @@ namespace FinanceSystem.Infrastructure.Services
         public Task<string> GenerateJwtToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["JwtSettings:Secret"]);
+            var key = Encoding.ASCII.GetBytes(_configuration["JwtSettings:Secret"]!);
 
             var claims = new List<Claim>
             {

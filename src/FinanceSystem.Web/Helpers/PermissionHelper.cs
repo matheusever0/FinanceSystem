@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Web.Services;
+﻿using FinanceSystem.Web.Extensions;
+using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -16,7 +17,7 @@ namespace FinanceSystem.Web.Helpers
             var logger = httpContext.RequestServices.GetService<ILogger<object>>();
             logger?.LogInformation("Verificando permissão: {Permission}", permissionSystemName);
 
-            if (!httpContext.User.Identity.IsAuthenticated)
+            if (!httpContext.IsUserAuthenticated())
             {
                 logger?.LogWarning("Usuário não autenticado tentando verificar permissão {Permission}", permissionSystemName);
                 return false;
@@ -28,7 +29,7 @@ namespace FinanceSystem.Web.Helpers
                 return true;
             }
 
-            var token = HttpContext.GetJwtToken();
+            var token = httpContext.GetJwtToken();
 
             if (string.IsNullOrEmpty(token))
             {
@@ -98,7 +99,7 @@ namespace FinanceSystem.Web.Helpers
 
         public static async Task<bool> UserHasAnyPermissionAsync(HttpContext httpContext, string[] permissionSystemNames)
         {
-            if (!httpContext.User.Identity.IsAuthenticated)
+            if (!httpContext.IsUserAuthenticated())
                 return false;
 
             if (httpContext.User.IsInRole("Admin"))

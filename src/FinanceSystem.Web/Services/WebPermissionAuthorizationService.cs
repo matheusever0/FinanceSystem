@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Web.Interfaces;
+﻿using FinanceSystem.Web.Extensions;
+using FinanceSystem.Web.Interfaces;
 using System.Security.Claims;
 
 namespace FinanceSystem.Web.Services
@@ -35,7 +36,7 @@ namespace FinanceSystem.Web.Services
                     return true;
                 }
 
-                var token = _httpContextAccessor.HttpContext.Session.GetString("JWToken");
+                var token = _httpContextAccessor?.HttpContext?.GetJwtToken();
                 if (string.IsNullOrEmpty(token))
                 {
                     _logger.LogWarning("Token não encontrado para usuário autenticado: {User}", user.Identity.Name);

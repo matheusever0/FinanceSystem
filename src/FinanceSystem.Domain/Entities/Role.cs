@@ -15,7 +15,7 @@
             RolePermissions = new List<RolePermission>();
         }
 
-        public Role(string name, string description = null)
+        public Role(string name, string description)
         {
             Id = Guid.NewGuid();
             Name = name;

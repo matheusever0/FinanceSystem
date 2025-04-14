@@ -34,7 +34,7 @@ namespace FinanceSystem.Infrastructure.Services
 
             foreach (var role in roles)
             {
-                var roleWithPermissions = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(role.Id);
+                var roleWithPermissions = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(role!.Id);
                 if (roleWithPermissions != null && roleWithPermissions.HasPermission(permissionSystemName))
                     return true;
             }
