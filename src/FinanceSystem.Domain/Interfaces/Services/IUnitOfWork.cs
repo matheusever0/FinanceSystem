@@ -7,6 +7,11 @@ namespace FinanceSystem.Domain.Interfaces.Services
         IUserRepository Users { get; }
         IRoleRepository Roles { get; }
         IPermissionRepository Permissions { get; }
+        IPaymentRepository Payments { get; }
+        IPaymentTypeRepository PaymentTypes { get; }
+        IPaymentMethodRepository PaymentMethods { get; }
+        ICreditCardRepository CreditCards { get; }
+        IPaymentInstallmentRepository PaymentInstallments { get; }
         Task<int> CompleteAsync();
     }
 }

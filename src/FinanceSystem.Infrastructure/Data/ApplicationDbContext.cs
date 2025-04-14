@@ -5,7 +5,6 @@ namespace FinanceSystem.Infrastructure.Data
 {
     public class ApplicationDbContext : DbContext
     {
-
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
@@ -16,6 +15,11 @@ namespace FinanceSystem.Infrastructure.Data
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<PaymentType> PaymentTypes { get; set; }
+        public DbSet<PaymentMethod> PaymentMethods { get; set; }
+        public DbSet<CreditCard> CreditCards { get; set; }
+        public DbSet<PaymentInstallment> PaymentInstallments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -50,6 +54,56 @@ namespace FinanceSystem.Infrastructure.Data
             modelBuilder.Entity<Permission>()
                 .HasIndex(p => p.SystemName)
                 .IsUnique();
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.PaymentType)
+                .WithMany(pt => pt.Payments)
+                .HasForeignKey(p => p.PaymentTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.PaymentMethod)
+                .WithMany(pm => pm.Payments)
+                .HasForeignKey(p => p.PaymentMethodId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PaymentType>()
+                .HasOne(pt => pt.User)
+                .WithMany()
+                .HasForeignKey(pt => pt.UserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false); 
+
+            modelBuilder.Entity<PaymentMethod>()
+                .HasOne(pm => pm.User)
+                .WithMany()
+                .HasForeignKey(pm => pm.UserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false); 
+
+            modelBuilder.Entity<CreditCard>()
+                .HasOne(cc => cc.User)
+                .WithMany()
+                .HasForeignKey(cc => cc.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CreditCard>()
+                .HasOne(cc => cc.PaymentMethod)
+                .WithMany(pm => pm.CreditCards)
+                .HasForeignKey(cc => cc.PaymentMethodId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PaymentInstallment>()
+                .HasOne(pi => pi.Payment)
+                .WithMany(p => p.Installments)
+                .HasForeignKey(pi => pi.PaymentId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

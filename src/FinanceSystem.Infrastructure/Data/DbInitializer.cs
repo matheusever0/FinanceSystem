@@ -1,4 +1,5 @@
 ﻿using FinanceSystem.Domain.Entities;
+using FinanceSystem.Domain.Enums;
 using FinanceSystem.Domain.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -56,10 +57,34 @@ namespace FinanceSystem.Infrastructure.Data
 
                     var managePermissionsPermission = new Permission("Manage Permissions", "permissions.manage", "Permission to manage permissions");
 
+                    var viewPaymentsPermission = new Permission("View Payments", "payments.view", "Permission to view payments");
+                    var createPaymentsPermission = new Permission("Create Payments", "payments.create", "Permission to create payments");
+                    var updatePaymentsPermission = new Permission("Edit Payments", "payments.edit", "Permission to edit payments");
+                    var deletePaymentsPermission = new Permission("Delete Payments", "payments.delete", "Permission to delete payments");
+
+                    var viewPaymentTypesPermission = new Permission("View Payment Types", "paymenttypes.view", "Permission to view payment types");
+                    var createPaymentTypesPermission = new Permission("Create Payment Types", "paymenttypes.create", "Permission to create payment types");
+                    var updatePaymentTypesPermission = new Permission("Edit Payment Types", "paymenttypes.edit", "Permission to edit payment types");
+                    var deletePaymentTypesPermission = new Permission("Delete Payment Types", "paymenttypes.delete", "Permission to delete payment types");
+
+                    var viewPaymentMethodsPermission = new Permission("View Payment Methods", "paymentmethods.view", "Permission to view payment methods");
+                    var createPaymentMethodsPermission = new Permission("Create Payment Methods", "paymentmethods.create", "Permission to create payment methods");
+                    var updatePaymentMethodsPermission = new Permission("Edit Payment Methods", "paymentmethods.edit", "Permission to edit payment methods");
+                    var deletePaymentMethodsPermission = new Permission("Delete Payment Methods", "paymentmethods.delete", "Permission to delete payment methods");
+
+                    var viewCreditCardsPermission = new Permission("View Credit Cards", "creditcards.view", "Permission to view credit cards");
+                    var createCreditCardsPermission = new Permission("Create Credit Cards", "creditcards.create", "Permission to create credit cards");
+                    var updateCreditCardsPermission = new Permission("Edit Credit Cards", "creditcards.edit", "Permission to edit credit cards");
+                    var deleteCreditCardsPermission = new Permission("Delete Credit Cards", "creditcards.delete", "Permission to delete credit cards");
+
                     await _context.Permissions.AddRangeAsync(
                         viewUsersPermission, createUsersPermission, updateUsersPermission, deleteUsersPermission,
                         viewRolesPermission, createRolesPermission, updateRolesPermission, deleteRolesPermission,
-                        managePermissionsPermission);
+                        managePermissionsPermission,
+                        viewPaymentsPermission, createPaymentsPermission, updatePaymentsPermission, deletePaymentsPermission,
+                        viewPaymentTypesPermission, createPaymentTypesPermission, updatePaymentTypesPermission, deletePaymentTypesPermission,
+                        viewPaymentMethodsPermission, createPaymentMethodsPermission, updatePaymentMethodsPermission, deletePaymentMethodsPermission,
+                        viewCreditCardsPermission, createCreditCardsPermission, updateCreditCardsPermission, deleteCreditCardsPermission);
 
                     await _context.SaveChangesAsync();
 
@@ -89,10 +114,18 @@ namespace FinanceSystem.Infrastructure.Data
                     }
 
                     var moderatorPermissions = allPermissions
-                        .Where(p => p.SystemName == "users.view" || 
-                                    p.SystemName == "users.create" || 
-                                    p.SystemName == "users.edit" || 
+                        .Where(p => p.SystemName == "users.view" ||
+                                    p.SystemName == "users.create" ||
+                                    p.SystemName == "users.edit" ||
                                     p.SystemName == "roles.view").ToList();
+
+                    moderatorPermissions.AddRange(allPermissions.Where(p =>
+                        p.SystemName == "payments.view" ||
+                        p.SystemName == "payments.create" ||
+                        p.SystemName == "payments.edit" ||
+                        p.SystemName == "paymenttypes.view" ||
+                        p.SystemName == "paymentmethods.view" ||
+                        p.SystemName == "creditcards.view"));
 
                     foreach (var permission in moderatorPermissions)
                     {
@@ -101,6 +134,12 @@ namespace FinanceSystem.Infrastructure.Data
 
                     var userPermissions = allPermissions
                         .Where(p => p.SystemName == "users.view").ToList();
+
+                    userPermissions.AddRange(allPermissions.Where(p =>
+                        p.SystemName.StartsWith("payments.") ||
+                        p.SystemName.StartsWith("paymenttypes.") ||
+                        p.SystemName.StartsWith("paymentmethods.") ||
+                        p.SystemName.StartsWith("creditcards.")));
 
                     foreach (var permission in userPermissions)
                     {
@@ -163,6 +202,58 @@ namespace FinanceSystem.Infrastructure.Data
                     }
 
                     _logger.LogInformation("Default users created successfully");
+                }
+
+                if (!await _context.PaymentTypes.AnyAsync())
+                {
+                    _logger.LogInformation("Creating default payment types...");
+
+                    var paymentTypes = new List<PaymentType>
+                    {
+                        new PaymentType("Alimentação", "Gastos com alimentação, restaurantes, mercado, etc."),
+                        new PaymentType("Moradia", "Gastos com aluguel, condomínio, IPTU, etc."),
+                        new PaymentType("Transporte", "Gastos com combustível, transporte público, manutenção de veículos, etc."),
+                        new PaymentType("Saúde", "Gastos com plano de saúde, medicamentos, consultas médicas, etc."),
+                        new PaymentType("Educação", "Gastos com mensalidades escolares, cursos, livros, etc."),
+                        new PaymentType("Lazer", "Gastos com cinema, viagens, eventos, etc."),
+                        new PaymentType("Vestuário", "Gastos com roupas, calçados, acessórios, etc."),
+                        new PaymentType("Serviços Públicos", "Gastos com água, luz, gás, internet, telefone, etc."),
+                        new PaymentType("Impostos", "Gastos com impostos e taxas governamentais"),
+                        new PaymentType("Investimentos", "Gastos com aplicações financeiras, ações, etc."),
+                        new PaymentType("Outros", "Gastos diversos não classificados em outras categorias")
+                    };
+
+                    await _context.PaymentTypes.AddRangeAsync(paymentTypes);
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation("Default payment types created successfully");
+                }
+
+                if (!await _context.PaymentMethods.AnyAsync())
+                {
+                    _logger.LogInformation("Creating default payment methods...");
+
+                    var paymentMethods = new List<PaymentMethod>
+                    {
+                        new PaymentMethod("Dinheiro", "Pagamento em espécie", PaymentMethodType.Cash),
+                        new PaymentMethod("Cartão de Crédito", "Pagamento com cartão de crédito", PaymentMethodType.CreditCard),
+                        new PaymentMethod("Cartão de Débito", "Pagamento com cartão de débito", PaymentMethodType.DebitCard),
+                        new PaymentMethod("Transferência Bancária", "Pagamento por transferência bancária", PaymentMethodType.BankTransfer),
+                        new PaymentMethod("PIX", "Pagamento via PIX", PaymentMethodType.BankTransfer),
+                        new PaymentMethod("Boleto Bancário", "Pagamento por boleto bancário", PaymentMethodType.BankTransfer),
+                        new PaymentMethod("Cheque", "Pagamento com cheque", PaymentMethodType.Check),
+                        new PaymentMethod("PayPal", "Pagamento via PayPal", PaymentMethodType.DigitalWallet),
+                        new PaymentMethod("Google Pay", "Pagamento via Google Pay", PaymentMethodType.DigitalWallet),
+                        new PaymentMethod("Apple Pay", "Pagamento via Apple Pay", PaymentMethodType.DigitalWallet),
+                        new PaymentMethod("Mercado Pago", "Pagamento via Mercado Pago", PaymentMethodType.DigitalWallet),
+                        new PaymentMethod("PicPay", "Pagamento via PicPay", PaymentMethodType.DigitalWallet),
+                        new PaymentMethod("Outro", "Outros métodos de pagamento", PaymentMethodType.Other)
+                    };
+
+                    await _context.PaymentMethods.AddRangeAsync(paymentMethods);
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation("Default payment methods created successfully");
                 }
             }
             catch (Exception ex)
