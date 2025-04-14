@@ -40,7 +40,6 @@ namespace FinanceSystem.API.Controllers
         {
             try
             {
-                // Se o token é válido, o usuário estará autenticado aqui
                 var identity = User.Identity;
                 if (identity.IsAuthenticated)
                 {

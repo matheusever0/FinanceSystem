@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace FinanceSystem.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class AddPermissions : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -63,7 +61,6 @@ namespace FinanceSystem.Infrastructure.Migrations
                 column: "PermissionId");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

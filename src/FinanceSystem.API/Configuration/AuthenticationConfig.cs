@@ -8,7 +8,6 @@ namespace FinanceSystem.API.Configuration
     {
         public static IServiceCollection AddAuthenticationConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
-            // Configurar JWT
             var jwtSettingsSection = configuration.GetSection("JwtSettings");
             services.Configure<JwtSettings>(jwtSettingsSection);
 

@@ -185,12 +185,8 @@ namespace FinanceSystem.Web.Controllers
                 var allPermissions = await _permissionService.GetAllPermissionsAsync(token);
                 var rolePermissions = await _permissionService.GetPermissionsByRoleIdAsync(roleId, token);
 
-                // Converter IDs de string para Guid
-                var selectedPermissionIds = selectedPermissions != null
-                    ? selectedPermissions.Select(p => Guid.Parse(p)).ToList()
-                    : new List<Guid>();
+                var selectedPermissionIds = selectedPermissions != null ? selectedPermissions.Select(p => Guid.Parse(p)).ToList() : new List<Guid>();
 
-                // Atualizar permissões do perfil via Roles API
                 await _roleService.UpdateRolePermissionsAsync(roleId, selectedPermissionIds.Select(p => p.ToString()).ToList(), token);
 
                 TempData["SuccessMessage"] = "Permissões do perfil atualizadas com sucesso!";

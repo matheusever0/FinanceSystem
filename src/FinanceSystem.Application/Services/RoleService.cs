@@ -34,15 +34,12 @@ namespace FinanceSystem.Application.Services
 
         public async Task<RoleDto> CreateAsync(CreateRoleDto createRoleDto)
         {
-            // Verificar se já existe uma role com esse nome
             var existingRole = await _unitOfWork.Roles.GetByNameAsync(createRoleDto.Name);
             if (existingRole != null)
                 throw new InvalidOperationException($"Role '{createRoleDto.Name}' already exists");
 
-            // Criar role
             var role = new Role(createRoleDto.Name, createRoleDto.Description);
 
-            // Persistir no banco de dados
             await _unitOfWork.Roles.AddAsync(role);
             await _unitOfWork.CompleteAsync();
 
@@ -55,7 +52,6 @@ namespace FinanceSystem.Application.Services
             if (role == null)
                 throw new KeyNotFoundException($"Role with ID {id} not found");
 
-            // Atualizar nome se fornecido
             if (!string.IsNullOrEmpty(updateRoleDto.Name))
             {
                 var existingRole = await _unitOfWork.Roles.GetByNameAsync(updateRoleDto.Name);
@@ -65,7 +61,6 @@ namespace FinanceSystem.Application.Services
                 role.UpdateName(updateRoleDto.Name);
             }
 
-            // Atualizar descrição se fornecida
             if (updateRoleDto.Description != null)
             {
                 role.UpdateDescription(updateRoleDto.Description);
@@ -83,7 +78,6 @@ namespace FinanceSystem.Application.Services
             if (role == null)
                 throw new KeyNotFoundException($"Role with ID {id} not found");
 
-            // Verificar se existem usuários com essa role
             var rolesWithUsers = await _unitOfWork.Roles.GetAllWithUsersAsync();
             var roleWithUsers = rolesWithUsers.FirstOrDefault(r => r.Id == id);
             if (roleWithUsers != null && roleWithUsers.UserRoles.Any())
@@ -112,16 +106,12 @@ namespace FinanceSystem.Application.Services
             if (role == null)
                 throw new KeyNotFoundException($"Role with ID {roleId} not found");
 
-            // Obter todas as permissões atuais do papel
             var currentPermissionIds = role.RolePermissions.Select(rp => rp.PermissionId).ToList();
 
-            // Permissões a serem removidas (estão em currentPermissionIds, mas não em permissionIds)
             var permissionsToRemove = currentPermissionIds.Except(permissionIds).ToList();
 
-            // Permissões a serem adicionadas (estão em permissionIds, mas não em currentPermissionIds)
             var permissionsToAdd = permissionIds.Except(currentPermissionIds).ToList();
 
-            // Remover permissões
             foreach (var permissionId in permissionsToRemove)
             {
                 var permission = await _unitOfWork.Permissions.GetByIdAsync(permissionId);
@@ -131,7 +121,6 @@ namespace FinanceSystem.Application.Services
                 }
             }
 
-            // Adicionar permissões
             foreach (var permissionId in permissionsToAdd)
             {
                 var permission = await _unitOfWork.Permissions.GetByIdAsync(permissionId);

@@ -42,7 +42,6 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.Session.GetString("JWToken");
                 var role = await _roleService.GetRoleByIdAsync(id, token);
 
-                // Obter as permissões atribuídas a este perfil
                 var permissions = await _permissionService.GetPermissionsByRoleIdAsync(id, token);
                 ViewBag.Permissions = permissions;
 
@@ -197,7 +196,6 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.Session.GetString("JWToken");
 
-                // Se não houver permissões selecionadas, usar uma lista vazia
                 var permissionList = selectedPermissions ?? new List<string>();
 
                 await _roleService.UpdateRolePermissionsAsync(id, permissionList, token);

@@ -17,31 +17,26 @@ namespace FinanceSystem.Application.Tests.Services
 
         public RoleServiceTests()
         {
-            // Configurar o AutoMapper
             var mapperConfig = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile(new MappingProfile());
-            });
+{
+    cfg.AddProfile(new MappingProfile());
+});
             _mapper = mapperConfig.CreateMapper();
 
-            // Configurar mocks
             _mockUnitOfWork = new Mock<IUnitOfWork>();
 
-            // Criar o serviço a ser testado
             _roleService = new RoleService(_mockUnitOfWork.Object, _mapper);
         }
 
         [Fact]
         public async Task GetByIdAsync_WithExistingRole_ShouldReturnRoleDto()
         {
-            // Arrange
             var roleId = Guid.NewGuid();
             var role = new Role("Admin", "Administrator role");
 
-            // Usar Reflection para definir o Id (propriedade protegida)
             typeof(Role)
-                .GetProperty("Id")
-                .SetValue(role, roleId);
+    .GetProperty("Id")
+    .SetValue(role, roleId);
 
             var mockRoleRepository = new Mock<IRoleRepository>();
             mockRoleRepository
@@ -52,10 +47,8 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(uow => uow.Roles)
                 .Returns(mockRoleRepository.Object);
 
-            // Act
             var result = await _roleService.GetByIdAsync(roleId);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal(roleId, result.Id);
             Assert.Equal(role.Name, result.Name);
@@ -65,7 +58,6 @@ namespace FinanceSystem.Application.Tests.Services
         [Fact]
         public async Task GetAllAsync_ShouldReturnAllRoles()
         {
-            // Arrange
             var roles = new List<Role>
             {
                 new Role("Admin", "Administrator role"),
@@ -81,10 +73,8 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(uow => uow.Roles)
                 .Returns(mockRoleRepository.Object);
 
-            // Act
             var result = await _roleService.GetAllAsync();
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal(roles.Count, result.Count());
         }
@@ -92,7 +82,6 @@ namespace FinanceSystem.Application.Tests.Services
         [Fact]
         public async Task CreateAsync_WithValidData_ShouldCreateAndReturnRole()
         {
-            // Arrange
             var createRoleDto = new CreateRoleDto
             {
                 Name = "NewRole",
@@ -108,10 +97,8 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(uow => uow.Roles)
                 .Returns(mockRoleRepository.Object);
 
-            // Act
             var result = await _roleService.CreateAsync(createRoleDto);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal(createRoleDto.Name, result.Name);
             Assert.Equal(createRoleDto.Description, result.Description);
@@ -123,7 +110,6 @@ namespace FinanceSystem.Application.Tests.Services
         [Fact]
         public async Task CreateAsync_WithExistingRoleName_ShouldThrowException()
         {
-            // Arrange
             var createRoleDto = new CreateRoleDto
             {
                 Name = "ExistingRole",
@@ -141,16 +127,14 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(uow => uow.Roles)
                 .Returns(mockRoleRepository.Object);
 
-            // Act & Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => _roleService.CreateAsync(createRoleDto));
+    () => _roleService.CreateAsync(createRoleDto));
             Assert.Contains("already exists", exception.Message);
         }
 
         [Fact]
         public async Task UpdateAsync_WithValidData_ShouldUpdateRole()
         {
-            // Arrange
             var roleId = Guid.NewGuid();
             var updateRoleDto = new UpdateRoleDto
             {
@@ -160,10 +144,9 @@ namespace FinanceSystem.Application.Tests.Services
 
             var role = new Role("OldRole", "Old description");
 
-            // Usar Reflection para definir o Id (propriedade protegida)
             typeof(Role)
-                .GetProperty("Id")
-                .SetValue(role, roleId);
+    .GetProperty("Id")
+    .SetValue(role, roleId);
 
             var mockRoleRepository = new Mock<IRoleRepository>();
             mockRoleRepository
@@ -178,10 +161,8 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(uow => uow.Roles)
                 .Returns(mockRoleRepository.Object);
 
-            // Act
             var result = await _roleService.UpdateAsync(roleId, updateRoleDto);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal(updateRoleDto.Name, result.Name);
             Assert.Equal(updateRoleDto.Description, result.Description);
@@ -193,14 +174,12 @@ namespace FinanceSystem.Application.Tests.Services
         [Fact]
         public async Task DeleteAsync_WithRoleHavingNoUsers_ShouldDeleteRole()
         {
-            // Arrange
             var roleId = Guid.NewGuid();
             var role = new Role("DeleteRole", "Role to delete");
 
-            // Usar Reflection para definir o Id (propriedade protegida)
             typeof(Role)
-                .GetProperty("Id")
-                .SetValue(role, roleId);
+    .GetProperty("Id")
+    .SetValue(role, roleId);
 
             var mockRoleRepository = new Mock<IRoleRepository>();
             mockRoleRepository
@@ -216,10 +195,8 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(uow => uow.Roles)
                 .Returns(mockRoleRepository.Object);
 
-            // Act
             await _roleService.DeleteAsync(roleId);
 
-            // Assert
             mockRoleRepository.Verify(repo => repo.DeleteAsync(It.IsAny<Role>()), Times.Once);
             _mockUnitOfWork.Verify(uow => uow.CompleteAsync(), Times.Once);
         }
@@ -227,16 +204,13 @@ namespace FinanceSystem.Application.Tests.Services
         [Fact]
         public async Task DeleteAsync_WithRoleAssignedToUsers_ShouldThrowException()
         {
-            // Arrange
             var roleId = Guid.NewGuid();
             var role = new Role("RoleWithUsers", "Role assigned to users");
 
-            // Usar Reflection para definir o Id (propriedade protegida)
             typeof(Role)
-                .GetProperty("Id")
-                .SetValue(role, roleId);
+    .GetProperty("Id")
+    .SetValue(role, roleId);
 
-            // Adicionar um UserRole à role
             var user = new User("testuser", "test@example.com", "hashedpassword");
             var userRole = new UserRole(user, role);
             typeof(Role)
@@ -256,9 +230,8 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(uow => uow.Roles)
                 .Returns(mockRoleRepository.Object);
 
-            // Act & Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => _roleService.DeleteAsync(roleId));
+    () => _roleService.DeleteAsync(roleId));
             Assert.Contains("assigned to users", exception.Message);
         }
     }

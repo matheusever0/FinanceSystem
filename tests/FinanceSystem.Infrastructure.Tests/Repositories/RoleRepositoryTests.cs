@@ -24,7 +24,6 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
         [Fact]
         public async Task GetByNameAsync_ShouldReturnRole_WhenRoleExists()
         {
-            // Arrange
             var options = GetInMemoryDbContextOptions();
             var roleName = "Admin";
 
@@ -35,13 +34,11 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
                 await context.SaveChangesAsync();
             }
 
-            // Act
             using (var context = GetDbContext(options))
             {
                 var repository = new RoleRepository(context);
                 var result = await repository.GetByNameAsync(roleName);
 
-                // Assert
                 Assert.NotNull(result);
                 Assert.Equal(roleName, result.Name);
             }
@@ -50,16 +47,13 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
         [Fact]
         public async Task GetByNameAsync_ShouldReturnNull_WhenRoleDoesNotExist()
         {
-            // Arrange
             var options = GetInMemoryDbContextOptions();
 
-            // Act
             using (var context = GetDbContext(options))
             {
                 var repository = new RoleRepository(context);
                 var result = await repository.GetByNameAsync("NonexistentRole");
 
-                // Assert
                 Assert.Null(result);
             }
         }
@@ -67,7 +61,6 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
         [Fact]
         public async Task GetAllWithUsersAsync_ShouldReturnRolesWithUsers()
         {
-            // Arrange
             var options = GetInMemoryDbContextOptions();
 
             using (var context = GetDbContext(options))
@@ -89,13 +82,11 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
                 await context.SaveChangesAsync();
             }
 
-            // Act
             using (var context = GetDbContext(options))
             {
                 var repository = new RoleRepository(context);
                 var result = await repository.GetAllWithUsersAsync();
 
-                // Assert
                 Assert.NotNull(result);
                 Assert.Equal(2, result.Count());
                 Assert.All(result, role => Assert.NotEmpty(role.UserRoles));

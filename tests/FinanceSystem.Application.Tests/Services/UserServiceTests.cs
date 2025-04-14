@@ -18,32 +18,27 @@ namespace FinanceSystem.Application.Tests.Services
 
         public UserServiceTests()
         {
-            // Configurar o AutoMapper
             var mapperConfig = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile(new MappingProfile());
-            });
+{
+    cfg.AddProfile(new MappingProfile());
+});
             _mapper = mapperConfig.CreateMapper();
 
-            // Configurar mocks
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockAuthService = new Mock<IAuthService>();
 
-            // Criar o serviço a ser testado
             _userService = new UserService(_mockUnitOfWork.Object, _mockAuthService.Object, _mapper);
         }
 
         [Fact]
         public async Task GetByIdAsync_WithExistingUser_ShouldReturnUserDto()
         {
-            // Arrange
             var userId = Guid.NewGuid();
             var user = new User("testuser", "test@example.com", "hashedpassword");
 
-            // Usar Reflection para definir o Id (propriedade protegida)
             typeof(User)
-                .GetProperty("Id")
-                .SetValue(user, userId);
+    .GetProperty("Id")
+    .SetValue(user, userId);
 
             var mockUserRepository = new Mock<IUserRepository>();
             mockUserRepository
@@ -54,10 +49,8 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(uow => uow.Users)
                 .Returns(mockUserRepository.Object);
 
-            // Act
             var result = await _userService.GetByIdAsync(userId);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal(userId, result.Id);
             Assert.Equal(user.Username, result.Username);
@@ -67,7 +60,6 @@ namespace FinanceSystem.Application.Tests.Services
         [Fact]
         public async Task GetAllAsync_ShouldReturnAllUsers()
         {
-            // Arrange
             var users = new List<User>
             {
                 new User("user1", "user1@example.com", "hash1"),
@@ -83,10 +75,8 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(uow => uow.Users)
                 .Returns(mockUserRepository.Object);
 
-            // Act
             var result = await _userService.GetAllAsync();
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal(users.Count, result.Count());
         }
@@ -94,7 +84,6 @@ namespace FinanceSystem.Application.Tests.Services
         [Fact]
         public async Task CreateAsync_WithValidData_ShouldCreateAndReturnUser()
         {
-            // Arrange
             var createUserDto = new CreateUserDto
             {
                 Username = "newuser",
@@ -131,10 +120,8 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(auth => auth.HashPassword(createUserDto.Password))
                 .Returns("hashedpassword");
 
-            // Act
             var result = await _userService.CreateAsync(createUserDto);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal(createUserDto.Username, result.Username);
             Assert.Equal(createUserDto.Email, result.Email);
@@ -146,7 +133,6 @@ namespace FinanceSystem.Application.Tests.Services
         [Fact]
         public async Task CreateAsync_WithExistingUsername_ShouldThrowException()
         {
-            // Arrange
             var createUserDto = new CreateUserDto
             {
                 Username = "existinguser",
@@ -165,16 +151,14 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(uow => uow.Users)
                 .Returns(mockUserRepository.Object);
 
-            // Act & Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => _userService.CreateAsync(createUserDto));
+    () => _userService.CreateAsync(createUserDto));
             Assert.Contains("already exists", exception.Message);
         }
 
         [Fact]
         public async Task UpdateAsync_WithValidData_ShouldUpdateUser()
         {
-            // Arrange
             var userId = Guid.NewGuid();
             var updateUserDto = new UpdateUserDto
             {
@@ -186,10 +170,9 @@ namespace FinanceSystem.Application.Tests.Services
 
             var user = new User("olduser", "old@example.com", "oldhash");
 
-            // Usar Reflection para definir o Id (propriedade protegida)
             typeof(User)
-                .GetProperty("Id")
-                .SetValue(user, userId);
+    .GetProperty("Id")
+    .SetValue(user, userId);
 
             var mockUserRepository = new Mock<IUserRepository>();
             mockUserRepository
@@ -212,10 +195,8 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(auth => auth.HashPassword(updateUserDto.Password))
                 .Returns("newhashedpassword");
 
-            // Act
             var result = await _userService.UpdateAsync(userId, updateUserDto);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal(updateUserDto.Username, result.Username);
             Assert.Equal(updateUserDto.Email, result.Email);
@@ -227,7 +208,6 @@ namespace FinanceSystem.Application.Tests.Services
         [Fact]
         public async Task LoginAsync_WithValidCredentials_ShouldReturnLoginResponse()
         {
-            // Arrange
             var loginDto = new LoginDto
             {
                 Username = "testuser",
@@ -254,10 +234,8 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(auth => auth.GenerateJwtToken(user))
                 .ReturnsAsync("jwt-token");
 
-            // Act
             var result = await _userService.LoginAsync(loginDto);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal("jwt-token", result.Token);
             Assert.NotNull(result.User);
@@ -270,7 +248,6 @@ namespace FinanceSystem.Application.Tests.Services
         [Fact]
         public async Task LoginAsync_WithInvalidCredentials_ShouldThrowException()
         {
-            // Arrange
             var loginDto = new LoginDto
             {
                 Username = "testuser",
@@ -293,16 +270,14 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(auth => auth.VerifyPassword(loginDto.Password, user.PasswordHash))
                 .Returns(false);
 
-            // Act & Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => _userService.LoginAsync(loginDto));
+    () => _userService.LoginAsync(loginDto));
             Assert.Contains("Invalid username or password", exception.Message);
         }
 
         [Fact]
         public async Task LoginAsync_WithInactiveUser_ShouldThrowException()
         {
-            // Arrange
             var loginDto = new LoginDto
             {
                 Username = "testuser",
@@ -321,9 +296,8 @@ namespace FinanceSystem.Application.Tests.Services
                 .Setup(uow => uow.Users)
                 .Returns(mockUserRepository.Object);
 
-            // Act & Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => _userService.LoginAsync(loginDto));
+    () => _userService.LoginAsync(loginDto));
             Assert.Contains("User account is deactivated", exception.Message);
         }
     }

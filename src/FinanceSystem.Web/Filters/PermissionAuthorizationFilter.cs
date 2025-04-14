@@ -31,7 +31,6 @@ namespace FinanceSystem.Web.Filters
                 return;
             }
 
-            // Bypass para administradores
             if (context.HttpContext.User.IsInRole("Admin"))
             {
                 _logger.LogInformation("Acesso concedido: usuário admin {User} acessando recurso",

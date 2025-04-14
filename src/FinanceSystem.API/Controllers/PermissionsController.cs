@@ -59,7 +59,7 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpGet("role/{roleId}")]
-        [Authorize] // Qualquer usuário autenticado pode obter permissões de um perfil
+        [Authorize]
         public async Task<ActionResult> GetPermissionsByRoleId(Guid roleId)
         {
             _logger.LogInformation("Obtendo permissões para o perfil {RoleId}", roleId);
@@ -84,7 +84,7 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        [Authorize] // Permitir que qualquer usuário autenticado possa obter suas próprias permissões
+        [Authorize]
         public async Task<ActionResult> GetPermissionsByUserId(Guid userId)
         {
             _logger.LogInformation("Obtendo permissões para o usuário {UserId}", userId);

@@ -220,7 +220,6 @@ namespace FinanceSystem.Web.Services
 
         public Task<ClaimsPrincipal> GetClaimsPrincipalFromToken(string token)
         {
-            // Implementação atual mantida
             try
             {
                 var handler = new JwtSecurityTokenHandler();

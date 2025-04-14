@@ -28,19 +28,15 @@ namespace FinanceSystem.API.Middlewares
                 switch (error)
                 {
                     case KeyNotFoundException:
-                        // Item não encontrado
                         response.StatusCode = (int)HttpStatusCode.NotFound;
                         break;
                     case InvalidOperationException:
-                        // Regra de negócio violada
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         break;
                     case UnauthorizedAccessException:
-                        // Acesso não autorizado
                         response.StatusCode = (int)HttpStatusCode.Unauthorized;
                         break;
                     default:
-                        // Erro não tratado
                         _logger.LogError(error, error.Message);
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;
                         break;

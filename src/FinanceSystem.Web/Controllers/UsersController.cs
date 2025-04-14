@@ -69,7 +69,6 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.Session.GetString("JWToken");
                 var roles = await _roleService.GetAllRolesAsync(token);
 
-                // Se não for admin, remover a role de Admin das opções disponíveis
                 if (!User.IsInRole("Admin"))
                 {
                     roles = roles.Where(r => r.Name != "Admin").ToList();
@@ -126,7 +125,6 @@ namespace FinanceSystem.Web.Controllers
 
                 var rolesList = await _roleService.GetAllRolesAsync(token);
 
-                // Se não for admin, remover a role de Admin das opções
                 if (!User.IsInRole("Admin"))
                 {
                     rolesList = rolesList.Where(r => r.Name != "Admin").ToList();
@@ -151,10 +149,8 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.Session.GetString("JWToken");
                 var user = await _userService.GetUserByIdAsync(id, token);
 
-                // Verificar se o usuário a ser editado é um admin
                 bool isTargetUserAdmin = user.Roles.Contains("Admin");
 
-                // Se o usuário atual não for admin e o usuário a ser editado for admin, bloquear o acesso
                 if (!User.IsInRole("Admin") && isTargetUserAdmin)
                 {
                     _logger.LogWarning("Usuário {UserName} tentou editar um administrador {AdminId}", User.Identity.Name, id);
@@ -165,7 +161,6 @@ namespace FinanceSystem.Web.Controllers
                 _logger.LogInformation("Usuário {UserName} editando usuário {UserId}", User.Identity.Name, id);
                 var roles = await _roleService.GetAllRolesAsync(token);
 
-                // Se não for admin, remover a role de Admin das opções
                 if (!User.IsInRole("Admin"))
                 {
                     roles = roles.Where(r => r.Name != "Admin").ToList();
@@ -200,11 +195,9 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.Session.GetString("JWToken");
 
-                // Verificar se o usuário a ser editado é um admin
                 var currentUser = await _userService.GetUserByIdAsync(id, token);
                 bool isTargetUserAdmin = currentUser.Roles.Contains("Admin");
 
-                // Se o usuário atual não for admin e o usuário a ser editado for admin, bloquear a edição
                 if (!User.IsInRole("Admin") && isTargetUserAdmin)
                 {
                     _logger.LogWarning("Usuário {UserName} tentou editar um administrador {AdminId}", User.Identity.Name, id);
@@ -212,30 +205,25 @@ namespace FinanceSystem.Web.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Se não for admin, garantir que não possa se promover a admin
                 if (!User.IsInRole("Admin") && selectedRoles != null)
                 {
                     selectedRoles = selectedRoles.Where(r => r != "Admin").ToList();
 
-                    // Se o usuário já era admin, manter a role de admin (para preservar os dados)
                     if (isTargetUserAdmin)
                     {
                         selectedRoles.Add("Admin");
                     }
                 }
 
-                // Garantir que as roles selecionadas sejam processadas
                 if (selectedRoles != null && selectedRoles.Any())
                 {
                     model.Roles = selectedRoles;
                 }
                 else
                 {
-                    // Se não houver perfis selecionados, adicionar erro de validação
                     ModelState.AddModelError("Roles", "É necessário selecionar pelo menos um perfil.");
                     var rolesList = await _roleService.GetAllRolesAsync(token);
 
-                    // Se não for admin, remover a role de Admin das opções
                     if (!User.IsInRole("Admin"))
                     {
                         rolesList = rolesList.Where(r => r.Name != "Admin").ToList();
@@ -257,7 +245,6 @@ namespace FinanceSystem.Web.Controllers
 
                 var roles = await _roleService.GetAllRolesAsync(token);
 
-                // Se não for admin, remover a role de Admin das opções
                 if (!User.IsInRole("Admin"))
                 {
                     roles = roles.Where(r => r.Name != "Admin").ToList();
@@ -282,10 +269,8 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.Session.GetString("JWToken");
                 var user = await _userService.GetUserByIdAsync(id, token);
 
-                // Verificar se o usuário a ser excluído é um admin
                 bool isTargetUserAdmin = user.Roles.Contains("Admin");
 
-                // Se o usuário atual não for admin e o usuário a ser excluído for admin, bloquear o acesso
                 if (!User.IsInRole("Admin") && isTargetUserAdmin)
                 {
                     _logger.LogWarning("Usuário {UserName} tentou excluir um administrador {AdminId}", User.Identity.Name, id);
@@ -313,11 +298,9 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.Session.GetString("JWToken");
 
-                // Verificar se o usuário a ser excluído é um admin
                 var user = await _userService.GetUserByIdAsync(id, token);
                 bool isTargetUserAdmin = user.Roles.Contains("Admin");
 
-                // Se o usuário atual não for admin e o usuário a ser excluído for admin, bloquear a exclusão
                 if (!User.IsInRole("Admin") && isTargetUserAdmin)
                 {
                     _logger.LogWarning("Usuário {UserName} tentou excluir um administrador {AdminId}", User.Identity.Name, id);

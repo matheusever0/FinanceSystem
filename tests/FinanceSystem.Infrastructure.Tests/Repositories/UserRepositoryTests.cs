@@ -24,7 +24,6 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
         [Fact]
         public async Task GetByUsernameAsync_ShouldReturnUser_WhenUserExists()
         {
-            // Arrange
             var options = GetInMemoryDbContextOptions();
             var username = "testuser";
 
@@ -35,13 +34,11 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
                 await context.SaveChangesAsync();
             }
 
-            // Act
             using (var context = GetDbContext(options))
             {
                 var repository = new UserRepository(context);
                 var result = await repository.GetByUsernameAsync(username);
 
-                // Assert
                 Assert.NotNull(result);
                 Assert.Equal(username, result.Username);
             }
@@ -50,16 +47,13 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
         [Fact]
         public async Task GetByUsernameAsync_ShouldReturnNull_WhenUserDoesNotExist()
         {
-            // Arrange
             var options = GetInMemoryDbContextOptions();
 
-            // Act
             using (var context = GetDbContext(options))
             {
                 var repository = new UserRepository(context);
                 var result = await repository.GetByUsernameAsync("nonexistentuser");
 
-                // Assert
                 Assert.Null(result);
             }
         }
@@ -67,7 +61,6 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
         [Fact]
         public async Task GetByEmailAsync_ShouldReturnUser_WhenEmailExists()
         {
-            // Arrange
             var options = GetInMemoryDbContextOptions();
             var email = "test@example.com";
 
@@ -78,13 +71,11 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
                 await context.SaveChangesAsync();
             }
 
-            // Act
             using (var context = GetDbContext(options))
             {
                 var repository = new UserRepository(context);
                 var result = await repository.GetByEmailAsync(email);
 
-                // Assert
                 Assert.NotNull(result);
                 Assert.Equal(email, result.Email);
             }
@@ -93,14 +84,12 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
         [Fact]
         public async Task GetUserWithRolesAsync_ShouldReturnUserWithRoles()
         {
-            // Arrange
             var options = GetInMemoryDbContextOptions();
             var userId = Guid.NewGuid();
 
             using (var context = GetDbContext(options))
             {
                 var user = new User("testuser", "test@example.com", "hashedpassword");
-                // Set user ID using reflection since it's a protected property
                 typeof(User).GetProperty("Id").SetValue(user, userId);
 
                 var role = new Role("Admin", "Administrator role");
@@ -113,13 +102,11 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
                 await context.SaveChangesAsync();
             }
 
-            // Act
             using (var context = GetDbContext(options))
             {
                 var repository = new UserRepository(context);
                 var result = await repository.GetUserWithRolesAsync(userId);
 
-                // Assert
                 Assert.NotNull(result);
                 Assert.NotEmpty(result.UserRoles);
                 Assert.Equal("Admin", result.UserRoles.First().Role.Name);
@@ -129,7 +116,6 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
         [Fact]
         public async Task GetUsersWithRolesAsync_ShouldReturnAllUsersWithRoles()
         {
-            // Arrange
             var options = GetInMemoryDbContextOptions();
 
             using (var context = GetDbContext(options))
@@ -151,13 +137,11 @@ namespace FinanceSystem.Infrastructure.Tests.Repositories
                 await context.SaveChangesAsync();
             }
 
-            // Act
             using (var context = GetDbContext(options))
             {
                 var repository = new UserRepository(context);
                 var result = await repository.GetUsersWithRolesAsync();
 
-                // Assert
                 Assert.NotNull(result);
                 Assert.Equal(2, result.Count());
                 Assert.All(result, user => Assert.NotEmpty(user.UserRoles));

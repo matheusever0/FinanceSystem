@@ -5,8 +5,7 @@
     var roles = ViewBag.Roles as IEnumerable<FinanceSystem.Web.Models.RoleModel>;
     var isAdmin = User.IsInRole("Admin");
 
-    // Preservar role de Admin se não for possível editar
-    var adminRole = Model.Roles.Contains("Admin");
+        var adminRole = Model.Roles.Contains("Admin");
 }
 
 <h1>Editar Usuário</h1>

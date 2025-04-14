@@ -37,21 +37,18 @@ namespace FinanceSystem.Web.Services
 
         public async Task<PermissionModel> CreatePermissionAsync(CreatePermissionModel model, string token)
         {
-            // Limpa o cache após criar uma nova permissão
             _userPermissionsCache.Clear();
             return await _apiService.PostAsync<PermissionModel>("/api/permissions", model, token);
         }
 
         public async Task<PermissionModel> UpdatePermissionAsync(string id, UpdatePermissionModel model, string token)
         {
-            // Limpa o cache após atualizar uma permissão
             _userPermissionsCache.Clear();
             return await _apiService.PutAsync<PermissionModel>($"/api/permissions/{id}", model, token);
         }
 
         public async Task DeletePermissionAsync(string id, string token)
         {
-            // Limpa o cache após excluir uma permissão
             _userPermissionsCache.Clear();
             await _apiService.DeleteAsync($"/api/permissions/{id}", token);
         }
@@ -71,27 +68,22 @@ namespace FinanceSystem.Web.Services
 
         public async Task<bool> AssignPermissionToRoleAsync(string roleId, string permissionId, string token)
         {
-            // Limpa o cache após atribuir uma permissão a um perfil
             _userPermissionsCache.Clear();
             return await _apiService.PostAsync<bool>($"/api/permissions/role/{roleId}/permission/{permissionId}", null, token);
         }
 
         public async Task<bool> RemovePermissionFromRoleAsync(string roleId, string permissionId, string token)
         {
-            // Limpa o cache após remover uma permissão de um perfil
             _userPermissionsCache.Clear();
             return await _apiService.DeleteAsync<bool>($"/api/permissions/role/{roleId}/permission/{permissionId}", token);
         }
 
         public async Task<IEnumerable<PermissionModel>> GetPermissionsByUserIdAsync(string userId, string token)
         {
-            // Chave de cache que inclui o ID do usuário e um hash do token
             string cacheKey = $"{userId}_{token.GetHashCode()}";
 
-            // Tentar obter do cache
             if (_userPermissionsCache.TryGetValue(cacheKey, out var cachedResult))
             {
-                // Verifica se o cache é recente (menos de 5 minutos)
                 if (DateTime.UtcNow.Subtract(cachedResult.Timestamp).TotalMinutes < 5)
                 {
                     _logger.LogDebug("Retornando permissões em cache para o usuário: {UserId}", userId);
@@ -104,7 +96,6 @@ namespace FinanceSystem.Web.Services
                 _logger.LogDebug("Buscando permissões da API para o usuário: {UserId}", userId);
                 var permissions = await _apiService.GetAsync<IEnumerable<PermissionModel>>($"/api/permissions/user/{userId}", token);
 
-                // Salva no cache
                 _userPermissionsCache[cacheKey] = (DateTime.UtcNow, permissions);
 
                 return permissions;

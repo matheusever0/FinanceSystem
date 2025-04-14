@@ -7,14 +7,11 @@ namespace FinanceSystem.Domain.Tests.Entities
         [Fact]
         public void Constructor_WithValidParameters_ShouldCreateRoleCorrectly()
         {
-            // Arrange
             string name = "Admin";
             string description = "Administrator role";
 
-            // Act
             var role = new Role(name, description);
 
-            // Assert
             Assert.Equal(name, role.Name);
             Assert.Equal(description, role.Description);
             Assert.NotEqual(Guid.Empty, role.Id);
@@ -25,13 +22,10 @@ namespace FinanceSystem.Domain.Tests.Entities
         [Fact]
         public void Constructor_WithNameOnly_ShouldCreateRoleWithNullDescription()
         {
-            // Arrange
             string name = "User";
 
-            // Act
             var role = new Role(name);
 
-            // Assert
             Assert.Equal(name, role.Name);
             Assert.Null(role.Description);
         }
@@ -39,28 +33,22 @@ namespace FinanceSystem.Domain.Tests.Entities
         [Fact]
         public void UpdateName_WithValidName_ShouldUpdateName()
         {
-            // Arrange
             var role = new Role("OldRole");
             string newName = "NewRole";
 
-            // Act
             role.UpdateName(newName);
 
-            // Assert
             Assert.Equal(newName, role.Name);
         }
 
         [Fact]
         public void UpdateDescription_WithValidDescription_ShouldUpdateDescription()
         {
-            // Arrange
             var role = new Role("Admin", "Old description");
             string newDescription = "New description";
 
-            // Act
             role.UpdateDescription(newDescription);
 
-            // Assert
             Assert.Equal(newDescription, role.Description);
         }
     }

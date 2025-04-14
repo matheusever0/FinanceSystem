@@ -29,7 +29,6 @@ namespace FinanceSystem.Infrastructure.Services
                 new Claim(ClaimTypes.Email, user.Email)
             };
 
-            // Adicionar claims de roles
             if (user.UserRoles != null)
             {
                 foreach (var userRole in user.UserRoles)

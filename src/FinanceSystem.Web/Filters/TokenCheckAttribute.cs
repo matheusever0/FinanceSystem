@@ -17,7 +17,6 @@ namespace FinanceSystem.Web.Filters
 
                 if (string.IsNullOrEmpty(token))
                 {
-                    // Token ausente mas usuário autenticado - limpar autenticação
                     httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).Wait();
                     httpContext.Session.Clear();
 

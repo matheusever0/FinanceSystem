@@ -8,7 +8,6 @@
         public Role Role { get; protected set; }
         public DateTime CreatedAt { get; protected set; }
 
-        // Construtor protegido para o EF Core
         protected UserRole() { }
 
         public UserRole(User user, Role role)

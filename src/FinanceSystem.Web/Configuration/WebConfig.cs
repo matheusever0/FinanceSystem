@@ -16,7 +16,8 @@ namespace FinanceSystem.Web.Configuration
                 options.Cookie.IsEssential = true;
             });
 
-            services.AddControllersWithViews(options => {
+            services.AddControllersWithViews(options =>
+            {
                 options.Filters.Add<TokenCheckAttribute>();
             });
 

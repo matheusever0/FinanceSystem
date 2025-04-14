@@ -11,21 +11,18 @@ namespace FinanceSystem.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            // Configurar SQL Server
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    configuration.GetConnectionString("DefaultConnection"),
-                    b => b.MigrationsAssembly("FinanceSystem.Infrastructure")
-                )
-            );
+    options.UseSqlServer(
+        configuration.GetConnectionString("DefaultConnection"),
+        b => b.MigrationsAssembly("FinanceSystem.Infrastructure")
+    )
+);
 
-            // Registrar serviços
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IDbInitializer, DbInitializer>();
             services.AddScoped<IPermissionAuthorizationService, PermissionAuthorizationService>();
 
-            // Registrar o inicializador de banco de dados
             services.AddHostedService<DatabaseInitializer>();
 
             return services;

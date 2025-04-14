@@ -11,10 +11,9 @@
         public DateTime? LastLogin { get; protected set; }
         public ICollection<UserRole> UserRoles { get; protected set; }
 
-        // Construtor protegido para o EF Core
-        protected User() {
+        protected User()
+        {
 
-            // Inicializar a coleção para evitar NullReferenceException
             UserRoles = new List<UserRole>();
         }
 
