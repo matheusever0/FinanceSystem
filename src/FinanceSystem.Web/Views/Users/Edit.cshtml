@@ -3,6 +3,10 @@
 @{
     ViewData["Title"] = "Editar Usuário";
     var roles = ViewBag.Roles as IEnumerable<FinanceSystem.Web.Models.RoleModel>;
+    var isAdmin = User.IsInRole("Admin");
+
+    // Preservar role de Admin se não for possível editar
+    var adminRole = Model.Roles.Contains("Admin");
 }
 
 <h1>Editar Usuário</h1>
@@ -51,7 +55,7 @@
             </div>
 
             <div class="mb-3">
-                <label asp-for="Roles" class="form-label">Perfis</label>
+                <label asp-for="Roles" class="form-label">Perfis <span class="text-danger">*</span></label>
                 <div class="card">
                     <div class="card-body p-2">
                         <div class="mb-2">
@@ -70,13 +74,24 @@
                         <div id="selectedRolesContainer" class="mt-3">
                             @foreach (var roleName in Model.Roles)
                             {
-                                <div class="badge bg-primary p-2 me-2 mb-2 role-badge">
-                                    <input type="hidden" name="selectedRoles" value="@roleName" />
-                                    @roleName
-                                    <a href="#" class="ms-1 text-white remove-role"><i class="fas fa-times"></i></a>
-                                </div>
+                                if (roleName == "Admin" && !isAdmin)
+                                {
+                                    <div class="badge bg-primary p-2 me-2 mb-2">
+                                        <input type="hidden" name="selectedRoles" value="Admin" />
+                                        Admin <i class="fas fa-lock ms-1" title="Role protegida"></i>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="badge bg-primary p-2 me-2 mb-2 role-badge">
+                                        <input type="hidden" name="selectedRoles" value="@roleName" />
+                                        @roleName
+                                        <a href="#" class="ms-1 text-white remove-role"><i class="fas fa-times"></i></a>
+                                    </div>
+                                }
                             }
                         </div>
+                        <span asp-validation-for="Roles" class="text-danger"></span>
                     </div>
                 </div>
             </div>

@@ -4,6 +4,8 @@
 document.addEventListener('DOMContentLoaded', function () {
     initializeStatusToggle();
     initializeRolesManager();
+    updateRoleSelector(); // Inicialmente atualiza a lista de roles disponíveis
+    setupFormValidation(); // Adiciona validação personalizada ao formulário
 });
 
 /**
@@ -79,6 +81,15 @@ function initializeRolesManager() {
 
             container.appendChild(newRoleBadge);
             roleSelector.value = '';
+
+            // Atualizar o seletor de perfis
+            updateRoleSelector();
+
+            // Esconder mensagem de erro se existir
+            const errorMessage = document.getElementById('roles-error-message');
+            if (errorMessage) {
+                errorMessage.style.display = 'none';
+            }
         }
     });
 
@@ -89,7 +100,64 @@ function initializeRolesManager() {
             const badge = e.target.closest('.role-badge');
             if (badge) {
                 badge.remove();
+
+                // Atualizar o seletor de perfis após remover
+                updateRoleSelector();
             }
+        }
+    });
+}
+
+/**
+ * Atualiza o seletor de perfis para esconder as opções já selecionadas
+ */
+function updateRoleSelector() {
+    const roleSelector = document.getElementById('roleSelector');
+    const selectedRoles = Array.from(document.querySelectorAll("#selectedRolesContainer input[name='selectedRoles']"))
+        .map(input => input.value);
+
+    // Iterar pelas opções do selector e esconder as que já estão selecionadas
+    Array.from(roleSelector.options).forEach(option => {
+        if (option.value && selectedRoles.includes(option.value)) {
+            option.style.display = 'none';
+        } else {
+            option.style.display = '';
+        }
+    });
+}
+
+/**
+ * Configura a validação do formulário
+ */
+function setupFormValidation() {
+    const form = document.querySelector('form[asp-action="Edit"], form[asp-action="Create"]');
+    if (!form) return;
+
+    form.addEventListener('submit', function (e) {
+        const selectedRoles = document.querySelectorAll("#selectedRolesContainer input[name='selectedRoles']");
+        const rolesContainer = document.getElementById('selectedRolesContainer');
+
+        // Verificar se existe alguma role selecionada
+        if (selectedRoles.length === 0) {
+            e.preventDefault(); // Impedir envio do formulário
+
+            // Verificar se já existe uma mensagem de erro
+            let errorMessage = document.getElementById('roles-error-message');
+
+            // Se não existe, criar
+            if (!errorMessage) {
+                errorMessage = document.createElement('div');
+                errorMessage.id = 'roles-error-message';
+                errorMessage.className = 'text-danger mt-2';
+                errorMessage.textContent = 'É necessário selecionar pelo menos um perfil.';
+                rolesContainer.parentNode.appendChild(errorMessage);
+            } else {
+                // Se já existe, mostrar
+                errorMessage.style.display = 'block';
+            }
+
+            // Rolar até o erro
+            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     });
 }
