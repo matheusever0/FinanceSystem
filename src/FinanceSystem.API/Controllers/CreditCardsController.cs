@@ -40,11 +40,11 @@ namespace FinanceSystem.API.Controllers
             {
                 var creditCard = await _creditCardService.GetByIdAsync(id);
 
-                //if (creditCard.UserId != GetCurrentUserId())
-                //{
-                //    _logger.LogWarning("User attempted to access credit card that doesn't belong to them");
-                //    return Forbid();
-                //}
+                if (creditCard.UserId != GetCurrentUserId())
+                {
+                    _logger.LogWarning("User attempted to access credit card that doesn't belong to them");
+                    return Forbid();
+                }
 
                 return Ok(creditCard);
             }
@@ -97,11 +97,11 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var existingCard = await _creditCardService.GetByIdAsync(id);
-                //if (existingCard.UserId != GetCurrentUserId())
-                //{
-                //    _logger.LogWarning("User attempted to update credit card that doesn't belong to them");
-                //    return Forbid();
-                //}
+                if (existingCard.UserId != GetCurrentUserId())
+                {
+                    _logger.LogWarning("User attempted to update credit card that doesn't belong to them");
+                    return Forbid();
+                }
 
                 var creditCard = await _creditCardService.UpdateAsync(id, updateCreditCardDto);
                 return Ok(creditCard);
@@ -126,11 +126,11 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var existingCard = await _creditCardService.GetByIdAsync(id);
-                //if (existingCard.UserId != GetCurrentUserId())
-                //{
-                //    _logger.LogWarning("User attempted to delete credit card that doesn't belong to them");
-                //    return Forbid();
-                //}
+                if (existingCard.UserId != GetCurrentUserId())
+                {
+                    _logger.LogWarning("User attempted to delete credit card that doesn't belong to them");
+                    return Forbid();
+                }
 
                 await _creditCardService.DeleteAsync(id);
                 return NoContent();
