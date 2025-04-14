@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Web.Filters;
+﻿using FinanceSystem.Web.Extensions;
+using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Models;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +23,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var permissions = await _permissionService.GetAllPermissionsAsync(token);
                 return View(permissions);
             }
@@ -37,7 +38,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var permission = await _permissionService.GetPermissionByIdAsync(id, token);
                 return View(permission);
             }
@@ -61,7 +62,7 @@ namespace FinanceSystem.Web.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var token = HttpContext.Session.GetString("JWToken");
+                    var token = HttpContext.GetJwtToken();
                     await _permissionService.CreatePermissionAsync(model, token);
                     TempData["SuccessMessage"] = "Permissão criada com sucesso!";
                     return RedirectToAction(nameof(Index));
@@ -79,7 +80,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var permission = await _permissionService.GetPermissionByIdAsync(id, token);
 
                 var model = new UpdatePermissionModel
@@ -105,7 +106,7 @@ namespace FinanceSystem.Web.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var token = HttpContext.Session.GetString("JWToken");
+                    var token = HttpContext.GetJwtToken();
                     await _permissionService.UpdatePermissionAsync(id, model, token);
                     TempData["SuccessMessage"] = "Permissão atualizada com sucesso!";
                     return RedirectToAction(nameof(Index));
@@ -123,7 +124,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var permission = await _permissionService.GetPermissionByIdAsync(id, token);
                 return View(permission);
             }
@@ -140,7 +141,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 await _permissionService.DeletePermissionAsync(id, token);
                 TempData["SuccessMessage"] = "Permissão excluída com sucesso!";
                 return RedirectToAction(nameof(Index));
@@ -156,7 +157,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var role = await _roleService.GetRoleByIdAsync(roleId, token);
                 var allPermissions = await _permissionService.GetAllPermissionsAsync(token);
                 var rolePermissions = await _permissionService.GetPermissionsByRoleIdAsync(roleId, token);
@@ -180,11 +181,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
-                var role = await _roleService.GetRoleByIdAsync(roleId, token);
-                var allPermissions = await _permissionService.GetAllPermissionsAsync(token);
-                var rolePermissions = await _permissionService.GetPermissionsByRoleIdAsync(roleId, token);
-
+                var token = HttpContext.GetJwtToken();
                 var selectedPermissionIds = selectedPermissions != null ? selectedPermissions.Select(p => Guid.Parse(p)).ToList() : new List<Guid>();
 
                 await _roleService.UpdateRolePermissionsAsync(roleId, selectedPermissionIds.Select(p => p.ToString()).ToList(), token);

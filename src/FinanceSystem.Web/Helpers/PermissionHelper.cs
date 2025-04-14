@@ -28,7 +28,7 @@ namespace FinanceSystem.Web.Helpers
                 return true;
             }
 
-            var token = httpContext.Session.GetString("JWToken");
+            var token = HttpContext.GetJwtToken();
 
             if (string.IsNullOrEmpty(token))
             {

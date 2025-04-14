@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Web.Filters;
+﻿using FinanceSystem.Web.Extensions;
+using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Models;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -30,7 +31,7 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 _logger.LogInformation("Usuário {UserName} acessando listagem de usuários", User.Identity.Name);
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var users = await _userService.GetAllUsersAsync(token);
                 return View(users);
             }
@@ -48,7 +49,7 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 _logger.LogInformation("Usuário {UserName} visualizando detalhes do usuário {UserId}", User.Identity.Name, id);
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var user = await _userService.GetUserByIdAsync(id, token);
                 return View(user);
             }
@@ -66,7 +67,7 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 _logger.LogInformation("Usuário {UserName} acessando página de criação de usuário", User.Identity.Name);
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var roles = await _roleService.GetAllRolesAsync(token);
 
                 if (!User.IsInRole("Admin"))
@@ -92,7 +93,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
 
                 if (!User.IsInRole("Admin") && selectedRoles != null)
                 {
@@ -146,7 +147,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var user = await _userService.GetUserByIdAsync(id, token);
 
                 bool isTargetUserAdmin = user.Roles.Contains("Admin");
@@ -193,7 +194,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
 
                 var currentUser = await _userService.GetUserByIdAsync(id, token);
                 bool isTargetUserAdmin = currentUser.Roles.Contains("Admin");
@@ -266,7 +267,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var user = await _userService.GetUserByIdAsync(id, token);
 
                 bool isTargetUserAdmin = user.Roles.Contains("Admin");
@@ -296,7 +297,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
 
                 var user = await _userService.GetUserByIdAsync(id, token);
                 bool isTargetUserAdmin = user.Roles.Contains("Admin");
@@ -319,10 +320,6 @@ namespace FinanceSystem.Web.Controllers
                 TempData["ErrorMessage"] = $"Erro ao excluir usuário: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
-        }
-        private string GetCurrentUserId()
-        {
-            return User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
     }
 }

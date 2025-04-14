@@ -13,7 +13,7 @@ namespace FinanceSystem.Web.Filters
 
             if (httpContext.User.Identity.IsAuthenticated)
             {
-                var token = httpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
 
                 if (string.IsNullOrEmpty(token))
                 {

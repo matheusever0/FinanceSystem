@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Web.Interfaces;
+﻿using FinanceSystem.Web.Extensions;
+using FinanceSystem.Web.Interfaces;
 using FinanceSystem.Web.Models;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -69,7 +70,7 @@ namespace FinanceSystem.Web.Controllers
 
                 _logger.LogInformation($"Login bem-sucedido para {model.Username}");
 
-                HttpContext.Session.SetString("JWToken", result.Token);
+                HttpContext.SetJwtToken(result.Token);
 
                 var principal = await _apiService.GetClaimsPrincipalFromToken(result.Token);
 

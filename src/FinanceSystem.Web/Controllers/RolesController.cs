@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Web.Filters;
+﻿using FinanceSystem.Web.Extensions;
+using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Models;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -23,7 +24,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var roles = await _roleService.GetAllRolesAsync(token);
                 return View(roles);
             }
@@ -39,7 +40,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
 
                 var permissions = await _permissionService.GetPermissionsByRoleIdAsync(id, token);
@@ -69,7 +70,7 @@ namespace FinanceSystem.Web.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var token = HttpContext.Session.GetString("JWToken");
+                    var token = HttpContext.GetJwtToken();
                     await _roleService.CreateRoleAsync(model, token);
                     TempData["SuccessMessage"] = "Perfil criado com sucesso!";
                     return RedirectToAction(nameof(Index));
@@ -88,7 +89,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
 
                 var model = new UpdateRoleModel
@@ -115,7 +116,7 @@ namespace FinanceSystem.Web.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var token = HttpContext.Session.GetString("JWToken");
+                    var token = HttpContext.GetJwtToken();
                     await _roleService.UpdateRoleAsync(id, model, token);
                     TempData["SuccessMessage"] = "Perfil atualizado com sucesso!";
                     return RedirectToAction(nameof(Index));
@@ -134,7 +135,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
                 return View(role);
             }
@@ -152,7 +153,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 await _roleService.DeleteRoleAsync(id, token);
                 TempData["SuccessMessage"] = "Perfil excluído com sucesso!";
                 return RedirectToAction(nameof(Index));
@@ -169,7 +170,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
                 var allPermissions = await _permissionService.GetAllPermissionsAsync(token);
                 var rolePermissions = await _permissionService.GetPermissionsByRoleIdAsync(id, token);
@@ -194,7 +195,7 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                var token = HttpContext.Session.GetString("JWToken");
+                var token = HttpContext.GetJwtToken();
 
                 var permissionList = selectedPermissions ?? new List<string>();
 
