@@ -199,14 +199,29 @@ namespace FinanceSystem.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequirePermission("payments.create")]
-        public async Task<IActionResult> Create(CreatePaymentModel model)
+        public async Task<IActionResult> Create(CreatePaymentModel model, List<string> selectedRoles)
         {
             var token = HttpContext.GetJwtToken();
 
             try
             {
+                if (string.IsNullOrEmpty(model.CreditCardId))
+                {
+                    var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(model.PaymentMethodId, token);
+
+                    if (paymentMethod != null && paymentMethod.Type == 2)
+                    {
+                        ModelState.AddModelError("CreditCardId", "Cartão de crédito é obrigatório para este método de pagamento.");
+                    }
+                    else
+                    {
+                        ModelState.Remove("CreditCardId");
+                    }
+                }
+
                 if (ModelState.IsValid)
                 {
+                    _logger.LogInformation("Usuário {UserName} criando novo pagamento", User.Identity.Name);
                     var payment = await _paymentService.CreatePaymentAsync(model, token);
                     TempData["SuccessMessage"] = "Pagamento criado com sucesso!";
                     return RedirectToAction(nameof(Details), new { id = payment.Id });
@@ -218,7 +233,6 @@ namespace FinanceSystem.Web.Controllers
                 ModelState.AddModelError(string.Empty, $"Erro ao criar pagamento: {ex.Message}");
             }
 
-            // Se chegou aqui, algo deu errado ou o ModelState é inválido
             try
             {
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);

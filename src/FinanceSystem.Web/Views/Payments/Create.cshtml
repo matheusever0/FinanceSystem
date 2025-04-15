@@ -140,22 +140,20 @@
             const paymentMethodSelect = document.getElementById('paymentMethodSelect');
             const creditCardSection = document.getElementById('creditCardSection');
 
-            // Mostrar/ocultar seção de cartão de crédito baseado no método de pagamento
-            function toggleCreditCardSection() {
-                const selectedOption = paymentMethodSelect.options[paymentMethodSelect.selectedIndex];
-                if (selectedOption.value && selectedOption.getAttribute('data-type') === '2') { // 2 = CreditCard
-                    creditCardSection.style.display = 'block';
-                    document.getElementById('CreditCardId').setAttribute('required', 'required');
-                } else {
-                    creditCardSection.style.display = 'none';
-                    document.getElementById('CreditCardId').removeAttribute('required');
-                }
+        function toggleCreditCardSection() {
+            const selectedOption = paymentMethodSelect.options[paymentMethodSelect.selectedIndex];
+            if (selectedOption.value && selectedOption.getAttribute('data-type') === '2') { 
+                creditCardSection.style.display = 'block';
+                document.getElementById('CreditCardId').setAttribute('required', 'required');
+            } else {
+                creditCardSection.style.display = 'none';
+                document.getElementById('CreditCardId').removeAttribute('required');
+                document.getElementById('CreditCardId').value = '';
             }
+        }
 
-            // Inicialização
             toggleCreditCardSection();
 
-            // Event listeners
             paymentMethodSelect.addEventListener('change', toggleCreditCardSection);
         });
     </script>
