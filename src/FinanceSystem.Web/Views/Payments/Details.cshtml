@@ -1,0 +1,297 @@
+﻿@model FinanceSystem.Web.Models.PaymentModel
+@using FinanceSystem.Web.Helpers
+@{
+    ViewData["Title"] = "Detalhes do Pagamento";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Detalhes do Pagamento</h1>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+            </a>
+            @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i> Editar
+                </a>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informações do Pagamento -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Informações do Pagamento</h6>
+                    <span class="badge @Model.StatusBadgeClass">@Model.StatusDescription</span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Descrição</h5>
+                                <p>@Model.Description</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Valor</h5>
+                                <p class="fw-bold">@Model.GetFormattedAmount()</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Data de Vencimento</h5>
+                                <p>@Model.GetFormattedDueDate()</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Data de Pagamento</h5>
+                                <p>@Model.GetFormattedPaymentDate()</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Tipo de Pagamento</h5>
+                                <p><a asp-controller="PaymentTypes" asp-action="Details" asp-route-id="@Model.PaymentTypeId">@Model.PaymentTypeName</a></p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Método de Pagamento</h5>
+                                <p><a asp-controller="PaymentMethods" asp-action="Details" asp-route-id="@Model.PaymentMethodId">@Model.PaymentMethodName</a></p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Recorrente</h5>
+                                <p>@(Model.IsRecurring ? "Sim" : "Não")</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Data de Criação</h5>
+                                <p>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card bg-light mb-3">
+                                    <div class="card-header">Observações</div>
+                                    <div class="card-body">
+                                        <p class="card-text">@Model.Notes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Ações -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Ações</h6>
+                </div>
+                <div class="card-body">
+                    @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
+                    {
+                        @if (Model.Status == 1) // Pendente
+                        {
+                            <form asp-action="MarkAsPaid" asp-route-id="@Model.Id" method="post" class="mb-3">
+                                @Html.AntiForgeryToken()
+                                <div class="mb-3">
+                                    <label for="paymentDate" class="form-label">Data de Pagamento</label>
+                                    <input type="date" id="paymentDate" name="paymentDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                </div>
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-check-circle me-1"></i> Marcar como Pago
+                                </button>
+                            </form>
+
+                            <form asp-action="MarkAsOverdue" asp-route-id="@Model.Id" method="post" class="mb-3">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-warning w-100">
+                                    <i class="fas fa-exclamation-circle me-1"></i> Marcar como Vencido
+                                </button>
+                            </form>
+                        }
+                        else if (Model.Status == 3) // Vencido
+                        {
+                            <form asp-action="MarkAsPaid" asp-route-id="@Model.Id" method="post" class="mb-3">
+                                @Html.AntiForgeryToken()
+                                <div class="mb-3">
+                                    <label for="paymentDate" class="form-label">Data de Pagamento</label>
+                                    <input type="date" id="paymentDate" name="paymentDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                </div>
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-check-circle me-1"></i> Marcar como Pago
+                                </button>
+                            </form>
+                        }
+
+                        @if (Model.Status != 4) // Não Cancelado
+                        {
+                            <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="mb-3">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="fas fa-ban me-1"></i> Cancelar Pagamento
+                                </button>
+                            </form>
+                        }
+                    }
+
+                    @if (await PermissionHelper.HasPermissionAsync(Context, "payments.delete"))
+                    {
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100">
+                            <i class="fas fa-trash me-1"></i> Excluir Pagamento
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parcelas (se houver) -->
+    @if (Model.Installments != null && Model.Installments.Any())
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Parcelas</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Nº</th>
+                                <th>Valor</th>
+                                <th>Vencimento</th>
+                                <th>Pagamento</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var installment in Model.Installments.OrderBy(i => i.InstallmentNumber))
+                            {
+                                <tr>
+                                    <td>@installment.InstallmentNumber</td>
+                                    <td>@installment.GetFormattedAmount()</td>
+                                    <td>@installment.GetFormattedDueDate()</td>
+                                    <td>@installment.GetFormattedPaymentDate()</td>
+                                    <td>
+                                        <span class="badge @installment.StatusBadgeClass">@installment.StatusDescription</span>
+                                    </td>
+                                    <td>
+                                        @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
+                                        {
+                                            @if (installment.Status == 1) // Pendente
+                                            {
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-sm btn-success mark-installment-paid"
+                                                            data-installment-id="@installment.Id" data-bs-toggle="modal" data-bs-target="#markInstallmentPaidModal">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-warning mark-installment-overdue"
+                                                            data-installment-id="@installment.Id" data-bs-toggle="modal" data-bs-target="#markInstallmentOverdueModal">
+                                                        <i class="fas fa-exclamation"></i>
+                                                    </button>
+                                                </div>
+                                            }
+                                            else if (installment.Status == 3) // Vencido
+                                            {
+                                                <button type="button" class="btn btn-sm btn-success mark-installment-paid"
+                                                        data-installment-id="@installment.Id" data-bs-toggle="modal" data-bs-target="#markInstallmentPaidModal">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modais -->
+@if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
+{
+    <!-- Modal Marcar Parcela como Paga -->
+    <div class="modal fade" id="markInstallmentPaidModal" tabindex="-1" aria-labelledby="markInstallmentPaidModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="markInstallmentPaidForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="markInstallmentPaidModalLabel">Marcar Parcela como Paga</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="installmentPaymentDate" class="form-label">Data de Pagamento</label>
+                            <input type="date" id="installmentPaymentDate" name="paymentDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Marcar como Pago</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Marcar Parcela como Vencida -->
+    <div class="modal fade" id="markInstallmentOverdueModal" tabindex="-1" aria-labelledby="markInstallmentOverdueModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="markInstallmentOverdueForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="markInstallmentOverdueModalLabel">Marcar Parcela como Vencida</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Tem certeza que deseja marcar esta parcela como vencida?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning">Marcar como Vencido</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Setup de modal para marcar parcela como paga
+                const markPaidButtons = document.querySelectorAll('.mark-installment-paid');
+                markPaidButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const installmentId = this.getAttribute('data-installment-id');
+                        const form = document.getElementById('markInstallmentPaidForm');
+                        form.action = `/PaymentInstallments/${installmentId}/MarkAsPaid`;
+                    });
+                });
+
+                // Setup de modal para marcar parcela como vencida
+                const markOverdueButtons = document.querySelectorAll('.mark-installment-overdue');
+                markOverdueButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const installmentId = this.getAttribute('data-installment-id');
+                        const form = document.getElementById('markInstallmentOverdueForm');
+                        form.action = `/PaymentInstallments/${installmentId}/MarkAsOverdue`;
+                    });
+                });
+            });
+        </script>
+    }
+}

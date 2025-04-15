@@ -77,16 +77,20 @@ namespace FinanceSystem.Infrastructure.Data
                     var updateCreditCardsPermission = new Permission("Edit Credit Cards", "creditcards.edit", "Permission to edit credit cards");
                     var deleteCreditCardsPermission = new Permission("Delete Credit Cards", "creditcards.delete", "Permission to delete credit cards");
 
-                    await _context.Permissions.AddRangeAsync(
-                        viewUsersPermission, createUsersPermission, updateUsersPermission, deleteUsersPermission,
-                        viewRolesPermission, createRolesPermission, updateRolesPermission, deleteRolesPermission,
-                        managePermissionsPermission,
-                        viewPaymentsPermission, createPaymentsPermission, updatePaymentsPermission, deletePaymentsPermission,
-                        viewPaymentTypesPermission, createPaymentTypesPermission, updatePaymentTypesPermission, deletePaymentTypesPermission,
-                        viewPaymentMethodsPermission, createPaymentMethodsPermission, updatePaymentMethodsPermission, deletePaymentMethodsPermission,
-                        viewCreditCardsPermission, createCreditCardsPermission, updateCreditCardsPermission, deleteCreditCardsPermission);
-
+                    await _context.Permissions.AddAsync(managePermissionsPermission);
                     await _context.SaveChangesAsync();
+                    await _context.Permissions.AddRangeAsync(viewUsersPermission, createUsersPermission, updateUsersPermission, deleteUsersPermission);
+                    await _context.SaveChangesAsync();
+                    await _context.Permissions.AddRangeAsync(viewRolesPermission, createRolesPermission, updateRolesPermission, deleteRolesPermission);
+                    await _context.SaveChangesAsync();
+                    await _context.Permissions.AddRangeAsync(viewPaymentsPermission, createPaymentsPermission, updatePaymentsPermission, deletePaymentsPermission);
+                    await _context.SaveChangesAsync();
+                    await _context.Permissions.AddRangeAsync(viewPaymentTypesPermission, createPaymentTypesPermission, updatePaymentTypesPermission, deletePaymentTypesPermission);
+                    await _context.SaveChangesAsync();
+                    await _context.Permissions.AddRangeAsync(viewPaymentMethodsPermission, createPaymentMethodsPermission, updatePaymentMethodsPermission, deletePaymentMethodsPermission);
+                    await _context.SaveChangesAsync();
+                    await _context.Permissions.AddRangeAsync(viewCreditCardsPermission, createCreditCardsPermission, updateCreditCardsPermission, deleteCreditCardsPermission);
+                    await _context.SaveChangesAsync();                    
 
                     _logger.LogInformation("Default permissions created successfully");
                 }
@@ -96,10 +100,9 @@ namespace FinanceSystem.Infrastructure.Data
                     _logger.LogInformation("Creating default roles...");
 
                     var adminRole = new Role("Admin", "Administrator role with full access");
-                    var moderatorRole = new Role("Moderator", "Moderator role with limited access");
                     var userRole = new Role("User", "Standard user role with minimal access");
 
-                    await _context.Roles.AddRangeAsync(adminRole, moderatorRole, userRole);
+                    await _context.Roles.AddRangeAsync(adminRole, userRole);
                     await _context.SaveChangesAsync();
 
                     _logger.LogInformation("Default roles created successfully");
@@ -126,11 +129,6 @@ namespace FinanceSystem.Infrastructure.Data
                         p.SystemName == "paymenttypes.view" ||
                         p.SystemName == "paymentmethods.view" ||
                         p.SystemName == "creditcards.view"));
-
-                    foreach (var permission in moderatorPermissions)
-                    {
-                        moderatorRole.AddPermission(permission);
-                    }
 
                     var userPermissions = allPermissions
                         .Where(p => p.SystemName == "users.view").ToList();
@@ -168,22 +166,6 @@ namespace FinanceSystem.Infrastructure.Data
 
                     adminUser.AddRole(adminRole);
                     await _context.SaveChangesAsync();
-
-                    var moderatorRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Moderator");
-                    if (moderatorRole != null)
-                    {
-                        var moderatorUser = new User(
-                            "moderator",
-                            "moderator@example.com",
-                            _authService.HashPassword("moderator")
-                        );
-
-                        await _context.Users.AddAsync(moderatorUser);
-                        await _context.SaveChangesAsync();
-
-                        moderatorUser.AddRole(moderatorRole);
-                        await _context.SaveChangesAsync();
-                    }
 
                     var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
                     if (userRole != null)

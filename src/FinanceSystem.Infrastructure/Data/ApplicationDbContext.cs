@@ -28,6 +28,38 @@ namespace FinanceSystem.Infrastructure.Data
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });
 
+            modelBuilder.Entity<User>()
+                .Property(e => e.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<Role>()
+                .Property(e => e.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<Permission>()
+                .Property(e => e.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<Payment>()
+                .Property(e => e.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<CreditCard>()
+                .Property(e => e.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<PaymentInstallment>()
+                .Property(e => e.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<PaymentMethod>()
+                .Property(e => e.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<PaymentType>()
+                .Property(e => e.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
             modelBuilder.Entity<UserRole>()
                 .HasOne(ur => ur.User)
                 .WithMany(u => u.UserRoles)

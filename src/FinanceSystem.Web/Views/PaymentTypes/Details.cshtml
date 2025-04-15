@@ -1,0 +1,102 @@
+﻿@model FinanceSystem.Web.Models.PaymentTypeModel
+@using FinanceSystem.Web.Helpers
+@{
+    ViewData["Title"] = "Detalhes do Tipo de Pagamento";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Detalhes do Tipo de Pagamento</h1>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+            </a>
+            @if (!Model.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.edit"))
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i> Editar
+                </a>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informações do Tipo de Pagamento -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Informações do Tipo de Pagamento</h6>
+                    @if (Model.IsSystem)
+                    {
+                        <span class="badge bg-success">Sistema</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-info">Personalizado</span>
+                    }
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Nome</h5>
+                                <p>@Model.Name</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Descrição</h5>
+                                <p>@(string.IsNullOrEmpty(Model.Description) ? "-" : Model.Description)</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Origem</h5>
+                                <p>@(Model.IsSystem ? "Sistema" : "Personalizado pelo usuário")</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Data de Criação</h5>
+                                <p>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ações -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Ações</h6>
+                </div>
+                <div class="card-body">
+                    <a asp-controller="Payments" asp-action="ByType" asp-route-id="@Model.Id" class="btn btn-info w-100 mb-3">
+                        <i class="fas fa-list me-1"></i> Ver Pagamentos Deste Tipo
+                    </a>
+
+                    @if (!Model.IsSystem)
+                    {
+                        @if (await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.edit"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary w-100 mb-3">
+                                <i class="fas fa-edit me-1"></i> Editar Tipo de Pagamento
+                            </a>
+                        }
+
+                        @if (await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.delete"))
+                        {
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-trash me-1"></i> Excluir Tipo de Pagamento
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> Este é um tipo de pagamento do sistema e não pode ser editado ou excluído.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
