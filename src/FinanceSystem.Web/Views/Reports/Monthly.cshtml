@@ -1,0 +1,472 @@
+﻿@model IEnumerable<FinanceSystem.Web.Models.PaymentModel>
+@{
+    ViewData["Title"] = "Relatório Mensal";
+
+    var currentMonth = ViewBag.Month;
+    var currentYear = ViewBag.Year;
+
+    var monthName = new DateTime(currentYear, currentMonth, 1).ToString("MMMM");
+    var previousMonth = currentMonth == 1 ? 12 : currentMonth - 1;
+    var previousYear = currentMonth == 1 ? currentYear - 1 : currentYear;
+    var nextMonth = currentMonth == 12 ? 1 : currentMonth + 1;
+    var nextYear = currentMonth == 12 ? currentYear + 1 : currentYear;
+
+    var totalAmount = ViewBag.TotalAmount;
+    var paidAmount = ViewBag.PaidAmount;
+    var pendingAmount = ViewBag.PendingAmount;
+    var overdueAmount = ViewBag.OverdueAmount;
+
+    var paymentsByType = ViewBag.PaymentsByType as List<dynamic>;
+
+    // Preparar dados para gráficos
+    var typeLabels = paymentsByType.Select(p => p.TypeName).ToList();
+    var typeValues = paymentsByType.Select(p => p.TotalAmount).ToList();
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            Relatório Mensal: @monthName.ToUpper() / @currentYear
+        </h1>
+        <div>
+            <a asp-action="PrintMonthly" asp-route-month="@currentMonth" asp-route-year="@currentYear" target="_blank" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-print me-1"></i> Imprimir Relatório
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-sm btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <!-- Navegação entre meses -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-action="Monthly" asp-route-month="@previousMonth" asp-route-year="@previousYear" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-chevron-left me-1"></i> Mês Anterior
+                        </a>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                Selecionar Mês
+                            </button>
+                            <ul class="dropdown-menu">
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    var monthText = new DateTime(2022, i, 1).ToString("MMMM");
+                                    <li>
+                                        <a class="dropdown-item @(i == currentMonth ? "active" : "")"
+                                           asp-action="Monthly" asp-route-month="@i" asp-route-year="@currentYear">
+                                            @monthText
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                Selecionar Ano
+                            </button>
+                            <ul class="dropdown-menu">
+                                @for (int i = DateTime.Now.Year - 2; i <= DateTime.Now.Year + 1; i++)
+                                {
+                                    <li>
+                                        <a class="dropdown-item @(i == currentYear ? "active" : "")"
+                                           asp-action="Monthly" asp-route-month="@currentMonth" asp-route-year="@i">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+
+                        <a asp-action="Monthly" asp-route-month="@nextMonth" asp-route-year="@nextYear" class="btn btn-sm btn-outline-primary">
+                            Próximo Mês <i class="fas fa-chevron-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="row">
+        <!-- Total -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total do Mês
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", totalAmount)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pago -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Pago
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", paidAmount)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pendente -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Total Pendente
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", pendingAmount)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vencido -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Total Vencido
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", overdueAmount)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row">
+        <!-- Gráfico de Pagamentos por Tipo -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Pagamentos por Tipo</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="paymentTypesPieChart"
+                                data-labels="@Html.Raw(Json.Serialize(typeLabels))"
+                                data-values="@Html.Raw(Json.Serialize(typeValues))"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        @foreach (var paymentType in paymentsByType.Take(5))
+                        {
+                            <span class="me-2">
+                                <i class="fas fa-circle" style="color: @GetRandomColor();"></i> @paymentType.TypeName
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Status -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Status de Pagamentos</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="paymentStatusPieChart"
+                                data-labels="@Html.Raw(Json.Serialize(new[] { "Pago", "Pendente", "Vencido", "Cancelado" }))"
+                                data-values="@Html.Raw(Json.Serialize(new[] { paidAmount, pendingAmount, overdueAmount, 0.0m }))"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="me-2">
+                            <i class="fas fa-circle text-success"></i> Pago
+                        </span>
+                        <span class="me-2">
+                            <i class="fas fa-circle text-warning"></i> Pendente
+                        </span>
+                        <span class="me-2">
+                            <i class="fas fa-circle text-danger"></i> Vencido
+                        </span>
+                        <span class="me-2">
+                            <i class="fas fa-circle text-secondary"></i> Cancelado
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Pagamentos -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Pagamentos de @monthName/@currentYear</h6>
+            <div class="dropdown no-arrow">
+                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                     aria-labelledby="dropdownMenuLink">
+                    <div class="dropdown-header">Opções:</div>
+                    <a class="dropdown-item" href="#" id="exportCSV">Exportar para CSV</a>
+                    <a class="dropdown-item" href="#" onclick="window.print()">Imprimir Tabela</a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Vencimento</th>
+                            <th>Status</th>
+                            <th>Tipo</th>
+                            <th>Método</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var payment in Model)
+                        {
+                            <tr>
+                                <td>@payment.Description</td>
+                                <td class="text-end">@payment.GetFormattedAmount()</td>
+                                <td class="text-center">@payment.GetFormattedDueDate()</td>
+                                <td class="text-center">
+                                    <span class="badge @payment.StatusBadgeClass">@payment.StatusDescription</span>
+                                </td>
+                                <td>@payment.PaymentTypeName</td>
+                                <td>@payment.PaymentMethodName</td>
+                                <td class="text-center">
+                                    <a href="@Url.Action("Details", "Payments", new { id = payment.Id })" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            setupExportButton();
+        });
+
+        function initializeCharts() {
+            // Inicializar gráfico de pagamentos por tipo
+            const typesPieChart = document.getElementById('paymentTypesPieChart');
+            if (typesPieChart) {
+                const labels = JSON.parse(typesPieChart.getAttribute('data-labels'));
+                const values = JSON.parse(typesPieChart.getAttribute('data-values'));
+                const backgroundColors = generateColors(labels.length);
+
+                new Chart(typesPieChart, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: backgroundColors,
+                            hoverBackgroundColor: backgroundColors.map(color => adjustColor(color, -20)),
+                            hoverBorderColor: 'rgba(234, 236, 244, 1)',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                display: true
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: R$ ${value.toLocaleString('pt-BR')} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
+
+            // Inicializar gráfico de status de pagamentos
+            const statusPieChart = document.getElementById('paymentStatusPieChart');
+            if (statusPieChart) {
+                const labels = JSON.parse(statusPieChart.getAttribute('data-labels'));
+                const values = JSON.parse(statusPieChart.getAttribute('data-values'));
+                const backgroundColors = ['#1cc88a', '#f6c23e', '#e74a3b', '#858796'];
+
+                new Chart(statusPieChart, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: backgroundColors,
+                            hoverBackgroundColor: backgroundColors.map(color => adjustColor(color, -20)),
+                            hoverBorderColor: 'rgba(234, 236, 244, 1)',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                display: true
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: R$ ${value.toLocaleString('pt-BR')} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
+        }
+
+        function setupExportButton() {
+            const exportBtn = document.getElementById('exportCSV');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    // Obter dados da tabela
+                    const table = document.getElementById('dataTable');
+                    const rows = table.querySelectorAll('tbody tr');
+                    const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+
+                    // Criar linhas CSV
+                    let csvContent = headers.join(',') + '\n';
+
+                    rows.forEach(row => {
+                        const cells = Array.from(row.querySelectorAll('td'));
+                        const rowData = cells.map(cell => {
+                            // Remover tags HTML e tratar valores com vírgulas
+                            let text = cell.textContent.trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+                            return `"${text}"`;
+                        });
+                        csvContent += rowData.join(',') + '\n';
+                    });
+
+                    // Criar link de download
+                    const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
+                    const link = document.createElement('a');
+                    link.setAttribute('href', encodedUri);
+                    link.setAttribute('download', `relatorio_@monthName-@currentYear.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            }
+        }
+
+        // Funções auxiliares para gráficos
+        function generateColors(count) {
+            const baseColors = [
+                'rgba(78, 115, 223, 0.8)',
+                'rgba(28, 200, 138, 0.8)',
+                'rgba(246, 194, 62, 0.8)',
+                'rgba(231, 74, 59, 0.8)',
+                'rgba(54, 185, 204, 0.8)',
+                'rgba(133, 135, 150, 0.8)'
+            ];
+
+            const colors = [];
+            for (let i = 0; i < count; i++) {
+                if (i < baseColors.length) {
+                    colors.push(baseColors[i]);
+                } else {
+                    // Gera cores aleatórias se precisar de mais
+                    const r = Math.floor(Math.random() * 200) + 55;
+                    const g = Math.floor(Math.random() * 200) + 55;
+                    const b = Math.floor(Math.random() * 200) + 55;
+                    colors.push(`rgba(${r}, ${g}, ${b}, 0.8)`);
+                }
+            }
+
+            return colors;
+        }
+
+        function adjustColor(color, amount) {
+            const rgbaMatch = color.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
+            if (!rgbaMatch) return color;
+
+            let r = parseInt(rgbaMatch[1]);
+            let g = parseInt(rgbaMatch[2]);
+            let b = parseInt(rgbaMatch[3]);
+            const a = parseFloat(rgbaMatch[4]);
+
+            r = Math.max(0, Math.min(255, r + amount));
+            g = Math.max(0, Math.min(255, g + amount));
+            b = Math.max(0, Math.min(255, b + amount));
+
+            return `rgba(${r}, ${g}, ${b}, ${a})`;
+        }
+    </script>
+}
+
+@functions {
+    string GetRandomColor()
+    {
+        var rand = new Random();
+        var colors = new[] { "#4e73df", "#1cc88a", "#36b9cc", "#f6c23e", "#e74a3b", "#858796" };
+        return colors[rand.Next(colors.Length)];
+    }
+}

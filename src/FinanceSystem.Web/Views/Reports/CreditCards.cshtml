@@ -1,0 +1,438 @@
+﻿@model IEnumerable<FinanceSystem.Web.Models.CreditCardModel>
+@{
+    ViewData["Title"] = "Relatório de Cartões de Crédito";
+
+    var cardData = ViewBag.CardData as List<dynamic> ?? new List<dynamic>();
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Relatório de Cartões de Crédito</h1>
+        <div>
+            <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-print me-1"></i> Imprimir Relatório
+            </button>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-sm btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> Nenhum cartão de crédito cadastrado.
+            <a asp-controller="CreditCards" asp-action="Create" class="alert-link">Clique aqui para adicionar seu primeiro cartão.</a>
+        </div>
+    }
+    else
+    {
+        <!-- Visão Geral -->
+        <div class="row">
+            @foreach (var data in cardData)
+            {
+                var card = data.Card as FinanceSystem.Web.Models.CreditCardModel;
+                var usagePercentage = data.UsagePercentage;
+                var colorClass = usagePercentage > 75 ? "danger" : (usagePercentage > 50 ? "warning" : "success");
+
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary">@card.Name</h6>
+                            <span class="badge bg-primary">@card.CardBrand</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="small text-muted">Limite Total</div>
+                                    <div class="font-weight-bold">@card.GetFormattedLimit()</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="small text-muted">Disponível</div>
+                                    <div class="font-weight-bold">@card.GetFormattedAvailableLimit()</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6 class="small font-weight-bold">
+                                    Utilização: @string.Format("{0:0.#}%", usagePercentage)
+                                </h6>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-@colorClass" role="progressbar" style="width: @string.Format("{0:0}%", usagePercentage)"
+                                         aria-valuenow="@usagePercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <div class="small text-muted">
+                                    Utilizado: @string.Format("{0:C2}", card.Limit - card.AvailableLimit)
+                                </div>
+                            </div>
+
+                            <div class="row mb-2">
+                                <div class="col-6">
+                                    <div class="small text-muted">Fecha Dia</div>
+                                    <div>@card.ClosingDay</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="small text-muted">Vence Dia</div>
+                                    <div>@card.DueDay</div>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <a asp-controller="CreditCards" asp-action="Details" asp-route-id="@card.Id" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-info-circle me-1"></i> Detalhes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Detalhes dos Cartões -->
+        <div class="row">
+            @foreach (var data in cardData)
+            {
+                var card = data.Card as FinanceSystem.Web.Models.CreditCardModel;
+                var payments = data.Payments as IEnumerable<FinanceSystem.Web.Models.PaymentModel>;
+
+                <div class="col-lg-12 mb-4">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary">Pagamentos com @card.Name</h6>
+                            <div class="dropdown no-arrow">
+                                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink-@card.Id"
+                                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                     aria-labelledby="dropdownMenuLink-@card.Id">
+                                    <div class="dropdown-header">Opções:</div>
+                                    <a class="dropdown-item" href="#" onclick="exportCardData('@card.Id')">Exportar para CSV</a>
+                                    <a class="dropdown-item" asp-controller="CreditCards" asp-action="Details" asp-route-id="@card.Id">Ver Detalhes</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            @if (!payments.Any())
+                            {
+                                <div class="text-center my-4">
+                                    <div class="mb-3">
+                                        <i class="fas fa-dollar-sign fa-3x text-gray-300"></i>
+                                    </div>
+                                    <p>Nenhum pagamento encontrado para este cartão.</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="row mb-4">
+                                    <div class="col-lg-4">
+                                        <div class="card bg-light mb-3">
+                                            <div class="card-body py-2">
+                                                <div class="row no-gutters align-items-center">
+                                                    <div class="col mr-2">
+                                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                            Total em Compras
+                                                        </div>
+                                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                            @string.Format("{0:C2}", data.TotalAmount)
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="card bg-light mb-3">
+                                            <div class="card-body py-2">
+                                                <div class="row no-gutters align-items-center">
+                                                    <div class="col mr-2">
+                                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                            Total Pago
+                                                        </div>
+                                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                            @string.Format("{0:C2}", data.PaidAmount)
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="card bg-light mb-3">
+                                            <div class="card-body py-2">
+                                                <div class="row no-gutters align-items-center">
+                                                    <div class="col mr-2">
+                                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                            Total Pendente
+                                                        </div>
+                                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                            @string.Format("{0:C2}", data.PendingAmount)
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <i class="fas fa-clock fa-2x text-gray-300"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" id="dataTable-@card.Id" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th>Descrição</th>
+                                                <th>Vencimento</th>
+                                                <th class="text-end">Valor</th>
+                                                <th class="text-center">Status</th>
+                                                <th class="text-center">Parcelas</th>
+                                                <th class="text-center">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var payment in payments.OrderByDescending(p => p.DueDate))
+                                            {
+                                                <tr>
+                                                    <td>@payment.Description</td>
+                                                    <td>@payment.GetFormattedDueDate()</td>
+                                                    <td class="text-end">@payment.GetFormattedAmount()</td>
+                                                    <td class="text-center">
+                                                        <span class="badge @payment.StatusBadgeClass">@payment.StatusDescription</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @(payment.Installments.Any() ? $"{payment.Installments.Count}x" : "-")
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id" class="btn btn-sm btn-info">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Análise Geral -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Análise Comparativa</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-bar">
+                            <canvas id="cardComparisonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeComparisonChart();
+        });
+
+        function initializeComparisonChart() {
+            const chartCanvas = document.getElementById('cardComparisonChart');
+            if (!chartCanvas) return;
+
+            // Criar dados para comparação de cartões
+            const cardData = @Html.Raw(Json.Serialize(cardData.Select(d => new
+            {
+                Name = ((FinanceSystem.Web.Models.CreditCardModel)d.Card).Name,
+                Total = d.TotalAmount,
+                Paid = d.PaidAmount,
+                Pending = d.PendingAmount,
+                UsagePercentage = d.UsagePercentage
+            })));
+
+            const labels = cardData.map(d => d.Name);
+            const totalData = cardData.map(d => d.Total);
+            const paidData = cardData.map(d => d.Paid);
+            const pendingData = cardData.map(d => d.Pending);
+            const usageData = cardData.map(d => d.UsagePercentage);
+
+            new Chart(chartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Total em Compras',
+                            data: totalData,
+                            backgroundColor: 'rgba(78, 115, 223, 0.8)',
+                            borderColor: 'rgba(78, 115, 223, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Total Pago',
+                            data: paidData,
+                            backgroundColor: 'rgba(28, 200, 138, 0.8)',
+                            borderColor: 'rgba(28, 200, 138, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Total Pendente',
+                            data: pendingData,
+                            backgroundColor: 'rgba(246, 194, 62, 0.8)',
+                            borderColor: 'rgba(246, 194, 62, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            left: 10,
+                            right: 25,
+                            top: 25,
+                            bottom: 0
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                                }
+                            },
+                            grid: {
+                                color: "rgb(234, 236, 244)",
+                                zeroLineColor: "rgb(234, 236, 244)",
+                                drawBorder: false,
+                                borderDash: [2],
+                                zeroLineBorderDash: [2]
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+
+                                    if (context.parsed.y !== null) {
+                                        label += 'R$ ' + context.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Também criar gráfico de utilização dos cartões
+            const usageChartCanvas = document.createElement('canvas');
+            usageChartCanvas.id = 'cardUsageChart';
+            chartCanvas.parentNode.appendChild(usageChartCanvas);
+
+            new Chart(usageChartCanvas, {
+                type: 'horizontalBar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Percentual de Utilização',
+                            data: usageData,
+                            backgroundColor: usageData.map(p =>
+                                p > 75 ? 'rgba(231, 74, 59, 0.8)' :
+                                (p > 50 ? 'rgba(246, 194, 62, 0.8)' : 'rgba(28, 200, 138, 0.8)')
+                            ),
+                            borderWidth: 0
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            left: 10,
+                            right: 25,
+                            top: 25,
+                            bottom: 0
+                        }
+                    },
+                    scales: {
+                        x: {
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Utilização: ' + context.raw.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportCardData(cardId) {
+            const table = document.getElementById(`dataTable-${cardId}`);
+            if (!table) return;
+
+            const rows = table.querySelectorAll('tbody tr');
+            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+
+            let csvContent = headers.join(',') + '\n';
+
+            rows.forEach(row => {
+                const cells = Array.from(row.querySelectorAll('td'));
+                const rowData = cells.map(cell => {
+                    // Remover tags HTML e tratar valores com vírgulas
+                    let text = cell.textContent.trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+                    return `"${text}"`;
+                });
+                csvContent += rowData.join(',') + '\n';
+            });
+
+            const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `cartao_${cardId}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+}
