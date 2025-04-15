@@ -22,8 +22,8 @@
             <i class="fas fa-info-circle me-2"></i> Nenhum cartão de crédito cadastrado.
             @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.create"))
             {
-                <a asp-action="Create" class="alert-link">Clique aqui</a>
-                para adicionar seu primeiro cartão.
+                <a asp-action="Create" class="alert-link">Clique aqui para adicionar seu primeiro cartão.</a>
+                
            }
         </div>
     }

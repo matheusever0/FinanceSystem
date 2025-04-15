@@ -1,4 +1,6 @@
-﻿using FinanceSystem.Web.Models;
+﻿using FinanceSystem.Web.Extensions;
+using FinanceSystem.Web.Models;
+using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -8,18 +10,87 @@ namespace FinanceSystem.Web.Controllers
     [Authorize]
     public class HomeController : Controller
     {
-        public HomeController()
+        private readonly IPaymentService _paymentService;
+        private readonly ICreditCardService _creditCardService;
+        private readonly ILogger<HomeController> _logger;
+
+        public HomeController(
+            IPaymentService paymentService,
+            ICreditCardService creditCardService,
+            ILogger<HomeController> logger)
         {
+            _paymentService = paymentService;
+            _creditCardService = creditCardService;
+            _logger = logger;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             if (!User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            return View();
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+
+                // Obter pagamentos pendentes e vencidos
+                var pendingPayments = await _paymentService.GetPendingPaymentsAsync(token);
+                var overduePayments = await _paymentService.GetOverduePaymentsAsync(token);
+
+                // Obter cartões de crédito
+                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
+
+                // Calcular saldo (simulado)
+                decimal totalBalance = 5000.00m; // Valor simulado
+
+                // Dados para o gráfico mensal (últimos 6 meses)
+                var monthlyData = await GetMonthlyDataAsync(token);
+
+                // Passar dados para a view
+                ViewBag.PaymentsPending = pendingPayments;
+                ViewBag.PaymentsOverdue = overduePayments;
+                ViewBag.CreditCards = creditCards;
+                ViewBag.TotalBalance = totalBalance;
+                ViewBag.MonthlyData = monthlyData;
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar dashboard");
+                TempData["ErrorMessage"] = $"Erro ao carregar dashboard: {ex.Message}";
+                return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            }
+        }
+
+        private async Task<Dictionary<string, decimal>> GetMonthlyDataAsync(string token)
+        {
+            var result = new Dictionary<string, decimal>();
+            var currentDate = DateTime.Now;
+
+            // Obter dados dos últimos 6 meses
+            for (int i = 5; i >= 0; i--)
+            {
+                var month = currentDate.AddMonths(-i).Month;
+                var year = currentDate.AddMonths(-i).Year;
+                var monthName = new DateTime(year, month, 1).ToString("MMM/yy");
+
+                try
+                {
+                    var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
+                    var monthTotal = payments.Sum(p => p.Amount);
+                    result.Add(monthName, monthTotal);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Erro ao obter dados do mês {Month}/{Year}", month, year);
+                    result.Add(monthName, 0); // Fallback para zero em caso de erro
+                }
+            }
+
+            return result;
         }
 
         public IActionResult Privacy()

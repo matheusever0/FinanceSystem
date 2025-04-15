@@ -1,0 +1,214 @@
+﻿/**
+ * Estilos específicos para os componentes financeiros
+ */
+
+/* Cards do Dashboard */
+.border-left-primary {
+    border-left: .25rem solid #4e73df !important;
+}
+
+.border-left-success {
+    border-left: .25rem solid #1cc88a !important;
+}
+
+.border-left-info {
+    border-left: .25rem solid #36b9cc !important;
+}
+
+.border-left-warning {
+    border-left: .25rem solid #f6c23e !important;
+}
+
+.border-left-danger {
+    border-left: .25rem solid #e74a3b !important;
+}
+
+/* Botões com ícones */
+.btn-icon-split {
+    padding: 0;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: stretch;
+    justify-content: center;
+}
+
+    .btn-icon-split .icon {
+        background: rgba(0, 0, 0, 0.15);
+        display: inline-block;
+        padding: .75rem 1rem;
+    }
+
+    .btn-icon-split .text {
+        display: inline-block;
+        padding: .75rem 1rem;
+        white-space: nowrap;
+        flex-grow: 1;
+        text-align: center;
+    }
+
+/* Cartões de crédito */
+.credit-card {
+    border-radius: 1rem;
+    overflow: hidden;
+    background: linear-gradient(45deg, #3a3a3a, #505050);
+    color: white;
+    position: relative;
+    height: 200px;
+    transition: all 0.3s ease;
+}
+
+    .credit-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+    }
+
+    .credit-card .brand {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .credit-card .chip {
+        width: 3rem;
+        height: 2.2rem;
+        background: linear-gradient(135deg, #e6b800, #ffd500);
+        border-radius: 0.5rem;
+        position: absolute;
+        top: 5rem;
+        left: 2rem;
+    }
+
+    .credit-card .number {
+        position: absolute;
+        bottom: 5rem;
+        left: 2rem;
+        font-size: 1.2rem;
+        letter-spacing: 0.2rem;
+    }
+
+    .credit-card .valid {
+        position: absolute;
+        bottom: 3rem;
+        left: 2rem;
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+
+    .credit-card .holder {
+        position: absolute;
+        bottom: 1.5rem;
+        left: 2rem;
+        font-size: 1rem;
+        text-transform: uppercase;
+    }
+
+    /* Variantes de cartões de crédito */
+    .credit-card.visa {
+        background: linear-gradient(135deg, #0055b8, #009fe3);
+    }
+
+    .credit-card.mastercard {
+        background: linear-gradient(135deg, #ff5f00, #ff9e1b);
+    }
+
+    .credit-card.amex {
+        background: linear-gradient(135deg, #2557D6, #1283da);
+    }
+
+    .credit-card.elo {
+        background: linear-gradient(135deg, #ef4123, #00a4e0);
+    }
+
+/* Gráficos */
+.chart-area {
+    position: relative;
+    height: 20rem;
+    width: 100%;
+}
+
+.chart-pie {
+    position: relative;
+    height: 15rem;
+    width: 100%;
+}
+
+/* Status de pagamentos */
+.payment-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+    .payment-status i {
+        margin-right: 0.25rem;
+    }
+
+    .payment-status.pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .payment-status.paid {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .payment-status.overdue {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .payment-status.cancelled {
+        background-color: #e2e3e5;
+        color: #383d41;
+    }
+
+/* Submenu */
+.collapse-item {
+    padding: .5rem 1rem;
+    margin: 0 .5rem;
+    display: block;
+    color: #b7b9cc;
+    font-size: .85rem;
+    border-radius: .35rem;
+    white-space: nowrap;
+}
+
+    .collapse-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: white;
+        text-decoration: none;
+    }
+
+    .collapse-item.active {
+        color: white;
+        font-weight: 700;
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+/* Estilos de impressão dos relatórios */
+@media print {
+    .sidebar, .topbar, .footer, .no-print {
+        display: none !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+    }
+
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+
+    .container-fluid {
+        width: 100% !important;
+        padding: 0 !important;
+    }
+}

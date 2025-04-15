@@ -83,6 +83,44 @@
                     </div>
                 }
             }
+            @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "creditcards.view"))
+            {
+                <div class="sidebar-menu-item">
+                    <a asp-controller="CreditCards" asp-action="Index" class="sidebar-menu-link @(controllerName == "CreditCards" ? "active" : "")">
+                        <span class="sidebar-menu-icon"><i class="fas fa-credit-card"></i></span>
+                        <span>Cartões de Crédito</span>
+                    </a>
+                </div>
+            }
+
+            <div class="sidebar-menu-item">
+                <a href="#" class="sidebar-menu-link @(controllerName == "PaymentTypes" || controllerName == "PaymentMethods" ? "active" : "")"
+                   data-bs-toggle="collapse" data-bs-target="#collapseConfiguration"
+                   aria-expanded="@(controllerName == "PaymentTypes" || controllerName == "PaymentMethods" ? "true" : "false")" aria-controls="collapseConfiguration">
+                    <span class="sidebar-menu-icon"><i class="fas fa-cog"></i></span>
+                    <span>Configurações</span>
+                    <i class="fas fa-angle-down ms-auto"></i>
+                </a>
+                <div class="collapse @(controllerName == "PaymentTypes" || controllerName == "PaymentMethods" ? "show" : "")" id="collapseConfiguration">
+                    <div class="bg-dark py-2">
+                        @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "paymenttypes.view"))
+                        {
+                            <a asp-controller="PaymentTypes" asp-action="Index" class="sidebar-menu-link @(controllerName == "PaymentTypes" ? "active" : "")">
+                                <span class="sidebar-menu-icon ps-2"><i class="fas fa-tags"></i></span>
+                                <span>Tipos de Pagamento</span>
+                            </a>
+                        }
+
+                        @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "paymentmethods.view"))
+                        {
+                            <a asp-controller="PaymentMethods" asp-action="Index" class="sidebar-menu-link @(controllerName == "PaymentMethods" ? "active" : "")">
+                                <span class="sidebar-menu-icon ps-2"><i class="fas fa-wallet"></i></span>
+                                <span>Métodos de Pagamento</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

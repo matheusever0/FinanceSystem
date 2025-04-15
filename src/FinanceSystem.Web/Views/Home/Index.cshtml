@@ -1,4 +1,5 @@
-﻿@{
+﻿@using FinanceSystem.Web.Helpers
+@{
     ViewData["Title"] = "Home";
 
     // Dados do dashboard
@@ -92,7 +93,18 @@
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Cartões de Crédito
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@creditCards.Count()</div>
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">@creditCards.Count()</div>
+                                </div>
+                                <div class="col">
+                                    <div class="progress progress-sm mr-2">
+                                        <div class="progress-bar bg-info" role="progressbar"
+                                             style="width: @(creditCards.Any() ? 100 : 0)%" aria-valuenow="@(creditCards.Any() ? 100 : 0)" aria-valuemin="0"
+                                             aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-credit-card fa-2x text-gray-300"></i>
@@ -103,169 +115,66 @@
         </div>
     </div>
 
-    <!-- Content Row -->
-    <div class="row">
-        <!-- Gráfico Anual -->
-        <div class="col-xl-8 col-lg-7">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Resumo de Gastos Mensais</h6>
-                    <div class="dropdown no-arrow">
-                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end shadow animated--fade-in"
-                             aria-labelledby="dropdownMenuLink">
-                            <div class="dropdown-header">Opções:</div>
-                            <a class="dropdown-item" href="#">Exportar Dados</a>
-                            <a class="dropdown-item" href="#">Alterar Período</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Ver Detalhes</a>
-                        </div>
-                    </div>
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Ações Rápidas</h6>
                 </div>
                 <div class="card-body">
-                    <div class="chart-area">
-                        <canvas id="monthlyExpensesChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Utilização de Limite -->
-        <div class="col-xl-4 col-lg-5">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Utilização de Limite de Cartões</h6>
-                </div>
-                <div class="card-body">
-                    @if (creditCards.Any())
-                    {
-                        @foreach (var card in creditCards)
+                    <div class="row justify-content-center">
+                        @if (await PermissionHelper.HasPermissionAsync(Context, "payments.create"))
                         {
-                            var usedPercentage = (card.Limit - card.AvailableLimit) / card.Limit * 100;
-                            var colorClass = usedPercentage > 75 ? "bg-danger" : (usedPercentage > 50 ? "bg-warning" : "bg-success");
-
-                            <h4 class="small font-weight-bold">@card.Name <span class="float-end">@string.Format("{0:0}%", usedPercentage)</span></h4>
-                            <div class="progress mb-4">
-                                <div class="progress-bar @colorClass" role="progressbar" style="width: @string.Format("{0:0}%", usedPercentage)"
-                                     aria-valuenow="@string.Format("{0:0}", usedPercentage)" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="col-xl-3 col-md-6 mb-2">
+                                <a asp-controller="Payments" asp-action="Create" class="btn btn-primary btn-icon-split btn-lg w-100">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-plus"></i>
+                                    </span>
+                                    <span class="text">Novo Pagamento</span>
+                                </a>
                             </div>
                         }
-                    }
-                    else
-                    {
-                        <div class="text-center">
-                            <p>Nenhum cartão de crédito cadastrado.</p>
-                            <a asp-controller="CreditCards" asp-action="Create" class="btn btn-sm btn-primary">
-                                <i class="fas fa-plus me-1"></i> Adicionar Cartão
-                            </a>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Pagamentos Próximos -->
-    <div class="row">
-        <!-- Pagamentos Pendentes -->
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Pagamentos Pendentes</h6>
-                </div>
-                <div class="card-body">
-                    @if (paymentsPending.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Descrição</th>
-                                        <th>Vencimento</th>
-                                        <th>Valor</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var payment in paymentsPending.OrderBy(p => p.DueDate).Take(5))
-                                    {
-                                        <tr>
-                                            <td>@payment.Description</td>
-                                            <td>@payment.DueDate.ToString("dd/MM/yyyy")</td>
-                                            <td>@string.Format("{0:C2}", payment.Amount)</td>
-                                            <td>
-                                                <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id" class="btn btn-sm btn-info">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="text-center mt-3">
-                            <a asp-controller="Payments" asp-action="Pending" class="btn btn-sm btn-primary">Ver Todos</a>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-3">
-                            <p class="mb-0">Nenhum pagamento pendente!</p>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
+                        @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.view"))
+                        {
+                            <div class="col-xl-3 col-md-6 mb-2">
+                                <a asp-controller="CreditCards" asp-action="Index" class="btn btn-info btn-icon-split btn-lg w-100">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-credit-card"></i>
+                                    </span>
+                                    <span class="text">Meus Cartões</span>
+                                </a>
+                            </div>
+                        }
 
-        <!-- Pagamentos Vencidos -->
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-danger">Pagamentos Vencidos</h6>
-                </div>
-                <div class="card-body">
-                    @if (paymentsOverdue.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Descrição</th>
-                                        <th>Vencimento</th>
-                                        <th>Valor</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var payment in paymentsOverdue.OrderBy(p => p.DueDate).Take(5))
-                                    {
-                                        <tr>
-                                            <td>@payment.Description</td>
-                                            <td>@payment.DueDate.ToString("dd/MM/yyyy")</td>
-                                            <td>@string.Format("{0:C2}", payment.Amount)</td>
-                                            <td>
-                                                <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id" class="btn btn-sm btn-info">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="text-center mt-3">
-                            <a asp-controller="Payments" asp-action="Overdue" class="btn btn-sm btn-danger">Ver Todos</a>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-3">
-                            <p class="mb-0">Nenhum pagamento vencido!</p>
-                        </div>
-                    }
+                        @if (await PermissionHelper.HasPermissionAsync(Context, "payments.view"))
+                        {
+                            <div class="col-xl-3 col-md-6 mb-2">
+                                <a asp-controller="Payments" asp-action="Pending" class="btn btn-warning btn-icon-split btn-lg w-100">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-clock"></i>
+                                    </span>
+                                    <span class="text">Pagamentos Pendentes</span>
+                                </a>
+                            </div>
+                        }
+
+                        @if (await PermissionHelper.HasPermissionAsync(Context, "payments.view"))
+                        {
+                            <div class="col-xl-3 col-md-6 mb-2">
+                                <a asp-controller="Payments" asp-action="ByMonth"
+                                   asp-route-month="@DateTime.Now.Month"
+                                   asp-route-year="@DateTime.Now.Year"
+                                   class="btn btn-success btn-icon-split btn-lg w-100">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-calendar"></i>
+                                    </span>
+                                    <span class="text">Este Mês</span>
+                                </a>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
