@@ -195,5 +195,78 @@ namespace FinanceSystem.Web.Services
                 throw;
             }
         }
+
+        public async Task<string> GetInstallmentParentPaymentAsync(string installmentId, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Obtendo pagamento pai da parcela com ID: {InstallmentId}", installmentId);
+
+                // Como não temos um endpoint dedicado para isso, podemos:
+                // 1. Buscar todos os pagamentos e verificar qual possui a parcela com o ID informado
+                // 2. Ou implementar um novo endpoint na API para realizar essa consulta específica
+
+                // Para simplificar, vamos utilizar a solução 1 neste exemplo:
+                var payments = await GetAllPaymentsAsync(token);
+
+                foreach (var payment in payments)
+                {
+                    if (payment.Installments != null && payment.Installments.Any(i => i.Id == installmentId))
+                    {
+                        return payment.Id;
+                    }
+                }
+
+                // Se não encontrar, retorna null
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter pagamento pai da parcela: {InstallmentId}", installmentId);
+                throw;
+            }
+        }
+
+        public async Task<bool> MarkInstallmentAsPaidAsync(string installmentId, DateTime paymentDate, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Marcando parcela como paga: {InstallmentId}", installmentId);
+                return await _apiService.PostAsync<bool>($"/api/payment-installments/{installmentId}/paid", paymentDate, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao marcar parcela como paga: {InstallmentId}", installmentId);
+                throw;
+            }
+        }
+
+        public async Task<bool> MarkInstallmentAsOverdueAsync(string installmentId, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Marcando parcela como vencida: {InstallmentId}", installmentId);
+                return await _apiService.PostAsync<bool>($"/api/payment-installments/{installmentId}/overdue", null, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao marcar parcela como vencida: {InstallmentId}", installmentId);
+                throw;
+            }
+        }
+
+        public async Task<bool> CancelInstallmentAsync(string installmentId, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Cancelando parcela: {InstallmentId}", installmentId);
+                return await _apiService.PostAsync<bool>($"/api/payment-installments/{installmentId}/cancel", null, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao cancelar parcela: {InstallmentId}", installmentId);
+                throw;
+            }
+        }
     }
 }

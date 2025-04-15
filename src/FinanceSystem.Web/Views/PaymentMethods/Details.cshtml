@@ -1,0 +1,171 @@
+﻿@model FinanceSystem.Web.Models.PaymentMethodModel
+@using FinanceSystem.Web.Helpers
+@{
+    ViewData["Title"] = "Detalhes do Método de Pagamento";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Detalhes do Método de Pagamento</h1>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+            </a>
+            @if (!Model.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "paymentmethods.edit"))
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i> Editar
+                </a>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informações do Método de Pagamento -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Informações do Método de Pagamento</h6>
+                    @if (Model.IsSystem)
+                    {
+                        <span class="badge bg-success">Sistema</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-info">Personalizado</span>
+                    }
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Nome</h5>
+                                <p>@Model.Name</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Descrição</h5>
+                                <p>@(string.IsNullOrEmpty(Model.Description) ? "-" : Model.Description)</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Tipo</h5>
+                                <p>@GetPaymentMethodTypeDescription(Model.Type)</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Origem</h5>
+                                <p>@(Model.IsSystem ? "Sistema" : "Personalizado pelo usuário")</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Data de Criação</h5>
+                                <p>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cartões de Crédito (se aplicável) -->
+            @if (Model.Type == 2 && Model.CreditCards.Any()) // Tipo 2 = Cartão de Crédito
+            {
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Cartões de Crédito Associados</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Bandeira</th>
+                                        <th>Limite</th>
+                                        <th>Disponível</th>
+                                        <th class="text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var card in Model.CreditCards)
+                                    {
+                                        <tr>
+                                            <td>@card.Name</td>
+                                            <td>@card.CardBrand (*@card.LastFourDigits)</td>
+                                            <td>@string.Format("{0:C2}", card.Limit)</td>
+                                            <td>@string.Format("{0:C2}", card.AvailableLimit)</td>
+                                            <td class="text-center">
+                                                <a asp-controller="CreditCards" asp-action="Details" asp-route-id="@card.Id" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Ações -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Ações</h6>
+                </div>
+                <div class="card-body">
+                    <a asp-controller="Payments" asp-action="ByMethod" asp-route-id="@Model.Id" class="btn btn-info w-100 mb-3">
+                        <i class="fas fa-list me-1"></i> Ver Pagamentos com Este Método
+                    </a>
+
+                    @if (Model.Type == 2) // Cartão de Crédito
+                    {
+                        <a asp-controller="CreditCards" asp-action="Create" asp-route-methodId="@Model.Id" class="btn btn-success w-100 mb-3">
+                            <i class="fas fa-credit-card me-1"></i> Adicionar Cartão de Crédito
+                        </a>
+                    }
+
+                    @if (!Model.IsSystem)
+                    {
+                        @if (await PermissionHelper.HasPermissionAsync(Context, "paymentmethods.edit"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary w-100 mb-3">
+                                <i class="fas fa-edit me-1"></i> Editar Método de Pagamento
+                            </a>
+                        }
+
+                        @if (await PermissionHelper.HasPermissionAsync(Context, "paymentmethods.delete"))
+                        {
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-trash me-1"></i> Excluir Método de Pagamento
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> Este é um método de pagamento do sistema e não pode ser editado ou excluído.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetPaymentMethodTypeDescription(int type)
+    {
+        return type switch
+        {
+            1 => "Dinheiro",
+            2 => "Cartão de Crédito",
+            3 => "Cartão de Débito",
+            4 => "Transferência Bancária",
+            5 => "Carteira Digital",
+            6 => "Cheque",
+            7 => "Outro",
+            _ => "Desconhecido"
+        };
+    }
+}

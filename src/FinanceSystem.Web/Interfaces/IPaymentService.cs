@@ -17,5 +17,9 @@ namespace FinanceSystem.Web.Services
         Task<PaymentModel> MarkAsPaidAsync(string id, DateTime? paymentDate, string token);
         Task<PaymentModel> MarkAsOverdueAsync(string id, string token);
         Task<PaymentModel> CancelPaymentAsync(string id, string token);
+        Task<string> GetInstallmentParentPaymentAsync(string installmentId, string token);
+        Task<bool> MarkInstallmentAsPaidAsync(string installmentId, DateTime paymentDate, string token);
+        Task<bool> MarkInstallmentAsOverdueAsync(string installmentId, string token);
+        Task<bool> CancelInstallmentAsync(string installmentId, string token);
     }
 }

@@ -1,92 +1,353 @@
 ﻿@{
-    ViewData["Title"] = "Início";
+    ViewData["Title"] = "Home";
+
+    // Dados do dashboard
+    var paymentsPending = ViewBag.PaymentsPending as IEnumerable<FinanceSystem.Web.Models.PaymentModel> ?? new List<FinanceSystem.Web.Models.PaymentModel>();
+    var paymentsOverdue = ViewBag.PaymentsOverdue as IEnumerable<FinanceSystem.Web.Models.PaymentModel> ?? new List<FinanceSystem.Web.Models.PaymentModel>();
+    var totalPendingAmount = paymentsPending.Sum(p => p.Amount);
+    var totalOverdueAmount = paymentsOverdue.Sum(p => p.Amount);
+    var totalBalance = ViewBag.TotalBalance ?? 0m;
+
+    // Dados dos cartões de crédito
+    var creditCards = ViewBag.CreditCards as IEnumerable<FinanceSystem.Web.Models.CreditCardModel> ?? new List<FinanceSystem.Web.Models.CreditCardModel>();
+
+    // Dados para o gráfico mensal
+    var monthlyData = ViewBag.MonthlyData as Dictionary<string, decimal> ?? new Dictionary<string, decimal>();
 }
 
-<div class="container-fluid px-0">
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard Financeiro</h1>
+        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-download fa-sm text-white-50"></i> Gerar Relatório
+        </a>
+    </div>
+
+    <!-- Cards de Resumo -->
     <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Bem-vindo ao Finance System</h5>
-                </div>
+        <!-- Saldo Total -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-4">
-                                <h2>Olá, @User.Identity?.Name!</h2>
-                                <p class="text-muted">
-                                    Bem-vindo ao seu sistema de gerenciamento. Você está logado como
-                                    <strong>@(User.IsInRole("Admin") ? "Administrador" : "Usuário")</strong>.
-                                </p>
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Saldo Atual
                             </div>
-
-                            <div class="mb-4">
-                                <h5 class="mb-3">Informações do Usuário</h5>
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="user-avatar me-3">
-                                        <i class="fas fa-user fa-2x"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">@User.Identity?.Name</h6>
-                                        <span class="badge bg-primary">@(User.IsInRole("Admin") ? "Administrador" : "Usuário")</span>
-                                    </div>
-                                </div>
-                                <p class="text-muted">
-                                    Data de acesso: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
-                                </p>
-                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", totalBalance)</div>
                         </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <div class="col-md-6">
-                            <h5 class="mb-3">Acesso Rápido</h5>
-
-                            <div class="row">
-                                @if (User.IsInRole("Admin"))
-                                {
-                                    <div class="col-md-6 mb-3">
-                                        <div class="card border-0 shadow-sm h-100">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="icon-circle bg-primary text-white me-3">
-                                                        <i class="fas fa-users"></i>
-                                                    </div>
-                                                    <h6 class="mb-0">Gerenciar Usuários</h6>
-                                                </div>
-                                                <p class="small text-muted">Acesse para cadastrar, editar ou excluir usuários do sistema.</p>
-                                                <a asp-controller="Users" asp-action="Index" class="btn btn-sm btn-outline-primary">Acessar</a>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <div class="card border-0 shadow-sm h-100">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="icon-circle bg-success text-white me-3">
-                                                        <i class="fas fa-user-tag"></i>
-                                                    </div>
-                                                    <h6 class="mb-0">Gerenciar Perfis</h6>
-                                                </div>
-                                                <p class="small text-muted">Acesse para cadastrar, editar ou excluir perfis de acesso.</p>
-                                                <a asp-controller="Roles" asp-action="Index" class="btn btn-sm btn-outline-success">Acessar</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="col-12">
-                                        <div class="alert alert-info">
-                                            <i class="fas fa-info-circle me-2"></i>
-                                            Você está logado como usuário regular. Apenas administradores têm acesso às funcionalidades de gerenciamento.
-                                        </div>
-                                    </div>
-                                }
+        <!-- Pendente -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pendente
                             </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", totalPendingAmount)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vencido -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Vencido
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", totalOverdueAmount)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cartões de Crédito -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Cartões de Crédito
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@creditCards.Count()</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-credit-card fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Gráfico Anual -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Resumo de Gastos Mensais</h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end shadow animated--fade-in"
+                             aria-labelledby="dropdownMenuLink">
+                            <div class="dropdown-header">Opções:</div>
+                            <a class="dropdown-item" href="#">Exportar Dados</a>
+                            <a class="dropdown-item" href="#">Alterar Período</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Ver Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="monthlyExpensesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Utilização de Limite -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Utilização de Limite de Cartões</h6>
+                </div>
+                <div class="card-body">
+                    @if (creditCards.Any())
+                    {
+                        @foreach (var card in creditCards)
+                        {
+                            var usedPercentage = (card.Limit - card.AvailableLimit) / card.Limit * 100;
+                            var colorClass = usedPercentage > 75 ? "bg-danger" : (usedPercentage > 50 ? "bg-warning" : "bg-success");
+
+                            <h4 class="small font-weight-bold">@card.Name <span class="float-end">@string.Format("{0:0}%", usedPercentage)</span></h4>
+                            <div class="progress mb-4">
+                                <div class="progress-bar @colorClass" role="progressbar" style="width: @string.Format("{0:0}%", usedPercentage)"
+                                     aria-valuenow="@string.Format("{0:0}", usedPercentage)" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center">
+                            <p>Nenhum cartão de crédito cadastrado.</p>
+                            <a asp-controller="CreditCards" asp-action="Create" class="btn btn-sm btn-primary">
+                                <i class="fas fa-plus me-1"></i> Adicionar Cartão
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagamentos Próximos -->
+    <div class="row">
+        <!-- Pagamentos Pendentes -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Pagamentos Pendentes</h6>
+                </div>
+                <div class="card-body">
+                    @if (paymentsPending.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Descrição</th>
+                                        <th>Vencimento</th>
+                                        <th>Valor</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var payment in paymentsPending.OrderBy(p => p.DueDate).Take(5))
+                                    {
+                                        <tr>
+                                            <td>@payment.Description</td>
+                                            <td>@payment.DueDate.ToString("dd/MM/yyyy")</td>
+                                            <td>@string.Format("{0:C2}", payment.Amount)</td>
+                                            <td>
+                                                <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a asp-controller="Payments" asp-action="Pending" class="btn btn-sm btn-primary">Ver Todos</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">
+                            <p class="mb-0">Nenhum pagamento pendente!</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagamentos Vencidos -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Pagamentos Vencidos</h6>
+                </div>
+                <div class="card-body">
+                    @if (paymentsOverdue.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Descrição</th>
+                                        <th>Vencimento</th>
+                                        <th>Valor</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var payment in paymentsOverdue.OrderBy(p => p.DueDate).Take(5))
+                                    {
+                                        <tr>
+                                            <td>@payment.Description</td>
+                                            <td>@payment.DueDate.ToString("dd/MM/yyyy")</td>
+                                            <td>@string.Format("{0:C2}", payment.Amount)</td>
+                                            <td>
+                                                <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a asp-controller="Payments" asp-action="Overdue" class="btn btn-sm btn-danger">Ver Todos</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">
+                            <p class="mb-0">Nenhum pagamento vencido!</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Configuração do gráfico de gastos mensais
+            const monthlyLabels = @Html.Raw(Json.Serialize(monthlyData.Keys));
+            const monthlyValues = @Html.Raw(Json.Serialize(monthlyData.Values));
+
+            const ctx = document.getElementById('monthlyExpensesChart').getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [{
+                        label: 'Gastos Mensais',
+                        data: monthlyValues,
+                        borderColor: '#4e73df',
+                        backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                        fill: true,
+                        lineTension: 0.3,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#4e73df',
+                        pointBorderColor: '#4e73df',
+                        pointHoverRadius: 3,
+                        pointHoverBackgroundColor: '#4e73df',
+                        pointHoverBorderColor: '#4e73df',
+                        pointHitRadius: 10,
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            left: 10,
+                            right: 25,
+                            top: 25,
+                            bottom: 0
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                                }
+                            },
+                            grid: {
+                                color: "rgb(234, 236, 244)",
+                                zeroLineColor: "rgb(234, 236, 244)",
+                                drawBorder: false,
+                                borderDash: [2],
+                                zeroLineBorderDash: [2]
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'R$ ' + context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,246 @@
+﻿@model FinanceSystem.Web.Models.CreditCardModel
+@using FinanceSystem.Web.Helpers
+@{
+    ViewData["Title"] = "Detalhes do Cartão de Crédito";
+    var paymentsWithCard = ViewBag.PaymentsWithCard as IEnumerable<FinanceSystem.Web.Models.PaymentModel> ?? new List<FinanceSystem.Web.Models.PaymentModel>();
+    var usedPercentage = (Model.Limit - Model.AvailableLimit) / Model.Limit * 100;
+    var colorClass = usedPercentage > 75 ? "danger" : (usedPercentage > 50 ? "warning" : "success");
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Detalhes do Cartão</h1>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+            </a>
+            @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.edit"))
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i> Editar
+                </a>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informações do Cartão -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Informações do Cartão</h6>
+                    <span class="badge bg-primary">@Model.CardBrand</span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Nome</h5>
+                                <p>@Model.Name</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Últimos 4 Dígitos</h5>
+                                <p>@Model.LastFourDigits</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Dia de Fechamento</h5>
+                                <p>@Model.ClosingDay</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Dia de Vencimento</h5>
+                                <p>@Model.DueDay</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Limite Total</h5>
+                                <p>@Model.GetFormattedLimit()</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Limite Disponível</h5>
+                                <p>@Model.GetFormattedAvailableLimit()</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Limite Utilizado</h5>
+                                <p>@Model.GetFormattedUsedLimit() (@Model.GetFormattedUsedPercentage())</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Data de Criação</h5>
+                                <p>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5 class="small font-weight-bold text-muted">Utilização do Limite</h5>
+                        <div class="progress mb-4">
+                            <div class="progress-bar bg-@colorClass" role="progressbar" style="width: @string.Format("{0:0}%", usedPercentage)"
+                                 aria-valuenow="@string.Format("{0:0}", usedPercentage)" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ações -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Ações</h6>
+                </div>
+                <div class="card-body">
+                    <a asp-controller="Payments" asp-action="Create" asp-route-paymentMethodId="@Model.PaymentMethodId" asp-route-creditCardId="@Model.Id" class="btn btn-success w-100 mb-3">
+                        <i class="fas fa-plus me-1"></i> Criar Novo Pagamento com Este Cartão
+                    </a>
+
+                    <a asp-controller="Payments" asp-action="ByMethod" asp-route-id="@Model.PaymentMethodId" class="btn btn-info w-100 mb-3">
+                        <i class="fas fa-list me-1"></i> Ver Pagamentos com Este Cartão
+                    </a>
+
+                    @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.edit"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary w-100 mb-3">
+                            <i class="fas fa-edit me-1"></i> Editar Cartão
+                        </a>
+                    }
+
+                    @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.delete"))
+                    {
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100">
+                            <i class="fas fa-trash me-1"></i> Excluir Cartão
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Data de Pagamento da Fatura</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        @{
+                            var today = DateTime.Today;
+                            var closingDay = Model.ClosingDay;
+                            var dueDay = Model.DueDay;
+
+                            DateTime nextClosingDate;
+                            DateTime nextDueDate;
+
+                            // Calcular a próxima data de fechamento
+                            if (today.Day <= closingDay)
+                            {
+                                nextClosingDate = new DateTime(today.Year, today.Month, closingDay);
+                            }
+                            else
+                            {
+                                nextClosingDate = today.AddMonths(1);
+                                nextClosingDate = new DateTime(nextClosingDate.Year, nextClosingDate.Month, closingDay);
+                            }
+
+                            // Calcular a próxima data de vencimento
+                            if (today.Day <= dueDay)
+                            {
+                                nextDueDate = new DateTime(today.Year, today.Month, dueDay);
+                            }
+                            else
+                            {
+                                nextDueDate = today.AddMonths(1);
+                                nextDueDate = new DateTime(nextDueDate.Year, nextDueDate.Month, dueDay);
+                            }
+
+                            // Calcular dias restantes
+                            var daysToClosing = (nextClosingDate - today).Days;
+                            var daysToDue = (nextDueDate - today).Days;
+                        }
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="card border-left-primary mb-3">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Próximo Fechamento</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">@nextClosingDate.ToString("dd/MM/yyyy")</div>
+                                                <div class="text-xs text-muted mt-1">Faltam @daysToClosing dias</div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-left-danger mb-3">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Próximo Vencimento</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">@nextDueDate.ToString("dd/MM/yyyy")</div>
+                                                <div class="text-xs text-muted mt-1">Faltam @daysToDue dias</div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagamentos Recentes -->
+    @if (paymentsWithCard.Any())
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Pagamentos Recentes com Este Cartão</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Data</th>
+                                <th>Vencimento</th>
+                                <th class="text-end">Valor</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var payment in paymentsWithCard.OrderByDescending(p => p.CreatedAt).Take(10))
+                            {
+                                <tr>
+                                    <td>@payment.Description</td>
+                                    <td>@payment.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    <td>@payment.DueDate.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">@payment.GetFormattedAmount()</td>
+                                    <td class="text-center">
+                                        <span class="badge @payment.StatusBadgeClass">@payment.StatusDescription</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-3 text-center">
+                    <a asp-controller="Payments" asp-action="ByMethod" asp-route-id="@Model.PaymentMethodId" class="btn btn-sm btn-primary">
+                        Ver Todos os Pagamentos
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
