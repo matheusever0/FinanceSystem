@@ -12,7 +12,8 @@
     <title>Login - Finance System</title>
     <link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" asp-append-version="true">
     <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" asp-append-version="true">
-    <link href="~/css/login.css" rel="stylesheet" asp-append-version="true">
+    <link href="~/css/base/variables.css" rel="stylesheet" asp-append-version="true">
+    <link href="~/css/pages/login.css" rel="stylesheet" asp-append-version="true">
 </head>
 <body class="login-page">
     <div class="login-container">
@@ -53,10 +54,11 @@
             <small>&copy; 2025 Finance System - Todos os direitos reservados</small>
         </div>
     </div>
-
-    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
-    <script src="~/lib/jquery/jquery.min.js" asp-append-version="true"></script>
-    <script src="~/lib/jquery-validation/jquery.validate.min.js" asp-append-version="true"></script>
-    <script src="~/lib/jquery-validation/jquery.validate.unobtrusive.min.js" asp-append-version="true"></script>
+    @section Scripts {
+        <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+        <script src="~/lib/jquery/jquery.min.js" asp-append-version="true"></script>
+        <script src="~/js/components/forms.js" asp-append-version="true"></script>
+        <partial name="_ValidationScriptsPartial" />
+    }
 </body>
 </html>

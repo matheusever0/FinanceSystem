@@ -13,6 +13,10 @@
     var nextYear = currentMonth == 12 ? currentYear + 1 : currentYear;
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/payments.css" asp-append-version="true">
+}
+
 <div class="container-fluid">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
@@ -79,7 +83,7 @@
         <div class="card shadow mb-4">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-striped mb-0 table-payments">
                         <thead class="bg-light">
                             <tr>
                                 <th>Descrição</th>
@@ -114,7 +118,7 @@
                                     <td class="text-center">@item.GetFormattedDueDate()</td>
                                     <td class="text-end">@item.GetFormattedAmount()</td>
                                     <td class="text-center">
-                                        <span class="badge @item.StatusBadgeClass">@item.StatusDescription</span>
+                                        <span class="badge @item.StatusBadgeClass payment-status">@item.StatusDescription</span>
                                     </td>
                                     <td>@item.PaymentTypeName</td>
                                     <td>@item.PaymentMethodName</td>
@@ -131,7 +135,7 @@
                                             }
                                             @if (await PermissionHelper.HasPermissionAsync(Context, "payments.delete"))
                                             {
-                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
+                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger btn-delete-payment">
                                                     <i class="fas fa-trash"></i>
                                                 </a>
                                             }
@@ -211,21 +215,6 @@
 </div>
 
 @section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const collapseFilters = document.getElementById('collapseFilters');
-            const filterBtn = document.querySelector('[data-bs-toggle="collapse"]');
-
-            filterBtn.addEventListener('click', function() {
-                const icon = this.querySelector('i');
-                if (collapseFilters.classList.contains('show')) {
-                    icon.classList.remove('fa-chevron-down');
-                    icon.classList.add('fa-chevron-right');
-                } else {
-                    icon.classList.remove('fa-chevron-right');
-                    icon.classList.add('fa-chevron-down');
-                }
-            });
-        });
-    </script>
+    <script src="~/js/components/tables.js" asp-append-version="true"></script>
+    <script src="~/js/pages/payments.js" asp-append-version="true"></script>
 }

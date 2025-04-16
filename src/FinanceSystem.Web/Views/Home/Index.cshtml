@@ -16,6 +16,10 @@
     var monthlyData = ViewBag.MonthlyData as Dictionary<string, decimal> ?? new Dictionary<string, decimal>();
 }
 
+@section Styles {
+        <link rel="stylesheet" href="~/css/pages/dashboard.css" asp-append-version="true">
+}
+
 <div class="container-fluid">
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -126,53 +130,53 @@
                     <div class="row justify-content-center">
                         @if (await PermissionHelper.HasPermissionAsync(Context, "payments.create"))
                         {
-                            <div class="col-xl-3 col-md-6 mb-2">
-                                <a asp-controller="Payments" asp-action="Create" class="btn btn-primary btn-icon-split btn-lg w-100">
-                                    <span class="icon text-white-50">
-                                        <i class="fas fa-plus"></i>
-                                    </span>
-                                    <span class="text">Novo Pagamento</span>
-                                </a>
-                            </div>
+                                <div class="col-xl-3 col-md-6 mb-2">
+                                    <a asp-controller="Payments" asp-action="Create" class="btn btn-primary btn-icon-split btn-lg w-100">
+                                        <span class="icon text-white-50">
+                                            <i class="fas fa-plus"></i>
+                                        </span>
+                                        <span class="text">Novo Pagamento</span>
+                                    </a>
+                                </div>
                         }
 
                         @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.view"))
                         {
-                            <div class="col-xl-3 col-md-6 mb-2">
-                                <a asp-controller="CreditCards" asp-action="Index" class="btn btn-info btn-icon-split btn-lg w-100">
-                                    <span class="icon text-white-50">
-                                        <i class="fas fa-credit-card"></i>
-                                    </span>
-                                    <span class="text">Meus Cartões</span>
-                                </a>
-                            </div>
+                                <div class="col-xl-3 col-md-6 mb-2">
+                                    <a asp-controller="CreditCards" asp-action="Index" class="btn btn-info btn-icon-split btn-lg w-100">
+                                        <span class="icon text-white-50">
+                                            <i class="fas fa-credit-card"></i>
+                                        </span>
+                                        <span class="text">Meus Cartões</span>
+                                    </a>
+                                </div>
                         }
 
                         @if (await PermissionHelper.HasPermissionAsync(Context, "payments.view"))
                         {
-                            <div class="col-xl-3 col-md-6 mb-2">
-                                <a asp-controller="Payments" asp-action="Pending" class="btn btn-warning btn-icon-split btn-lg w-100">
-                                    <span class="icon text-white-50">
-                                        <i class="fas fa-clock"></i>
-                                    </span>
-                                    <span class="text">Pagamentos Pendentes</span>
-                                </a>
-                            </div>
+                                <div class="col-xl-3 col-md-6 mb-2">
+                                    <a asp-controller="Payments" asp-action="Pending" class="btn btn-warning btn-icon-split btn-lg w-100">
+                                        <span class="icon text-white-50">
+                                            <i class="fas fa-clock"></i>
+                                        </span>
+                                        <span class="text">Pagamentos Pendentes</span>
+                                    </a>
+                                </div>
                         }
 
                         @if (await PermissionHelper.HasPermissionAsync(Context, "payments.view"))
                         {
-                            <div class="col-xl-3 col-md-6 mb-2">
-                                <a asp-controller="Payments" asp-action="ByMonth"
-                                   asp-route-month="@DateTime.Now.Month"
-                                   asp-route-year="@DateTime.Now.Year"
-                                   class="btn btn-success btn-icon-split btn-lg w-100">
-                                    <span class="icon text-white-50">
-                                        <i class="fas fa-calendar"></i>
-                                    </span>
-                                    <span class="text">Este Mês</span>
-                                </a>
-                            </div>
+                                <div class="col-xl-3 col-md-6 mb-2">
+                                    <a asp-controller="Payments" asp-action="ByMonth"
+                                       asp-route-month="@DateTime.Now.Month"
+                                       asp-route-year="@DateTime.Now.Year"
+                                       class="btn btn-success btn-icon-split btn-lg w-100">
+                                        <span class="icon text-white-50">
+                                            <i class="fas fa-calendar"></i>
+                                        </span>
+                                        <span class="text">Este Mês</span>
+                                    </a>
+                                </div>
                         }
                     </div>
                 </div>
@@ -190,7 +194,9 @@
                 </div>
                 <div class="card-body">
                     <div class="chart-area">
-                        <canvas id="monthlyExpensesChart"></canvas>
+                        <canvas id="monthlyExpensesChart" 
+                                data-labels="@Html.Raw(Json.Serialize(monthlyData.Keys))" 
+                                data-values="@Html.Raw(Json.Serialize(monthlyData.Values))"></canvas>
                     </div>
                 </div>
             </div>
@@ -205,18 +211,18 @@
                 <div class="card-body">
                     @if (!creditCards.Any())
                     {
-                        <div class="text-center my-4">
-                            <div class="mb-3">
-                                <i class="fas fa-credit-card fa-3x text-gray-300"></i>
-                            </div>
-                            <p>Nenhum cartão de crédito cadastrado.</p>
+                            <div class="text-center my-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-credit-card fa-3x text-gray-300"></i>
+                                </div>
+                                <p>Nenhum cartão de crédito cadastrado.</p>
                             @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.create"))
                             {
-                                <a asp-controller="CreditCards" asp-action="Create" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-plus me-1"></i> Adicionar Cartão
-                                </a>
+                                        <a asp-controller="CreditCards" asp-action="Create" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-plus me-1"></i> Adicionar Cartão
+                                        </a>
                             }
-                        </div>
+                            </div>
                     }
                     else
                     {
@@ -225,28 +231,28 @@
                             var usedPercentage = Math.Round((card.Limit - card.AvailableLimit) / card.Limit * 100, 0);
                             var colorClass = usedPercentage > 75 ? "danger" : (usedPercentage > 50 ? "warning" : "success");
 
-                            <div class="mb-4">
-                                <h4 class="small font-weight-bold">
+                                    <div class="mb-4">
+                                        <h4 class="small font-weight-bold">
                                     @card.Name <span class="float-end">@card.GetFormattedUsedPercentage()</span>
-                                </h4>
-                                <div class="progress mb-4">
-                                    <div class="progress-bar bg-@colorClass" role="progressbar" style="width: @usedPercentage%"
-                                         aria-valuenow="@usedPercentage" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <div class="small text-muted d-flex justify-content-between">
-                                    <span>Disponível: @card.GetFormattedAvailableLimit()</span>
-                                    <span>Limite: @card.GetFormattedLimit()</span>
-                                </div>
-                            </div>
+                                        </h4>
+                                        <div class="progress mb-4">
+                                            <div class="progress-bar bg-@colorClass" role="progressbar" style="width: @usedPercentage%"
+                                                 aria-valuenow="@usedPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <div class="small text-muted d-flex justify-content-between">
+                                            <span>Disponível: @card.GetFormattedAvailableLimit()</span>
+                                            <span>Limite: @card.GetFormattedLimit()</span>
+                                        </div>
+                                    </div>
                         }
 
                         @if (creditCards.Count() > 3)
                         {
-                            <div class="text-center mt-4">
-                                <a asp-controller="CreditCards" asp-action="Index" class="btn btn-sm btn-light">
-                                    Ver todos os cartões
-                                </a>
-                            </div>
+                                    <div class="text-center mt-4">
+                                        <a asp-controller="CreditCards" asp-action="Index" class="btn btn-sm btn-light">
+                                            Ver todos os cartões
+                                        </a>
+                                    </div>
                         }
                     }
                 </div>
@@ -265,48 +271,48 @@
                 <div class="card-body">
                     @if (!paymentsPending.Any())
                     {
-                        <div class="text-center my-4">
-                            <div class="mb-3">
-                                <i class="fas fa-check-circle fa-3x text-success"></i>
+                            <div class="text-center my-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-check-circle fa-3x text-success"></i>
+                                </div>
+                                <p>Nenhum pagamento pendente!</p>
                             </div>
-                            <p>Nenhum pagamento pendente!</p>
-                        </div>
                     }
                     else
                     {
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Descrição</th>
-                                        <th>Vencimento</th>
-                                        <th class="text-end">Valor</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Descrição</th>
+                                            <th>Vencimento</th>
+                                            <th class="text-end">Valor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                     @foreach (var payment in paymentsPending.OrderBy(p => p.DueDate).Take(5))
                                     {
-                                        <tr>
-                                            <td>
-                                                <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id">
+                                                <tr>
+                                                    <td>
+                                                        <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id">
                                                     @payment.Description
-                                                </a>
-                                            </td>
-                                            <td>@payment.GetFormattedDueDate()</td>
-                                            <td class="text-end">@payment.GetFormattedAmount()</td>
-                                        </tr>
+                                                        </a>
+                                                    </td>
+                                                    <td>@payment.GetFormattedDueDate()</td>
+                                                    <td class="text-end">@payment.GetFormattedAmount()</td>
+                                                </tr>
                                     }
-                                </tbody>
-                            </table>
-                        </div>
+                                    </tbody>
+                                </table>
+                            </div>
 
                         @if (paymentsPending.Count() > 5)
                         {
-                            <div class="text-center mt-3">
-                                <a asp-controller="Payments" asp-action="Pending" class="btn btn-sm btn-warning">
-                                    Ver todos (@paymentsPending.Count())
-                                </a>
-                            </div>
+                                    <div class="text-center mt-3">
+                                        <a asp-controller="Payments" asp-action="Pending" class="btn btn-sm btn-warning">
+                                            Ver todos (@paymentsPending.Count())
+                                        </a>
+                                    </div>
                         }
                     }
                 </div>
@@ -322,48 +328,48 @@
                 <div class="card-body">
                     @if (!paymentsOverdue.Any())
                     {
-                        <div class="text-center my-4">
-                            <div class="mb-3">
-                                <i class="fas fa-calendar-check fa-3x text-success"></i>
+                            <div class="text-center my-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-calendar-check fa-3x text-success"></i>
+                                </div>
+                                <p>Nenhum pagamento vencido!</p>
                             </div>
-                            <p>Nenhum pagamento vencido!</p>
-                        </div>
                     }
                     else
                     {
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Descrição</th>
-                                        <th>Vencimento</th>
-                                        <th class="text-end">Valor</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Descrição</th>
+                                            <th>Vencimento</th>
+                                            <th class="text-end">Valor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                     @foreach (var payment in paymentsOverdue.OrderBy(p => p.DueDate).Take(5))
                                     {
-                                        <tr>
-                                            <td>
-                                                <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id" class="text-danger">
+                                                <tr>
+                                                    <td>
+                                                        <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id" class="text-danger">
                                                     @payment.Description
-                                                </a>
-                                            </td>
-                                            <td>@payment.GetFormattedDueDate()</td>
-                                            <td class="text-end">@payment.GetFormattedAmount()</td>
-                                        </tr>
+                                                        </a>
+                                                    </td>
+                                                    <td>@payment.GetFormattedDueDate()</td>
+                                                    <td class="text-end">@payment.GetFormattedAmount()</td>
+                                                </tr>
                                     }
-                                </tbody>
-                            </table>
-                        </div>
+                                    </tbody>
+                                </table>
+                            </div>
 
                         @if (paymentsOverdue.Count() > 5)
                         {
-                            <div class="text-center mt-3">
-                                <a asp-controller="Payments" asp-action="Overdue" class="btn btn-sm btn-danger">
-                                    Ver todos (@paymentsOverdue.Count())
-                                </a>
-                            </div>
+                                    <div class="text-center mt-3">
+                                        <a asp-controller="Payments" asp-action="Overdue" class="btn btn-sm btn-danger">
+                                            Ver todos (@paymentsOverdue.Count())
+                                        </a>
+                                    </div>
                         }
                     }
                 </div>
@@ -373,81 +379,7 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Configuração do gráfico de gastos mensais
-            const monthlyLabels = @Html.Raw(Json.Serialize(monthlyData.Keys));
-            const monthlyValues = @Html.Raw(Json.Serialize(monthlyData.Values));
-
-            const ctx = document.getElementById('monthlyExpensesChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: monthlyLabels,
-                    datasets: [{
-                        label: 'Gastos Mensais',
-                        data: monthlyValues,
-                        borderColor: '#4e73df',
-                        backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 3,
-                        pointBackgroundColor: '#4e73df',
-                        pointBorderColor: '#4e73df',
-                        pointHoverRadius: 3,
-                        pointHoverBackgroundColor: '#4e73df',
-                        pointHoverBorderColor: '#4e73df',
-                        pointHitRadius: 10,
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: {
-                            left: 10,
-                            right: 25,
-                            top: 25,
-                            bottom: 0
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false,
-                                drawBorder: false
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                callback: function(value) {
-                                    return 'R$ ' + value.toLocaleString('pt-BR');
-                                }
-                            },
-                            grid: {
-                                color: "rgb(234, 236, 244)",
-                                zeroLineColor: "rgb(234, 236, 244)",
-                                drawBorder: false,
-                                borderDash: [2],
-                                zeroLineBorderDash: [2]
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return 'R$ ' + context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        });
-    </script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="~/js/components/charts.js" asp-append-version="true"></script>
+        <script src="~/js/pages/dashboard.js" asp-append-version="true"></script>
 }
