@@ -4,6 +4,10 @@
     ViewData["Title"] = "Detalhes do Pagamento";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/payments.css" asp-append-version="true">
+}
+
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Detalhes do Pagamento</h1>
@@ -94,7 +98,7 @@
                 <div class="card-body">
                     @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
                     {
-                        @if (Model.Status == 1)
+                        @if (Model.Status == 1) // Pendente
                         {
                             <form asp-action="MarkAsPaid" asp-route-id="@Model.Id" method="post" class="mb-3">
                                 @Html.AntiForgeryToken()
@@ -114,7 +118,7 @@
                                 </button>
                             </form>
                         }
-                        else if (Model.Status == 3)
+                        else if (Model.Status == 3) // Vencido
                         {
                             <form asp-action="MarkAsPaid" asp-route-id="@Model.Id" method="post" class="mb-3">
                                 @Html.AntiForgeryToken()
@@ -128,11 +132,11 @@
                             </form>
                         }
 
-                        @if (Model.Status != 4)
+                        @if (Model.Status != 4) // Não Cancelado
                         {
                             <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="mb-3">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-danger w-100">
+                                <button type="submit" class="btn btn-danger w-100 btn-cancel-payment" data-id="@Model.Id">
                                     <i class="fas fa-ban me-1"></i> Cancelar Pagamento
                                 </button>
                             </form>
@@ -141,7 +145,7 @@
 
                     @if (await PermissionHelper.HasPermissionAsync(Context, "payments.delete"))
                     {
-                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100">
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100 btn-delete-payment">
                             <i class="fas fa-trash me-1"></i> Excluir Pagamento
                         </a>
                     }
@@ -184,7 +188,7 @@
                                     <td>
                                         @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
                                         {
-                                            @if (installment.Status == 1)
+                                            @if (installment.Status == 1) // Pendente
                                             {
                                                 <div class="btn-group">
                                                     <button type="button" class="btn btn-sm btn-success mark-installment-paid"
@@ -197,7 +201,7 @@
                                                     </button>
                                                 </div>
                                             }
-                                            else if (installment.Status == 3)
+                                            else if (installment.Status == 3) // Vencido
                                             {
                                                 <button type="button" class="btn btn-sm btn-success mark-installment-paid"
                                                         data-installment-id="@installment.Id" data-bs-toggle="modal" data-bs-target="#markInstallmentPaidModal">
@@ -268,28 +272,6 @@
 }
 
 @section Scripts {
-    @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
-    {
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                                const markPaidButtons = document.querySelectorAll('.mark-installment-paid');
-                markPaidButtons.forEach(button => {
-                    button.addEventListener('click', function() {
-                        const installmentId = this.getAttribute('data-installment-id');
-                        const form = document.getElementById('markInstallmentPaidForm');
-                        form.action = `/PaymentInstallments/${installmentId}/MarkAsPaid`;
-                    });
-                });
-
-                                const markOverdueButtons = document.querySelectorAll('.mark-installment-overdue');
-                markOverdueButtons.forEach(button => {
-                    button.addEventListener('click', function() {
-                        const installmentId = this.getAttribute('data-installment-id');
-                        const form = document.getElementById('markInstallmentOverdueForm');
-                        form.action = `/PaymentInstallments/${installmentId}/MarkAsOverdue`;
-                    });
-                });
-            });
-        </script>
-    }
+    <script src="~/js/components/forms.js" asp-append-version="true"></script>
+    <script src="~/js/pages/payments.js" asp-append-version="true"></script>
 }

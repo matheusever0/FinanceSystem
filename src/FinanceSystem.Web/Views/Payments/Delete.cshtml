@@ -3,6 +3,10 @@
     ViewData["Title"] = "Excluir Pagamento";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/payments.css" asp-append-version="true">
+}
+
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Excluir Pagamento</h1>
@@ -46,7 +50,6 @@
                         <h6 class="small font-weight-bold text-muted">Método de Pagamento</h6>
                         <p>@Model.PaymentMethodName</p>
                     </div>
-
                     @if (Model.Installments != null && Model.Installments.Any())
                     {
                         <div class="alert alert-warning mt-3">
@@ -87,3 +90,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/pages/payments.js" asp-append-version="true"></script>
+}

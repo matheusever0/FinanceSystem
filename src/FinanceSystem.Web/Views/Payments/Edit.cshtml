@@ -5,6 +5,10 @@
     var paymentMethods = ViewBag.PaymentMethods as IEnumerable<FinanceSystem.Web.Models.PaymentMethodModel>;
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/payments.css" asp-append-version="true">
+}
+
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Editar Pagamento</h1>
@@ -18,7 +22,7 @@
             <h6 class="m-0 font-weight-bold text-primary">Informações do Pagamento</h6>
         </div>
         <div class="card-body">
-            <form asp-action="Edit" method="post">
+            <form asp-action="Edit" method="post" id="payment-form">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="row">
@@ -110,4 +114,6 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="~/js/components/forms.js" asp-append-version="true"></script>
+    <script src="~/js/pages/payments.js" asp-append-version="true"></script>
 }

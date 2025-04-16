@@ -6,6 +6,10 @@
     var creditCards = ViewBag.CreditCards as IEnumerable<FinanceSystem.Web.Models.CreditCardModel>;
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/payments.css" asp-append-version="true">
+}
+
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Novo Pagamento</h1>
@@ -19,7 +23,7 @@
             <h6 class="m-0 font-weight-bold text-primary">Informações do Pagamento</h6>
         </div>
         <div class="card-body">
-            <form asp-action="Create" method="post">
+            <form asp-action="Create" method="post" id="payment-form">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="row">
@@ -135,26 +139,6 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const paymentMethodSelect = document.getElementById('paymentMethodSelect');
-            const creditCardSection = document.getElementById('creditCardSection');
-
-        function toggleCreditCardSection() {
-            const selectedOption = paymentMethodSelect.options[paymentMethodSelect.selectedIndex];
-            if (selectedOption.value && selectedOption.getAttribute('data-type') === '2') { 
-                creditCardSection.style.display = 'block';
-                document.getElementById('CreditCardId').setAttribute('required', 'required');
-            } else {
-                creditCardSection.style.display = 'none';
-                document.getElementById('CreditCardId').removeAttribute('required');
-                document.getElementById('CreditCardId').value = '';
-            }
-        }
-
-            toggleCreditCardSection();
-
-            paymentMethodSelect.addEventListener('change', toggleCreditCardSection);
-        });
-    </script>
+    <script src="~/js/components/forms.js" asp-append-version="true"></script>
+    <script src="~/js/pages/payments.js" asp-append-version="true"></script>
 }
