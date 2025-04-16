@@ -6,7 +6,7 @@
     left: var(--sidebar-width);
     height: var(--topbar-height);
     background-color: var(--bg-light);
-    transition: all var(--transition-speed);
+    transition: all 0.3s ease;
     z-index: var(--z-index-sticky);
     box-shadow: var(--shadow-sm);
     display: flex;
@@ -14,23 +14,30 @@
     padding: 0 1rem;
 }
 
-    /* Quando o sidebar está colapsado */
-    .topbar.expanded {
-        left: var(--sidebar-collapsed-width);
-    }
+/* When sidebar is collapsed on desktop */
+.topbar.expanded {
+    left: var(--sidebar-collapsed-width);
+}
 
-/* Botão para toggle do menu */
+/* Add this to your existing topbar.css */
+@media (max-width: 991.98px) {
+    .topbar {
+        left: 0 !important;
+    }
+}
+
+/* Menu toggle button */
 .menu-toggle {
     cursor: pointer;
     font-size: 1.5rem;
     margin-right: 1rem;
     color: var(--primary-color);
-    transition: color var(--transition-speed);
+    transition: color 0.3s ease;
 }
 
-    .menu-toggle:hover {
-        color: var(--primary-dark);
-    }
+.menu-toggle:hover {
+    color: var(--primary-dark);
+}
 
 /* Título da página */
 .page-title {
@@ -46,100 +53,4 @@
 /* Avatar do usuário e menu dropdown */
 .user-dropdown {
     position: relative;
-}
-
-    .user-dropdown button {
-        background: none;
-        border: none;
-        color: var(--text-color);
-        display: flex;
-        align-items: center;
-        padding: 0.5rem;
-        cursor: pointer;
-        transition: all var(--transition-speed);
-    }
-
-        .user-dropdown button:hover {
-            color: var(--primary-color);
-        }
-
-/* Dropdown menu */
-.dropdown-menu {
-    position: absolute;
-    right: 0;
-    z-index: var(--z-index-dropdown);
-    min-width: 10rem;
-    margin: 0.125rem 0 0;
-    background-color: var(--bg-light);
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    display: none;
-}
-
-    .dropdown-menu.show {
-        display: block;
-    }
-
-.dropdown-item {
-    display: block;
-    width: 100%;
-    padding: 0.5rem 1rem;
-    clear: both;
-    text-align: inherit;
-    white-space: nowrap;
-    background-color: transparent;
-    border: 0;
-    color: var(--text-color);
-    text-decoration: none;
-}
-
-    .dropdown-item:hover, .dropdown-item:focus {
-        color: var(--text-color);
-        text-decoration: none;
-        background-color: var(--secondary-color);
-    }
-
-    .dropdown-item.active, .dropdown-item:active {
-        color: white;
-        text-decoration: none;
-        background-color: var(--primary-color);
-    }
-
-.dropdown-item-text {
-    display: block;
-    padding: 0.5rem 1rem;
-    color: var(--text-color);
-}
-
-.dropdown-divider {
-    height: 0;
-    margin: 0.5rem 0;
-    overflow: hidden;
-    border-top: 1px solid var(--border-color);
-}
-
-/* Responsividade */
-@media (max-width: 992px) {
-    .topbar {
-        left: 0;
-    }
-
-    .menu-toggle {
-        display: block;
-    }
-
-    .page-title {
-        font-size: 1rem;
-    }
-}
-
-@media (max-width: 576px) {
-    .topbar {
-        padding: 0 0.5rem;
-    }
-
-    .page-title {
-        font-size: 0.9rem;
-    }
 }

@@ -12,6 +12,13 @@
         margin-left: var(--sidebar-collapsed-width);
     }
 
+/* Adjust for mobile view */
+@media (max-width: 991.98px) {
+    .main-content {
+        margin-left: 0 !important;
+    }
+}
+
 /* Container fluido para o conteúdo */
 .container-fluid {
     width: 100%;
@@ -117,10 +124,6 @@
 
 /* Ajustes para telas pequenas */
 @media (max-width: 992px) {
-    .main-content {
-        margin-left: 0;
-    }
-
     .d-sm-flex {
         flex-direction: column;
         align-items: flex-start;
