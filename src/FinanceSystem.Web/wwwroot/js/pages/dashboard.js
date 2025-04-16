@@ -27,75 +27,81 @@ function initializeMonthlyExpensesChart() {
     const chartCanvas = document.getElementById('monthlyExpensesChart');
     if (!chartCanvas) return;
 
-    // Obter dados do atributo data
-    const labels = JSON.parse(chartCanvas.getAttribute('data-labels') || '[]');
-    const values = JSON.parse(chartCanvas.getAttribute('data-values') || '[]');
+    try {
+        const labelsRaw = chartCanvas.getAttribute('data-labels');
+        const valuesRaw = chartCanvas.getAttribute('data-values');
 
-    new Chart(chartCanvas, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Gastos Mensais',
-                data: values,
-                backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                borderColor: 'rgba(78, 115, 223, 1)',
-                pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
-                pointRadius: 3,
-                pointHoverRadius: 5,
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    left: 10,
-                    right: 25,
-                    top: 25,
-                    bottom: 0
-                }
+        const labels = JSON.parse(labelsRaw);
+        const values = JSON.parse(valuesRaw);
+
+        new Chart(chartCanvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Gastos Mensais',
+                    data: values,
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    tension: 0.3,
+                    fill: true
+                }]
             },
-            scales: {
-                x: {
-                    grid: {
-                        display: false,
-                        drawBorder: false
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 10,
+                        right: 25,
+                        top: 25,
+                        bottom: 0
                     }
                 },
-                y: {
-                    ticks: {
-                        callback: function (value) {
-                            return 'R$ ' + value.toLocaleString('pt-BR');
+                scales: {
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
                         }
                     },
-                    grid: {
-                        color: "rgb(234, 236, 244)",
-                        zeroLineColor: "rgb(234, 236, 244)",
-                        drawBorder: false,
-                        borderDash: [2],
-                        zeroLineBorderDash: [2]
+                    y: {
+                        ticks: {
+                            callback: function (value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR');
+                            }
+                        },
+                        grid: {
+                            color: "rgb(234, 236, 244)",
+                            drawBorder: false,
+                            borderDash: [2],
+                            zeroLineBorderDash: [2]
+                        }
                     }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
                 },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            return 'R$ ' + context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return 'R$ ' + context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    } catch (error) {
+        console.error('Erro ao inicializar gráfico de gastos mensais:', error);
+    }
 }
 
 function initializePaymentTypesChart() {

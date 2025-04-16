@@ -4,6 +4,7 @@ using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace FinanceSystem.Web.Controllers
 {
@@ -34,16 +35,23 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 var token = HttpContext.GetJwtToken();
-
-                                var pendingPayments = await _paymentService.GetPendingPaymentsAsync(token);
+                var pendingPayments = await _paymentService.GetPendingPaymentsAsync(token);
                 var overduePayments = await _paymentService.GetOverduePaymentsAsync(token);
+                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
+                decimal totalBalance = 5000.00m;
+                var monthlyData = await GetMonthlyDataAsync(token);
 
-                                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
+                var labels = monthlyData.Keys.ToList();
+                var values = monthlyData.Values.ToList();
 
-                                decimal totalBalance = 5000.00m; 
-                                var monthlyData = await GetMonthlyDataAsync(token);
+                var jsonOptions = new JsonSerializerOptions
+                {
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
 
-                                ViewBag.PaymentsPending = pendingPayments;
+                ViewBag.MonthlyLabels = JsonSerializer.Serialize(labels, jsonOptions);
+                ViewBag.MonthlyValues = JsonSerializer.Serialize(values, jsonOptions);
+                ViewBag.PaymentsPending = pendingPayments;
                 ViewBag.PaymentsOverdue = overduePayments;
                 ViewBag.CreditCards = creditCards;
                 ViewBag.TotalBalance = totalBalance;
@@ -64,7 +72,7 @@ namespace FinanceSystem.Web.Controllers
             var result = new Dictionary<string, decimal>();
             var currentDate = DateTime.Now;
 
-                        for (int i = 5; i >= 0; i--)
+            for (int i = 5; i >= 0; i--)
             {
                 var month = currentDate.AddMonths(-i).Month;
                 var year = currentDate.AddMonths(-i).Year;
@@ -79,7 +87,8 @@ namespace FinanceSystem.Web.Controllers
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Erro ao obter dados do mês {Month}/{Year}", month, year);
-                    result.Add(monthName, 0);                 }
+                    result.Add(monthName, 0);
+                }
             }
 
             return result;

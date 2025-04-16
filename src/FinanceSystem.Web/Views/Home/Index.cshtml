@@ -7,9 +7,7 @@
     var totalPendingAmount = paymentsPending.Sum(p => p.Amount);
     var totalOverdueAmount = paymentsOverdue.Sum(p => p.Amount);
     var totalBalance = ViewBag.TotalBalance ?? 0m;
-
     var creditCards = ViewBag.CreditCards as IEnumerable<FinanceSystem.Web.Models.CreditCardModel> ?? new List<FinanceSystem.Web.Models.CreditCardModel>();
-
     var monthlyData = ViewBag.MonthlyData as Dictionary<string, decimal> ?? new Dictionary<string, decimal>();
 }
 
@@ -192,8 +190,9 @@
                 <div class="card-body">
                     <div class="chart-area">
                         <canvas id="monthlyExpensesChart"
-                                data-labels="@Html.Raw(Json.Serialize(monthlyData.Keys))"
-                                data-values="@Html.Raw(Json.Serialize(monthlyData.Values))"></canvas>
+                                data-labels='@Html.Raw(ViewBag.MonthlyLabels)'
+                                data-values='@Html.Raw(ViewBag.MonthlyValues)'>
+                        </canvas>
                     </div>
                 </div>
             </div>
@@ -376,6 +375,7 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="~/js/components/charts.js" asp-append-version="true"></script>
     <script src="~/js/pages/dashboard.js" asp-append-version="true"></script>
 }
