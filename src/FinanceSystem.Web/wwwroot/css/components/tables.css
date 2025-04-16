@@ -1,2 +1,187 @@
-﻿body {
+﻿/* Estilos para tabelas */
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+    vertical-align: top;
+    border-color: var(--border-color);
+}
+
+    .table > :not(caption) > * > * {
+        padding: 0.75rem;
+        border-bottom-width: 1px;
+    }
+
+    .table > tbody {
+        vertical-align: inherit;
+    }
+
+    .table > thead {
+        vertical-align: bottom;
+    }
+
+/* Variações de tabelas */
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.table-hover > tbody > tr:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+}
+
+.table-bordered {
+    border: 1px solid var(--border-color);
+}
+
+    .table-bordered > :not(caption) > * {
+        border-width: 1px 0;
+    }
+
+        .table-bordered > :not(caption) > * > * {
+            border-width: 0 1px;
+        }
+
+.table-borderless > :not(caption) > * > * {
+    border-bottom-width: 0;
+}
+
+.table-sm > :not(caption) > * > * {
+    padding: 0.3rem;
+}
+
+/* Cores para as linhas da tabela */
+.table-primary,
+.table-primary > th,
+.table-primary > td {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+}
+
+.table-success,
+.table-success > th,
+.table-success > td {
+    background-color: rgba(var(--success-color-rgb), 0.1);
+}
+
+.table-info,
+.table-info > th,
+.table-info > td {
+    background-color: rgba(var(--info-color-rgb), 0.1);
+}
+
+.table-warning,
+.table-warning > th,
+.table-warning > td {
+    background-color: rgba(var(--warning-color-rgb), 0.1);
+}
+
+.table-danger,
+.table-danger > th,
+.table-danger > td {
+    background-color: rgba(var(--danger-color-rgb), 0.1);
+}
+
+.table-secondary,
+.table-secondary > th,
+.table-secondary > td {
+    background-color: rgba(var(--secondary-color-rgb), 0.1);
+}
+
+.table-light,
+.table-light > th,
+.table-light > td {
+    background-color: #f8f9fa;
+}
+
+.table-dark,
+.table-dark > th,
+.table-dark > td {
+    background-color: #343a40;
+    color: white;
+}
+
+/* Tabela responsiva */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Cabeçalho de tabela com fundo claro */
+.bg-light {
+    background-color: var(--secondary-color) !important;
+}
+
+thead.bg-light th {
+    font-weight: 600;
+    color: var(--text-color);
+    border-bottom: 2px solid var(--border-color);
+}
+
+/* Rodapé da tabela com estilo diferenciado */
+tfoot {
+    font-weight: bold;
+    background-color: var(--secondary-color);
+}
+
+/* Status de pagamentos em tabelas */
+.payment-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+    .payment-status i {
+        margin-right: 0.25rem;
+    }
+
+    .payment-status.pending {
+        background-color: rgba(var(--warning-color-rgb), 0.2);
+        color: var(--warning-color);
+    }
+
+    .payment-status.paid {
+        background-color: rgba(var(--success-color-rgb), 0.2);
+        color: var(--success-color);
+    }
+
+    .payment-status.overdue {
+        background-color: rgba(var(--danger-color-rgb), 0.2);
+        color: var(--danger-color);
+    }
+
+    .payment-status.cancelled {
+        background-color: rgba(var(--secondary-color-rgb), 0.2);
+        color: var(--text-muted);
+    }
+
+/* Ajustes para dispositivos pequenos */
+@media (max-width: 576px) {
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+        .table-responsive > .table {
+            white-space: nowrap;
+        }
+
+    .table th, .table td {
+        padding: 0.5rem;
+    }
+}
+
+/* Ajustes para impressão */
+@media print {
+    .table {
+        border-collapse: collapse !important;
+    }
+
+        .table td, .table th {
+            background-color: white !important;
+            border: 1px solid #ddd !important;
+        }
 }

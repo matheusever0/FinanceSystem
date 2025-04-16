@@ -1,2 +1,215 @@
-﻿body {
+﻿/* Dashboard specific styles */
+.dashboard-container {
+    padding-bottom: 2rem;
+}
+
+/* Dashboard cards */
+.dashboard-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+    .dashboard-card:hover {
+        box-shadow: var(--shadow);
+    }
+
+.dashboard-card-header {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-card-body {
+    padding: 1.25rem;
+}
+
+.dashboard-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.quick-action-button {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+    .quick-action-button:hover {
+        transform: translateY(-3px);
+        text-decoration: none;
+        color: white;
+    }
+
+    .quick-action-button i {
+        margin-right: 0.75rem;
+        font-size: 1.5rem;
+    }
+
+.quick-action-primary {
+    background-color: var(--primary-color);
+}
+
+.quick-action-success {
+    background-color: var(--success-color);
+}
+
+.quick-action-danger {
+    background-color: var(--danger-color);
+}
+
+.quick-action-warning {
+    background-color: var(--warning-color);
+}
+
+.quick-action-info {
+    background-color: var(--info-color);
+}
+
+/* Dashboard statistics */
+.stat-card {
+    border-left: 0.25rem solid;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1.25rem;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+    .stat-card:hover {
+        box-shadow: var(--shadow);
+    }
+
+.stat-primary {
+    border-left-color: var(--primary-color);
+}
+
+.stat-success {
+    border-left-color: var(--success-color);
+}
+
+.stat-warning {
+    border-left-color: var(--warning-color);
+}
+
+.stat-danger {
+    border-left-color: var(--danger-color);
+}
+
+.stat-info {
+    border-left-color: var(--info-color);
+}
+
+.stat-label {
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-icon {
+    color: rgba(0, 0, 0, 0.1);
+    font-size: 2rem;
+}
+
+/* Dashboard charts */
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-bottom: 1.5rem;
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin: 0 0.5rem 0.5rem 0;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 0.25rem;
+}
+
+.legend-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Dashboard pending/overdue lists */
+.payment-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.payment-list-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .payment-list-item:last-child {
+        border-bottom: none;
+    }
+
+.payment-list-details {
+    flex: 1;
+}
+
+.payment-list-title {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.payment-list-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.payment-list-amount {
+    font-weight: 600;
+    margin-left: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .dashboard-quick-actions {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-quick-actions {
+        grid-template-columns: 1fr;
+    }
 }

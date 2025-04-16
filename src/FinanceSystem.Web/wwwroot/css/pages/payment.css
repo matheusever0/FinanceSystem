@@ -1,2 +1,244 @@
-﻿body {
+﻿/* Payment specific styles */
+.payment-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Payment list */
+.payment-list-container {
+    margin-bottom: 2rem;
+}
+
+.payment-item {
+    display: flex;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+    .payment-item:hover {
+        background-color: rgba(0, 0, 0, 0.01);
+    }
+
+    .payment-item:last-child {
+        border-bottom: none;
+    }
+
+.payment-icon {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    width: 40px;
+    height: 40px;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .payment-icon.recurring {
+        background-color: rgba(54, 185, 204, 0.2);
+        color: var(--info-color);
+    }
+
+.payment-details {
+    flex: 1;
+}
+
+.payment-title {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.payment-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.payment-amount {
+    font-weight: 600;
+    margin-left: 1rem;
+    align-self: center;
+}
+
+.payment-due-date {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    align-self: center;
+    margin-left: 1rem;
+    min-width: 100px;
+    text-align: center;
+}
+
+.payment-status {
+    margin-left: 1rem;
+    align-self: center;
+}
+
+.payment-actions {
+    margin-left: 1rem;
+    align-self: center;
+}
+
+/* Payment details page */
+.payment-details-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+.payment-info-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.payment-info-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.payment-info-body {
+    padding: 1.5rem;
+}
+
+.payment-info-row {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.payment-info-label {
+    font-weight: 500;
+    min-width: 150px;
+    color: var(--text-muted);
+}
+
+.payment-info-value {
+    flex: 1;
+}
+
+.payment-notes {
+    background-color: #f9f9f9;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-top: 1rem;
+}
+
+.payment-notes-title {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+}
+
+/* Payment installments */
+.installment-table th,
+.installment-table td {
+    text-align: center;
+}
+
+.installment-status {
+    width: 100px;
+}
+
+/* Payment form */
+.payment-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.payment-method-section,
+.payment-card-section {
+    background-color: #f9f9f9;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+}
+
+.payment-section-title {
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.installments-config {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.installments-slider {
+    flex: 1;
+    margin-right: 1rem;
+}
+
+.installments-value {
+    font-weight: 600;
+    min-width: 50px;
+    text-align: center;
+}
+
+/* Payment filters */
+.payment-filters {
+    display: flex;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.payment-filter-item {
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    background-color: #f9f9f9;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+    .payment-filter-item:hover {
+        background-color: var(--primary-light);
+    }
+
+    .payment-filter-item.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .payment-details-container {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-item {
+        flex-wrap: wrap;
+    }
+
+    .payment-actions {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 1rem;
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 768px) {
+    .payment-due-date,
+    .payment-status {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+
+    .payment-item {
+        flex-direction: column;
+    }
+
+    .payment-amount {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
 }
