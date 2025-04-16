@@ -16,10 +16,12 @@
     var pendingAmount = ViewBag.PendingAmount;
     var overdueAmount = ViewBag.OverdueAmount;
 
-    var paymentsByType = ViewBag.PaymentsByType as List<dynamic>;
+    // Na view Monthly.cshtml, substitua:
+    var paymentsByType = ViewBag.PaymentsByType as List<dynamic> ?? new List<dynamic>();
 
-    var typeLabels = paymentsByType.Select(p => p.TypeName).ToList();
-    var typeValues = paymentsByType.Select(p => p.TotalAmount).ToList();
+    // E então, nas linhas que usam paymentsByType, verifique se há itens:
+    var typeLabels = paymentsByType.Any() ? paymentsByType.Select(p => p.TypeName).ToList() : new List<dynamic>();
+    var typeValues = paymentsByType.Any() ? paymentsByType.Select(p => p.TotalAmount).ToList() : new List<dynamic>();
 }
 
 @section Styles {
