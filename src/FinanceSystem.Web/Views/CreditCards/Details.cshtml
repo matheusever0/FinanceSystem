@@ -7,6 +7,10 @@
     var colorClass = usedPercentage > 75 ? "danger" : (usedPercentage > 50 ? "warning" : "success");
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/creditcards.css" asp-append-version="true">
+}
+
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Detalhes do Cartão</h1>
@@ -241,3 +245,7 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script src="~/js/pages/creditcards.js" asp-append-version="true"></script>
+}

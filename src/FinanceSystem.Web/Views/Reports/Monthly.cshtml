@@ -22,6 +22,10 @@
     var typeValues = paymentsByType.Select(p => p.TotalAmount).ToList();
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/payments.css" asp-append-version="true">
+}
+
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">
@@ -285,171 +289,8 @@
 </div>
 
 @section Scripts {
-    <script src="https:    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeCharts();
-            setupExportButton();
-        });
-
-        function initializeCharts() {
-                        const typesPieChart = document.getElementById('paymentTypesPieChart');
-            if (typesPieChart) {
-                const labels = JSON.parse(typesPieChart.getAttribute('data-labels'));
-                const values = JSON.parse(typesPieChart.getAttribute('data-values'));
-                const backgroundColors = generateColors(labels.length);
-
-                new Chart(typesPieChart, {
-                    type: 'doughnut',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: values,
-                            backgroundColor: backgroundColors,
-                            hoverBackgroundColor: backgroundColors.map(color => adjustColor(color, -20)),
-                            hoverBorderColor: 'rgba(234, 236, 244, 1)',
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                display: true
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const label = context.label || '';
-                                        const value = context.raw;
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const percentage = ((value / total) * 100).toFixed(1);
-                                        return `${label}: R$ ${value.toLocaleString('pt-BR')} (${percentage}%)`;
-                                    }
-                                }
-                            }
-                        },
-                        cutout: '70%'
-                    }
-                });
-            }
-
-                        const statusPieChart = document.getElementById('paymentStatusPieChart');
-            if (statusPieChart) {
-                const labels = JSON.parse(statusPieChart.getAttribute('data-labels'));
-                const values = JSON.parse(statusPieChart.getAttribute('data-values'));
-                const backgroundColors = ['#1cc88a', '#f6c23e', '#e74a3b', '#858796'];
-
-                new Chart(statusPieChart, {
-                    type: 'doughnut',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: values,
-                            backgroundColor: backgroundColors,
-                            hoverBackgroundColor: backgroundColors.map(color => adjustColor(color, -20)),
-                            hoverBorderColor: 'rgba(234, 236, 244, 1)',
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                display: true
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const label = context.label || '';
-                                        const value = context.raw;
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                        return `${label}: R$ ${value.toLocaleString('pt-BR')} (${percentage}%)`;
-                                    }
-                                }
-                            }
-                        },
-                        cutout: '70%'
-                    }
-                });
-            }
-        }
-
-        function setupExportButton() {
-            const exportBtn = document.getElementById('exportCSV');
-            if (exportBtn) {
-                exportBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-
-                                        const table = document.getElementById('dataTable');
-                    const rows = table.querySelectorAll('tbody tr');
-                    const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
-
-                                        let csvContent = headers.join(',') + '\n';
-
-                    rows.forEach(row => {
-                        const cells = Array.from(row.querySelectorAll('td'));
-                        const rowData = cells.map(cell => {
-                                                        let text = cell.textContent.trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
-                            return `"${text}"`;
-                            });
-                            csvContent += rowData.join(',') + '\n';
-                        });
-
-                                            const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
-                        const link = document.createElement('a');
-                        link.setAttribute('href', encodedUri);
-                        link.setAttribute('download', `relatorio_@monthName-@currentYear.csv`);
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    });
-                }
-            }
-
-                    function generateColors(count) {
-                const baseColors = [
-                    'rgba(78, 115, 223, 0.8)',
-                    'rgba(28, 200, 138, 0.8)',
-                    'rgba(246, 194, 62, 0.8)',
-                    'rgba(231, 74, 59, 0.8)',
-                    'rgba(54, 185, 204, 0.8)',
-                    'rgba(133, 135, 150, 0.8)'
-                ];
-
-                const colors = [];
-                for (let i = 0; i < count; i++) {
-                    if (i < baseColors.length) {
-                        colors.push(baseColors[i]);
-                    } else {
-                                            const r = Math.floor(Math.random() * 200) + 55;
-                        const g = Math.floor(Math.random() * 200) + 55;
-                        const b = Math.floor(Math.random() * 200) + 55;
-                        colors.push(`rgba(${r}, ${g}, ${b}, 0.8)`);
-                    }
-                }
-
-                return colors;
-            }
-
-            function adjustColor(color, amount) {
-                const rgbaMatch = color.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
-                if (!rgbaMatch) return color;
-
-                let r = parseInt(rgbaMatch[1]);
-                let g = parseInt(rgbaMatch[2]);
-                let b = parseInt(rgbaMatch[3]);
-                const a = parseFloat(rgbaMatch[4]);
-
-                r = Math.max(0, Math.min(255, r + amount));
-                g = Math.max(0, Math.min(255, g + amount));
-                b = Math.max(0, Math.min(255, b + amount));
-
-                return `rgba(${r}, ${g}, ${b}, ${a})`;
-            }
-        </script>
+    <script src="~/js/components/charts.js" asp-append-version="true"></script>
+    <script src="~/js/components/tables.js" asp-append-version="true"></script>
 }
 
 @functions {
