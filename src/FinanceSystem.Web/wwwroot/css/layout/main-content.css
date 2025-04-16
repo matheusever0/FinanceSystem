@@ -1,0 +1,141 @@
+﻿/* Estilos para o conteúdo principal */
+.main-content {
+    margin-left: var(--sidebar-width);
+    transition: all var(--transition-speed);
+    padding: 20px;
+    padding-top: calc(var(--topbar-height) + 20px);
+    min-height: 100vh;
+}
+
+    /* Quando o sidebar está colapsado */
+    .main-content.expanded {
+        margin-left: var(--sidebar-collapsed-width);
+    }
+
+/* Container fluido para o conteúdo */
+.container-fluid {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+/* Títulos de página e ações */
+.d-sm-flex {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+    .d-sm-flex h1,
+    .d-sm-flex .h3 {
+        margin-bottom: 0;
+    }
+
+/* Sistema de grid para layout */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+.col-lg-12,
+.col-lg-8, .col-lg-7, .col-lg-6, .col-lg-5, .col-lg-4,
+.col-md-12, .col-md-6,
+.col-xl-6, .col-xl-4, .col-xl-3 {
+    position: relative;
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+/* Colunas para diferentes breakpoints */
+@media (min-width: 768px) {
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    .col-md-12 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+@media (min-width: 992px) {
+    .col-lg-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+
+    .col-lg-5 {
+        flex: 0 0 41.666667%;
+        max-width: 41.666667%;
+    }
+
+    .col-lg-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    .col-lg-7 {
+        flex: 0 0 58.333333%;
+        max-width: 58.333333%;
+    }
+
+    .col-lg-8 {
+        flex: 0 0 66.666667%;
+        max-width: 66.666667%;
+    }
+
+    .col-lg-12 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .col-xl-3 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+
+    .col-xl-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+
+    .col-xl-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+/* Ajustes para telas pequenas */
+@media (max-width: 992px) {
+    .main-content {
+        margin-left: 0;
+    }
+
+    .d-sm-flex {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+        .d-sm-flex h1,
+        .d-sm-flex .h3 {
+            margin-bottom: 1rem;
+        }
+}
+
+/* Ajustes para impressão */
+@media print {
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+    }
+}

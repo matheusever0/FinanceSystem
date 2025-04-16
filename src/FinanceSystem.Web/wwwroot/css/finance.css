@@ -4,23 +4,23 @@
 
 /* Cards do Dashboard */
 .border-left-primary {
-    border-left: .25rem solid #4e73df !important;
+    border-left: 0.25rem solid var(--primary-color) !important;
 }
 
 .border-left-success {
-    border-left: .25rem solid #1cc88a !important;
+    border-left: 0.25rem solid var(--success-color) !important;
 }
 
 .border-left-info {
-    border-left: .25rem solid #36b9cc !important;
+    border-left: 0.25rem solid var(--info-color) !important;
 }
 
 .border-left-warning {
-    border-left: .25rem solid #f6c23e !important;
+    border-left: 0.25rem solid var(--warning-color) !important;
 }
 
 .border-left-danger {
-    border-left: .25rem solid #e74a3b !important;
+    border-left: 0.25rem solid var(--danger-color) !important;
 }
 
 /* Botões com ícones */
@@ -35,12 +35,12 @@
     .btn-icon-split .icon {
         background: rgba(0, 0, 0, 0.15);
         display: inline-block;
-        padding: .75rem 1rem;
+        padding: 0.75rem 1rem;
     }
 
     .btn-icon-split .text {
         display: inline-block;
-        padding: .75rem 1rem;
+        padding: 0.75rem 1rem;
         white-space: nowrap;
         flex-grow: 1;
         text-align: center;
@@ -170,12 +170,12 @@
 
 /* Submenu */
 .collapse-item {
-    padding: .5rem 1rem;
-    margin: 0 .5rem;
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem;
     display: block;
     color: #b7b9cc;
-    font-size: .85rem;
-    border-radius: .35rem;
+    font-size: 0.85rem;
+    border-radius: 0.35rem;
     white-space: nowrap;
 }
 
@@ -189,6 +189,156 @@
         color: white;
         font-weight: 700;
         background-color: rgba(255, 255, 255, 0.1);
+    }
+
+/* Barras de progresso */
+.progress {
+    display: flex;
+    height: 1rem;
+    overflow: hidden;
+    font-size: 0.75rem;
+    background-color: #e9ecef;
+    border-radius: 0.25rem;
+}
+
+.progress-bar {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    color: white;
+    text-align: center;
+    white-space: nowrap;
+    background-color: var(--primary-color);
+    transition: width 0.6s ease;
+}
+
+.progress-bar-striped {
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+    background-size: 1rem 1rem;
+}
+
+.progress-bar-animated {
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+    from {
+        background-position: 1rem 0;
+    }
+
+    to {
+        background-position: 0 0;
+    }
+}
+
+/* Cores para as barras de progresso */
+.progress-bar.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.progress-bar.bg-warning {
+    background-color: var(--warning-color) !important;
+}
+
+.progress-bar.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+.progress-bar.bg-info {
+    background-color: var(--info-color) !important;
+}
+
+/* Cartões para relatórios */
+.card-report {
+    margin-bottom: 1.5rem;
+}
+
+    .card-report .card-header {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 600;
+    }
+
+    .card-report .card-footer {
+        background-color: #f8f9fa;
+        font-size: 0.85rem;
+    }
+
+/* Dados financeiros */
+.financial-data {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+    .financial-data .label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+
+    .financial-data .value {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .financial-data .secondary {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+
+/* Categorias financeiras */
+.finance-category {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+    .finance-category .icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+        color: white;
+    }
+
+    .finance-category .name {
+        font-weight: 500;
+    }
+
+    .finance-category .amount {
+        margin-left: auto;
+        font-weight: 600;
+    }
+
+/* Filtros de relatórios */
+.report-filters {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.date-navigator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+    .date-navigator .date-display {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .date-navigator .date-controls {
+        display: flex;
+        gap: 0.5rem;
     }
 
 /* Estilos de impressão dos relatórios */
@@ -210,5 +360,21 @@
     .container-fluid {
         width: 100% !important;
         padding: 0 !important;
+    }
+
+    .chart-area, .chart-pie {
+        page-break-inside: avoid;
+    }
+
+    body {
+        font-size: 12pt;
+    }
+
+    .progress {
+        border: 1px solid #ddd;
+    }
+
+    .progress-bar {
+        border-right: 1px solid #ddd;
     }
 }

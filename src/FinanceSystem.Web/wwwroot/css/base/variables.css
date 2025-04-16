@@ -1,0 +1,51 @@
+﻿/* Variáveis CSS para o Finance System */
+:root {
+    /* Cores principais */
+    --primary-color: #3b5998;
+    --primary-light: #8b9dc3;
+    --primary-dark: #2c3e50;
+    --secondary-color: #f8f9fa;
+    /* Cores de estado */
+    --success-color: #1cc88a;
+    --warning-color: #f6c23e;
+    --danger-color: #e74a3b;
+    --info-color: #36b9cc;
+    /* Cores de texto */
+    --text-color: #333333;
+    --text-light: #6c757d;
+    --text-muted: #858796;
+    /* Cores de fundo */
+    --bg-color: #f5f7fa;
+    --bg-light: #ffffff;
+    --bg-dark: #2c3e50;
+    /* Cores de bordas */
+    --border-color: #e3e6f0;
+    /* Tamanhos */
+    --sidebar-width: 250px;
+    --sidebar-collapsed-width: 70px;
+    --topbar-height: 60px;
+    /* Fontes */
+    --font-family: 'Segoe UI', 'Helvetica', sans-serif;
+    --font-size-base: 14px;
+    --font-size-sm: 12px;
+    --font-size-lg: 16px;
+    --font-size-xl: 18px;
+    /* Sombras */
+    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    /* Animações */
+    --transition-speed: 0.3s;
+    /* Border radius */
+    --border-radius-sm: 0.2rem;
+    --border-radius: 0.5rem;
+    --border-radius-lg: 0.8rem;
+    /* Z-index */
+    --z-index-dropdown: 1000;
+    --z-index-sticky: 1020;
+    --z-index-fixed: 1030;
+    --z-index-modal-backdrop: 1040;
+    --z-index-modal: 1050;
+    --z-index-popover: 1060;
+    --z-index-tooltip: 1070;
+}
