@@ -18,7 +18,6 @@
 
     var paymentsByType = ViewBag.PaymentsByType as List<dynamic>;
 
-    // Preparar dados para gráficos
     var typeLabels = paymentsByType.Select(p => p.TypeName).ToList();
     var typeValues = paymentsByType.Select(p => p.TotalAmount).ToList();
 }
@@ -286,16 +285,14 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
+    <script src="https:    <script>
         document.addEventListener('DOMContentLoaded', function() {
             initializeCharts();
             setupExportButton();
         });
 
         function initializeCharts() {
-            // Inicializar gráfico de pagamentos por tipo
-            const typesPieChart = document.getElementById('paymentTypesPieChart');
+                        const typesPieChart = document.getElementById('paymentTypesPieChart');
             if (typesPieChart) {
                 const labels = JSON.parse(typesPieChart.getAttribute('data-labels'));
                 const values = JSON.parse(typesPieChart.getAttribute('data-values'));
@@ -337,8 +334,7 @@
                 });
             }
 
-            // Inicializar gráfico de status de pagamentos
-            const statusPieChart = document.getElementById('paymentStatusPieChart');
+                        const statusPieChart = document.getElementById('paymentStatusPieChart');
             if (statusPieChart) {
                 const labels = JSON.parse(statusPieChart.getAttribute('data-labels'));
                 const values = JSON.parse(statusPieChart.getAttribute('data-values'));
@@ -387,79 +383,73 @@
                 exportBtn.addEventListener('click', function(e) {
                     e.preventDefault();
 
-                    // Obter dados da tabela
-                    const table = document.getElementById('dataTable');
+                                        const table = document.getElementById('dataTable');
                     const rows = table.querySelectorAll('tbody tr');
                     const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
 
-                    // Criar linhas CSV
-                    let csvContent = headers.join(',') + '\n';
+                                        let csvContent = headers.join(',') + '\n';
 
                     rows.forEach(row => {
                         const cells = Array.from(row.querySelectorAll('td'));
                         const rowData = cells.map(cell => {
-                            // Remover tags HTML e tratar valores com vírgulas
-                            let text = cell.textContent.trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+                                                        let text = cell.textContent.trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
                             return `"${text}"`;
+                            });
+                            csvContent += rowData.join(',') + '\n';
                         });
-                        csvContent += rowData.join(',') + '\n';
+
+                                            const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
+                        const link = document.createElement('a');
+                        link.setAttribute('href', encodedUri);
+                        link.setAttribute('download', `relatorio_@monthName-@currentYear.csv`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
                     });
-
-                    // Criar link de download
-                    const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
-                    const link = document.createElement('a');
-                    link.setAttribute('href', encodedUri);
-                    link.setAttribute('download', `relatorio_@monthName-@currentYear.csv`);
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                });
-            }
-        }
-
-        // Funções auxiliares para gráficos
-        function generateColors(count) {
-            const baseColors = [
-                'rgba(78, 115, 223, 0.8)',
-                'rgba(28, 200, 138, 0.8)',
-                'rgba(246, 194, 62, 0.8)',
-                'rgba(231, 74, 59, 0.8)',
-                'rgba(54, 185, 204, 0.8)',
-                'rgba(133, 135, 150, 0.8)'
-            ];
-
-            const colors = [];
-            for (let i = 0; i < count; i++) {
-                if (i < baseColors.length) {
-                    colors.push(baseColors[i]);
-                } else {
-                    // Gera cores aleatórias se precisar de mais
-                    const r = Math.floor(Math.random() * 200) + 55;
-                    const g = Math.floor(Math.random() * 200) + 55;
-                    const b = Math.floor(Math.random() * 200) + 55;
-                    colors.push(`rgba(${r}, ${g}, ${b}, 0.8)`);
                 }
             }
 
-            return colors;
-        }
+                    function generateColors(count) {
+                const baseColors = [
+                    'rgba(78, 115, 223, 0.8)',
+                    'rgba(28, 200, 138, 0.8)',
+                    'rgba(246, 194, 62, 0.8)',
+                    'rgba(231, 74, 59, 0.8)',
+                    'rgba(54, 185, 204, 0.8)',
+                    'rgba(133, 135, 150, 0.8)'
+                ];
 
-        function adjustColor(color, amount) {
-            const rgbaMatch = color.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
-            if (!rgbaMatch) return color;
+                const colors = [];
+                for (let i = 0; i < count; i++) {
+                    if (i < baseColors.length) {
+                        colors.push(baseColors[i]);
+                    } else {
+                                            const r = Math.floor(Math.random() * 200) + 55;
+                        const g = Math.floor(Math.random() * 200) + 55;
+                        const b = Math.floor(Math.random() * 200) + 55;
+                        colors.push(`rgba(${r}, ${g}, ${b}, 0.8)`);
+                    }
+                }
 
-            let r = parseInt(rgbaMatch[1]);
-            let g = parseInt(rgbaMatch[2]);
-            let b = parseInt(rgbaMatch[3]);
-            const a = parseFloat(rgbaMatch[4]);
+                return colors;
+            }
 
-            r = Math.max(0, Math.min(255, r + amount));
-            g = Math.max(0, Math.min(255, g + amount));
-            b = Math.max(0, Math.min(255, b + amount));
+            function adjustColor(color, amount) {
+                const rgbaMatch = color.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
+                if (!rgbaMatch) return color;
 
-            return `rgba(${r}, ${g}, ${b}, ${a})`;
-        }
-    </script>
+                let r = parseInt(rgbaMatch[1]);
+                let g = parseInt(rgbaMatch[2]);
+                let b = parseInt(rgbaMatch[3]);
+                const a = parseFloat(rgbaMatch[4]);
+
+                r = Math.max(0, Math.min(255, r + amount));
+                g = Math.max(0, Math.min(255, g + amount));
+                b = Math.max(0, Math.min(255, b + amount));
+
+                return `rgba(${r}, ${g}, ${b}, ${a})`;
+            }
+        </script>
 }
 
 @functions {

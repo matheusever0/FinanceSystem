@@ -94,8 +94,7 @@ namespace FinanceSystem.Application.Services
                 if (creditCard.UserId != userId)
                     throw new UnauthorizedAccessException("User does not have access to this credit card");
 
-                // Verifica se há limite disponível
-                if (creditCard.AvailableLimit < createPaymentDto.Amount)
+                                if (creditCard.AvailableLimit < createPaymentDto.Amount)
                     throw new InvalidOperationException("Insufficient credit card limit");
 
                 creditCard.DecrementAvailableLimit(createPaymentDto.Amount);

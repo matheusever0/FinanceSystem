@@ -34,20 +34,16 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                // Definir mês e ano padrão caso não sejam fornecidos
-                month ??= DateTime.Now.Month;
+                                month ??= DateTime.Now.Month;
                 year ??= DateTime.Now.Year;
 
                 var token = HttpContext.GetJwtToken();
 
-                // Obter pagamentos do mês específico
-                var payments = await _paymentService.GetPaymentsByMonthAsync(month.Value, year.Value, token);
+                                var payments = await _paymentService.GetPaymentsByMonthAsync(month.Value, year.Value, token);
 
-                // Obter tipos de pagamento para agrupar os dados
-                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
+                                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
 
-                // Agrupar pagamentos por tipo para o gráfico
-                var paymentsByType = payments
+                                var paymentsByType = payments
                     .GroupBy(p => p.PaymentTypeId)
                     .Select(g => new {
                         TypeId = g.Key,
@@ -57,14 +53,12 @@ namespace FinanceSystem.Web.Controllers
                     .OrderByDescending(g => g.TotalAmount)
                     .ToList();
 
-                // Calcular totais
-                var totalAmount = payments.Sum(p => p.Amount);
+                                var totalAmount = payments.Sum(p => p.Amount);
                 var paidAmount = payments.Where(p => p.Status == 2).Sum(p => p.Amount);
                 var pendingAmount = payments.Where(p => p.Status == 1).Sum(p => p.Amount);
                 var overdueAmount = payments.Where(p => p.Status == 3).Sum(p => p.Amount);
 
-                // Preparar dados para gráficos
-                ViewBag.PaymentTypes = paymentTypes;
+                                ViewBag.PaymentTypes = paymentTypes;
                 ViewBag.PaymentsByType = paymentsByType;
                 ViewBag.Month = month;
                 ViewBag.Year = year;
@@ -87,13 +81,11 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                // Definir ano padrão caso não seja fornecido
-                year ??= DateTime.Now.Year;
+                                year ??= DateTime.Now.Year;
 
                 var token = HttpContext.GetJwtToken();
 
-                // Preparar dados para gráfico mensal do ano
-                var monthlyData = new Dictionary<string, decimal>();
+                                var monthlyData = new Dictionary<string, decimal>();
                 for (int month = 1; month <= 12; month++)
                 {
                     var monthName = new DateTime(year.Value, month, 1).ToString("MMM");
@@ -104,23 +96,19 @@ namespace FinanceSystem.Web.Controllers
                     }
                     catch (Exception)
                     {
-                        // Fallback para zero em caso de erro
-                        monthlyData.Add(monthName, 0);
+                                                monthlyData.Add(monthName, 0);
                     }
                 }
 
-                // Obter tipos de pagamento e métodos para agrupamento
-                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
+                                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
 
-                // Dados para gráficos anuais por mês (já calculados acima)
-                ViewBag.MonthlyData = monthlyData;
+                                ViewBag.MonthlyData = monthlyData;
                 ViewBag.Year = year;
                 ViewBag.PaymentTypes = paymentTypes;
                 ViewBag.PaymentMethods = paymentMethods;
 
-                // Calcular totais anuais
-                var totalAnnual = monthlyData.Values.Sum();
+                                var totalAnnual = monthlyData.Values.Sum();
                 ViewBag.TotalAnnual = totalAnnual;
                 ViewBag.AverageMonthly = totalAnnual / Math.Max(1, monthlyData.Count(m => m.Value > 0));
 
@@ -140,11 +128,9 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
 
-                // Obter cartões de crédito
-                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
+                                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
 
-                // Obter pagamentos por cartão de crédito (usando método de pagamento)
-                var cardData = new List<object>();
+                                var cardData = new List<object>();
                 foreach (var card in creditCards)
                 {
                     try
@@ -189,11 +175,9 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
 
-                // Obter pagamentos do mês específico
-                var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
+                                var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
 
-                // Calcular totais
-                var totalAmount = payments.Sum(p => p.Amount);
+                                var totalAmount = payments.Sum(p => p.Amount);
                 var paidAmount = payments.Where(p => p.Status == 2).Sum(p => p.Amount);
                 var pendingAmount = payments.Where(p => p.Status == 1).Sum(p => p.Amount);
                 var overdueAmount = payments.Where(p => p.Status == 3).Sum(p => p.Amount);

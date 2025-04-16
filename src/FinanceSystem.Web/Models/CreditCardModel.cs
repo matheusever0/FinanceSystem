@@ -45,7 +45,6 @@ namespace FinanceSystem.Web.Models
         [Display(Name = "Método de Pagamento")]
         public string PaymentMethodName { get; set; }
 
-        // Propriedades adicionais para facilitar a visualização
         [Display(Name = "Limite Utilizado")]
         [DisplayFormat(DataFormatString = "{0:C2}")]
         public decimal UsedLimit => Limit - AvailableLimit;

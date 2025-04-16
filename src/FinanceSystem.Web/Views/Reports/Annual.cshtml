@@ -12,7 +12,6 @@
     var paymentTypes = ViewBag.PaymentTypes as IEnumerable<FinanceSystem.Web.Models.PaymentTypeModel> ?? new List<FinanceSystem.Web.Models.PaymentTypeModel>();
     var paymentMethods = ViewBag.PaymentMethods as IEnumerable<FinanceSystem.Web.Models.PaymentMethodModel> ?? new List<FinanceSystem.Web.Models.PaymentMethodModel>();
 
-    // Preparar dados para gráficos
     var monthLabels = monthlyData.Keys.ToList();
     var monthValues = monthlyData.Values.ToList();
 }
@@ -291,160 +290,155 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeMonthlyChart();
-            initializeVariationChart();
-        });
+    <script src="https:    <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                initializeMonthlyChart();
+                initializeVariationChart();
+            });
 
-        function initializeMonthlyChart() {
-            const chartCanvas = document.getElementById('monthlyExpensesChart');
-            if (!chartCanvas) return;
+            function initializeMonthlyChart() {
+                const chartCanvas = document.getElementById('monthlyExpensesChart');
+                if (!chartCanvas) return;
 
-            const labels = JSON.parse(chartCanvas.getAttribute('data-labels'));
-            const values = JSON.parse(chartCanvas.getAttribute('data-values'));
+                const labels = JSON.parse(chartCanvas.getAttribute('data-labels'));
+                const values = JSON.parse(chartCanvas.getAttribute('data-values'));
 
-            new Chart(chartCanvas, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Gastos Mensais',
-                        data: values,
-                        borderColor: '#4e73df',
-                        backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 3,
-                        pointBackgroundColor: '#4e73df',
-                        pointBorderColor: '#4e73df',
-                        pointHoverRadius: 3,
-                        pointHoverBackgroundColor: '#4e73df',
-                        pointHoverBorderColor: '#4e73df',
-                        pointHitRadius: 10,
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: {
-                            left: 10,
-                            right: 25,
-                            top: 25,
-                            bottom: 0
-                        }
+                new Chart(chartCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Gastos Mensais',
+                            data: values,
+                            borderColor: '#4e73df',
+                            backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 3,
+                            pointBackgroundColor: '#4e73df',
+                            pointBorderColor: '#4e73df',
+                            pointHoverRadius: 3,
+                            pointHoverBackgroundColor: '#4e73df',
+                            pointHoverBorderColor: '#4e73df',
+                            pointHitRadius: 10,
+                            pointBorderWidth: 2
+                        }]
                     },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false,
-                                drawBorder: false
+                    options: {
+                        maintainAspectRatio: false,
+                        layout: {
+                            padding: {
+                                left: 10,
+                                right: 25,
+                                top: 25,
+                                bottom: 0
                             }
                         },
-                        y: {
-                            ticks: {
-                                callback: function(value) {
-                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false,
+                                    drawBorder: false
                                 }
                             },
-                            grid: {
-                                color: "rgb(234, 236, 244)",
-                                zeroLineColor: "rgb(234, 236, 244)",
-                                drawBorder: false,
-                                borderDash: [2],
-                                zeroLineBorderDash: [2]
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return 'R$ ' + context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                                }
-                            }
-                        }
-                    }
-                }
+                            y: {
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'R$ ' + value.toLocaleString('pt-BR');
+                                    }
+                                },
+                                grid: {
+                                    color: " rgb(234, 236, 244)",
+            zeroLineColor: "rgb(234, 236, 244)" ,
+            drawBorder: false,
+            borderDash: [2],
+            zeroLineBorderDash: [2]
+            }
+            }
+            },
+            plugins: {
+            legend: {
+            display: false
+            },
+            tooltip: {
+            callbacks: {
+            label: function(context) {
+            return 'R$ ' + context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            }
+            }
+            }
+            }
+            }
             });
-        }
-
-        function initializeVariationChart() {
-            const chartCanvas = document.getElementById('variationBarChart');
+            }
+            function initializeVariationChart() {
+            const chartCanvas=document.getElementById('variationBarChart');
             if (!chartCanvas) return;
+            const labels=JSON.parse(document.getElementById('monthlyExpensesChart').getAttribute('data-labels'));
+            const values=JSON.parse(document.getElementById('monthlyExpensesChart').getAttribute('data-values'));
+            const average=values.reduce((a, b)=>
+        a + b, 0) / values.filter(v => v > 0).length;
+                   const variations = values.map(v => v > 0 ? ((v - average) / average * 100) : 0);
 
-            const labels = JSON.parse(document.getElementById('monthlyExpensesChart').getAttribute('data-labels'));
-            const values = JSON.parse(document.getElementById('monthlyExpensesChart').getAttribute('data-values'));
+                               const backgroundColors = variations.map(v =>
+                       v > 0 ? 'rgba(231, 74, 59, 0.8)' :
+                       (v < 0 ? 'rgba(28, 200, 138, 0.8)' : 'rgba(78, 115, 223, 0.8)')
+                   );
 
-            // Calcular diferença percentual da média
-            const average = values.reduce((a, b) => a + b, 0) / values.filter(v => v > 0).length;
-            const variations = values.map(v => v > 0 ? ((v - average) / average * 100) : 0);
-
-            // Definir cores com base nas variações
-            const backgroundColors = variations.map(v =>
-                v > 0 ? 'rgba(231, 74, 59, 0.8)' :
-                (v < 0 ? 'rgba(28, 200, 138, 0.8)' : 'rgba(78, 115, 223, 0.8)')
-            );
-
-            new Chart(chartCanvas, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Variação da Média (%)',
-                        data: variations,
-                        backgroundColor: backgroundColors,
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: {
-                            left: 10,
-                            right: 25,
-                            top: 25,
-                            bottom: 0
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false,
-                                drawBorder: false
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                callback: function(value) {
-                                    return value.toFixed(1) + '%';
-                                }
-                            },
-                            grid: {
-                                color: "rgb(234, 236, 244)",
-                                zeroLineColor: "rgb(234, 236, 244)",
-                                drawBorder: false,
-                                borderDash: [2],
-                                zeroLineBorderDash: [2]
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.raw.toFixed(1) + '% em relação à média';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
+                   new Chart(chartCanvas, {
+                       type: 'bar',
+                       data: {
+                           labels: labels,
+                           datasets: [{
+                               label: 'Variação da Média (%)',
+                               data: variations,
+                               backgroundColor: backgroundColors,
+                               borderWidth: 0
+                           }]
+                       },
+                       options: {
+                           maintainAspectRatio: false,
+                           layout: {
+                               padding: {
+                                   left: 10,
+                                   right: 25,
+                                   top: 25,
+                                   bottom: 0
+                               }
+                           },
+                           scales: {
+                               x: {
+                                   grid: {
+                                       display: false,
+                                       drawBorder: false
+                                   }
+                               },
+                               y: {
+                                   ticks: {
+                                       callback: function(value) {
+                                           return value.toFixed(1) + '%';
+                                       }
+                                   },
+                                   grid: {
+                                       color: "rgb(234, 236, 244)",
+                                       zeroLineColor: "rgb(234, 236, 244)",
+                                       drawBorder: false,
+                                       borderDash: [2],
+                                       zeroLineBorderDash: [2]
+                                   }
+                               }
+                           },
+                           plugins: {
+                               tooltip: {
+                                   callbacks: {
+                                       label: function(context) {
+                                           return context.raw.toFixed(1) + '% em relação à média';
+                                       }
+                                   }
+                               }
+                           }
+                       }
+                   });
+               }
     </script>
 }

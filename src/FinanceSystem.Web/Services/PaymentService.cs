@@ -202,11 +202,6 @@ namespace FinanceSystem.Web.Services
             {
                 _logger.LogInformation("Obtendo pagamento pai da parcela com ID: {InstallmentId}", installmentId);
 
-                // Como não temos um endpoint dedicado para isso, podemos:
-                // 1. Buscar todos os pagamentos e verificar qual possui a parcela com o ID informado
-                // 2. Ou implementar um novo endpoint na API para realizar essa consulta específica
-
-                // Para simplificar, vamos utilizar a solução 1 neste exemplo:
                 var payments = await GetAllPaymentsAsync(token);
 
                 foreach (var payment in payments)
@@ -217,8 +212,7 @@ namespace FinanceSystem.Web.Services
                     }
                 }
 
-                // Se não encontrar, retorna null
-                return null;
+                return string.Empty;
             }
             catch (Exception ex)
             {

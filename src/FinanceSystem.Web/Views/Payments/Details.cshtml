@@ -94,7 +94,7 @@
                 <div class="card-body">
                     @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
                     {
-                        @if (Model.Status == 1) // Pendente
+                        @if (Model.Status == 1)
                         {
                             <form asp-action="MarkAsPaid" asp-route-id="@Model.Id" method="post" class="mb-3">
                                 @Html.AntiForgeryToken()
@@ -114,7 +114,7 @@
                                 </button>
                             </form>
                         }
-                        else if (Model.Status == 3) // Vencido
+                        else if (Model.Status == 3)
                         {
                             <form asp-action="MarkAsPaid" asp-route-id="@Model.Id" method="post" class="mb-3">
                                 @Html.AntiForgeryToken()
@@ -128,7 +128,7 @@
                             </form>
                         }
 
-                        @if (Model.Status != 4) // Não Cancelado
+                        @if (Model.Status != 4)
                         {
                             <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="mb-3">
                                 @Html.AntiForgeryToken()
@@ -184,7 +184,7 @@
                                     <td>
                                         @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
                                         {
-                                            @if (installment.Status == 1) // Pendente
+                                            @if (installment.Status == 1)
                                             {
                                                 <div class="btn-group">
                                                     <button type="button" class="btn btn-sm btn-success mark-installment-paid"
@@ -197,7 +197,7 @@
                                                     </button>
                                                 </div>
                                             }
-                                            else if (installment.Status == 3) // Vencido
+                                            else if (installment.Status == 3)
                                             {
                                                 <button type="button" class="btn btn-sm btn-success mark-installment-paid"
                                                         data-installment-id="@installment.Id" data-bs-toggle="modal" data-bs-target="#markInstallmentPaidModal">
@@ -272,8 +272,7 @@
     {
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Setup de modal para marcar parcela como paga
-                const markPaidButtons = document.querySelectorAll('.mark-installment-paid');
+                                const markPaidButtons = document.querySelectorAll('.mark-installment-paid');
                 markPaidButtons.forEach(button => {
                     button.addEventListener('click', function() {
                         const installmentId = this.getAttribute('data-installment-id');
@@ -282,8 +281,7 @@
                     });
                 });
 
-                // Setup de modal para marcar parcela como vencida
-                const markOverdueButtons = document.querySelectorAll('.mark-installment-overdue');
+                                const markOverdueButtons = document.querySelectorAll('.mark-installment-overdue');
                 markOverdueButtons.forEach(button => {
                     button.addEventListener('click', function() {
                         const installmentId = this.getAttribute('data-installment-id');

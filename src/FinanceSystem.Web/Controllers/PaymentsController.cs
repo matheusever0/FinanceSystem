@@ -307,8 +307,7 @@ namespace FinanceSystem.Web.Controllers
                 ModelState.AddModelError(string.Empty, $"Erro ao atualizar pagamento: {ex.Message}");
             }
 
-            // Se chegou aqui, algo deu errado ou o ModelState é inválido
-            try
+                        try
             {
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);

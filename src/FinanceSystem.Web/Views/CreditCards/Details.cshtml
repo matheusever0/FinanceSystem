@@ -127,8 +127,7 @@
                             DateTime nextClosingDate;
                             DateTime nextDueDate;
 
-                            // Calcular a próxima data de fechamento
-                            if (today.Day <= closingDay)
+                                                        if (today.Day <= closingDay)
                             {
                                 nextClosingDate = new DateTime(today.Year, today.Month, closingDay);
                             }
@@ -138,8 +137,7 @@
                                 nextClosingDate = new DateTime(nextClosingDate.Year, nextClosingDate.Month, closingDay);
                             }
 
-                            // Calcular a próxima data de vencimento
-                            if (today.Day <= dueDay)
+                                                        if (today.Day <= dueDay)
                             {
                                 nextDueDate = new DateTime(today.Year, today.Month, dueDay);
                             }
@@ -149,8 +147,7 @@
                                 nextDueDate = new DateTime(nextDueDate.Year, nextDueDate.Month, dueDay);
                             }
 
-                            // Calcular dias restantes
-                            var daysToClosing = (nextClosingDate - today).Days;
+                                                        var daysToClosing = (nextClosingDate - today).Days;
                             var daysToDue = (nextDueDate - today).Days;
                         }
 

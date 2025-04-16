@@ -2,22 +2,19 @@
 @{
     ViewData["Title"] = "Dashboard";
 
-    // Dados do dashboard
     var paymentsPending = ViewBag.PaymentsPending as IEnumerable<FinanceSystem.Web.Models.PaymentModel> ?? new List<FinanceSystem.Web.Models.PaymentModel>();
     var paymentsOverdue = ViewBag.PaymentsOverdue as IEnumerable<FinanceSystem.Web.Models.PaymentModel> ?? new List<FinanceSystem.Web.Models.PaymentModel>();
     var totalPendingAmount = paymentsPending.Sum(p => p.Amount);
     var totalOverdueAmount = paymentsOverdue.Sum(p => p.Amount);
     var totalBalance = ViewBag.TotalBalance ?? 0m;
 
-    // Dados dos cartões de crédito
     var creditCards = ViewBag.CreditCards as IEnumerable<FinanceSystem.Web.Models.CreditCardModel> ?? new List<FinanceSystem.Web.Models.CreditCardModel>();
 
-    // Dados para o gráfico mensal
     var monthlyData = ViewBag.MonthlyData as Dictionary<string, decimal> ?? new Dictionary<string, decimal>();
 }
 
 @section Styles {
-        <link rel="stylesheet" href="~/css/pages/dashboard.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/pages/dashboard.css" asp-append-version="true">
 }
 
 <div class="container-fluid">
@@ -130,53 +127,53 @@
                     <div class="row justify-content-center">
                         @if (await PermissionHelper.HasPermissionAsync(Context, "payments.create"))
                         {
-                                <div class="col-xl-3 col-md-6 mb-2">
-                                    <a asp-controller="Payments" asp-action="Create" class="btn btn-primary btn-icon-split btn-lg w-100">
-                                        <span class="icon text-white-50">
-                                            <i class="fas fa-plus"></i>
-                                        </span>
-                                        <span class="text">Novo Pagamento</span>
-                                    </a>
-                                </div>
+                            <div class="col-xl-3 col-md-6 mb-2">
+                                <a asp-controller="Payments" asp-action="Create" class="btn btn-primary btn-icon-split btn-lg w-100">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-plus"></i>
+                                    </span>
+                                    <span class="text">Novo Pagamento</span>
+                                </a>
+                            </div>
                         }
 
                         @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.view"))
                         {
-                                <div class="col-xl-3 col-md-6 mb-2">
-                                    <a asp-controller="CreditCards" asp-action="Index" class="btn btn-info btn-icon-split btn-lg w-100">
-                                        <span class="icon text-white-50">
-                                            <i class="fas fa-credit-card"></i>
-                                        </span>
-                                        <span class="text">Meus Cartões</span>
-                                    </a>
-                                </div>
+                            <div class="col-xl-3 col-md-6 mb-2">
+                                <a asp-controller="CreditCards" asp-action="Index" class="btn btn-info btn-icon-split btn-lg w-100">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-credit-card"></i>
+                                    </span>
+                                    <span class="text">Meus Cartões</span>
+                                </a>
+                            </div>
                         }
 
                         @if (await PermissionHelper.HasPermissionAsync(Context, "payments.view"))
                         {
-                                <div class="col-xl-3 col-md-6 mb-2">
-                                    <a asp-controller="Payments" asp-action="Pending" class="btn btn-warning btn-icon-split btn-lg w-100">
-                                        <span class="icon text-white-50">
-                                            <i class="fas fa-clock"></i>
-                                        </span>
-                                        <span class="text">Pagamentos Pendentes</span>
-                                    </a>
-                                </div>
+                            <div class="col-xl-3 col-md-6 mb-2">
+                                <a asp-controller="Payments" asp-action="Pending" class="btn btn-warning btn-icon-split btn-lg w-100">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-clock"></i>
+                                    </span>
+                                    <span class="text">Pagamentos Pendentes</span>
+                                </a>
+                            </div>
                         }
 
                         @if (await PermissionHelper.HasPermissionAsync(Context, "payments.view"))
                         {
-                                <div class="col-xl-3 col-md-6 mb-2">
-                                    <a asp-controller="Payments" asp-action="ByMonth"
-                                       asp-route-month="@DateTime.Now.Month"
-                                       asp-route-year="@DateTime.Now.Year"
-                                       class="btn btn-success btn-icon-split btn-lg w-100">
-                                        <span class="icon text-white-50">
-                                            <i class="fas fa-calendar"></i>
-                                        </span>
-                                        <span class="text">Este Mês</span>
-                                    </a>
-                                </div>
+                            <div class="col-xl-3 col-md-6 mb-2">
+                                <a asp-controller="Payments" asp-action="ByMonth"
+                                   asp-route-month="@DateTime.Now.Month"
+                                   asp-route-year="@DateTime.Now.Year"
+                                   class="btn btn-success btn-icon-split btn-lg w-100">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-calendar"></i>
+                                    </span>
+                                    <span class="text">Este Mês</span>
+                                </a>
+                            </div>
                         }
                     </div>
                 </div>
@@ -194,8 +191,8 @@
                 </div>
                 <div class="card-body">
                     <div class="chart-area">
-                        <canvas id="monthlyExpensesChart" 
-                                data-labels="@Html.Raw(Json.Serialize(monthlyData.Keys))" 
+                        <canvas id="monthlyExpensesChart"
+                                data-labels="@Html.Raw(Json.Serialize(monthlyData.Keys))"
                                 data-values="@Html.Raw(Json.Serialize(monthlyData.Values))"></canvas>
                     </div>
                 </div>
@@ -211,18 +208,18 @@
                 <div class="card-body">
                     @if (!creditCards.Any())
                     {
-                            <div class="text-center my-4">
-                                <div class="mb-3">
-                                    <i class="fas fa-credit-card fa-3x text-gray-300"></i>
-                                </div>
-                                <p>Nenhum cartão de crédito cadastrado.</p>
+                        <div class="text-center my-4">
+                            <div class="mb-3">
+                                <i class="fas fa-credit-card fa-3x text-gray-300"></i>
+                            </div>
+                            <p>Nenhum cartão de crédito cadastrado.</p>
                             @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.create"))
                             {
-                                        <a asp-controller="CreditCards" asp-action="Create" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-plus me-1"></i> Adicionar Cartão
-                                        </a>
+                                <a asp-controller="CreditCards" asp-action="Create" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-plus me-1"></i> Adicionar Cartão
+                                </a>
                             }
-                            </div>
+                        </div>
                     }
                     else
                     {
@@ -231,28 +228,28 @@
                             var usedPercentage = Math.Round((card.Limit - card.AvailableLimit) / card.Limit * 100, 0);
                             var colorClass = usedPercentage > 75 ? "danger" : (usedPercentage > 50 ? "warning" : "success");
 
-                                    <div class="mb-4">
-                                        <h4 class="small font-weight-bold">
+                            <div class="mb-4">
+                                <h4 class="small font-weight-bold">
                                     @card.Name <span class="float-end">@card.GetFormattedUsedPercentage()</span>
-                                        </h4>
-                                        <div class="progress mb-4">
-                                            <div class="progress-bar bg-@colorClass" role="progressbar" style="width: @usedPercentage%"
-                                                 aria-valuenow="@usedPercentage" aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                        <div class="small text-muted d-flex justify-content-between">
-                                            <span>Disponível: @card.GetFormattedAvailableLimit()</span>
-                                            <span>Limite: @card.GetFormattedLimit()</span>
-                                        </div>
-                                    </div>
+                                </h4>
+                                <div class="progress mb-4">
+                                    <div class="progress-bar bg-@colorClass" role="progressbar" style="width: @usedPercentage%"
+                                         aria-valuenow="@usedPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <div class="small text-muted d-flex justify-content-between">
+                                    <span>Disponível: @card.GetFormattedAvailableLimit()</span>
+                                    <span>Limite: @card.GetFormattedLimit()</span>
+                                </div>
+                            </div>
                         }
 
                         @if (creditCards.Count() > 3)
                         {
-                                    <div class="text-center mt-4">
-                                        <a asp-controller="CreditCards" asp-action="Index" class="btn btn-sm btn-light">
-                                            Ver todos os cartões
-                                        </a>
-                                    </div>
+                            <div class="text-center mt-4">
+                                <a asp-controller="CreditCards" asp-action="Index" class="btn btn-sm btn-light">
+                                    Ver todos os cartões
+                                </a>
+                            </div>
                         }
                     }
                 </div>
@@ -271,48 +268,48 @@
                 <div class="card-body">
                     @if (!paymentsPending.Any())
                     {
-                            <div class="text-center my-4">
-                                <div class="mb-3">
-                                    <i class="fas fa-check-circle fa-3x text-success"></i>
-                                </div>
-                                <p>Nenhum pagamento pendente!</p>
+                        <div class="text-center my-4">
+                            <div class="mb-3">
+                                <i class="fas fa-check-circle fa-3x text-success"></i>
                             </div>
+                            <p>Nenhum pagamento pendente!</p>
+                        </div>
                     }
                     else
                     {
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Descrição</th>
-                                            <th>Vencimento</th>
-                                            <th class="text-end">Valor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Descrição</th>
+                                        <th>Vencimento</th>
+                                        <th class="text-end">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     @foreach (var payment in paymentsPending.OrderBy(p => p.DueDate).Take(5))
                                     {
-                                                <tr>
-                                                    <td>
-                                                        <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id">
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id">
                                                     @payment.Description
-                                                        </a>
-                                                    </td>
-                                                    <td>@payment.GetFormattedDueDate()</td>
-                                                    <td class="text-end">@payment.GetFormattedAmount()</td>
-                                                </tr>
+                                                </a>
+                                            </td>
+                                            <td>@payment.GetFormattedDueDate()</td>
+                                            <td class="text-end">@payment.GetFormattedAmount()</td>
+                                        </tr>
                                     }
-                                    </tbody>
-                                </table>
-                            </div>
+                                </tbody>
+                            </table>
+                        </div>
 
                         @if (paymentsPending.Count() > 5)
                         {
-                                    <div class="text-center mt-3">
-                                        <a asp-controller="Payments" asp-action="Pending" class="btn btn-sm btn-warning">
-                                            Ver todos (@paymentsPending.Count())
-                                        </a>
-                                    </div>
+                            <div class="text-center mt-3">
+                                <a asp-controller="Payments" asp-action="Pending" class="btn btn-sm btn-warning">
+                                    Ver todos (@paymentsPending.Count())
+                                </a>
+                            </div>
                         }
                     }
                 </div>
@@ -328,48 +325,48 @@
                 <div class="card-body">
                     @if (!paymentsOverdue.Any())
                     {
-                            <div class="text-center my-4">
-                                <div class="mb-3">
-                                    <i class="fas fa-calendar-check fa-3x text-success"></i>
-                                </div>
-                                <p>Nenhum pagamento vencido!</p>
+                        <div class="text-center my-4">
+                            <div class="mb-3">
+                                <i class="fas fa-calendar-check fa-3x text-success"></i>
                             </div>
+                            <p>Nenhum pagamento vencido!</p>
+                        </div>
                     }
                     else
                     {
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Descrição</th>
-                                            <th>Vencimento</th>
-                                            <th class="text-end">Valor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Descrição</th>
+                                        <th>Vencimento</th>
+                                        <th class="text-end">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     @foreach (var payment in paymentsOverdue.OrderBy(p => p.DueDate).Take(5))
                                     {
-                                                <tr>
-                                                    <td>
-                                                        <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id" class="text-danger">
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id" class="text-danger">
                                                     @payment.Description
-                                                        </a>
-                                                    </td>
-                                                    <td>@payment.GetFormattedDueDate()</td>
-                                                    <td class="text-end">@payment.GetFormattedAmount()</td>
-                                                </tr>
+                                                </a>
+                                            </td>
+                                            <td>@payment.GetFormattedDueDate()</td>
+                                            <td class="text-end">@payment.GetFormattedAmount()</td>
+                                        </tr>
                                     }
-                                    </tbody>
-                                </table>
-                            </div>
+                                </tbody>
+                            </table>
+                        </div>
 
                         @if (paymentsOverdue.Count() > 5)
                         {
-                                    <div class="text-center mt-3">
-                                        <a asp-controller="Payments" asp-action="Overdue" class="btn btn-sm btn-danger">
-                                            Ver todos (@paymentsOverdue.Count())
-                                        </a>
-                                    </div>
+                            <div class="text-center mt-3">
+                                <a asp-controller="Payments" asp-action="Overdue" class="btn btn-sm btn-danger">
+                                    Ver todos (@paymentsOverdue.Count())
+                                </a>
+                            </div>
                         }
                     }
                 </div>
@@ -379,7 +376,6 @@
 </div>
 
 @section Scripts {
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="~/js/components/charts.js" asp-append-version="true"></script>
-        <script src="~/js/pages/dashboard.js" asp-append-version="true"></script>
+    <script src="https:        <script src="~/js/components/charts.js" asp-append-version="true"></script>
+    <script src="~/js/pages/dashboard.js" asp-append-version="true"></script>
 }

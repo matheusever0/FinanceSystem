@@ -245,8 +245,7 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
+    <script src="https:    <script>
         document.addEventListener('DOMContentLoaded', function() {
             initializeComparisonChart();
         });
@@ -255,8 +254,7 @@
             const chartCanvas = document.getElementById('cardComparisonChart');
             if (!chartCanvas) return;
 
-            // Criar dados para comparação de cartões
-            const cardData = @Html.Raw(Json.Serialize(cardData.Select(d => new
+                        const cardData = @Html.Raw(Json.Serialize(cardData.Select(d => new
             {
                 Name = ((FinanceSystem.Web.Models.CreditCardModel)d.Card).Name,
                 Total = d.TotalAmount,
@@ -324,115 +322,113 @@
                             },
                             grid: {
                                 color: "rgb(234, 236, 244)",
-                                zeroLineColor: "rgb(234, 236, 244)",
-                                drawBorder: false,
-                                borderDash: [2],
-                                zeroLineBorderDash: [2]
+                                    zeroLineColor: "rgb(234, 236, 244)",
+                                    drawBorder: false,
+                                    borderDash: [2],
+                                    zeroLineBorderDash: [2]
+                                }
                             }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
 
-                                    if (context.parsed.y !== null) {
-                                        label += 'R$ ' + context.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                                        if (context.parsed.y !== null) {
+                                            label += 'R$ ' + context.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                                        }
+                                        return label;
                                     }
-                                    return label;
                                 }
                             }
                         }
                     }
-                }
-            });
-
-            // Também criar gráfico de utilização dos cartões
-            const usageChartCanvas = document.createElement('canvas');
-            usageChartCanvas.id = 'cardUsageChart';
-            chartCanvas.parentNode.appendChild(usageChartCanvas);
-
-            new Chart(usageChartCanvas, {
-                type: 'horizontalBar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Percentual de Utilização',
-                            data: usageData,
-                            backgroundColor: usageData.map(p =>
-                                p > 75 ? 'rgba(231, 74, 59, 0.8)' :
-                                (p > 50 ? 'rgba(246, 194, 62, 0.8)' : 'rgba(28, 200, 138, 0.8)')
-                            ),
-                            borderWidth: 0
-                        }
-                    ]
-                },
-                options: {
-                    indexAxis: 'y',
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: {
-                            left: 10,
-                            right: 25,
-                            top: 25,
-                            bottom: 0
-                        }
-                    },
-                    scales: {
-                        x: {
-                            min: 0,
-                            max: 100,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return 'Utilização: ' + context.raw.toFixed(1) + '%';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function exportCardData(cardId) {
-            const table = document.getElementById(`dataTable-${cardId}`);
-            if (!table) return;
-
-            const rows = table.querySelectorAll('tbody tr');
-            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
-
-            let csvContent = headers.join(',') + '\n';
-
-            rows.forEach(row => {
-                const cells = Array.from(row.querySelectorAll('td'));
-                const rowData = cells.map(cell => {
-                    // Remover tags HTML e tratar valores com vírgulas
-                    let text = cell.textContent.trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
-                    return `"${text}"`;
                 });
-                csvContent += rowData.join(',') + '\n';
-            });
 
-            const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
-            const link = document.createElement('a');
-            link.setAttribute('href', encodedUri);
-            link.setAttribute('download', `cartao_${cardId}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    </script>
+                            const usageChartCanvas = document.createElement('canvas');
+                usageChartCanvas.id = 'cardUsageChart';
+                chartCanvas.parentNode.appendChild(usageChartCanvas);
+
+                new Chart(usageChartCanvas, {
+                    type: 'horizontalBar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Percentual de Utilização',
+                                data: usageData,
+                                backgroundColor: usageData.map(p =>
+                                    p > 75 ? 'rgba(231, 74, 59, 0.8)' :
+                                    (p > 50 ? 'rgba(246, 194, 62, 0.8)' : 'rgba(28, 200, 138, 0.8)')
+                                ),
+                                borderWidth: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        maintainAspectRatio: false,
+                        layout: {
+                            padding: {
+                                left: 10,
+                                right: 25,
+                                top: 25,
+                                bottom: 0
+                            }
+                        },
+                        scales: {
+                            x: {
+                                min: 0,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Utilização: ' + context.raw.toFixed(1) + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function exportCardData(cardId) {
+                const table = document.getElementById(`dataTable-${cardId}`);
+                if (!table) return;
+
+                const rows = table.querySelectorAll('tbody tr');
+                const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+
+                let csvContent = headers.join(',') + '\n';
+
+                rows.forEach(row => {
+                    const cells = Array.from(row.querySelectorAll('td'));
+                    const rowData = cells.map(cell => {
+                                            let text = cell.textContent.trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+                        return `"${text}"`;
+                    });
+                    csvContent += rowData.join(',') + '\n';
+                });
+
+                const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
+                const link = document.createElement('a');
+                link.setAttribute('href', encodedUri);
+                link.setAttribute('download', `cartao_${cardId}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        </script>
 }

@@ -66,8 +66,7 @@
             </div>
 
             <!-- Cartões de Crédito (se aplicável) -->
-            @if (Model.Type == 2 && Model.CreditCards.Any()) // Tipo 2 = Cartão de Crédito
-            {
+            @if (Model.Type == 2 && Model.CreditCards.Any())             {
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Cartões de Crédito Associados</h6>
@@ -118,8 +117,7 @@
                         <i class="fas fa-list me-1"></i> Ver Pagamentos com Este Método
                     </a>
 
-                    @if (Model.Type == 2) // Cartão de Crédito
-                    {
+                    @if (Model.Type == 2)                     {
                         <a asp-controller="CreditCards" asp-action="Create" asp-route-methodId="@Model.Id" class="btn btn-success w-100 mb-3">
                             <i class="fas fa-credit-card me-1"></i> Adicionar Cartão de Crédito
                         </a>

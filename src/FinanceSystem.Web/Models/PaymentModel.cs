@@ -58,7 +58,6 @@ namespace FinanceSystem.Web.Models
         [Display(Name = "Parcelas")]
         public List<PaymentInstallmentModel> Installments { get; set; } = new List<PaymentInstallmentModel>();
 
-        // Propriedades adicionais para facilitar a visualização
         [Display(Name = "Status")]
         public string StatusBadgeClass => GetStatusBadgeClass();
 
@@ -66,10 +65,10 @@ namespace FinanceSystem.Web.Models
         {
             return Status switch
             {
-                1 => "bg-warning",   // Pending
-                2 => "bg-success",   // Paid
-                3 => "bg-danger",    // Overdue
-                4 => "bg-secondary", // Cancelled
+                1 => "bg-warning",
+                2 => "bg-success",
+                3 => "bg-danger",
+                4 => "bg-secondary",
                 _ => "bg-primary",
             };
         }

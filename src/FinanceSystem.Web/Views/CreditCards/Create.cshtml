@@ -47,8 +47,7 @@
                                 <option value="">-- Selecione um método de pagamento --</option>
                                 @if (paymentMethods != null)
                                 {
-                                    @foreach (var method in paymentMethods.Where(m => m.Type == 2)) // Tipo 2 = Cartão de Crédito
-                                    {
+                                    @foreach (var method in paymentMethods.Where(m => m.Type == 2))                                     {
                                         <option value="@method.Id">@method.Name</option>
                                     }
                                 }

@@ -35,21 +35,15 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
 
-                // Obter pagamentos pendentes e vencidos
-                var pendingPayments = await _paymentService.GetPendingPaymentsAsync(token);
+                                var pendingPayments = await _paymentService.GetPendingPaymentsAsync(token);
                 var overduePayments = await _paymentService.GetOverduePaymentsAsync(token);
 
-                // Obter cartões de crédito
-                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
+                                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
 
-                // Calcular saldo (simulado)
-                decimal totalBalance = 5000.00m; // Valor simulado
+                                decimal totalBalance = 5000.00m; 
+                                var monthlyData = await GetMonthlyDataAsync(token);
 
-                // Dados para o gráfico mensal (últimos 6 meses)
-                var monthlyData = await GetMonthlyDataAsync(token);
-
-                // Passar dados para a view
-                ViewBag.PaymentsPending = pendingPayments;
+                                ViewBag.PaymentsPending = pendingPayments;
                 ViewBag.PaymentsOverdue = overduePayments;
                 ViewBag.CreditCards = creditCards;
                 ViewBag.TotalBalance = totalBalance;
@@ -70,8 +64,7 @@ namespace FinanceSystem.Web.Controllers
             var result = new Dictionary<string, decimal>();
             var currentDate = DateTime.Now;
 
-            // Obter dados dos últimos 6 meses
-            for (int i = 5; i >= 0; i--)
+                        for (int i = 5; i >= 0; i--)
             {
                 var month = currentDate.AddMonths(-i).Month;
                 var year = currentDate.AddMonths(-i).Year;
@@ -86,8 +79,7 @@ namespace FinanceSystem.Web.Controllers
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Erro ao obter dados do mês {Month}/{Year}", month, year);
-                    result.Add(monthName, 0); // Fallback para zero em caso de erro
-                }
+                    result.Add(monthName, 0);                 }
             }
 
             return result;

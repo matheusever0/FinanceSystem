@@ -56,8 +56,7 @@
                         <p>Ao confirmar esta operação, você está excluindo permanentemente este método de pagamento.</p>
                         <p>Importante: Se este método de pagamento estiver em uso por algum pagamento existente, a exclusão não será permitida.</p>
 
-                        @if (Model.Type == 2 && Model.CreditCards.Any()) // Cartão de Crédito
-                        {
+                        @if (Model.Type == 2 && Model.CreditCards.Any())                         {
                             <div class="alert alert-warning">
                                 <i class="fas fa-exclamation-triangle me-2"></i>
                                 Este método de pagamento possui @Model.CreditCards.Count cartões de crédito associados que também serão excluídos.

@@ -31,9 +31,7 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
 
-                // Aqui usaria um serviço de instalação de pagamento, mas como não foi implementado,
-                // usamos o paymentService para redirecionar ao pagamento principal
-                var paymentId = TempData["PaymentId"]?.ToString() ??
+                                                var paymentId = TempData["PaymentId"]?.ToString() ??
                     (await _paymentService.GetInstallmentParentPaymentAsync(id, token));
 
                 if (string.IsNullOrEmpty(paymentId))
@@ -52,8 +50,7 @@ namespace FinanceSystem.Web.Controllers
                 _logger.LogError(ex, "Erro ao marcar parcela como paga");
                 TempData["ErrorMessage"] = $"Erro ao marcar parcela como paga: {ex.Message}";
 
-                // Tentar retornar para o pagamento principal
-                var paymentId = TempData["PaymentId"]?.ToString();
+                                var paymentId = TempData["PaymentId"]?.ToString();
                 if (!string.IsNullOrEmpty(paymentId))
                 {
                     return RedirectToAction("Details", "Payments", new { id = paymentId });
@@ -73,9 +70,7 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
 
-                // Aqui usaria um serviço de instalação de pagamento, mas como não foi implementado,
-                // usamos o paymentService para redirecionar ao pagamento principal
-                var paymentId = TempData["PaymentId"]?.ToString() ??
+                                                var paymentId = TempData["PaymentId"]?.ToString() ??
                     (await _paymentService.GetInstallmentParentPaymentAsync(id, token));
 
                 if (string.IsNullOrEmpty(paymentId))
@@ -94,8 +89,7 @@ namespace FinanceSystem.Web.Controllers
                 _logger.LogError(ex, "Erro ao marcar parcela como vencida");
                 TempData["ErrorMessage"] = $"Erro ao marcar parcela como vencida: {ex.Message}";
 
-                // Tentar retornar para o pagamento principal
-                var paymentId = TempData["PaymentId"]?.ToString();
+                                var paymentId = TempData["PaymentId"]?.ToString();
                 if (!string.IsNullOrEmpty(paymentId))
                 {
                     return RedirectToAction("Details", "Payments", new { id = paymentId });
@@ -115,9 +109,7 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
 
-                // Aqui usaria um serviço de instalação de pagamento, mas como não foi implementado,
-                // usamos o paymentService para redirecionar ao pagamento principal
-                var paymentId = TempData["PaymentId"]?.ToString() ??
+                                                var paymentId = TempData["PaymentId"]?.ToString() ??
                     (await _paymentService.GetInstallmentParentPaymentAsync(id, token));
 
                 if (string.IsNullOrEmpty(paymentId))
@@ -136,8 +128,7 @@ namespace FinanceSystem.Web.Controllers
                 _logger.LogError(ex, "Erro ao cancelar parcela");
                 TempData["ErrorMessage"] = $"Erro ao cancelar parcela: {ex.Message}";
 
-                // Tentar retornar para o pagamento principal
-                var paymentId = TempData["PaymentId"]?.ToString();
+                                var paymentId = TempData["PaymentId"]?.ToString();
                 if (!string.IsNullOrEmpty(paymentId))
                 {
                     return RedirectToAction("Details", "Payments", new { id = paymentId });
