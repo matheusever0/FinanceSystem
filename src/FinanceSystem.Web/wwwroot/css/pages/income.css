@@ -1,0 +1,261 @@
+﻿/* Income specific styles */
+.income-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Income list */
+.income-list-container {
+    margin-bottom: 2rem;
+}
+
+.income-item {
+    display: flex;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+    .income-item:hover {
+        background-color: rgba(0, 0, 0, 0.01);
+    }
+
+    .income-item:last-child {
+        border-bottom: none;
+    }
+
+.income-icon {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    width: 40px;
+    height: 40px;
+    background-color: var(--success-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .income-icon.recurring {
+        background-color: rgba(54, 185, 204, 0.2);
+        color: var(--info-color);
+    }
+
+.income-details {
+    flex: 1;
+}
+
+.income-title {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.income-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.income-amount {
+    font-weight: 600;
+    margin-left: 1rem;
+    align-self: center;
+    color: var(--success-color);
+}
+
+.income-due-date {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    align-self: center;
+    margin-left: 1rem;
+    min-width: 100px;
+    text-center: center;
+}
+
+.income-status {
+    margin-left: 1rem;
+    align-self: center;
+}
+
+.income-actions {
+    margin-left: 1rem;
+    align-self: center;
+}
+
+/* Income details page */
+.income-details-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+.income-info-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.income-info-header {
+    background-color: var(--success-color);
+    color: white;
+    padding: 1rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.income-info-body {
+    padding: 1.5rem;
+}
+
+.income-info-row {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.income-info-label {
+    font-weight: 500;
+    min-width: 150px;
+    color: var(--text-muted);
+}
+
+.income-info-value {
+    flex: 1;
+}
+
+.income-notes {
+    background-color: #f9f9f9;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-top: 1rem;
+}
+
+.income-notes-title {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+}
+
+/* Income installments */
+.installment-table th,
+.installment-table td {
+    text-align: center;
+}
+
+.installment-status {
+    width: 100px;
+}
+
+/* Income form */
+.income-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.income-section-title {
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.installments-config {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.installments-slider {
+    flex: 1;
+    margin-right: 1rem;
+}
+
+.installments-value {
+    font-weight: 600;
+    min-width: 50px;
+    text-align: center;
+}
+
+/* Income filters */
+.income-filters {
+    display: flex;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.income-filter-item {
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    background-color: #f9f9f9;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+    .income-filter-item:hover {
+        background-color: var(--primary-light);
+    }
+
+    .income-filter-item.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+/* Income types */
+.income-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    background-color: var(--secondary-color);
+}
+
+.income-type-system {
+    background-color: rgba(54, 185, 204, 0.1);
+    color: var(--info-color);
+    border: 1px solid rgba(54, 185, 204, 0.2);
+}
+
+.income-type-user {
+    background-color: rgba(78, 115, 223, 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(78, 115, 223, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .income-details-container {
+        grid-template-columns: 1fr;
+    }
+
+    .income-item {
+        flex-wrap: wrap;
+    }
+
+    .income-actions {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 1rem;
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 768px) {
+    .income-due-date,
+    .income-status {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+
+    .income-item {
+        flex-direction: column;
+    }
+
+    .income-amount {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+}

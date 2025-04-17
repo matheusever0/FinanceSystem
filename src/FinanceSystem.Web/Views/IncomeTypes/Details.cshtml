@@ -1,0 +1,105 @@
+﻿@using FinanceSystem.Web.Helpers
+@model FinanceSystem.Web.Models.IncomeType.IncomeTypeModel
+@{
+    ViewData["Title"] = "Detalhes do Tipo de Receita";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+    <div>
+        @if (!Model.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "incomes.edit"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+        }
+        <a asp-action="Index" class="btn btn-sm btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Informações do Tipo de Receita</h6>
+                @if (Model.IsSystem)
+                {
+                    <span class="badge bg-info">Sistema</span>
+                }
+                else
+                {
+                    <span class="badge bg-primary">Personalizado</span>
+                }
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="financial-data">
+                            <div class="label">Nome</div>
+                            <div class="value">@Model.Name</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="financial-data">
+                            <div class="label">Data de Criação</div>
+                            <div class="value">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="financial-data">
+                                <div class="label">Descrição</div>
+                                <div class="value">@Model.Description</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="financial-data">
+                            <div class="label">Tipo</div>
+                            <div class="value">
+                                @if (Model.IsSystem)
+                                {
+                                    <span class="text-info"><i class="fas fa-cog"></i> Sistema</span>
+                                }
+                                else
+                                {
+                                    <span class="text-primary"><i class="fas fa-user"></i> Personalizado</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.IsSystem)
+                {
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle"></i> Este é um tipo de receita do sistema e não pode ser editado ou excluído.
+                    </div>
+                }
+                else
+                {
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12">
+                            @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.delete"))
+                            {
+                                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                                    <i class="fas fa-trash"></i> Excluir
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

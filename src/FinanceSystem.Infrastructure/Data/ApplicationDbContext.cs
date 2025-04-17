@@ -20,6 +20,9 @@ namespace FinanceSystem.Infrastructure.Data
         public DbSet<PaymentMethod> PaymentMethods { get; set; }
         public DbSet<CreditCard> CreditCards { get; set; }
         public DbSet<PaymentInstallment> PaymentInstallments { get; set; }
+        public DbSet<Income> Incomes { get; set; }
+        public DbSet<IncomeInstallment> IncomeInstallments { get; set; }
+        public DbSet<IncomeType> IncomeTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -57,6 +60,18 @@ namespace FinanceSystem.Infrastructure.Data
                 .HasDefaultValueSql("NEWSEQUENTIALID()");
 
             modelBuilder.Entity<PaymentType>()
+                .Property(e => e.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<Income>()
+                .Property(e => e.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<IncomeInstallment>()
+                .Property(e => e.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<IncomeType>()
                 .Property(e => e.Id)
                 .HasDefaultValueSql("NEWSEQUENTIALID()");
 
@@ -136,6 +151,38 @@ namespace FinanceSystem.Infrastructure.Data
                 .WithMany(p => p.Installments)
                 .HasForeignKey(pi => pi.PaymentId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Income>()
+                .HasOne(i => i.User)
+                .WithMany()
+                .HasForeignKey(i => i.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Income>()
+                .HasOne(i => i.IncomeType)
+                .WithMany(it => it.Incomes)
+                .HasForeignKey(i => i.IncomeTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Income>()
+                .HasMany(i => i.Installments)
+                .WithOne(ii => ii.Income)
+                .HasForeignKey(ii => ii.IncomeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<IncomeType>()
+                .HasOne(it => it.User)
+                .WithMany()
+                .HasForeignKey(it => it.UserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            modelBuilder.Entity<IncomeType>()
+                .HasMany(it => it.Incomes)
+                .WithOne(i => i.IncomeType)
+                .HasForeignKey(i => i.IncomeTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }

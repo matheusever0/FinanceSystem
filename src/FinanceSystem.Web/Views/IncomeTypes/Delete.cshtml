@@ -1,0 +1,69 @@
+﻿@model FinanceSystem.Web.Models.IncomeType.IncomeTypeModel
+@{
+    ViewData["Title"] = "Excluir Tipo de Receita";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-sm btn-secondary">
+        <i class="fas fa-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-danger">
+        <h6 class="m-0 font-weight-bold text-white">Confirmação de Exclusão</h6>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle fa-2x float-left me-3"></i>
+            <p class="mb-0">
+                <strong>Atenção!</strong> Você está prestes a excluir este tipo de receita permanentemente. Esta ação não poderá ser desfeita.
+            </p>
+        </div>
+
+        <h5 class="mt-4">Detalhes do Tipo de Receita</h5>
+        <hr />
+
+        <dl class="row">
+            <dt class="col-sm-3">Nome</dt>
+            <dd class="col-sm-9">@Model.Name</dd>
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <dt class="col-sm-3">Descrição</dt>
+                <dd class="col-sm-9">@Model.Description</dd>
+            }
+
+            <dt class="col-sm-3">Tipo</dt>
+            <dd class="col-sm-9">
+                @if (Model.IsSystem)
+                {
+                    <span class="badge bg-info">Sistema</span>
+                }
+                else
+                {
+                    <span class="badge bg-primary">Personalizado</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Data de Criação</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+        </dl>
+
+        <div class="alert alert-warning mt-3">
+            <i class="fas fa-exclamation-circle"></i>
+            Se houver receitas associadas a este tipo, elas não serão excluídas, mas perderão a associação com este tipo.
+        </div>
+
+        <form asp-action="Delete" method="post" class="mt-4">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Confirmar Exclusão
+            </button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+        </form>
+    </div>
+</div>

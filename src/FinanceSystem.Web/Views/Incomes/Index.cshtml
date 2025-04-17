@@ -1,0 +1,122 @@
+﻿@using FinanceSystem.Web.Helpers
+@model IEnumerable<FinanceSystem.Web.Models.Income.IncomeModel>
+@{
+    ViewData["Title"] = ViewBag.Title ?? "Receitas";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+    <div>
+        @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.create"))
+        {
+            <a asp-action="Create" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus-circle"></i> Nova Receita
+            </a>
+        }
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <div class="row">
+            <div class="col-md-9">
+                <h6 class="m-0 font-weight-bold text-primary">Suas Receitas</h6>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-group btn-group-sm" role="group">
+                    <a asp-action="Index" class="btn @(ViewContext.RouteData.Values["action"].ToString() == "Index" ? "btn-primary" : "btn-outline-primary")">
+                        <i class="fas fa-list"></i> Todas
+                    </a>
+                    <a asp-action="Pending" class="btn @(ViewContext.RouteData.Values["action"].ToString() == "Pending" ? "btn-primary" : "btn-outline-primary")">
+                        <i class="fas fa-clock"></i> Pendentes
+                    </a>
+                    <a asp-action="Received" class="btn @(ViewContext.RouteData.Values["action"].ToString() == "Received" ? "btn-primary" : "btn-outline-primary")">
+                        <i class="fas fa-check"></i> Recebidas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="incomeTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Vencimento</th>
+                            <th>Tipo</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var income in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@income.Id">
+                                        @income.Description
+                                        @if (income.IsRecurring)
+                                        {
+                                            <small class="text-muted ms-2"><i class="fas fa-sync-alt" title="Recorrente"></i></small>
+                                        }
+                                    </a>
+                                </td>
+                                <td class="text-end">@income.GetFormattedAmount()</td>
+                                <td class="text-center">@income.GetFormattedDueDate()</td>
+                                <td>@income.IncomeTypeName</td>
+                                <td class="text-center">
+                                    <span class="badge @income.StatusBadgeClass">@income.StatusDescription</span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@income.Id" class="btn btn-info" title="Detalhes">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.edit"))
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@income.Id" class="btn btn-primary" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        }
+                                        @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.delete"))
+                                        {
+                                            <a asp-action="Delete" asp-route-id="@income.Id" class="btn btn-danger" title="Excluir">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Nenhuma receita encontrada.
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof $.fn.DataTable !== 'undefined') {
+                $('#incomeTable').DataTable({
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+                    },
+                    responsive: true,
+                    order: [[2, 'asc']]
+                });
+            }
+        });
+    </script>
+}

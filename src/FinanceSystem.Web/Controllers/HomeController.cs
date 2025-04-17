@@ -1,5 +1,5 @@
 ﻿using FinanceSystem.Web.Extensions;
-using FinanceSystem.Web.Models;
+using FinanceSystem.Web.Models.Generics;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,4 @@
-﻿using FinanceSystem.Application.DTOs.PaymentInstallmentDto;
+﻿using FinanceSystem.Application.DTOs.PaymentInstallment;
 using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,4 @@
-﻿using FinanceSystem.Application.DTOs.PaymentInstallmentDto;
+﻿using FinanceSystem.Application.DTOs.PaymentInstallment;
 
 namespace FinanceSystem.Application.Interfaces
 {

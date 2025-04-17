@@ -1,0 +1,168 @@
+﻿@model FinanceSystem.Web.Models.Income.CreateIncomeModel
+@{
+    ViewData["Title"] = "Nova Receita";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+    <a asp-action="Index" class="btn btn-sm btn-secondary">
+        <i class="fas fa-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Informações da Receita</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label asp-for="Description" class="control-label"></label>
+                                <input asp-for="Description" class="form-control" />
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Amount" class="control-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input asp-for="Amount" class="form-control money" />
+                                </div>
+                                <span asp-validation-for="Amount" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="DueDate" class="control-label"></label>
+                                <input asp-for="DueDate" class="form-control" type="date" />
+                                <span asp-validation-for="DueDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="ReceivedDate" class="control-label"></label>
+                                <input asp-for="ReceivedDate" class="form-control" type="date" />
+                                <span asp-validation-for="ReceivedDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="IncomeTypeId" class="control-label"></label>
+                                <select asp-for="IncomeTypeId" class="form-select" asp-items="@(new SelectList(ViewBag.IncomeTypes, "Id", "Name"))">
+                                    <option value="">Selecione um tipo...</option>
+                                </select>
+                                <span asp-validation-for="IncomeTypeId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="IsRecurring" class="control-label"></label>
+                                <div class="form-check form-switch mt-2">
+                                    <input asp-for="IsRecurring" class="form-check-input" type="checkbox" id="isRecurringSwitch" />
+                                    <label class="form-check-label" for="isRecurringSwitch" id="isRecurringLabel">Não</label>
+                                </div>
+                                <span asp-validation-for="IsRecurring" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label asp-for="NumberOfInstallments" class="control-label"></label>
+                                <input asp-for="NumberOfInstallments" class="form-control" min="1" max="48" />
+                                <span asp-validation-for="NumberOfInstallments" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="Notes" class="control-label"></label>
+                                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Notes" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Salvar
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Informações</h6>
+            </div>
+            <div class="card-body">
+                <p>Preencha os dados da sua receita:</p>
+                <ul>
+                    <li><strong>Descrição:</strong> Um nome ou identificação para sua receita.</li>
+                    <li><strong>Valor:</strong> O valor da receita.</li>
+                    <li><strong>Data de Vencimento:</strong> A data em que você espera receber.</li>
+                    <li><strong>Data de Recebimento:</strong> Caso já tenha recebido, informe a data.</li>
+                    <li><strong>Tipo de Receita:</strong> Categorize sua receita.</li>
+                    <li><strong>Recorrente:</strong> Marque se esta receita se repete regularmente.</li>
+                    <li><strong>Número de Parcelas:</strong> Se a receita é parcelada, informe quantas parcelas.</li>
+                </ul>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> As receitas parceladas terão o valor dividido em parcelas iguais, com vencimentos mensais a partir da data informada.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Controle de receita recorrente
+            const isRecurringSwitch = document.getElementById('isRecurringSwitch');
+            const isRecurringLabel = document.getElementById('isRecurringLabel');
+            const installmentsInput = document.getElementById('NumberOfInstallments');
+
+            if (isRecurringSwitch && isRecurringLabel) {
+                isRecurringSwitch.addEventListener('change', function () {
+                    isRecurringLabel.textContent = this.checked ? 'Sim' : 'Não';
+
+                    if (this.checked && installmentsInput) {
+                        installmentsInput.value = '1';
+                        installmentsInput.disabled = true;
+                    } else if (installmentsInput) {
+                        installmentsInput.disabled = false;
+                    }
+                });
+
+                // Executa no carregamento para definir estado inicial
+                isRecurringSwitch.dispatchEvent(new Event('change'));
+            }
+
+            // Mascara para campo de dinheiro
+            if (typeof $.fn.mask !== 'undefined') {
+                $('.money').mask('#.##0,00', { reverse: true });
+            }
+        });
+    </script>
+}

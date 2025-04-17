@@ -4,7 +4,7 @@ using FinanceSystem.Application.DTOs.Income;
 using FinanceSystem.Application.DTOs.IncomeInstallment;
 using FinanceSystem.Application.DTOs.IncomeType;
 using FinanceSystem.Application.DTOs.Payment;
-using FinanceSystem.Application.DTOs.PaymentInstallmentDto;
+using FinanceSystem.Application.DTOs.PaymentInstallment;
 using FinanceSystem.Application.DTOs.PaymentMethod;
 using FinanceSystem.Application.DTOs.PaymentType;
 using FinanceSystem.Application.DTOs.Permission;
