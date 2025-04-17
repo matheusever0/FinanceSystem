@@ -12,6 +12,9 @@ namespace FinanceSystem.Domain.Interfaces.Services
         IPaymentMethodRepository PaymentMethods { get; }
         ICreditCardRepository CreditCards { get; }
         IPaymentInstallmentRepository PaymentInstallments { get; }
+        IIncomeRepository Incomes { get; }
+        IIncomeTypeRepository IncomeTypes { get; }
+        IIncomeInstallmentRepository IncomeInstallments { get; }
         Task<int> CompleteAsync();
     }
 }

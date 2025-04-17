@@ -16,6 +16,10 @@ namespace FinanceSystem.Infrastructure
         private IPaymentMethodRepository _paymentMethodRepository;
         private ICreditCardRepository _creditCardRepository;
         private IPaymentInstallmentRepository _paymentInstallmentRepository;
+        private IIncomeRepository _incomeRepository;
+        private IIncomeTypeRepository _incomeTypeRepository;
+        private IIncomeInstallmentRepository _incomeInstallmentRepository;
+
         private bool _disposed = false;
 
         public UnitOfWork(ApplicationDbContext context)
@@ -38,6 +42,12 @@ namespace FinanceSystem.Infrastructure
         public ICreditCardRepository CreditCards => _creditCardRepository ??= new CreditCardRepository(_context);
 
         public IPaymentInstallmentRepository PaymentInstallments => _paymentInstallmentRepository ??= new PaymentInstallmentRepository(_context);
+
+        public IIncomeRepository Incomes => _incomeRepository ??= new IncomeRepository(_context);
+
+        public IIncomeTypeRepository IncomeTypes => _incomeTypeRepository ??= new IncomeTypeRepository(_context);
+
+        public IIncomeInstallmentRepository IncomeInstallments => _incomeInstallmentRepository ??= new IncomeInstallmentRepository(_context);
 
         public async Task<int> CompleteAsync()
         {

@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
 using FinanceSystem.Application.DTOs.CreditCard;
+using FinanceSystem.Application.DTOs.Income;
+using FinanceSystem.Application.DTOs.IncomeInstallment;
+using FinanceSystem.Application.DTOs.IncomeType;
 using FinanceSystem.Application.DTOs.Payment;
 using FinanceSystem.Application.DTOs.PaymentInstallmentDto;
 using FinanceSystem.Application.DTOs.PaymentMethod;
@@ -37,6 +40,14 @@ namespace FinanceSystem.Application.Mappings
                 .ForMember(dest => dest.PaymentMethodName, opt => opt.MapFrom(src => src.PaymentMethod.Name));
 
             CreateMap<PaymentInstallment, PaymentInstallmentDto>();
+
+            CreateMap<Income, IncomeDto>()
+                .ForMember(dest => dest.IncomeTypeName,
+                opt => opt.MapFrom(src => src.IncomeType.Name));
+
+            CreateMap<IncomeType, IncomeTypeDto>();
+
+            CreateMap<IncomeInstallment, IncomeInstallmentDto>();
         }
     }
 }
