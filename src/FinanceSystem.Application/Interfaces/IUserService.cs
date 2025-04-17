@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Application.DTOs;
+﻿using FinanceSystem.Application.DTOs.Login;
+using FinanceSystem.Application.DTOs.User;
 
 namespace FinanceSystem.Application.Interfaces
 {

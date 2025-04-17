@@ -1,4 +1,4 @@
-﻿using FinanceSystem.Application.DTOs;
+﻿using FinanceSystem.Application.DTOs.Login;
 using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

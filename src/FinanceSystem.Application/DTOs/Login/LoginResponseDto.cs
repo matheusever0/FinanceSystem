@@ -1,4 +1,6 @@
-﻿namespace FinanceSystem.Application.DTOs
+﻿using FinanceSystem.Application.DTOs.User;
+
+namespace FinanceSystem.Application.DTOs.Login
 {
     public class LoginResponseDto
     {

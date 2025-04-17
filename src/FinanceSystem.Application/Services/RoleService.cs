@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using FinanceSystem.Application.DTOs;
+using FinanceSystem.Application.DTOs.Role;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Entities;
 using FinanceSystem.Domain.Interfaces.Services;

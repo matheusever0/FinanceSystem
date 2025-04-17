@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FinanceSystem.Application.DTOs
+namespace FinanceSystem.Application.DTOs.PaymentType
 {
-    public class UpdatePaymentMethodDto
+    public class UpdatePaymentTypeDto
     {
         [StringLength(50, MinimumLength = 3)]
         public string Name { get; set; }

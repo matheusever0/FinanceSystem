@@ -1,4 +1,4 @@
-﻿using FinanceSystem.Application.DTOs;
+﻿using FinanceSystem.Application.DTOs.PaymentMethod;
 using FinanceSystem.Domain.Enums;
 
 namespace FinanceSystem.Application.Interfaces

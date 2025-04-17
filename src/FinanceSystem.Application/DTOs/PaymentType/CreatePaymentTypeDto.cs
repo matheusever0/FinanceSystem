@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FinanceSystem.Application.DTOs
+namespace FinanceSystem.Application.DTOs.PaymentType
 {
     public class CreatePaymentTypeDto
     {

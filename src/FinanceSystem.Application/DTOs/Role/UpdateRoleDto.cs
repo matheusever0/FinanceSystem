@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FinanceSystem.Application.DTOs
+namespace FinanceSystem.Application.DTOs.Role
 {
-    public class CreateRoleDto
+    public class UpdateRoleDto
     {
-        [Required]
         [StringLength(50, MinimumLength = 3)]
         public string Name { get; set; }
 

@@ -1,6 +1,6 @@
 ﻿using FinanceSystem.Domain.Enums;
 
-namespace FinanceSystem.Application.DTOs
+namespace FinanceSystem.Application.DTOs.Payment
 {
     public class PaymentDto
     {

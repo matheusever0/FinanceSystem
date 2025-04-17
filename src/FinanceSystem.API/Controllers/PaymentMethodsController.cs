@@ -1,4 +1,4 @@
-﻿using FinanceSystem.Application.DTOs;
+﻿using FinanceSystem.Application.DTOs.PaymentMethod;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;

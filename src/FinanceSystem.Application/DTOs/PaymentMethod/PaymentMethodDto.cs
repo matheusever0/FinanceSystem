@@ -1,6 +1,7 @@
-﻿using FinanceSystem.Domain.Enums;
+﻿using FinanceSystem.Application.DTOs.CreditCard;
+using FinanceSystem.Domain.Enums;
 
-namespace FinanceSystem.Application.DTOs
+namespace FinanceSystem.Application.DTOs.PaymentMethod
 {
     public class PaymentMethodDto
     {
