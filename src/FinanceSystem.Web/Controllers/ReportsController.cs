@@ -1,5 +1,6 @@
 ﻿using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
+using FinanceSystem.Web.Models;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,18 +35,19 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                                month ??= DateTime.Now.Month;
+                month ??= DateTime.Now.Month;
                 year ??= DateTime.Now.Year;
 
                 var token = HttpContext.GetJwtToken();
 
-                                var payments = await _paymentService.GetPaymentsByMonthAsync(month.Value, year.Value, token);
+                var payments = await _paymentService.GetPaymentsByMonthAsync(month.Value, year.Value, token);
 
-                                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
+                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
 
-                                var paymentsByType = payments
+                var paymentsByType = payments
                     .GroupBy(p => p.PaymentTypeId)
-                    .Select(g => new {
+                    .Select(g => new PaymentByTypeDto
+                    {
                         TypeId = g.Key,
                         TypeName = paymentTypes.FirstOrDefault(t => t.Id == g.Key)?.Name ?? "Desconhecido",
                         TotalAmount = g.Sum(p => p.Amount)
@@ -53,12 +55,12 @@ namespace FinanceSystem.Web.Controllers
                     .OrderByDescending(g => g.TotalAmount)
                     .ToList();
 
-                                var totalAmount = payments.Sum(p => p.Amount);
+                var totalAmount = payments.Sum(p => p.Amount);
                 var paidAmount = payments.Where(p => p.Status == 2).Sum(p => p.Amount);
                 var pendingAmount = payments.Where(p => p.Status == 1).Sum(p => p.Amount);
                 var overdueAmount = payments.Where(p => p.Status == 3).Sum(p => p.Amount);
 
-                                ViewBag.PaymentTypes = paymentTypes;
+                ViewBag.PaymentTypes = paymentTypes;
                 ViewBag.PaymentsByType = paymentsByType;
                 ViewBag.Month = month;
                 ViewBag.Year = year;
@@ -81,11 +83,11 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                                year ??= DateTime.Now.Year;
+                year ??= DateTime.Now.Year;
 
                 var token = HttpContext.GetJwtToken();
 
-                                var monthlyData = new Dictionary<string, decimal>();
+                var monthlyData = new Dictionary<string, decimal>();
                 for (int month = 1; month <= 12; month++)
                 {
                     var monthName = new DateTime(year.Value, month, 1).ToString("MMM");
@@ -96,19 +98,19 @@ namespace FinanceSystem.Web.Controllers
                     }
                     catch (Exception)
                     {
-                                                monthlyData.Add(monthName, 0);
+                        monthlyData.Add(monthName, 0);
                     }
                 }
 
-                                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
+                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
 
-                                ViewBag.MonthlyData = monthlyData;
+                ViewBag.MonthlyData = monthlyData;
                 ViewBag.Year = year;
                 ViewBag.PaymentTypes = paymentTypes;
                 ViewBag.PaymentMethods = paymentMethods;
 
-                                var totalAnnual = monthlyData.Values.Sum();
+                var totalAnnual = monthlyData.Values.Sum();
                 ViewBag.TotalAnnual = totalAnnual;
                 ViewBag.AverageMonthly = totalAnnual / Math.Max(1, monthlyData.Count(m => m.Value > 0));
 
@@ -128,9 +130,9 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
 
-                                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
+                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
 
-                                var cardData = new List<object>();
+                var cardData = new List<object>();
                 foreach (var card in creditCards)
                 {
                     try
@@ -175,9 +177,9 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
 
-                                var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
+                var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
 
-                                var totalAmount = payments.Sum(p => p.Amount);
+                var totalAmount = payments.Sum(p => p.Amount);
                 var paidAmount = payments.Where(p => p.Status == 2).Sum(p => p.Amount);
                 var pendingAmount = payments.Where(p => p.Status == 1).Sum(p => p.Amount);
                 var overdueAmount = payments.Where(p => p.Status == 3).Sum(p => p.Amount);

@@ -108,9 +108,11 @@ function initializePaymentTypesChart() {
     const chartCanvas = document.getElementById('paymentTypesPieChart');
     if (!chartCanvas) return;
 
-    // Obter dados do atributo data
-    const labels = JSON.parse(chartCanvas.getAttribute('data-labels') || '[]');
-    const values = JSON.parse(chartCanvas.getAttribute('data-values') || '[]');
+    const labelsRaw = chartCanvas.getAttribute('data-labels');
+    const valuesRaw = chartCanvas.getAttribute('data-values');
+
+    const labels = JSON.parse(labelsRaw);
+    const values = JSON.parse(valuesRaw);
 
     // Gerar cores
     const backgroundColors = generateColors(labels.length);

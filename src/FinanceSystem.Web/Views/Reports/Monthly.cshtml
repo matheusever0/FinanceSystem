@@ -1,4 +1,6 @@
-﻿@model IEnumerable<FinanceSystem.Web.Models.PaymentModel>
+﻿@using FinanceSystem.Web.Models
+@using System.Text.Json
+@model IEnumerable<FinanceSystem.Web.Models.PaymentModel>
 @{
     ViewData["Title"] = "Relatório Mensal";
 
@@ -16,12 +18,16 @@
     var pendingAmount = ViewBag.PendingAmount;
     var overdueAmount = ViewBag.OverdueAmount;
 
-    // Na view Monthly.cshtml, substitua:
-    var paymentsByType = ViewBag.PaymentsByType as List<dynamic> ?? new List<dynamic>();
+    var paymentsByType = ViewBag.PaymentsByType as List<PaymentByTypeDto> ?? new List<PaymentByTypeDto>();
 
-    // E então, nas linhas que usam paymentsByType, verifique se há itens:
-    var typeLabels = paymentsByType.Any() ? paymentsByType.Select(p => p.TypeName).ToList() : new List<dynamic>();
-    var typeValues = paymentsByType.Any() ? paymentsByType.Select(p => p.TotalAmount).ToList() : new List<dynamic>();
+    var jsonOptions = new JsonSerializerOptions
+    {Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping};
+
+    var typeLabels = JsonSerializer.Serialize(paymentsByType.Select(p => p.TypeName).ToList(), jsonOptions);
+    var typeValues = JsonSerializer.Serialize(paymentsByType.Select(p => p.TotalAmount).ToList(), jsonOptions);
+
+    var amountValues = JsonSerializer.Serialize(new[] { paidAmount, pendingAmount, overdueAmount, "0.0m" }, jsonOptions);
+    var typeValues2 = JsonSerializer.Serialize(new[] { "Pago", "Pendente", "Vencido", "Cancelado" }, jsonOptions);
 }
 
 @section Styles {
@@ -187,8 +193,9 @@
                 <div class="card-body">
                     <div class="chart-pie pt-4 pb-2">
                         <canvas id="paymentTypesPieChart"
-                                data-labels="@Html.Raw(Json.Serialize(typeLabels))"
-                                data-values="@Html.Raw(Json.Serialize(typeValues))"></canvas>
+                                data-labels='@Html.Raw(typeLabels)'
+                                data-values='@Html.Raw(typeValues)'>
+                        </canvas>
                     </div>
                     <div class="mt-4 text-center small">
                         @foreach (var paymentType in paymentsByType.Take(5))
@@ -211,8 +218,8 @@
                 <div class="card-body">
                     <div class="chart-pie pt-4 pb-2">
                         <canvas id="paymentStatusPieChart"
-                                data-labels="@Html.Raw(Json.Serialize(new[] { "Pago", "Pendente", "Vencido", "Cancelado" }))"
-                                data-values="@Html.Raw(Json.Serialize(new[] { paidAmount, pendingAmount, overdueAmount, 0.0m }))"></canvas>
+                                data-labels='@Html.Raw(typeValues2)'
+                                data-values='@Html.Raw(amountValues)'></canvas>
                     </div>
                     <div class="mt-4 text-center small">
                         <span class="me-2">
@@ -291,8 +298,10 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="~/js/components/charts.js" asp-append-version="true"></script>
     <script src="~/js/components/tables.js" asp-append-version="true"></script>
+    <script src="~/js/pages/dashboard.js" asp-append-version="true"></script>
 }
 
 @functions {
