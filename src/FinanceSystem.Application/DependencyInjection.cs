@@ -20,6 +20,9 @@ namespace FinanceSystem.Application
             services.AddScoped<IPaymentMethodService, PaymentMethodService>();
             services.AddScoped<ICreditCardService, CreditCardService>();
             services.AddScoped<IPaymentInstallmentService, PaymentInstallmentService>();
+            services.AddScoped<IIncomeInstallmentService, IncomeInstallmentService>();
+            services.AddScoped<IIncomeService, IncomeService>();
+            services.AddScoped<IIncomeTypeService, IncomeTypeService>();
 
             return services;
         }
