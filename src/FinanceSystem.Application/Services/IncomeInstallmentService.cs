@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using FinanceSystem.Application.DTOs;
+using FinanceSystem.Application.DTOs.IncomeInstallment;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Interfaces.Services;
 

@@ -1,4 +1,4 @@
-﻿namespace FinanceSystem.Application.DTOs
+﻿namespace FinanceSystem.Application.DTOs.User
 {
     public class UserDto
     {

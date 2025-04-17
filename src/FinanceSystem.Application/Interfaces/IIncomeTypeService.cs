@@ -1,4 +1,4 @@
-﻿using FinanceSystem.Application.DTOs;
+﻿using FinanceSystem.Application.DTOs.IncomeType;
 
 namespace FinanceSystem.Application.Interfaces
 {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FinanceSystem.Application.DTOs
+namespace FinanceSystem.Application.DTOs.IncomeType
 {
     public class UpdateIncomeTypeDto
     {

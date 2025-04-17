@@ -1,5 +1,12 @@
 ﻿using AutoMapper;
-using FinanceSystem.Application.DTOs;
+using FinanceSystem.Application.DTOs.CreditCard;
+using FinanceSystem.Application.DTOs.Payment;
+using FinanceSystem.Application.DTOs.PaymentInstallmentDto;
+using FinanceSystem.Application.DTOs.PaymentMethod;
+using FinanceSystem.Application.DTOs.PaymentType;
+using FinanceSystem.Application.DTOs.Permission;
+using FinanceSystem.Application.DTOs.Role;
+using FinanceSystem.Application.DTOs.User;
 using FinanceSystem.Domain.Entities;
 
 namespace FinanceSystem.Application.Mappings

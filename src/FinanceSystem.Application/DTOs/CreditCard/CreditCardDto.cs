@@ -1,4 +1,4 @@
-﻿namespace FinanceSystem.Application.DTOs
+﻿namespace FinanceSystem.Application.DTOs.CreditCard
 {
     public class CreditCardDto
     {

@@ -1,6 +1,7 @@
-﻿using FinanceSystem.Domain.Enums;
+﻿using FinanceSystem.Application.DTOs.IncomeInstallment;
+using FinanceSystem.Domain.Enums;
 
-namespace FinanceSystem.Application.DTOs
+namespace FinanceSystem.Application.DTOs.Income
 {
     public class IncomeDto
     {
