@@ -3,6 +3,10 @@
     ViewData["Title"] = "Novo Tipo de Receita";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/income.css" asp-append-version="true">
+}
+
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
     <a asp-action="Index" class="btn btn-sm btn-secondary">
@@ -75,4 +79,6 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script src="~/js/pages/incomes.js" asp-append-version="true"></script>
 }

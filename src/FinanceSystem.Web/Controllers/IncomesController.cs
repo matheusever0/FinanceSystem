@@ -217,6 +217,8 @@ namespace FinanceSystem.Web.Controllers
                     Description = income.Description,
                     Amount = income.Amount,
                     DueDate = income.DueDate,
+                    ReceivedDate = income.ReceivedDate,
+                    Status = income.Status,
                     IsRecurring = income.IsRecurring,
                     Notes = income.Notes,
                     IncomeTypeId = income.IncomeTypeId

@@ -31,7 +31,6 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
 
-                // Tenta obter o ID da receita pai a partir do TempData ou da API
                 var incomeId = TempData["IncomeId"]?.ToString() ??
                     (await _incomeService.GetInstallmentParentIncomeAsync(id, token));
 
@@ -51,7 +50,6 @@ namespace FinanceSystem.Web.Controllers
                 _logger.LogError(ex, "Erro ao marcar parcela como recebida");
                 TempData["ErrorMessage"] = $"Erro ao marcar parcela como recebida: {ex.Message}";
 
-                // Se houver ID da receita no TempData, redireciona para os detalhes
                 var incomeId = TempData["IncomeId"]?.ToString();
                 if (!string.IsNullOrEmpty(incomeId))
                 {
@@ -72,7 +70,6 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
 
-                // Tenta obter o ID da receita pai a partir do TempData ou da API
                 var incomeId = TempData["IncomeId"]?.ToString() ??
                     (await _incomeService.GetInstallmentParentIncomeAsync(id, token));
 
@@ -92,7 +89,6 @@ namespace FinanceSystem.Web.Controllers
                 _logger.LogError(ex, "Erro ao cancelar parcela");
                 TempData["ErrorMessage"] = $"Erro ao cancelar parcela: {ex.Message}";
 
-                // Se houver ID da receita no TempData, redireciona para os detalhes
                 var incomeId = TempData["IncomeId"]?.ToString();
                 if (!string.IsNullOrEmpty(incomeId))
                 {

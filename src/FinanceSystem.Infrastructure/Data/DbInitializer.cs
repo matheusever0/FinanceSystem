@@ -77,6 +77,11 @@ namespace FinanceSystem.Infrastructure.Data
                     var updateCreditCardsPermission = new Permission("Edit Credit Cards", "creditcards.edit", "Permission to edit credit cards");
                     var deleteCreditCardsPermission = new Permission("Delete Credit Cards", "creditcards.delete", "Permission to delete credit cards");
 
+                    var viewIncomesPermission = new Permission("View Incomes", "incomes.view", "Permission to view incomes");
+                    var createIncomesPermission = new Permission("Create Incomes", "incomes.create", "Permission to create incomes");
+                    var updateIncomesPermission = new Permission("Edit Incomes", "incomes.edit", "Permission to edit incomes");
+                    var deleteIncomesPermission = new Permission("Delete Incomes", "incomes.delete", "Permission to delete incomes");
+
                     await _context.Permissions.AddAsync(managePermissionsPermission);
                     await _context.SaveChangesAsync();
                     await _context.Permissions.AddRangeAsync(viewUsersPermission, createUsersPermission, updateUsersPermission, deleteUsersPermission);
@@ -90,7 +95,9 @@ namespace FinanceSystem.Infrastructure.Data
                     await _context.Permissions.AddRangeAsync(viewPaymentMethodsPermission, createPaymentMethodsPermission, updatePaymentMethodsPermission, deletePaymentMethodsPermission);
                     await _context.SaveChangesAsync();
                     await _context.Permissions.AddRangeAsync(viewCreditCardsPermission, createCreditCardsPermission, updateCreditCardsPermission, deleteCreditCardsPermission);
-                    await _context.SaveChangesAsync();                    
+                    await _context.SaveChangesAsync();
+                    await _context.Permissions.AddRangeAsync(viewIncomesPermission, createIncomesPermission, updateIncomesPermission, deleteIncomesPermission);
+                    await _context.SaveChangesAsync();
 
                     _logger.LogInformation("Default permissions created successfully");
                 }
