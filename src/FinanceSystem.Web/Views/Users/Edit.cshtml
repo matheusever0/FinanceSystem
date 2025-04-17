@@ -1,8 +1,10 @@
-﻿@model FinanceSystem.Web.Models.UpdateUserModel
+﻿@using FinanceSystem.Web.Models.Role
+@using FinanceSystem.Web.Models.User
+@model UpdateUserModel
 
 @{
     ViewData["Title"] = "Editar Usuário";
-    var roles = ViewBag.Roles as IEnumerable<FinanceSystem.Web.Models.RoleModel>;
+    var roles = ViewBag.Roles as IEnumerable<RoleModel>;
     var isAdmin = User.IsInRole("Admin");
 
         var adminRole = Model.Roles.Contains("Admin");

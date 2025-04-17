@@ -1,13 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FinanceSystem.Web.Models.PaymentInstallment;
+using System.ComponentModel.DataAnnotations;
 
-namespace FinanceSystem.Web.Models
+namespace FinanceSystem.Web.Models.Payment
 {
-    public class PaymentInstallmentModel
+    public class PaymentModel
     {
         public string Id { get; set; }
 
-        [Display(Name = "Número da Parcela")]
-        public int InstallmentNumber { get; set; }
+        [Display(Name = "Descrição")]
+        public string Description { get; set; }
 
         [Display(Name = "Valor")]
         [DisplayFormat(DataFormatString = "{0:C2}")]
@@ -27,6 +28,12 @@ namespace FinanceSystem.Web.Models
         [Display(Name = "Status")]
         public string StatusDescription { get; set; }
 
+        [Display(Name = "Recorrente")]
+        public bool IsRecurring { get; set; }
+
+        [Display(Name = "Observações")]
+        public string Notes { get; set; }
+
         [Display(Name = "Data de Criação")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
         public DateTime CreatedAt { get; set; }
@@ -35,7 +42,22 @@ namespace FinanceSystem.Web.Models
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
         public DateTime? UpdatedAt { get; set; }
 
-        public string PaymentId { get; set; }
+        public string UserId { get; set; }
+
+        [Display(Name = "Tipo de Pagamento")]
+        public string PaymentTypeId { get; set; }
+
+        [Display(Name = "Tipo de Pagamento")]
+        public string PaymentTypeName { get; set; }
+
+        [Display(Name = "Método de Pagamento")]
+        public string PaymentMethodId { get; set; }
+
+        [Display(Name = "Método de Pagamento")]
+        public string PaymentMethodName { get; set; }
+
+        [Display(Name = "Parcelas")]
+        public List<PaymentInstallmentModel> Installments { get; set; } = new List<PaymentInstallmentModel>();
 
         [Display(Name = "Status")]
         public string StatusBadgeClass => GetStatusBadgeClass();

@@ -1,9 +1,12 @@
-﻿@model FinanceSystem.Web.Models.CreatePaymentModel
+﻿@using FinanceSystem.Web.Models.CreditCard
+@using FinanceSystem.Web.Models.Payment
+@using FinanceSystem.Web.Models.PaymentMethod
+@model CreatePaymentModel
 @{
     ViewData["Title"] = "Novo Pagamento";
     var paymentTypes = ViewBag.PaymentTypes as IEnumerable<FinanceSystem.Web.Models.PaymentTypeModel>;
-    var paymentMethods = ViewBag.PaymentMethods as IEnumerable<FinanceSystem.Web.Models.PaymentMethodModel>;
-    var creditCards = ViewBag.CreditCards as IEnumerable<FinanceSystem.Web.Models.CreditCardModel>;
+    var paymentMethods = ViewBag.PaymentMethods as IEnumerable<PaymentMethodModel>;
+    var creditCards = ViewBag.CreditCards as IEnumerable<CreditCardModel>;
 }
 
 @section Styles {

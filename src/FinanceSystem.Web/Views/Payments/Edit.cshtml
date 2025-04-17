@@ -1,8 +1,10 @@
-﻿@model FinanceSystem.Web.Models.UpdatePaymentModel
+﻿@using FinanceSystem.Web.Models.Payment
+@using FinanceSystem.Web.Models.PaymentMethod
+@model UpdatePaymentModel
 @{
     ViewData["Title"] = "Editar Pagamento";
     var paymentTypes = ViewBag.PaymentTypes as IEnumerable<FinanceSystem.Web.Models.PaymentTypeModel>;
-    var paymentMethods = ViewBag.PaymentMethods as IEnumerable<FinanceSystem.Web.Models.PaymentMethodModel>;
+    var paymentMethods = ViewBag.PaymentMethods as IEnumerable<PaymentMethodModel>;
 }
 
 @section Styles {

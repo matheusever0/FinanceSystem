@@ -1,6 +1,6 @@
 ﻿using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Interfaces;
-using FinanceSystem.Web.Models;
+using FinanceSystem.Web.Models.Login;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;

@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FinanceSystem.Web.Models.CreditCard;
+using System.ComponentModel.DataAnnotations;
 
-namespace FinanceSystem.Web.Models
+namespace FinanceSystem.Web.Models.PaymentMethod
 {
     public class PaymentMethodModel
     {

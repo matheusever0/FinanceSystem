@@ -1,7 +1,9 @@
-﻿@model FinanceSystem.Web.Models.CreateCreditCardModel
+﻿@using FinanceSystem.Web.Models.CreditCard
+@using FinanceSystem.Web.Models.PaymentMethod
+@model CreateCreditCardModel
 @{
     ViewData["Title"] = "Novo Cartão de Crédito";
-    var paymentMethods = ViewBag.PaymentMethods as IEnumerable<FinanceSystem.Web.Models.PaymentMethodModel>;
+    var paymentMethods = ViewBag.PaymentMethods as IEnumerable<PaymentMethodModel>;
 }
 
 <div class="container-fluid">

@@ -1,6 +1,6 @@
 ﻿using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
-using FinanceSystem.Web.Models;
+using FinanceSystem.Web.Models.Role;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

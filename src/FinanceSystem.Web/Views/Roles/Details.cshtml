@@ -1,8 +1,10 @@
-﻿@model FinanceSystem.Web.Models.RoleModel
+﻿@using FinanceSystem.Web.Models.Permission
+@using FinanceSystem.Web.Models.Role
+@model RoleModel
 
 @{
     ViewData["Title"] = "Detalhes do Perfil";
-    var permissions = ViewBag.Permissions as IEnumerable<FinanceSystem.Web.Models.PermissionModel>;
+    var permissions = ViewBag.Permissions as IEnumerable<PermissionModel>;
 }
 
 <h1>Detalhes do Perfil</h1>

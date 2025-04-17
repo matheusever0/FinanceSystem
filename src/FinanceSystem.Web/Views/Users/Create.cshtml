@@ -1,8 +1,10 @@
-﻿@model FinanceSystem.Web.Models.CreateUserModel
+﻿@using FinanceSystem.Web.Models.Role
+@using FinanceSystem.Web.Models.User
+@model CreateUserModel
 
 @{
     ViewData["Title"] = "Criar Usuário";
-    var roles = ViewBag.Roles as IEnumerable<FinanceSystem.Web.Models.RoleModel>;
+    var roles = ViewBag.Roles as IEnumerable<RoleModel>;
     var isAdmin = User.IsInRole("Admin");
 }
 

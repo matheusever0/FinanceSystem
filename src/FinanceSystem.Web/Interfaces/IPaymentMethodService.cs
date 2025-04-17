@@ -1,4 +1,4 @@
-﻿using FinanceSystem.Web.Models;
+﻿using FinanceSystem.Web.Models.PaymentMethod;
 
 namespace FinanceSystem.Web.Services
 {

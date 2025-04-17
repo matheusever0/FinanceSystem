@@ -1,8 +1,10 @@
-﻿@model FinanceSystem.Web.Models.CreditCardModel
+﻿@model CreditCardModel
 @using FinanceSystem.Web.Helpers
+@using FinanceSystem.Web.Models.CreditCard
+@using FinanceSystem.Web.Models.Payment
 @{
     ViewData["Title"] = "Detalhes do Cartão de Crédito";
-    var paymentsWithCard = ViewBag.PaymentsWithCard as IEnumerable<FinanceSystem.Web.Models.PaymentModel> ?? new List<FinanceSystem.Web.Models.PaymentModel>();
+    var paymentsWithCard = ViewBag.PaymentsWithCard as IEnumerable<PaymentModel> ?? new List<PaymentModel>();
     var usedPercentage = (Model.Limit - Model.AvailableLimit) / Model.Limit * 100;
     var colorClass = usedPercentage > 75 ? "danger" : (usedPercentage > 50 ? "warning" : "success");
 }

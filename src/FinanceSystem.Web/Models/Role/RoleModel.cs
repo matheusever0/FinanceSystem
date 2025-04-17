@@ -1,4 +1,4 @@
-﻿namespace FinanceSystem.Web.Models
+﻿namespace FinanceSystem.Web.Models.Role
 {
     public class RoleModel
     {

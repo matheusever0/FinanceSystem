@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FinanceSystem.Web.Models
+namespace FinanceSystem.Web.Models.CreditCard
 {
     public class CreditCardModel
     {
@@ -51,7 +51,7 @@ namespace FinanceSystem.Web.Models
 
         [Display(Name = "Percentual Utilizado")]
         [DisplayFormat(DataFormatString = "{0:P0}")]
-        public decimal UsedPercentage => (UsedLimit / Limit) * 100;
+        public decimal UsedPercentage => UsedLimit / Limit * 100;
 
         public string GetFormattedLimit()
         {

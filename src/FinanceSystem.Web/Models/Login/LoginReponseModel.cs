@@ -1,4 +1,6 @@
-﻿namespace FinanceSystem.Web.Models
+﻿using FinanceSystem.Web.Models.User;
+
+namespace FinanceSystem.Web.Models.Login
 {
     public class LoginResponseModel
     {

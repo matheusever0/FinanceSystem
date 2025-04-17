@@ -1,4 +1,5 @@
-﻿@{
+﻿@using FinanceSystem.Web.Models.PaymentMethod
+@{
     ViewData["Title"] = "Relatório Anual";
 
     var currentYear = ViewBag.Year ?? DateTime.Now.Year;
@@ -10,7 +11,7 @@
     var averageMonthly = ViewBag.AverageMonthly ?? 0m;
 
     var paymentTypes = ViewBag.PaymentTypes as IEnumerable<FinanceSystem.Web.Models.PaymentTypeModel> ?? new List<FinanceSystem.Web.Models.PaymentTypeModel>();
-    var paymentMethods = ViewBag.PaymentMethods as IEnumerable<FinanceSystem.Web.Models.PaymentMethodModel> ?? new List<FinanceSystem.Web.Models.PaymentMethodModel>();
+    var paymentMethods = ViewBag.PaymentMethods as IEnumerable<PaymentMethodModel> ?? new List<PaymentMethodModel>();
 
     var monthLabels = monthlyData.Keys.ToList();
     var monthValues = monthlyData.Values.ToList();

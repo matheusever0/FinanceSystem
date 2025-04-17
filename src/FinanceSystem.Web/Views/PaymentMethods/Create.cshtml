@@ -1,4 +1,5 @@
-﻿@model FinanceSystem.Web.Models.CreatePaymentMethodModel
+﻿@using FinanceSystem.Web.Models.PaymentMethod
+@model CreatePaymentMethodModel
 @{
     ViewData["Title"] = "Novo Método de Pagamento";
     var paymentMethodTypes = ViewBag.PaymentMethodTypes as IEnumerable<SelectListItem>;

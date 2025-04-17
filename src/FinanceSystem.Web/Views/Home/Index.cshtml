@@ -1,13 +1,15 @@
 ﻿@using FinanceSystem.Web.Helpers
+@using FinanceSystem.Web.Models.CreditCard
+@using FinanceSystem.Web.Models.Payment
 @{
     ViewData["Title"] = "Dashboard";
 
-    var paymentsPending = ViewBag.PaymentsPending as IEnumerable<FinanceSystem.Web.Models.PaymentModel> ?? new List<FinanceSystem.Web.Models.PaymentModel>();
-    var paymentsOverdue = ViewBag.PaymentsOverdue as IEnumerable<FinanceSystem.Web.Models.PaymentModel> ?? new List<FinanceSystem.Web.Models.PaymentModel>();
+    var paymentsPending = ViewBag.PaymentsPending as IEnumerable<PaymentModel> ?? new List<PaymentModel>();
+    var paymentsOverdue = ViewBag.PaymentsOverdue as IEnumerable<PaymentModel> ?? new List<PaymentModel>();
     var totalPendingAmount = paymentsPending.Sum(p => p.Amount);
     var totalOverdueAmount = paymentsOverdue.Sum(p => p.Amount);
     var totalBalance = ViewBag.TotalBalance ?? 0m;
-    var creditCards = ViewBag.CreditCards as IEnumerable<FinanceSystem.Web.Models.CreditCardModel> ?? new List<FinanceSystem.Web.Models.CreditCardModel>();
+    var creditCards = ViewBag.CreditCards as IEnumerable<CreditCardModel> ?? new List<CreditCardModel>();
     var monthlyData = ViewBag.MonthlyData as Dictionary<string, decimal> ?? new Dictionary<string, decimal>();
 }
 

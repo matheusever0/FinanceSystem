@@ -1,9 +1,11 @@
-﻿@model IEnumerable<FinanceSystem.Web.Models.PermissionModel>
+﻿@using FinanceSystem.Web.Models.Permission
+@using FinanceSystem.Web.Models.Role
+@model IEnumerable<PermissionModel>
 
 @{
     ViewData["Title"] = "Gerenciar Permissões";
-    var role = ViewBag.Role as FinanceSystem.Web.Models.RoleModel;
-    var allPermissions = ViewBag.AllPermissions as IEnumerable<FinanceSystem.Web.Models.PermissionModel>;
+    var role = ViewBag.Role as RoleModel;
+    var allPermissions = ViewBag.AllPermissions as IEnumerable<PermissionModel>;
     var rolePermissions = ViewBag.RolePermissions as List<string>;
 }
 

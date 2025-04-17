@@ -1,4 +1,4 @@
-﻿namespace FinanceSystem.Web.Models
+﻿namespace FinanceSystem.Web.Models.Generics
 {
     public class PaymentByTypeDto
     {

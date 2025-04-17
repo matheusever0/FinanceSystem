@@ -1,5 +1,5 @@
 ﻿using FinanceSystem.Web.Interfaces;
-using FinanceSystem.Web.Models;
+using FinanceSystem.Web.Models.Role;
 
 namespace FinanceSystem.Web.Services
 {

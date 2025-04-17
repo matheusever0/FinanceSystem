@@ -1,7 +1,9 @@
-﻿@model FinanceSystem.Web.Models.CreditCardModel
+﻿@using FinanceSystem.Web.Models.CreditCard
+@using FinanceSystem.Web.Models.Payment
+@model CreditCardModel
 @{
     ViewData["Title"] = "Excluir Cartão de Crédito";
-    var paymentsWithCard = ViewBag.PaymentsWithCard as IEnumerable<FinanceSystem.Web.Models.PaymentModel> ?? new List<FinanceSystem.Web.Models.PaymentModel>();
+    var paymentsWithCard = ViewBag.PaymentsWithCard as IEnumerable<PaymentModel> ?? new List<PaymentModel>();
     var hasPendingPayments = paymentsWithCard.Any(p => p.Status == 1 || p.Status == 3); }
 
 <div class="container-fluid">

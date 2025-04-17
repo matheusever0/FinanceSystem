@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FinanceSystem.Web.Models
+namespace FinanceSystem.Web.Models.CreditCard
 {
     public class CreateCreditCardModel
     {
