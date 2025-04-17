@@ -16,6 +16,8 @@ namespace FinanceSystem.Web.Configuration
             services.AddScoped<IPaymentTypeService, PaymentTypeService>();
             services.AddScoped<IPaymentMethodService, PaymentMethodService>();
             services.AddScoped<ICreditCardService, CreditCardService>();
+            services.AddScoped<IIncomeService, IncomeService>();
+            services.AddScoped<IIncomeTypeService, IncomeTypeService>();
 
             return services;
         }
