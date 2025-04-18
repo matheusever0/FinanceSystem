@@ -119,6 +119,12 @@ namespace FinanceSystem.Domain.Entities
             UpdateUpdatedAt();
         }
 
+        public void UpdateType(IncomeType incomeType)
+        {
+            IncomeType = incomeType;
+            UpdateUpdatedAt();
+        }
+
         private void UpdateUpdatedAt()
         {
             UpdatedAt = DateTime.UtcNow;

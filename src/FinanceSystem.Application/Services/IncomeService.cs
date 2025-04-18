@@ -141,6 +141,8 @@ namespace FinanceSystem.Application.Services
 
                 if (!incomeType.IsSystem && incomeType.UserId != income.UserId)
                     throw new UnauthorizedAccessException("User does not have access to this income type");
+
+                income.UpdateType(incomeType);
             }
 
             await _unitOfWork.Incomes.UpdateAsync(income);
