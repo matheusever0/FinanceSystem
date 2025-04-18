@@ -29,8 +29,7 @@ namespace FinanceSystem.Web.Middlewares
                 {
                     _logger.LogWarning("Resposta 401 detectada. Redirecionando para login.");
 
-                    if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest" ||
-    context.Request.Headers["Accept"].ToString().Contains("application/json"))
+                    if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest" || context.Request.Headers["Accept"].ToString().Contains("application/json"))
                     {
                         await CopyResponseToOriginalStream(responseBody, originalBodyStream);
                     }
