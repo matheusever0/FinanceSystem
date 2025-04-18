@@ -4,7 +4,6 @@ using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace FinanceSystem.API.Controllers
 {

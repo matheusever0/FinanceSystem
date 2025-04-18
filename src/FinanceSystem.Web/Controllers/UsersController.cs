@@ -4,7 +4,6 @@ using FinanceSystem.Web.Models.User;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace FinanceSystem.Web.Controllers
 {

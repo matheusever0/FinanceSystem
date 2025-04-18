@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace FinanceSystem.Web.Extensions
+﻿namespace FinanceSystem.Web.Extensions
 {
     public static class HttpContextUserExtensions
     {

@@ -3,7 +3,6 @@ using FinanceSystem.Application.DTOs.IncomeType;
 using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace FinanceSystem.API.Controllers
 {

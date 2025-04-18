@@ -1,6 +1,4 @@
-﻿using FinanceSystem.Domain.Entities;
-
-namespace FinanceSystem.Domain.Entities
+﻿namespace FinanceSystem.Domain.Entities
 {
     public class IncomeType
     {

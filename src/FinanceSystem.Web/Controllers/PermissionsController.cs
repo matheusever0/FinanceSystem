@@ -1,5 +1,4 @@
 ﻿using FinanceSystem.Web.Extensions;
-using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Models.Permission;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
