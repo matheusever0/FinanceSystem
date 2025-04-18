@@ -1,5 +1,8 @@
 ﻿using System.Net;
 using System.Text.Json;
+using FinanceSystem.API.Configuration;
+using FinanceSystem.API.Extensions;
+using Microsoft.Extensions.Localization;
 
 namespace FinanceSystem.API.Middlewares
 {
@@ -7,11 +10,16 @@ namespace FinanceSystem.API.Middlewares
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ErrorHandlerMiddleware> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public ErrorHandlerMiddleware(RequestDelegate next, ILogger<ErrorHandlerMiddleware> logger)
+        public ErrorHandlerMiddleware(
+            RequestDelegate next,
+            ILogger<ErrorHandlerMiddleware> logger,
+            IStringLocalizer<SharedResource> localizer)
         {
             _next = next;
             _logger = logger;
+            _localizer = localizer;
         }
 
         public async Task Invoke(HttpContext context)
@@ -24,27 +32,104 @@ namespace FinanceSystem.API.Middlewares
             {
                 var response = context.Response;
                 response.ContentType = "application/json";
+                string messageKey = LogMessageConstants.ErrorGeneric;
 
+                // Determinar o status code e a chave da mensagem com base no tipo de exceção
                 switch (error)
                 {
-                    case KeyNotFoundException:
+                    case KeyNotFoundException ex:
                         response.StatusCode = (int)HttpStatusCode.NotFound;
+                        messageKey = LogMessageConstants.ErrorNotFound;
+                        _logger.LogWarningOperation(messageKey, _localizer, ex.Message);
                         break;
-                    case InvalidOperationException:
+
+                    case InvalidOperationException ex:
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        messageKey = LogMessageConstants.ErrorInvalidOperation;
+                        _logger.LogWarningOperation(messageKey, _localizer, ex.Message);
                         break;
-                    case UnauthorizedAccessException:
+
+                    case UnauthorizedAccessException ex:
                         response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        messageKey = LogMessageConstants.ErrorUnauthorized;
+                        _logger.LogWarningOperation(messageKey, _localizer, ex.Message);
                         break;
+
                     default:
-                        _logger.LogError(error, error.Message);
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        _logger.LogErrorOperation(error, messageKey, _localizer);
                         break;
                 }
 
-                var result = JsonSerializer.Serialize(new { message = error?.Message });
+                // Obter a mensagem localizada baseada na exceção original
+                string localizedMessage = GetLocalizedErrorMessage(error);
+
+                // Serializar e retornar a resposta
+                var result = JsonSerializer.Serialize(new { message = localizedMessage });
                 await response.WriteAsync(result);
             }
+        }
+
+        /// <summary>
+        /// Obtém a mensagem de erro localizada com base na exceção
+        /// </summary>
+        private string GetLocalizedErrorMessage(Exception ex)
+        {
+            // Verificar o tipo de exceção e tentar obter uma mensagem mais específica
+            if (ex is KeyNotFoundException)
+            {
+                // Tentar extrair a entidade e o ID
+                var (entity, id) = TryExtractEntityInfo(ex.Message);
+                if (!string.IsNullOrEmpty(entity) && !string.IsNullOrEmpty(id))
+                {
+                    // Tentar obter uma mensagem específica para a entidade
+                    string specificKey = $"{char.ToUpper(entity[0])}{entity.Substring(1)}.NotFound";
+
+                    // Se o valor localizado não for igual à chave, então a localização foi bem-sucedida
+                    var localizedValue = _localizer[specificKey, id].Value;
+                    if (localizedValue != specificKey)
+                    {
+                        return localizedValue;
+                    }
+
+                    // Caso contrário, usamos a mensagem genérica
+                    return _localizer[LogMessageConstants.ErrorNotFound, entity, id];
+                }
+
+                // Se não conseguimos extrair a entidade e o ID, devolvemos a mensagem original
+                return ex.Message;
+            }
+            else if (ex is InvalidOperationException)
+            {
+                return _localizer[LogMessageConstants.ErrorInvalidOperation, ex.Message];
+            }
+            else if (ex is UnauthorizedAccessException)
+            {
+                return _localizer[LogMessageConstants.ErrorUnauthorized, ex.Message];
+            }
+
+            // Para outras exceções, retornamos uma mensagem genérica
+            return _localizer[LogMessageConstants.ErrorGeneric];
+        }
+
+        /// <summary>
+        /// Tenta extrair informações de entidade da mensagem de erro
+        /// </summary>
+        private static (string entity, string id) TryExtractEntityInfo(string message)
+        {
+            // Formato esperado: "{Entity} with ID {id} not found"
+            if (message.Contains(" with ID ") && message.EndsWith(" not found"))
+            {
+                string[] parts = message.Split(new[] { " with ID " }, StringSplitOptions.None);
+                if (parts.Length == 2)
+                {
+                    string entity = parts[0].ToLower();
+                    string id = parts[1].Replace(" not found", "").Trim();
+                    return (entity, id);
+                }
+            }
+
+            return (string.Empty, string.Empty);
         }
     }
 }
