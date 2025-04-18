@@ -2,8 +2,14 @@
 {
     public static class LogMessageConstants
     {
-        public const string AuthLogin = "Auth.Login";
+        public const string AuthLogin = "Auth.LoginAttempt";
+        public const string AuthLoginSuccess = "Auth.LoginSuccess";
+        public const string AuthLoginFailed = "Auth.LoginFailed";
+        public const string AuthTokenValid = "Auth.TokenValid";
+        public const string AuthTokenInvalid = "Auth.TokenInvalid";
         public const string AuthTokenVerify = "Auth.TokenVerify";
+        public const string AuthTokenVerifyError = "Auth.TokenVerifyError";
+        public const string AuthGetPermissions = "Auth.GetPermissions";
 
         public const string PaymentGet = "Payment.Get";
         public const string PaymentGetAll = "Payment.GetAll";

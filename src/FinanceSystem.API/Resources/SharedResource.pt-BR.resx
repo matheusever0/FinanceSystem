@@ -117,7 +117,337 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Error.NotFound" xml:space="preserve">
+    <value>{0} com ID {1} não encontrado</value>
+  </data>
+  <data name="Error.InvalidOperation" xml:space="preserve">
+    <value>Operação inválida: {0}</value>
+  </data>
+  <data name="Error.Unauthorized" xml:space="preserve">
+    <value>Acesso não autorizado: {0}</value>
+  </data>
+  <data name="Error.Generic" xml:space="preserve">
+    <value>Ocorreu um erro inesperado</value>
+  </data>
+  <data name="Error.InvalidArgument" xml:space="preserve">
+    <value>Argumento inválido: {0}</value>
+  </data>
+  <data name="Entity.NotFound" xml:space="preserve">
+    <value>{0} com ID {1} não encontrado</value>
+  </data>
+  <data name="Auth.LoginAttempt" xml:space="preserve">
+    <value>Tentativa de login para usuário: {0}</value>
+  </data>
+  <data name="Auth.LoginSuccess" xml:space="preserve">
+    <value>Login bem-sucedido para usuário: {0}</value>
+  </data>
+  <data name="Auth.LoginFailed" xml:space="preserve">
+    <value>Falha no login para usuário: {0}</value>
+  </data>
+  <data name="Auth.TokenValid" xml:space="preserve">
+    <value>Token válido para usuário: {0}</value>
+  </data>
+  <data name="Auth.TokenInvalid" xml:space="preserve">
+    <value>Token inválido ou expirado</value>
+  </data>
+  <data name="Auth.TokenVerifyError" xml:space="preserve">
+    <value>Erro ao verificar token</value>
+  </data>
+  <data name="User.GetAll" xml:space="preserve">
+    <value>Obtendo todos os usuários</value>
+  </data>
+  <data name="User.Get" xml:space="preserve">
+    <value>Obtendo usuário com ID: {0}</value>
+  </data>
+  <data name="User.Create" xml:space="preserve">
+    <value>Criando novo usuário: {0}</value>
+  </data>
+  <data name="User.Update" xml:space="preserve">
+    <value>Atualizando usuário com ID: {0}</value>
+  </data>
+  <data name="User.Delete" xml:space="preserve">
+    <value>Excluindo usuário com ID: {0}</value>
+  </data>
+  <data name="User.NotFound" xml:space="preserve">
+    <value>Usuário com ID {0} não encontrado</value>
+  </data>
+  <data name="User.Unauthorized" xml:space="preserve">
+    <value>Usuário tentou acessar dados de usuário que não pertencem a ele</value>
+  </data>
+  <data name="Payment.GetAll" xml:space="preserve">
+    <value>Obtendo todos os pagamentos para o usuário</value>
+  </data>
+  <data name="Payment.Get" xml:space="preserve">
+    <value>Obtendo pagamento com ID: {0}</value>
+  </data>
+  <data name="Payment.Create" xml:space="preserve">
+    <value>Criando novo pagamento</value>
+  </data>
+  <data name="Payment.Update" xml:space="preserve">
+    <value>Atualizando pagamento com ID: {0}</value>
+  </data>
+  <data name="Payment.Delete" xml:space="preserve">
+    <value>Excluindo pagamento com ID: {0}</value>
+  </data>
   <data name="Payment.NotFound" xml:space="preserve">
     <value>Pagamento com ID {0} não encontrado</value>
+  </data>
+  <data name="Payment.Unauthorized" xml:space="preserve">
+    <value>Usuário tentou acessar pagamento que não pertence a ele. ID do pagamento: {0}</value>
+  </data>
+  <data name="Payment.GetByMonth" xml:space="preserve">
+    <value>Obtendo pagamentos para {0}/{1}</value>
+  </data>
+  <data name="Payment.InvalidMonth" xml:space="preserve">
+    <value>Mês deve estar entre 1 e 12</value>
+  </data>
+  <data name="Payment.CannotDeletePaid" xml:space="preserve">
+    <value>Não é possível excluir um pagamento já pago</value>
+  </data>
+  <data name="Payment.MarkAsPaid" xml:space="preserve">
+    <value>Marcando pagamento com ID: {0} como pago</value>
+  </data>
+  <data name="Payment.MarkAsOverdue" xml:space="preserve">
+    <value>Marcando pagamento com ID: {0} como vencido</value>
+  </data>
+  <data name="Payment.Cancel" xml:space="preserve">
+    <value>Cancelando pagamento com ID: {0}</value>
+  </data>
+  <data name="Income.GetAll" xml:space="preserve">
+    <value>Obtendo todos os recebimentos para o usuário</value>
+  </data>
+  <data name="Income.Get" xml:space="preserve">
+    <value>Obtendo recebimento com ID: {0}</value>
+  </data>
+  <data name="Income.Create" xml:space="preserve">
+    <value>Criando novo recebimento</value>
+  </data>
+  <data name="Income.Update" xml:space="preserve">
+    <value>Atualizando recebimento com ID: {0}</value>
+  </data>
+  <data name="Income.Delete" xml:space="preserve">
+    <value>Excluindo recebimento com ID: {0}</value>
+  </data>
+  <data name="Income.NotFound" xml:space="preserve">
+    <value>Recebimento com ID {0} não encontrado</value>
+  </data>
+  <data name="Income.Unauthorized" xml:space="preserve">
+    <value>Usuário tentou acessar recebimento que não pertence a ele. ID do recebimento: {0}</value>
+  </data>
+  <data name="Income.GetByMonth" xml:space="preserve">
+    <value>Obtendo recebimentos para {0}/{1}</value>
+  </data>
+  <data name="Income.InvalidMonth" xml:space="preserve">
+    <value>Mês deve estar entre 1 e 12</value>
+  </data>
+  <data name="Income.CannotDeleteReceived" xml:space="preserve">
+    <value>Não é possível excluir um recebimento já recebido</value>
+  </data>
+  <data name="Income.MarkAsReceived" xml:space="preserve">
+    <value>Marcando recebimento com ID: {0} como recebido</value>
+  </data>
+  <data name="Income.Cancel" xml:space="preserve">
+    <value>Cancelando recebimento com ID: {0}</value>
+  </data>
+  <data name="PaymentType.GetAll" xml:space="preserve">
+    <value>Obtendo todos os tipos de pagamento para o usuário</value>
+  </data>
+  <data name="PaymentType.Get" xml:space="preserve">
+    <value>Obtendo tipo de pagamento com ID: {0}</value>
+  </data>
+  <data name="PaymentType.Create" xml:space="preserve">
+    <value>Criando novo tipo de pagamento</value>
+  </data>
+  <data name="PaymentType.Update" xml:space="preserve">
+    <value>Atualizando tipo de pagamento com ID: {0}</value>
+  </data>
+  <data name="PaymentType.Delete" xml:space="preserve">
+    <value>Excluindo tipo de pagamento com ID: {0}</value>
+  </data>
+  <data name="PaymentType.NotFound" xml:space="preserve">
+    <value>Tipo de pagamento com ID {0} não encontrado</value>
+  </data>
+  <data name="PaymentType.Unauthorized" xml:space="preserve">
+    <value>Usuário tentou acessar tipo de pagamento que não pertence a ele</value>
+  </data>
+  <data name="PaymentType.SystemUpdate" xml:space="preserve">
+    <value>Usuário tentou atualizar um tipo de pagamento do sistema. ID do tipo: {0}</value>
+  </data>
+  <data name="PaymentType.CannotUpdateSystem" xml:space="preserve">
+    <value>Não é possível atualizar tipos de pagamento do sistema</value>
+  </data>
+  <data name="PaymentType.CannotDeleteSystem" xml:space="preserve">
+    <value>Não é possível excluir tipos de pagamento do sistema</value>
+  </data>
+  <data name="IncomeType.GetAll" xml:space="preserve">
+    <value>Obtendo todos os tipos de recebimento para o usuário</value>
+  </data>
+  <data name="IncomeType.Get" xml:space="preserve">
+    <value>Obtendo tipo de recebimento com ID: {0}</value>
+  </data>
+  <data name="IncomeType.Create" xml:space="preserve">
+    <value>Criando novo tipo de recebimento</value>
+  </data>
+  <data name="IncomeType.Update" xml:space="preserve">
+    <value>Atualizando tipo de recebimento com ID: {0}</value>
+  </data>
+  <data name="IncomeType.Delete" xml:space="preserve">
+    <value>Excluindo tipo de recebimento com ID: {0}</value>
+  </data>
+  <data name="IncomeType.NotFound" xml:space="preserve">
+    <value>Tipo de recebimento com ID {0} não encontrado</value>
+  </data>
+  <data name="IncomeType.Unauthorized" xml:space="preserve">
+    <value>Usuário tentou acessar tipo de recebimento que não pertence a ele</value>
+  </data>
+  <data name="IncomeType.SystemUpdate" xml:space="preserve">
+    <value>Usuário tentou atualizar um tipo de recebimento do sistema. ID do tipo: {0}</value>
+  </data>
+  <data name="IncomeType.CannotUpdateSystem" xml:space="preserve">
+    <value>Não é possível atualizar tipos de recebimento do sistema</value>
+  </data>
+  <data name="IncomeType.CannotDeleteSystem" xml:space="preserve">
+    <value>Não é possível excluir tipos de recebimento do sistema</value>
+  </data>
+  <data name="PaymentMethod.GetAll" xml:space="preserve">
+    <value>Obtendo todos os métodos de pagamento para o usuário</value>
+  </data>
+  <data name="PaymentMethod.Get" xml:space="preserve">
+    <value>Obtendo método de pagamento com ID: {0}</value>
+  </data>
+  <data name="PaymentMethod.Create" xml:space="preserve">
+    <value>Criando novo método de pagamento</value>
+  </data>
+  <data name="PaymentMethod.Update" xml:space="preserve">
+    <value>Atualizando método de pagamento com ID: {0}</value>
+  </data>
+  <data name="PaymentMethod.Delete" xml:space="preserve">
+    <value>Excluindo método de pagamento com ID: {0}</value>
+  </data>
+  <data name="PaymentMethod.NotFound" xml:space="preserve">
+    <value>Método de pagamento com ID {0} não encontrado</value>
+  </data>
+  <data name="PaymentMethod.Unauthorized" xml:space="preserve">
+    <value>Usuário tentou acessar método de pagamento que não pertence a ele</value>
+  </data>
+  <data name="PaymentMethod.SystemUpdate" xml:space="preserve">
+    <value>Usuário tentou atualizar um método de pagamento do sistema. ID do método: {0}</value>
+  </data>
+  <data name="PaymentMethod.CannotUpdateSystem" xml:space="preserve">
+    <value>Não é possível atualizar métodos de pagamento do sistema</value>
+  </data>
+  <data name="PaymentMethod.CannotDeleteSystem" xml:space="preserve">
+    <value>Não é possível excluir métodos de pagamento do sistema</value>
+  </data>
+  <data name="CreditCard.GetAll" xml:space="preserve">
+    <value>Obtendo todos os cartões de crédito para o usuário</value>
+  </data>
+  <data name="CreditCard.Get" xml:space="preserve">
+    <value>Obtendo cartão de crédito com ID: {0}</value>
+  </data>
+  <data name="CreditCard.Create" xml:space="preserve">
+    <value>Criando novo cartão de crédito</value>
+  </data>
+  <data name="CreditCard.Update" xml:space="preserve">
+    <value>Atualizando cartão de crédito com ID: {0}</value>
+  </data>
+  <data name="CreditCard.Delete" xml:space="preserve">
+    <value>Excluindo cartão de crédito com ID: {0}</value>
+  </data>
+  <data name="CreditCard.NotFound" xml:space="preserve">
+    <value>Cartão de crédito com ID {0} não encontrado</value>
+  </data>
+  <data name="CreditCard.Unauthorized" xml:space="preserve">
+    <value>Usuário tentou acessar cartão de crédito que não pertence a ele</value>
+  </data>
+  <data name="CreditCard.InsufficientLimit" xml:space="preserve">
+    <value>Limite de cartão de crédito insuficiente</value>
+  </data>
+  <data name="PaymentInstallment.GetAll" xml:space="preserve">
+    <value>Obtendo todas as parcelas para o pagamento ID: {0}</value>
+  </data>
+  <data name="PaymentInstallment.Get" xml:space="preserve">
+    <value>Obtendo parcela com ID: {0}</value>
+  </data>
+  <data name="PaymentInstallment.NotFound" xml:space="preserve">
+    <value>Parcela de pagamento com ID {0} não encontrada</value>
+  </data>
+  <data name="PaymentInstallment.Unauthorized" xml:space="preserve">
+    <value>Usuário tentou acessar parcela que não pertence a ele</value>
+  </data>
+  <data name="PaymentInstallment.MarkAsPaid" xml:space="preserve">
+    <value>Marcando parcela com ID: {0} como paga</value>
+  </data>
+  <data name="PaymentInstallment.MarkAsOverdue" xml:space="preserve">
+    <value>Marcando parcela com ID: {0} como vencida</value>
+  </data>
+  <data name="PaymentInstallment.Cancel" xml:space="preserve">
+    <value>Cancelando parcela com ID: {0}</value>
+  </data>
+  <data name="IncomeInstallment.GetAll" xml:space="preserve">
+    <value>Obtendo todas as parcelas para o recebimento ID: {0}</value>
+  </data>
+  <data name="IncomeInstallment.Get" xml:space="preserve">
+    <value>Obtendo parcela com ID: {0}</value>
+  </data>
+  <data name="IncomeInstallment.NotFound" xml:space="preserve">
+    <value>Parcela de recebimento com ID {0} não encontrada</value>
+  </data>
+  <data name="IncomeInstallment.Unauthorized" xml:space="preserve">
+    <value>Usuário tentou acessar parcela que não pertence a ele</value>
+  </data>
+  <data name="IncomeInstallment.MarkAsReceived" xml:space="preserve">
+    <value>Marcando parcela com ID: {0} como recebida</value>
+  </data>
+  <data name="IncomeInstallment.Cancel" xml:space="preserve">
+    <value>Cancelando parcela com ID: {0}</value>
+  </data>
+  <data name="Role.GetAll" xml:space="preserve">
+    <value>Obtendo todos os perfis</value>
+  </data>
+  <data name="Role.Get" xml:space="preserve">
+    <value>Obtendo perfil com ID: {0}</value>
+  </data>
+  <data name="Role.Create" xml:space="preserve">
+    <value>Criando novo perfil: {0}</value>
+  </data>
+  <data name="Role.Update" xml:space="preserve">
+    <value>Atualizando perfil com ID: {0}</value>
+  </data>
+  <data name="Role.Delete" xml:space="preserve">
+    <value>Excluindo perfil com ID: {0}</value>
+  </data>
+  <data name="Role.NotFound" xml:space="preserve">
+    <value>Perfil com ID {0} não encontrado</value>
+  </data>
+  <data name="Role.CannotDeleteAssigned" xml:space="preserve">
+    <value>Não é possível excluir perfil pois está atribuído a usuários</value>
+  </data>
+  <data name="Permission.GetAll" xml:space="preserve">
+    <value>Obtendo todas as permissões</value>
+  </data>
+  <data name="Permission.Get" xml:space="preserve">
+    <value>Obtendo permissão com ID: {0}</value>
+  </data>
+  <data name="Permission.Create" xml:space="preserve">
+    <value>Criando nova permissão: {0}</value>
+  </data>
+  <data name="Permission.Update" xml:space="preserve">
+    <value>Atualizando permissão com ID: {0}</value>
+  </data>
+  <data name="Permission.Delete" xml:space="preserve">
+    <value>Excluindo permissão com ID: {0}</value>
+  </data>
+  <data name="Permission.NotFound" xml:space="preserve">
+    <value>Permissão com ID {0} não encontrada</value>
+  </data>
+  <data name="Permission.GetForRole" xml:space="preserve">
+    <value>Obtendo permissões para o perfil ID: {0}</value>
+  </data>
+  <data name="Permission.GetForUser" xml:space="preserve">
+    <value>Obtendo permissões para o usuário ID: {0}</value>
+  </data>
+  <data name="Auth.InvalidCredentials" xml:space="preserve">
+    <value>Nome de usuário ou senha inválidos</value>
   </data>
 </root>
