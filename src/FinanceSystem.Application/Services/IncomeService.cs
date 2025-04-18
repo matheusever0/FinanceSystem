@@ -145,6 +145,11 @@ namespace FinanceSystem.Application.Services
                 income.UpdateType(incomeType);
             }
 
+            if (updateIncomeDto.IsRecurring.HasValue)
+            {
+                income.UpdateRecurring(updateIncomeDto.IsRecurring.Value);
+            }
+
             await _unitOfWork.Incomes.UpdateAsync(income);
             await _unitOfWork.CompleteAsync();
 

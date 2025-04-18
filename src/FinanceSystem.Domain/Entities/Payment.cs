@@ -123,6 +123,24 @@ public class Payment
         UpdateUpdatedAt();
     }
 
+    public void UpdateType(PaymentType paymentType)
+    {
+        PaymentType = paymentType;
+        UpdateUpdatedAt();
+    }
+    public void UpdateMethod(PaymentMethod paymentMethod)
+    {
+        PaymentMethod = paymentMethod;
+        UpdateUpdatedAt();
+    }
+
+
+    public void UpdateRecurring(bool recurring)
+    {
+        IsRecurring = recurring;
+        UpdateUpdatedAt();
+    }
+
     private void UpdateUpdatedAt()
     {
         UpdatedAt = DateTime.UtcNow;

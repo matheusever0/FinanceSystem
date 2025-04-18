@@ -174,6 +174,8 @@ namespace FinanceSystem.Application.Services
                 if (!paymentType.IsSystem && paymentType.UserId != payment.UserId)
                     throw new UnauthorizedAccessException("User does not have access to this payment type");
 
+                payment.UpdateType(paymentType);
+
             }
 
             if (updatePaymentDto.PaymentMethodId.HasValue)
@@ -185,6 +187,13 @@ namespace FinanceSystem.Application.Services
                 if (!paymentMethod.IsSystem && paymentMethod.UserId != payment.UserId)
                     throw new UnauthorizedAccessException("User does not have access to this payment method");
 
+                payment.UpdateMethod(paymentMethod);
+
+            }
+
+            if (updatePaymentDto.IsRecurring.HasValue)
+            {
+                payment.UpdateRecurring(updatePaymentDto.IsRecurring.Value);
             }
 
             await _unitOfWork.Payments.UpdateAsync(payment);

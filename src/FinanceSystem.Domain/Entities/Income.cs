@@ -124,6 +124,11 @@ namespace FinanceSystem.Domain.Entities
             IncomeType = incomeType;
             UpdateUpdatedAt();
         }
+        public void UpdateRecurring(bool recurring)
+        {
+            IsRecurring = recurring;
+            UpdateUpdatedAt();
+        }
 
         private void UpdateUpdatedAt()
         {
