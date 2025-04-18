@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Application.DTOs.Income;
+﻿using FinanceSystem.API.Extensions;
+using FinanceSystem.Application.DTOs.Income;
 using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Obtendo todas as entradas para o usuário");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var incomes = await _incomeService.GetAllByUserIdAsync(userId);
 
             return Ok(incomes);
@@ -40,7 +41,7 @@ namespace FinanceSystem.API.Controllers
             {
                 var income = await _incomeService.GetByIdAsync(id);
 
-                if (income.UserId != GetCurrentUserId())
+                if (income.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("Usuário tentou acessar entrada que não pertence a ele");
                     return Forbid();
@@ -65,7 +66,7 @@ namespace FinanceSystem.API.Controllers
                 return BadRequest(new { message = "Mês deve estar entre 1 e 12" });
             }
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var incomes = await _incomeService.GetByMonthAsync(userId, month, year);
 
             return Ok(incomes);
@@ -76,7 +77,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Obtendo entradas pendentes");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var incomes = await _incomeService.GetPendingAsync(userId);
 
             return Ok(incomes);
@@ -87,7 +88,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Obtendo entradas recebidas");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var incomes = await _incomeService.GetReceivedAsync(userId);
 
             return Ok(incomes);
@@ -98,7 +99,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Obtendo entradas por tipo ID: {TypeId}", typeId);
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var incomes = await _incomeService.GetByTypeAsync(userId, typeId);
 
             return Ok(incomes);
@@ -111,7 +112,7 @@ namespace FinanceSystem.API.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = HttpContext.GetCurrentUserId();
                 var income = await _incomeService.CreateAsync(createIncomeDto, userId);
 
                 return CreatedAtAction(nameof(GetById), new { id = income.Id }, income);
@@ -141,7 +142,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var existingIncome = await _incomeService.GetByIdAsync(id);
-                if (existingIncome.UserId != GetCurrentUserId())
+                if (existingIncome.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("Usuário tentou atualizar entrada que não pertence a ele");
                     return Forbid();
@@ -175,7 +176,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var existingIncome = await _incomeService.GetByIdAsync(id);
-                if (existingIncome.UserId != GetCurrentUserId())
+                if (existingIncome.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("Usuário tentou excluir entrada que não pertence a ele");
                     return Forbid();
@@ -204,7 +205,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var existingIncome = await _incomeService.GetByIdAsync(id);
-                if (existingIncome.UserId != GetCurrentUserId())
+                if (existingIncome.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("Usuário tentou marcar como recebida uma entrada que não pertence a ele");
                     return Forbid();
@@ -229,7 +230,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var existingIncome = await _incomeService.GetByIdAsync(id);
-                if (existingIncome.UserId != GetCurrentUserId())
+                if (existingIncome.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("Usuário tentou cancelar uma entrada que não pertence a ele");
                     return Forbid();
@@ -243,12 +244,6 @@ namespace FinanceSystem.API.Controllers
                 _logger.LogWarning(ex, "Entrada não encontrada");
                 return NotFound(new { message = ex.Message });
             }
-        }
-
-        private Guid GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.Parse(userIdClaim);
         }
     }
 }

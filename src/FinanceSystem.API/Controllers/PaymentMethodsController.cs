@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Application.DTOs.PaymentMethod;
+﻿using FinanceSystem.API.Extensions;
+using FinanceSystem.Application.DTOs.PaymentMethod;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +27,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Getting all payment methods for user");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var paymentMethods = await _paymentMethodService.GetAllAvailableForUserAsync(userId);
 
             return Ok(paymentMethods);
@@ -47,7 +48,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Getting all user-defined payment methods");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var paymentMethods = await _paymentMethodService.GetUserMethodsAsync(userId);
 
             return Ok(paymentMethods);
@@ -72,7 +73,7 @@ namespace FinanceSystem.API.Controllers
             {
                 var paymentMethod = await _paymentMethodService.GetByIdAsync(id);
 
-                if (!paymentMethod.IsSystem && paymentMethod.UserId != GetCurrentUserId())
+                if (!paymentMethod.IsSystem && paymentMethod.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to access payment method that doesn't belong to them");
                     return Forbid();
@@ -94,7 +95,7 @@ namespace FinanceSystem.API.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = HttpContext.GetCurrentUserId();
                 var paymentMethod = await _paymentMethodService.CreateAsync(createPaymentMethodDto, userId);
 
                 return CreatedAtAction(nameof(GetById), new { id = paymentMethod.Id }, paymentMethod);
@@ -126,7 +127,7 @@ namespace FinanceSystem.API.Controllers
                     return BadRequest(new { message = "Cannot update system payment method" });
                 }
 
-                if (existingMethod.UserId != GetCurrentUserId())
+                if (existingMethod.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to update payment method that doesn't belong to them");
                     return Forbid();
@@ -162,7 +163,7 @@ namespace FinanceSystem.API.Controllers
                     return BadRequest(new { message = "Cannot delete system payment method" });
                 }
 
-                if (existingMethod.UserId != GetCurrentUserId())
+                if (existingMethod.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to delete payment method that doesn't belong to them");
                     return Forbid();
@@ -181,12 +182,6 @@ namespace FinanceSystem.API.Controllers
                 _logger.LogWarning(ex, "Invalid operation when deleting payment method");
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
-        private Guid GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.Parse(userIdClaim);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Application.DTOs.PaymentInstallment;
+﻿using FinanceSystem.API.Extensions;
+using FinanceSystem.Application.DTOs.PaymentInstallment;
 using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +34,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var payment = await _paymentService.GetByIdAsync(paymentId);
-                if (payment.UserId != GetCurrentUserId())
+                if (payment.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to access installments for a payment that doesn't belong to them");
                     return Forbid();
@@ -54,7 +55,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Getting installments between {StartDate} and {EndDate}", startDate, endDate);
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var installments = await _paymentInstallmentService.GetByDueDateAsync(userId, startDate, endDate);
 
             return Ok(installments);
@@ -65,7 +66,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Getting pending installments");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var installments = await _paymentInstallmentService.GetPendingAsync(userId);
 
             return Ok(installments);
@@ -76,7 +77,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Getting overdue installments");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var installments = await _paymentInstallmentService.GetOverdueAsync(userId);
 
             return Ok(installments);
@@ -92,7 +93,7 @@ namespace FinanceSystem.API.Controllers
                 var installment = await _paymentInstallmentService.GetByIdAsync(id);
 
                 var payment = await _paymentService.GetByIdAsync(installment.PaymentId);
-                if (payment.UserId != GetCurrentUserId())
+                if (payment.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to access installment that doesn't belong to their payment");
                     return Forbid();
@@ -117,7 +118,7 @@ namespace FinanceSystem.API.Controllers
                 var installment = await _paymentInstallmentService.GetByIdAsync(id);
 
                 var payment = await _paymentService.GetByIdAsync(installment.PaymentId);
-                if (payment.UserId != GetCurrentUserId())
+                if (payment.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to mark as paid an installment that doesn't belong to their payment");
                     return Forbid();
@@ -144,7 +145,7 @@ namespace FinanceSystem.API.Controllers
                 var installment = await _paymentInstallmentService.GetByIdAsync(id);
 
                 var payment = await _paymentService.GetByIdAsync(installment.PaymentId);
-                if (payment.UserId != GetCurrentUserId())
+                if (payment.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to mark as overdue an installment that doesn't belong to their payment");
                     return Forbid();
@@ -170,7 +171,7 @@ namespace FinanceSystem.API.Controllers
                 var installment = await _paymentInstallmentService.GetByIdAsync(id);
 
                 var payment = await _paymentService.GetByIdAsync(installment.PaymentId);
-                if (payment.UserId != GetCurrentUserId())
+                if (payment.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to cancel an installment that doesn't belong to their payment");
                     return Forbid();
@@ -184,11 +185,6 @@ namespace FinanceSystem.API.Controllers
                 _logger.LogWarning(ex, "Installment not found");
                 return NotFound(new { message = ex.Message });
             }
-        }
-        private Guid GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.Parse(userIdClaim);
         }
     }
 }

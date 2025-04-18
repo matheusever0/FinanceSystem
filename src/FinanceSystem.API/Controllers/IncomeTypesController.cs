@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Application.DTOs.IncomeType;
+﻿using FinanceSystem.API.Extensions;
+using FinanceSystem.Application.DTOs.IncomeType;
 using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Obtendo todos os tipos de entrada para o usuário");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var incomeTypes = await _incomeTypeService.GetAllAvailableForUserAsync(userId);
 
             return Ok(incomeTypes);
@@ -46,7 +47,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Obtendo todos os tipos de entrada personalizados do usuário");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var incomeTypes = await _incomeTypeService.GetUserTypesAsync(userId);
 
             return Ok(incomeTypes);
@@ -61,7 +62,7 @@ namespace FinanceSystem.API.Controllers
             {
                 var incomeType = await _incomeTypeService.GetByIdAsync(id);
 
-                if (!incomeType.IsSystem && incomeType.UserId != GetCurrentUserId())
+                if (!incomeType.IsSystem && incomeType.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("Usuário tentou acessar tipo de entrada que não pertence a ele");
                     return Forbid();
@@ -83,7 +84,7 @@ namespace FinanceSystem.API.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = HttpContext.GetCurrentUserId();
                 var incomeType = await _incomeTypeService.CreateAsync(createIncomeTypeDto, userId);
 
                 return CreatedAtAction(nameof(GetById), new { id = incomeType.Id }, incomeType);
@@ -115,7 +116,7 @@ namespace FinanceSystem.API.Controllers
                     return BadRequest(new { message = "Não é possível atualizar tipos de entrada do sistema" });
                 }
 
-                if (existingType.UserId != GetCurrentUserId())
+                if (existingType.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("Usuário tentou atualizar tipo de entrada que não pertence a ele");
                     return Forbid();
@@ -151,7 +152,7 @@ namespace FinanceSystem.API.Controllers
                     return BadRequest(new { message = "Não é possível excluir tipos de entrada do sistema" });
                 }
 
-                if (existingType.UserId != GetCurrentUserId())
+                if (existingType.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("Usuário tentou excluir tipo de entrada que não pertence a ele");
                     return Forbid();
@@ -170,12 +171,6 @@ namespace FinanceSystem.API.Controllers
                 _logger.LogWarning(ex, "Operação inválida ao excluir tipo de entrada");
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
-        private Guid GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.Parse(userIdClaim);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Application.DTOs.CreditCard;
+﻿using FinanceSystem.API.Extensions;
+using FinanceSystem.Application.DTOs.CreditCard;
 using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Getting all credit cards for user");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var creditCards = await _creditCardService.GetByUserIdAsync(userId);
 
             return Ok(creditCards);
@@ -40,7 +41,7 @@ namespace FinanceSystem.API.Controllers
             {
                 var creditCard = await _creditCardService.GetByIdAsync(id);
 
-                if (creditCard.UserId != GetCurrentUserId())
+                if (creditCard.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to access credit card that doesn't belong to them");
                     return Forbid();
@@ -62,7 +63,7 @@ namespace FinanceSystem.API.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = HttpContext.GetCurrentUserId();
                 var creditCard = await _creditCardService.CreateAsync(createCreditCardDto, userId);
 
                 return CreatedAtAction(nameof(GetById), new { id = creditCard.Id }, creditCard);
@@ -97,7 +98,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var existingCard = await _creditCardService.GetByIdAsync(id);
-                if (existingCard.UserId != GetCurrentUserId())
+                if (existingCard.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to update credit card that doesn't belong to them");
                     return Forbid();
@@ -126,7 +127,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var existingCard = await _creditCardService.GetByIdAsync(id);
-                if (existingCard.UserId != GetCurrentUserId())
+                if (existingCard.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to delete credit card that doesn't belong to them");
                     return Forbid();
@@ -145,12 +146,6 @@ namespace FinanceSystem.API.Controllers
                 _logger.LogWarning(ex, "Invalid operation when deleting credit card");
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
-        private Guid GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.Parse(userIdClaim);
         }
     }
 }

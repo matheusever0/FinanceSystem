@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Application.DTOs.IncomeInstallment;
+﻿using FinanceSystem.API.Extensions;
+using FinanceSystem.Application.DTOs.IncomeInstallment;
 using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +34,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var income = await _incomeService.GetByIdAsync(incomeId);
-                if (income.UserId != GetCurrentUserId())
+                if (income.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("Usuário tentou acessar parcelas para uma entrada que não pertence a ele");
                     return Forbid();
@@ -54,7 +55,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Obtendo parcelas entre {StartDate} e {EndDate}", startDate, endDate);
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var installments = await _incomeInstallmentService.GetByDueDateAsync(userId, startDate, endDate);
 
             return Ok(installments);
@@ -65,7 +66,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Obtendo parcelas pendentes");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var installments = await _incomeInstallmentService.GetPendingAsync(userId);
 
             return Ok(installments);
@@ -76,7 +77,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Obtendo parcelas recebidas");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var installments = await _incomeInstallmentService.GetReceivedAsync(userId);
 
             return Ok(installments);
@@ -92,7 +93,7 @@ namespace FinanceSystem.API.Controllers
                 var installment = await _incomeInstallmentService.GetByIdAsync(id);
 
                 var income = await _incomeService.GetByIdAsync(installment.IncomeId);
-                if (income.UserId != GetCurrentUserId())
+                if (income.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("Usuário tentou acessar parcela que não pertence a sua entrada");
                     return Forbid();
@@ -117,7 +118,7 @@ namespace FinanceSystem.API.Controllers
                 var installment = await _incomeInstallmentService.GetByIdAsync(id);
 
                 var income = await _incomeService.GetByIdAsync(installment.IncomeId);
-                if (income.UserId != GetCurrentUserId())
+                if (income.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("Usuário tentou marcar como recebida uma parcela que não pertence a sua entrada");
                     return Forbid();
@@ -144,7 +145,7 @@ namespace FinanceSystem.API.Controllers
                 var installment = await _incomeInstallmentService.GetByIdAsync(id);
 
                 var income = await _incomeService.GetByIdAsync(installment.IncomeId);
-                if (income.UserId != GetCurrentUserId())
+                if (income.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("Usuário tentou cancelar uma parcela que não pertence a sua entrada");
                     return Forbid();
@@ -158,12 +159,6 @@ namespace FinanceSystem.API.Controllers
                 _logger.LogWarning(ex, "Parcela não encontrada");
                 return NotFound(new { message = ex.Message });
             }
-        }
-
-        private Guid GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.Parse(userIdClaim);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Application.DTOs.PaymentType;
+﻿using FinanceSystem.API.Extensions;
+using FinanceSystem.Application.DTOs.PaymentType;
 using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Getting all payment types for user");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var paymentTypes = await _paymentTypeService.GetAllAvailableForUserAsync(userId);
 
             return Ok(paymentTypes);
@@ -46,7 +47,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Getting all user-defined payment types");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var paymentTypes = await _paymentTypeService.GetUserTypesAsync(userId);
 
             return Ok(paymentTypes);
@@ -61,7 +62,7 @@ namespace FinanceSystem.API.Controllers
             {
                 var paymentType = await _paymentTypeService.GetByIdAsync(id);
 
-                if (!paymentType.IsSystem && paymentType.UserId != GetCurrentUserId())
+                if (!paymentType.IsSystem && paymentType.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to access payment type that doesn't belong to them");
                     return Forbid();
@@ -83,7 +84,7 @@ namespace FinanceSystem.API.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = HttpContext.GetCurrentUserId();
                 var paymentType = await _paymentTypeService.CreateAsync(createPaymentTypeDto, userId);
 
                 return CreatedAtAction(nameof(GetById), new { id = paymentType.Id }, paymentType);
@@ -115,7 +116,7 @@ namespace FinanceSystem.API.Controllers
                     return BadRequest(new { message = "Cannot update system payment type" });
                 }
 
-                if (existingType.UserId != GetCurrentUserId())
+                if (existingType.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to update payment type that doesn't belong to them");
                     return Forbid();
@@ -151,7 +152,7 @@ namespace FinanceSystem.API.Controllers
                     return BadRequest(new { message = "Cannot delete system payment type" });
                 }
 
-                if (existingType.UserId != GetCurrentUserId())
+                if (existingType.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to delete payment type that doesn't belong to them");
                     return Forbid();
@@ -170,12 +171,6 @@ namespace FinanceSystem.API.Controllers
                 _logger.LogWarning(ex, "Invalid operation when deleting payment type");
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
-        private Guid GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.Parse(userIdClaim);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Application.DTOs.Payment;
+﻿using FinanceSystem.API.Extensions;
+using FinanceSystem.Application.DTOs.Payment;
 using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Getting all payments for user");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var payments = await _paymentService.GetAllByUserIdAsync(userId);
 
             return Ok(payments);
@@ -40,7 +41,7 @@ namespace FinanceSystem.API.Controllers
             {
                 var payment = await _paymentService.GetByIdAsync(id);
 
-                if (payment.UserId != GetCurrentUserId())
+                if (payment.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to access payment that doesn't belong to them");
                     return Forbid();
@@ -65,7 +66,7 @@ namespace FinanceSystem.API.Controllers
                 return BadRequest(new { message = "Month must be between 1 and 12" });
             }
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var payments = await _paymentService.GetByMonthAsync(userId, month, year);
 
             return Ok(payments);
@@ -76,7 +77,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Getting pending payments");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var payments = await _paymentService.GetPendingAsync(userId);
 
             return Ok(payments);
@@ -87,7 +88,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Getting overdue payments");
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var payments = await _paymentService.GetOverdueAsync(userId);
 
             return Ok(payments);
@@ -98,7 +99,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Getting payments by type ID: {TypeId}", typeId);
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var payments = await _paymentService.GetByTypeAsync(userId, typeId);
 
             return Ok(payments);
@@ -109,7 +110,7 @@ namespace FinanceSystem.API.Controllers
         {
             _logger.LogInformation("Getting payments by method ID: {MethodId}", methodId);
 
-            var userId = GetCurrentUserId();
+            var userId = HttpContext.GetCurrentUserId();
             var payments = await _paymentService.GetByMethodAsync(userId, methodId);
 
             return Ok(payments);
@@ -122,7 +123,7 @@ namespace FinanceSystem.API.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = HttpContext.GetCurrentUserId();
                 var payment = await _paymentService.CreateAsync(createPaymentDto, userId);
 
                 return CreatedAtAction(nameof(GetById), new { id = payment.Id }, payment);
@@ -152,7 +153,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var existingPayment = await _paymentService.GetByIdAsync(id);
-                if (existingPayment.UserId != GetCurrentUserId())
+                if (existingPayment.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to update payment that doesn't belong to them");
                     return Forbid();
@@ -186,7 +187,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var existingPayment = await _paymentService.GetByIdAsync(id);
-                if (existingPayment.UserId != GetCurrentUserId())
+                if (existingPayment.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to delete payment that doesn't belong to them");
                     return Forbid();
@@ -215,7 +216,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var existingPayment = await _paymentService.GetByIdAsync(id);
-                if (existingPayment.UserId != GetCurrentUserId())
+                if (existingPayment.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to mark as paid a payment that doesn't belong to them");
                     return Forbid();
@@ -240,7 +241,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var existingPayment = await _paymentService.GetByIdAsync(id);
-                if (existingPayment.UserId != GetCurrentUserId())
+                if (existingPayment.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to mark as overdue a payment that doesn't belong to them");
                     return Forbid();
@@ -264,7 +265,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var existingPayment = await _paymentService.GetByIdAsync(id);
-                if (existingPayment.UserId != GetCurrentUserId())
+                if (existingPayment.UserId != HttpContext.GetCurrentUserId())
                 {
                     _logger.LogWarning("User attempted to cancel a payment that doesn't belong to them");
                     return Forbid();
@@ -278,12 +279,6 @@ namespace FinanceSystem.API.Controllers
                 _logger.LogWarning(ex, "Payment not found");
                 return NotFound(new { message = ex.Message });
             }
-        }
-
-        private Guid GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.Parse(userIdClaim);
         }
     }
 }
