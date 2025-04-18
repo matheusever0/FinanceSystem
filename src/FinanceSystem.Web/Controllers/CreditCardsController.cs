@@ -63,7 +63,8 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 var token = HttpContext.GetJwtToken();
-                var creditCardPaymentMethods = await _paymentMethodService.GetByTypeAsync(2, token);                 ViewBag.PaymentMethods = creditCardPaymentMethods;
+                var creditCardPaymentMethods = await _paymentMethodService.GetByTypeAsync(2, token);
+                ViewBag.PaymentMethods = creditCardPaymentMethods;
                 return View();
             }
             catch (Exception ex)
@@ -96,7 +97,7 @@ namespace FinanceSystem.Web.Controllers
                 ModelState.AddModelError(string.Empty, $"Erro ao criar cartão de crédito: {ex.Message}");
             }
 
-                        try
+            try
             {
                 var creditCardPaymentMethods = await _paymentMethodService.GetByTypeAsync(2, token);
                 ViewBag.PaymentMethods = creditCardPaymentMethods;

@@ -24,7 +24,7 @@ namespace FinanceSystem.Web.Models.Payment
         public int? Status { get; set; }
 
         [Display(Name = "Pagamento Recorrente")]
-        public bool? IsRecurring { get; set; }
+        public bool IsRecurring { get; set; }
 
         [Display(Name = "Observações")]
         [StringLength(500, ErrorMessage = "As observações devem ter no máximo 500 caracteres")]

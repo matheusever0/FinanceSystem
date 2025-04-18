@@ -214,6 +214,7 @@ namespace FinanceSystem.Web.Controllers
 
                 var model = new UpdateIncomeModel
                 {
+                    Id = income.Id,
                     Description = income.Description,
                     Amount = income.Amount,
                     DueDate = income.DueDate,

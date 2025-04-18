@@ -35,7 +35,7 @@ namespace FinanceSystem.Domain.Entities
             IncomeType incomeType,
             User user,
             bool isRecurring = false,
-            string notes = null)
+            string notes = "")
         {
             Id = Guid.NewGuid();
             Description = description;
@@ -65,6 +65,13 @@ namespace FinanceSystem.Domain.Entities
         public void Cancel()
         {
             Status = IncomeStatus.Cancelled;
+            UpdateUpdatedAt();
+        }
+
+        public void Pending()
+        {
+            ReceivedDate = null;
+            Status = IncomeStatus.Pending;
             UpdateUpdatedAt();
         }
 

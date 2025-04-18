@@ -127,6 +127,9 @@ namespace FinanceSystem.Application.Services
                     case IncomeStatus.Cancelled:
                         income.Cancel();
                         break;
+                    case IncomeStatus.Pending:
+                        income.Pending();
+                        break;
                 }
             }
 

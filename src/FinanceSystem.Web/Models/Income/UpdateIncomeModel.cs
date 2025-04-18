@@ -4,6 +4,7 @@ namespace FinanceSystem.Web.Models.Income
 {
     public class UpdateIncomeModel
     {
+        public string Id { get; set; }
         [StringLength(100, MinimumLength = 3, ErrorMessage = "A descrição deve ter entre 3 e 100 caracteres")]
         [Display(Name = "Descrição")]
         public string Description { get; set; }

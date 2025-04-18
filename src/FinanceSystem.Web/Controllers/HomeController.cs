@@ -13,15 +13,18 @@ namespace FinanceSystem.Web.Controllers
     {
         private readonly IPaymentService _paymentService;
         private readonly ICreditCardService _creditCardService;
+        private readonly IIncomeService _incomeService;
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(
             IPaymentService paymentService,
             ICreditCardService creditCardService,
+            IIncomeService incomeService,
             ILogger<HomeController> logger)
         {
             _paymentService = paymentService;
             _creditCardService = creditCardService;
+            _incomeService = incomeService;
             _logger = logger;
         }
 
@@ -37,25 +40,30 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var pendingPayments = await _paymentService.GetPendingPaymentsAsync(token);
                 var overduePayments = await _paymentService.GetOverduePaymentsAsync(token);
+                var pendingIncomes = await _incomeService.GetPendingIncomesAsync(token);
+                var receivedIncomes = await _incomeService.GetReceivedIncomesAsync(token);
                 var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
-                decimal totalBalance = 5000.00m;
-                var monthlyData = await GetMonthlyDataAsync(token);
+                var payments = await _paymentService.GetAllPaymentsAsync(token);
+                var incomesMonth = await _incomeService.GetIncomesByMonthAsync(DateTime.Now.Month, DateTime.Now.Year, token);
+                var paymentsMonth = await _paymentService.GetPaymentsByMonthAsync(DateTime.Now.Month, DateTime.Now.Year, token);
 
-                var labels = monthlyData.Keys.ToList();
-                var values = monthlyData.Values.ToList();
+                // Calcular saldo dinâmico
+                decimal totalIncome = receivedIncomes.Sum(i => i.Amount);
+                decimal totalPayments = payments.Sum(i => i.Amount);
+                decimal totalBalance = totalIncome - totalPayments;
 
-                var jsonOptions = new JsonSerializerOptions
-                {
-                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                };
-
-                ViewBag.MonthlyLabels = JsonSerializer.Serialize(labels, jsonOptions);
-                ViewBag.MonthlyValues = JsonSerializer.Serialize(values, jsonOptions);
-                ViewBag.PaymentsPending = pendingPayments;
-                ViewBag.PaymentsOverdue = overduePayments;
-                ViewBag.CreditCards = creditCards;
                 ViewBag.TotalBalance = totalBalance;
-                ViewBag.MonthlyData = monthlyData;
+                ViewBag.PendingPayments = pendingPayments;
+                ViewBag.PaymentsOverdue = overduePayments;
+                ViewBag.PendingIncomes = pendingIncomes;
+                ViewBag.CreditCards = creditCards;
+                ViewBag.IncomesMonth = incomesMonth.Sum(i => i.Amount);
+                ViewBag.PaymentsMonth = paymentsMonth.Sum(i => i.Amount);
+
+                // Manter lógica existente de gráficos mensais
+                var monthlyData = await GetMonthlyDataAsync(token);
+                ViewBag.MonthlyLabels = JsonSerializer.Serialize(monthlyData.Keys.ToList());
+                ViewBag.MonthlyValues = JsonSerializer.Serialize(monthlyData.Values.ToList());
 
                 return View();
             }
@@ -81,6 +89,7 @@ namespace FinanceSystem.Web.Controllers
                 try
                 {
                     var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
+
                     var monthTotal = payments.Sum(p => p.Amount);
                     result.Add(monthName, monthTotal);
                 }

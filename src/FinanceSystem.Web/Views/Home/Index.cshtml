@@ -1,5 +1,6 @@
 ﻿@using FinanceSystem.Web.Helpers
 @using FinanceSystem.Web.Models.CreditCard
+@using FinanceSystem.Web.Models.Income
 @using FinanceSystem.Web.Models.Payment
 @{
     ViewData["Title"] = "Dashboard";
@@ -11,6 +12,11 @@
     var totalBalance = ViewBag.TotalBalance ?? 0m;
     var creditCards = ViewBag.CreditCards as IEnumerable<CreditCardModel> ?? new List<CreditCardModel>();
     var monthlyData = ViewBag.MonthlyData as Dictionary<string, decimal> ?? new Dictionary<string, decimal>();
+    var pendingIncomes = ViewBag.PendingIncomes as IEnumerable<IncomeModel> ?? new List<IncomeModel>();
+    var totalPendingIncomes = pendingIncomes.Sum(i => i.Amount);
+    var incomesMonth = ViewBag.IncomesMonth ?? 0m;
+    var paymentsMonth = ViewBag.PaymentsMonth ?? 0m;
+
 }
 
 @section Styles {
@@ -40,13 +46,72 @@
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", totalBalance)</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
+        <!-- Receitas do mês recebidas -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Receitas do Mês Recebidas
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @string.Format("{0:C2}", incomesMonth)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Pagamentos do mês efetuados -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Pagamentos do mês efetuados.
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @string.Format("{0:C2}", paymentsMonth)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Receitas Pendentes -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Receitas Pendentes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @string.Format("{0:C2}", totalPendingIncomes)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Pendente -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
@@ -54,7 +119,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Pendente
+                                Pagamentos Pendentes
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", totalPendingAmount)</div>
                         </div>
@@ -73,7 +138,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                Vencido
+                                Pagamentos Vencidos
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", totalOverdueAmount)</div>
                         </div>
@@ -137,6 +202,18 @@
                             </div>
                         }
 
+                        @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.create"))
+                        {
+                            <div class="col-xl-3 col-md-6 mb-2">
+                                <a asp-controller="Incomes" asp-action="Create" class="btn btn-success btn-icon-split btn-lg w-100">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-plus"></i>
+                                    </span>
+                                    <span class="text">Nova Receita</span>
+                                </a>
+                            </div>
+                        }
+
                         @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.view"))
                         {
                             <div class="col-xl-3 col-md-6 mb-2">
@@ -171,7 +248,21 @@
                                     <span class="icon text-white-50">
                                         <i class="fas fa-calendar"></i>
                                     </span>
-                                    <span class="text">Este Mês</span>
+                                    <span class="text">Pagamentos | Este mês</span>
+                                </a>
+                            </div>
+                        }
+                        @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.view"))
+                        {
+                            <div class="col-xl-3 col-md-6 mb-2">
+                                <a asp-controller="Incomes" asp-action="ByMonth"
+                                   asp-route-month="@DateTime.Now.Month"
+                                   asp-route-year="@DateTime.Now.Year"
+                                   class="btn btn-success btn-icon-split btn-lg w-100">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-calendar"></i>
+                                    </span>
+                                    <span class="text">Recebimentos | Este mês</span>
                                 </a>
                             </div>
                         }
@@ -309,6 +400,62 @@
                             <div class="text-center mt-3">
                                 <a asp-controller="Payments" asp-action="Pending" class="btn btn-sm btn-warning">
                                     Ver todos (@paymentsPending.Count())
+                                </a>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <!-- Receitas Pendentes -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Receitas Pendentes</h6>
+                </div>
+                <div class="card-body">
+                    @if (!pendingIncomes.Any())
+                    {
+                        <div class="text-center my-4">
+                            <div class="mb-3">
+                                <i class="fas fa-check-circle fa-3x text-success"></i>
+                            </div>
+                            <p>Nenhuma receita pendente!</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Descrição</th>
+                                        <th>Vencimento</th>
+                                        <th class="text-end">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var income in pendingIncomes.OrderBy(i => i.DueDate).Take(5))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Incomes" asp-action="Details" asp-route-id="@income.Id">
+                                                    @income.Description
+                                                </a>
+                                            </td>
+                                            <td>@income.GetFormattedDueDate()</td>
+                                            <td class="text-end">@income.GetFormattedAmount()</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if (pendingIncomes.Count() > 5)
+                        {
+                            <div class="text-center mt-3">
+                                <a asp-controller="Incomes" asp-action="Pending" class="btn btn-sm btn-success">
+                                    Ver todas (@pendingIncomes.Count())
                                 </a>
                             </div>
                         }

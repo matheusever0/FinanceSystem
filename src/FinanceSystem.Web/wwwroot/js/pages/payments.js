@@ -1,4 +1,6 @@
-﻿/**
+﻿import { isValidNumber } from './utils/validators.js';
+
+/**
  * Scripts específicos para as páginas de pagamentos
  */
 
@@ -271,7 +273,6 @@ function filterPaymentTableByText(text) {
  * Inicializa ações em pagamentos
  */
 function initializePaymentActions() {
-    // Botão para marcar como pago
     const paymentButtons = document.querySelectorAll('.btn-mark-paid');
 
     paymentButtons.forEach(button => {
@@ -281,12 +282,11 @@ function initializePaymentActions() {
 
             if (modal) {
                 const form = modal.querySelector('form');
-                form.setAttribute('action', `/Payments/${paymentId}/MarkAsPaid`);
+                form.setAttribute('action', `/Payments/MarkAsPaid/${paymentId}`);
             }
         });
     });
 
-    // Botão para cancelar pagamento
     const cancelButtons = document.querySelectorAll('.btn-cancel-payment');
 
     cancelButtons.forEach(button => {
@@ -298,7 +298,7 @@ function initializePaymentActions() {
                 const form = document.createElement('form');
 
                 form.method = 'POST';
-                form.action = `/Payments/${paymentId}/Cancel`;
+                form.action = `/Payments/Cancel/${paymentId}`;
 
                 // Adiciona token anti-forgery
                 const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
@@ -313,15 +313,6 @@ function initializePaymentActions() {
                 document.body.appendChild(form);
                 form.submit();
             }
-        });
-    });
-
-    // Botão para excluir pagamento
-    const deleteButtons = document.querySelectorAll('.btn-delete-payment');
-
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function (e) {
-            return confirm('Tem certeza que deseja excluir este pagamento? Esta ação não pode ser desfeita.');
         });
     });
 }

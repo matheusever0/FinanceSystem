@@ -135,7 +135,7 @@
 
                         @if (Model.Status != 4) // Não Cancelado
                         {
-                            <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="mb-3">
+                            <form asp-controller="Payments" asp-action="Cancel" asp-route-id="@Model.Id" method="post">
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn btn-danger w-100 btn-cancel-payment" data-id="@Model.Id">
                                     <i class="fas fa-ban me-1"></i> Cancelar Pagamento

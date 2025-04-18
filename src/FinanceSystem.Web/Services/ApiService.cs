@@ -25,35 +25,68 @@ namespace FinanceSystem.Web.Services
             _httpClientFactory = httpClientFactory;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
-            _jsonOptions = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
+            _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         }
 
         private async Task HandleUnauthorizedResponse()
         {
             _logger.LogWarning("Token expirado ou inválido. Redirecionando para login...");
-
             if (_httpContextAccessor.HttpContext != null)
             {
                 await _httpContextAccessor.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 _httpContextAccessor.HttpContext.Session.Clear();
-
                 _httpContextAccessor.HttpContext.Items["RequireRelogin"] = true;
             }
         }
 
-        public async Task<bool> VerifyTokenAsync(string token)
+        private HttpClient CreateClient(string token)
         {
-            if (string.IsNullOrEmpty(token))
-                return false;
+            var client = _httpClientFactory.CreateClient("FinanceAPI");
+            if (!string.IsNullOrEmpty(token))
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            return client;
+        }
 
+        private async Task<string> HandleResponse(HttpResponseMessage response)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                await HandleUnauthorizedResponse();
+                var errorMessage = TryExtractMessage(content) ?? "Sessão expirada ou inválida";
+                throw new UnauthorizedAccessException(errorMessage);
+            }
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = TryExtractMessage(content) ?? "Erro desconhecido na API";
+                throw new Exception(errorMessage);
+            }
+            return content;
+        }
+
+        private string? TryExtractMessage(string json)
+        {
             try
             {
-                var client = _httpClientFactory.CreateClient("FinanceAPI");
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var errorObj = JsonSerializer.Deserialize<Dictionary<string, string>>(json, _jsonOptions);
+                if (errorObj != null && errorObj.TryGetValue("message", out var msg))
+                    return msg;
+            }
+            catch
+            {
+                _logger.LogWarning("Falha ao extrair mensagem de erro do JSON: {Json}", json);
+            }
+            return null;
+        }
 
+        public async Task<bool> VerifyTokenAsync(string token)
+        {
+            if (string.IsNullOrEmpty(token)) return false;
+            try
+            {
+                var client = CreateClient(token);
                 var response = await client.GetAsync("api/auth/verify-token");
                 return response.IsSuccessStatusCode;
             }
@@ -65,157 +98,47 @@ namespace FinanceSystem.Web.Services
 
         public async Task<T> GetAsync<T>(string endpoint, string token)
         {
-            try
-            {
-                var client = _httpClientFactory.CreateClient("FinanceAPI");
-                if (!string.IsNullOrEmpty(token))
-                {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                }
-
-                var response = await client.GetAsync(endpoint);
-
-                if (response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    await HandleUnauthorizedResponse();
-                    throw new UnauthorizedAccessException("Sessão expirada ou inválida");
-                }
-
-                response.EnsureSuccessStatusCode();
-
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<T>(content, _jsonOptions)!;
-            }
-            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                await HandleUnauthorizedResponse();
-                throw new UnauthorizedAccessException("Sessão expirada ou inválida");
-            }
+            var client = CreateClient(token);
+            var response = await client.GetAsync(endpoint);
+            var content = await HandleResponse(response);
+            return JsonSerializer.Deserialize<T>(content, _jsonOptions)!;
         }
 
         public async Task<T> PostAsync<T>(string endpoint, object? data = null, string token = "")
         {
-            try
-            {
-                var client = _httpClientFactory.CreateClient("FinanceAPI");
-                if (!string.IsNullOrEmpty(token))
-                {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                }
-
-                var json = data != null ? JsonSerializer.Serialize(data) : "";
-                _logger.LogInformation($"Enviando requisição para {endpoint}: {json}");
-
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await client.PostAsync(endpoint, content);
-
-                if (response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    await HandleUnauthorizedResponse();
-                    throw new UnauthorizedAccessException("Sessão expirada ou inválida");
-                }
-
-                var responseContent = await response.Content.ReadAsStringAsync();
-                _logger.LogInformation($"Resposta do endpoint {endpoint}: {responseContent}");
-
-                response.EnsureSuccessStatusCode();
-                return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions)!;
-            }
-            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                await HandleUnauthorizedResponse();
-                throw new UnauthorizedAccessException("Sessão expirada ou inválida");
-            }
+            var client = CreateClient(token);
+            var json = data != null ? JsonSerializer.Serialize(data) : "";
+            _logger.LogInformation("Enviando requisição para {Endpoint}: {Json}", endpoint, json);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(endpoint, content);
+            var responseContent = await HandleResponse(response);
+            _logger.LogInformation("Resposta do endpoint {Endpoint}: {ResponseContent}", endpoint, responseContent);
+            return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions)!;
         }
 
         public async Task<T> PutAsync<T>(string endpoint, object? data = null, string token = "")
         {
-            try
-            {
-                var client = _httpClientFactory.CreateClient("FinanceAPI");
-                if (!string.IsNullOrEmpty(token))
-                {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                }
-
-                var json = JsonSerializer.Serialize(data);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                var response = await client.PutAsync(endpoint, content);
-
-                if (response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    await HandleUnauthorizedResponse();
-                    throw new UnauthorizedAccessException("Sessão expirada ou inválida");
-                }
-
-                response.EnsureSuccessStatusCode();
-
-                var responseContent = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions)!;
-            }
-            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                await HandleUnauthorizedResponse();
-                throw new UnauthorizedAccessException("Sessão expirada ou inválida");
-            }
+            var client = CreateClient(token);
+            var json = JsonSerializer.Serialize(data);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PutAsync(endpoint, content);
+            var responseContent = await HandleResponse(response);
+            return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions)!;
         }
 
         public async Task DeleteAsync(string endpoint, string token)
         {
-            try
-            {
-                var client = _httpClientFactory.CreateClient("FinanceAPI");
-                if (!string.IsNullOrEmpty(token))
-                {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                }
-
-                var response = await client.DeleteAsync(endpoint);
-
-                if (response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    await HandleUnauthorizedResponse();
-                    throw new UnauthorizedAccessException("Sessão expirada ou inválida");
-                }
-
-                response.EnsureSuccessStatusCode();
-            }
-            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                await HandleUnauthorizedResponse();
-                throw new UnauthorizedAccessException("Sessão expirada ou inválida");
-            }
+            var client = CreateClient(token);
+            var response = await client.DeleteAsync(endpoint);
+            await HandleResponse(response);
         }
 
         public async Task<T> DeleteAsync<T>(string endpoint, string token)
         {
-            try
-            {
-                var client = _httpClientFactory.CreateClient("FinanceAPI");
-                if (!string.IsNullOrEmpty(token))
-                {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                }
-
-                var response = await client.DeleteAsync(endpoint);
-
-                if (response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    await HandleUnauthorizedResponse();
-                    throw new UnauthorizedAccessException("Sessão expirada ou inválida");
-                }
-
-                response.EnsureSuccessStatusCode();
-
-                var responseContent = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions)!;
-            }
-            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                await HandleUnauthorizedResponse();
-                throw new UnauthorizedAccessException("Sessão expirada ou inválida");
-            }
+            var client = CreateClient(token);
+            var response = await client.DeleteAsync(endpoint);
+            var responseContent = await HandleResponse(response);
+            return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions)!;
         }
 
         public Task<ClaimsPrincipal> GetClaimsPrincipalFromToken(string token)
@@ -242,12 +165,10 @@ namespace FinanceSystem.Web.Services
                         "role" => ClaimTypes.Role,
                         _ => claim.Type
                     };
-
                     identity.AddClaim(new Claim(claimType, claim.Value));
                 }
 
-                var principal = new ClaimsPrincipal(identity);
-                return Task.FromResult(principal);
+                return Task.FromResult(new ClaimsPrincipal(identity));
             }
             catch (Exception ex)
             {

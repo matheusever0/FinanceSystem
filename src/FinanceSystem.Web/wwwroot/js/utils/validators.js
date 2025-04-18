@@ -7,7 +7,7 @@
  * @param {any} value - Valor a ser verificado
  * @returns {boolean} - Resultado da verificação
  */
-function isValidNumber(value) {
+export function isValidNumber(value) {
     return !isNaN(parseFloat(value)) && isFinite(value);
 }
 
