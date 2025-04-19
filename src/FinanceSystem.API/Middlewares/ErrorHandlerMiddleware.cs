@@ -1,7 +1,9 @@
-﻿using System.Net;
+﻿// API/Middlewares/ErrorHandlerMiddleware.cs
+using System.Net;
 using System.Text.Json;
 using FinanceSystem.API.Configuration;
 using FinanceSystem.API.Extensions;
+using FinanceSystem.Application.DTOs.Common;
 using Microsoft.Extensions.Localization;
 
 namespace FinanceSystem.API.Middlewares
@@ -33,39 +35,44 @@ namespace FinanceSystem.API.Middlewares
                 var response = context.Response;
                 response.ContentType = "application/json";
                 string messageKey = LogMessageConstants.ErrorGeneric;
+                int statusCode = (int)HttpStatusCode.InternalServerError;
 
                 // Determinar o status code e a chave da mensagem com base no tipo de exceção
                 switch (error)
                 {
                     case KeyNotFoundException ex:
-                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        statusCode = (int)HttpStatusCode.NotFound;
                         messageKey = LogMessageConstants.ErrorNotFound;
                         _logger.LogWarningOperation(messageKey, _localizer, ex.Message);
                         break;
 
                     case InvalidOperationException ex:
-                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        statusCode = (int)HttpStatusCode.BadRequest;
                         messageKey = LogMessageConstants.ErrorInvalidOperation;
                         _logger.LogWarningOperation(messageKey, _localizer, ex.Message);
                         break;
 
                     case UnauthorizedAccessException ex:
-                        response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        statusCode = (int)HttpStatusCode.Unauthorized;
                         messageKey = LogMessageConstants.ErrorUnauthorized;
                         _logger.LogWarningOperation(messageKey, _localizer, ex.Message);
                         break;
 
                     default:
-                        response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        statusCode = (int)HttpStatusCode.InternalServerError;
                         _logger.LogErrorOperation(error, messageKey, _localizer);
                         break;
                 }
 
-                // Obter a mensagem localizada baseada na exceção original
-                string localizedMessage = GetLocalizedErrorMessage(error);
+                // Criar resposta de API padronizada
+                var apiResponse = ApiResponse<object>.ErrorResult(messageKey, statusCode);
+
+                // Obter a mensagem localizada
+                apiResponse.Message = GetLocalizedErrorMessage(error);
 
                 // Serializar e retornar a resposta
-                var result = JsonSerializer.Serialize(new { message = localizedMessage });
+                var result = JsonSerializer.Serialize(apiResponse);
+                response.StatusCode = statusCode;
                 await response.WriteAsync(result);
             }
         }

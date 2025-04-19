@@ -153,7 +153,7 @@ namespace FinanceSystem.Application.Services
                 throw new InvalidOperationException("User account is deactivated");
 
             if (!_authService.VerifyPassword(loginDto.Password, user.PasswordHash))
-                throw new InvalidOperationException("Invalid username or password");
+                throw new UnauthorizedAccessException("Invalid username or password");
 
             user.SetLastLogin();
             await _unitOfWork.Users.UpdateAsync(user);

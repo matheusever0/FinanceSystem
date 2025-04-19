@@ -1,5 +1,7 @@
-﻿using FinanceSystem.API.Configuration;
+﻿// API/Controllers/AuthController.cs
+using FinanceSystem.API.Configuration;
 using FinanceSystem.API.Extensions;
+using FinanceSystem.Application.DTOs.Common;
 using FinanceSystem.Application.DTOs.Login;
 using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +29,7 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginDto loginDto)
+        public async Task<ActionResult> Login([FromBody] LoginDto loginDto)
         {
             _logger.LogOperation(LogMessageConstants.AuthLogin, _localizer, loginDto.Username);
 
@@ -35,12 +37,12 @@ namespace FinanceSystem.API.Controllers
             {
                 var response = await _userService.LoginAsync(loginDto);
                 _logger.LogOperation(LogMessageConstants.AuthLoginSuccess, _localizer, loginDto.Username);
-                return Ok(response);
+                return this.ApiOk(response);
             }
             catch (Exception ex)
             {
                 _logger.LogWarningOperation(LogMessageConstants.AuthLoginFailed, _localizer, loginDto.Username);
-                return Unauthorized(new { message = _localizer["Auth.InvalidCredentials"] });
+                return this.ApiUnauthorized<LoginResponseDto>("Auth.InvalidCredentials", _localizer);
             }
         }
 
@@ -54,16 +56,17 @@ namespace FinanceSystem.API.Controllers
                 {
                     var username = User.Identity.Name;
                     _logger.LogOperation(LogMessageConstants.AuthTokenValid, _localizer, username);
-                    return Ok(new { valid = true, username });
+
+                    return this.ApiOk(new { username });
                 }
 
                 _logger.LogWarningOperation(LogMessageConstants.AuthTokenInvalid, _localizer);
-                return Unauthorized(new { valid = false, message = _localizer["Auth.TokenInvalid"] });
+                return this.ApiUnauthorized<object>("Auth.TokenInvalid", _localizer);
             }
             catch (Exception ex)
             {
                 _logger.LogErrorOperation(ex, LogMessageConstants.AuthTokenVerifyError, _localizer);
-                return StatusCode(500, new { valid = false, message = _localizer["Auth.TokenVerifyError"] });
+                return this.ApiError<object>("Auth.TokenVerifyError", _localizer, StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -75,7 +78,7 @@ namespace FinanceSystem.API.Controllers
                 if (!User.Identity.IsAuthenticated)
                 {
                     _logger.LogWarningOperation(LogMessageConstants.ErrorUnauthorized, _localizer, "auth permissions");
-                    return Unauthorized(new { message = _localizer["Auth.UserNotAuthenticated"] });
+                    return this.ApiUnauthorized<object>("Auth.UserNotAuthenticated", _localizer);
                 }
 
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -83,18 +86,20 @@ namespace FinanceSystem.API.Controllers
 
                 _logger.LogOperation(LogMessageConstants.AuthGetPermissions, _localizer, userId);
 
-                return Ok(new
+                var permissions = new
                 {
                     userId,
                     roles,
                     isAdmin = User.IsInRole("Admin"),
                     isModerator = User.IsInRole("Moderator")
-                });
+                };
+
+                return this.ApiOk(permissions);
             }
             catch (Exception ex)
             {
                 _logger.LogErrorOperation(ex, LogMessageConstants.ErrorGeneric, _localizer, "user permissions");
-                return StatusCode(500, new { message = _localizer["Error.GetUserPermissions"] });
+                return this.ApiError<object>("Error.GetUserPermissions", _localizer, StatusCodes.Status500InternalServerError);
             }
         }
     }
