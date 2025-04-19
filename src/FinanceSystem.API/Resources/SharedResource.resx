@@ -450,4 +450,7 @@
   <data name="Auth.InvalidCredentials" xml:space="preserve">
     <value>Invalid username or password</value>
   </data>
+  <data name="Auth.UserDeactivated" xml:space="preserve">
+    <value>User account is deactivated</value>
+  </data>
 </root>

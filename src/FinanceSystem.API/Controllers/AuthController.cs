@@ -1,7 +1,6 @@
-﻿// API/Controllers/AuthController.cs
-using FinanceSystem.API.Configuration;
+﻿using FinanceSystem.API.Configuration;
 using FinanceSystem.API.Extensions;
-using FinanceSystem.Application.DTOs.Common;
+using FinanceSystem.API.Resources;
 using FinanceSystem.Application.DTOs.Login;
 using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -42,7 +41,7 @@ namespace FinanceSystem.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogWarningOperation(LogMessageConstants.AuthLoginFailed, _localizer, loginDto.Username);
-                return this.ApiUnauthorized<LoginResponseDto>("Auth.InvalidCredentials", _localizer);
+                return this.ApiUnauthorized<LoginResponseDto>(ex.Message, _localizer);
             }
         }
 

@@ -18,7 +18,7 @@ namespace FinanceSystem.API.Extensions
             int statusCode = StatusCodes.Status400BadRequest)
         {
             var response = ApiResponse<T>.ErrorResult(messageKey, statusCode);
-            response.Message = localizer[messageKey];
+            response.Message = localizer[messageKey].Value;
 
             return controller.StatusCode(statusCode, response);
         }

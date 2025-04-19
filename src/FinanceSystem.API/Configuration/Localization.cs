@@ -7,7 +7,7 @@ namespace FinanceSystem.API.Configuration
     {
         public static IServiceCollection AddLocalizationResources(this IServiceCollection services)
         {
-            services.AddLocalization(options => options.ResourcesPath = "Resources");
+            services.AddLocalization(options => options.ResourcesPath = "");
 
             services.Configure<RequestLocalizationOptions>(options =>
             {

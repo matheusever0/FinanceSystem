@@ -3,6 +3,7 @@ using System.Net;
 using System.Text.Json;
 using FinanceSystem.API.Configuration;
 using FinanceSystem.API.Extensions;
+using FinanceSystem.API.Resources;
 using FinanceSystem.Application.DTOs.Common;
 using Microsoft.Extensions.Localization;
 

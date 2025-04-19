@@ -147,13 +147,13 @@ namespace FinanceSystem.Application.Services
         {
             var user = await _unitOfWork.Users.GetByUsernameAsync(loginDto.Username);
             if (user == null)
-                throw new InvalidOperationException("Invalid username or password");
+                throw new InvalidOperationException("Auth.InvalidCredentials");
 
             if (!user.IsActive)
-                throw new InvalidOperationException("User account is deactivated");
+                throw new InvalidOperationException("Auth.UserDeactivated");
 
             if (!_authService.VerifyPassword(loginDto.Password, user.PasswordHash))
-                throw new UnauthorizedAccessException("Invalid username or password");
+                throw new InvalidOperationException("Auth.InvalidCredentials");
 
             user.SetLastLogin();
             await _unitOfWork.Users.UpdateAsync(user);

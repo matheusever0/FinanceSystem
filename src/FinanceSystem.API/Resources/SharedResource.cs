@@ -1,4 +1,4 @@
-﻿namespace FinanceSystem.API.Configuration
+﻿namespace FinanceSystem.API.Resources
 {
     public class SharedResource
     {

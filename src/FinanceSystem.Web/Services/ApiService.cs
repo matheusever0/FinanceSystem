@@ -53,6 +53,9 @@ namespace FinanceSystem.Web.Services
         private async Task<string> HandleResponse(HttpResponseMessage response)
         {
             var content = await response.Content.ReadAsStringAsync();
+
+            _logger.LogInformation("Resposta completa: {Content}", content);
+
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 await HandleUnauthorizedResponse();
