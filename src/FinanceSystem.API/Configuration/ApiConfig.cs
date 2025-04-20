@@ -11,9 +11,8 @@ namespace FinanceSystem.API.Configuration
             services.AddControllers();
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll",
+                options.AddPolicy("AllowSpecificOrigin",
                     builder => builder
-                        .AllowAnyOrigin()
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials());
@@ -40,7 +39,7 @@ namespace FinanceSystem.API.Configuration
             });
 
             app.UseHttpsRedirection();
-            app.UseCors("AllowAll");
+            app.UseCors("AllowSpecificOrigin");
             app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseRouting();
             app.UseAuthentication();
