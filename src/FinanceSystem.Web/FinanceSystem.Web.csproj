@@ -15,5 +15,14 @@
 	<ItemGroup>
 	  <Folder Include="wwwroot\images\" />
 	</ItemGroup>
+	
+	<ItemGroup>
+	  <Content Update="appsettings.Development.json">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="appsettings.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
 
 </Project>
