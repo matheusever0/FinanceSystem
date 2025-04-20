@@ -123,28 +123,13 @@ namespace FinanceSystem.Infrastructure.Data
                         adminRole.AddPermission(permission);
                     }
 
-                    var moderatorPermissions = allPermissions
-                        .Where(p => p.SystemName == "users.view" ||
-                                    p.SystemName == "users.create" ||
-                                    p.SystemName == "users.edit" ||
-                                    p.SystemName == "roles.view").ToList();
-
-                    moderatorPermissions.AddRange(allPermissions.Where(p =>
-                        p.SystemName == "payments.view" ||
-                        p.SystemName == "payments.create" ||
-                        p.SystemName == "payments.edit" ||
-                        p.SystemName == "paymenttypes.view" ||
-                        p.SystemName == "paymentmethods.view" ||
-                        p.SystemName == "creditcards.view"));
-
                     var userPermissions = allPermissions
                         .Where(p => p.SystemName == "users.view").ToList();
 
                     userPermissions.AddRange(allPermissions.Where(p =>
                         p.SystemName.StartsWith("payments.") ||
-                        p.SystemName.StartsWith("paymenttypes.") ||
-                        p.SystemName.StartsWith("paymentmethods.") ||
-                        p.SystemName.StartsWith("creditcards.")));
+                        p.SystemName.StartsWith("creditcards.") ||
+                        p.SystemName.StartsWith("incomes.")));
 
                     foreach (var permission in userPermissions)
                     {
