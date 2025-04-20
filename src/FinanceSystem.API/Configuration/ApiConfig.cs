@@ -15,7 +15,8 @@ namespace FinanceSystem.API.Configuration
                     builder => builder
                         .AllowAnyOrigin()
                         .AllowAnyMethod()
-                        .AllowAnyHeader());
+                        .AllowAnyHeader()
+                        .AllowCredentials());
             });
 
             services.AddApplication();
@@ -30,9 +31,13 @@ namespace FinanceSystem.API.Configuration
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI();
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Finance System API v1");
+            });
 
             app.UseHttpsRedirection();
             app.UseCors("AllowAll");
