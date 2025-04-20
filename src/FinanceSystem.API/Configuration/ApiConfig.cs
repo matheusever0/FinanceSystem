@@ -42,6 +42,7 @@ namespace FinanceSystem.API.Configuration
             app.UseCors("AllowSpecificOrigin");
             app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseRouting();
+            app.UseHttpMethodOverride();
             app.UseAuthentication();
             app.UseAuthorization();
 
