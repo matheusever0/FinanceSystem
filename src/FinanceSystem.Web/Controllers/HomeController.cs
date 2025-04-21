@@ -1,5 +1,6 @@
 ﻿using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Models.Generics;
+using FinanceSystem.Web.Models.Payment;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -64,10 +65,11 @@ namespace FinanceSystem.Web.Controllers
                 ViewBag.IncomesMonth = incomesMonth.Where(e => e.Status == pagoEnum).Sum(i => i.Amount);
                 ViewBag.PaymentsMonth = paymentsMonth.Where(e => e.Status == pagoEnum).Sum(i => i.Amount);
 
-                // Manter lógica existente de gráficos mensais
-                var monthlyData = await GetMonthlyDataAsync(token);
-                ViewBag.MonthlyLabels = JsonSerializer.Serialize(monthlyData.Keys.ToList());
-                ViewBag.MonthlyValues = JsonSerializer.Serialize(monthlyData.Values.ToList());
+                // Modificação para incluir tanto receitas quanto despesas no gráfico mensal
+                var monthlyData = await GetMonthlyComparisonDataAsync(token);
+                ViewBag.MonthlyLabels = JsonSerializer.Serialize(monthlyData.Select(m => m.Month));
+                ViewBag.MonthlyIncomeValues = JsonSerializer.Serialize(monthlyData.Select(m => m.IncomeAmount));
+                ViewBag.MonthlyPaymentValues = JsonSerializer.Serialize(monthlyData.Select(m => m.PaymentAmount));
 
                 return View();
             }
@@ -79,9 +81,9 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
-        private async Task<Dictionary<string, decimal>> GetMonthlyDataAsync(string token)
+        private async Task<List<MonthlyComparisonData>> GetMonthlyComparisonDataAsync(string token)
         {
-            var result = new Dictionary<string, decimal>();
+            var result = new List<MonthlyComparisonData>();
             var currentDate = DateTime.Now;
 
             for (int i = 5; i >= 0; i--)
@@ -93,19 +95,33 @@ namespace FinanceSystem.Web.Controllers
                 try
                 {
                     var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
+                    var incomes = await _incomeService.GetIncomesByMonthAsync(month, year, token);
 
-                    var monthTotal = payments.Where(e => e.Status == 2).Sum(p => p.Amount);
-                    result.Add(monthName, monthTotal);
+                    var monthPaymentTotal = payments.Where(e => e.Status == 2).Sum(p => p.Amount);
+                    var monthIncomeTotal = incomes.Where(e => e.Status == 2).Sum(i => i.Amount);
+
+                    result.Add(new MonthlyComparisonData
+                    {
+                        Month = monthName,
+                        PaymentAmount = monthPaymentTotal,
+                        IncomeAmount = monthIncomeTotal
+                    });
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Erro ao obter dados do mês {Month}/{Year}", month, year);
-                    result.Add(monthName, 0);
+                    result.Add(new MonthlyComparisonData
+                    {
+                        Month = monthName,
+                        PaymentAmount = 0,
+                        IncomeAmount = 0
+                    });
                 }
             }
 
             return result;
         }
+
 
         public IActionResult Privacy()
         {

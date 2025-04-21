@@ -133,8 +133,22 @@
 
 /* Dashboard charts */
 .chart-container {
-    position: relative;
-    height: 300px;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.chart-container-full {
+    width: 100%;
+    height: 1000px; 
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1.5rem;
 }
 
@@ -145,10 +159,28 @@
     flex-wrap: wrap;
 }
 
+.chart-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.chart-area {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
 .legend-item {
     display: flex;
     align-items: center;
     margin: 0 0.5rem 0.5rem 0;
+}
+
+.chart-filters {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .legend-color {

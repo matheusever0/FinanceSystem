@@ -10,48 +10,48 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Inicializa gráficos do dashboard
 function initializeDashboardCharts() {
-    // Gráfico de gastos mensais
-    initializeMonthlyExpensesChart();
+    // Gráfico de gastos mensais com comparação de receitas
+    initializeMonthlyComparisonChart();
 
-    // Gráfico de tipos de pagamento
+    // Outros gráficos
     initializePaymentTypesChart();
-
-    // Gráfico de status de pagamentos
     initializePaymentStatusChart();
-
-    // Gráfico de cartões de crédito
     initializeCreditCardChart();
 }
 
-function initializeMonthlyExpensesChart() {
+function initializeMonthlyComparisonChart() {
     const chartCanvas = document.getElementById('monthlyExpensesChart');
     if (!chartCanvas) return;
 
     try {
         const labelsRaw = chartCanvas.getAttribute('data-labels');
-        const valuesRaw = chartCanvas.getAttribute('data-values');
+        const incomeValuesRaw = chartCanvas.getAttribute('data-income-values');
+        const paymentValuesRaw = chartCanvas.getAttribute('data-payment-values');
 
         const labels = JSON.parse(labelsRaw);
-        const values = JSON.parse(valuesRaw);
+        const incomeValues = JSON.parse(incomeValuesRaw);
+        const paymentValues = JSON.parse(paymentValuesRaw);
 
         new Chart(chartCanvas, {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: labels,
-                datasets: [{
-                    label: 'Gastos Mensais',
-                    data: values,
-                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                    borderColor: 'rgba(78, 115, 223, 1)',
-                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
-                    pointRadius: 3,
-                    pointHoverRadius: 5,
-                    tension: 0.3,
-                    fill: true
-                }]
+                datasets: [
+                    {
+                        label: 'Receitas',
+                        data: incomeValues,
+                        backgroundColor: 'rgba(28, 200, 138, 0.8)', // Verde para receitas
+                        borderColor: 'rgba(28, 200, 138, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Despesas',
+                        data: paymentValues,
+                        backgroundColor: 'rgba(231, 74, 59, 0.8)', // Vermelho para despesas
+                        borderColor: 'rgba(231, 74, 59, 1)',
+                        borderWidth: 1
+                    }
+                ]
             },
             options: {
                 responsive: true,
@@ -87,12 +87,13 @@ function initializeMonthlyExpensesChart() {
                 },
                 plugins: {
                     legend: {
-                        display: false
+                        display: true,
+                        position: 'top'
                     },
                     tooltip: {
                         callbacks: {
                             label: function (context) {
-                                return 'R$ ' + context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                                return `${context.dataset.label}: R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
                             }
                         }
                     }
@@ -100,7 +101,7 @@ function initializeMonthlyExpensesChart() {
             }
         });
     } catch (error) {
-        console.error('Erro ao inicializar gráfico de gastos mensais:', error);
+        console.error('Erro ao inicializar gráfico de comparação mensal:', error);
     }
 }
 

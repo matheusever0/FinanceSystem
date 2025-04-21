@@ -270,7 +270,7 @@
 
     <div class="row">
 
-        <div class="col-xl-8 col-lg-7">
+        <div class="col-xl-8 col-lg-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Gastos Mensais</h6>
@@ -279,7 +279,8 @@
                     <div class="chart-area">
                         <canvas id="monthlyExpensesChart"
                                 data-labels='@Html.Raw(ViewBag.MonthlyLabels)'
-                                data-values='@Html.Raw(ViewBag.MonthlyValues)'>
+                                data-income-values='@Html.Raw(ViewBag.MonthlyIncomeValues)'
+                                data-payment-values='@Html.Raw(ViewBag.MonthlyPaymentValues)'>
                         </canvas>
                     </div>
                 </div>
@@ -448,6 +449,61 @@
                             <div class="text-center mt-3">
                                 <a asp-controller="Payments" asp-action="Overdue" class="btn btn-sm btn-danger">
                                     Ver todos (@paymentsOverdue.Count())
+                                </a>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recebimentos Vencidos</h6>
+                </div>
+                <div class="card-body">
+                    @if (!overdueIncomes.Any())
+                    {
+                        <div class="text-center my-4">
+                            <div class="mb-3">
+                                <i class="fas fa-calendar-check fa-3x text-success"></i>
+                            </div>
+                            <p>Nenhum recebimento vencido!</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Descrição</th>
+                                        <th>Vencimento</th>
+                                        <th class="text-end">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var income in overdueIncomes.OrderBy(p => p.DueDate).Take(5))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Incomes" asp-action="Details" asp-route-id="@income.Id" class="text-danger">
+                                                    @income.Description
+                                                </a>
+                                            </td>
+                                            <td>@income.GetFormattedDueDate()</td>
+                                            <td class="text-end">@income.GetFormattedAmount()</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if (overdueIncomes.Count() > 5)
+                        {
+                            <div class="text-center mt-3">
+                                <a asp-controller="Incomes" asp-action="Overdue" class="btn btn-sm btn-danger">
+                                    Ver todos (@overdueIncomes.Count())
                                 </a>
                             </div>
                         }
