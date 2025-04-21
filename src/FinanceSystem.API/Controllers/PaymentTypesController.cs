@@ -12,66 +12,49 @@ namespace FinanceSystem.API.Controllers
     public class PaymentTypesController : ControllerBase
     {
         private readonly IPaymentTypeService _paymentTypeService;
-        private readonly ILogger<PaymentTypesController> _logger;
 
-        public PaymentTypesController(IPaymentTypeService paymentTypeService, ILogger<PaymentTypesController> logger)
+        public PaymentTypesController(IPaymentTypeService paymentTypeService)
         {
             _paymentTypeService = paymentTypeService;
-            _logger = logger;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PaymentTypeDto>>> GetAll()
         {
-            _logger.LogInformation("Getting all payment types for user");
-
             var userId = HttpContext.GetCurrentUserId();
             var paymentTypes = await _paymentTypeService.GetAllAvailableForUserAsync(userId);
-
             return Ok(paymentTypes);
         }
 
         [HttpGet("system")]
         public async Task<ActionResult<IEnumerable<PaymentTypeDto>>> GetAllSystem()
         {
-            _logger.LogInformation("Getting all system payment types");
-
             var paymentTypes = await _paymentTypeService.GetAllSystemTypesAsync();
-
             return Ok(paymentTypes);
         }
 
         [HttpGet("user")]
         public async Task<ActionResult<IEnumerable<PaymentTypeDto>>> GetAllUser()
         {
-            _logger.LogInformation("Getting all user-defined payment types");
-
             var userId = HttpContext.GetCurrentUserId();
             var paymentTypes = await _paymentTypeService.GetUserTypesAsync(userId);
-
             return Ok(paymentTypes);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PaymentTypeDto>> GetById(Guid id)
         {
-            _logger.LogInformation("Getting payment type with ID: {TypeId}", id);
-
             try
             {
                 var paymentType = await _paymentTypeService.GetByIdAsync(id);
 
                 if (!paymentType.IsSystem && paymentType.UserId != HttpContext.GetCurrentUserId())
-                {
-                    _logger.LogWarning("User attempted to access payment type that doesn't belong to them");
                     return Forbid();
-                }
 
                 return Ok(paymentType);
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Payment type not found");
                 return NotFound(new { message = ex.Message });
             }
         }
@@ -79,23 +62,18 @@ namespace FinanceSystem.API.Controllers
         [HttpPost]
         public async Task<ActionResult<PaymentTypeDto>> Create(CreatePaymentTypeDto createPaymentTypeDto)
         {
-            _logger.LogInformation("Creating new payment type");
-
             try
             {
                 var userId = HttpContext.GetCurrentUserId();
                 var paymentType = await _paymentTypeService.CreateAsync(createPaymentTypeDto, userId);
-
                 return CreatedAtAction(nameof(GetById), new { id = paymentType.Id }, paymentType);
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "User not found");
                 return NotFound(new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogWarning(ex, "Invalid operation when creating payment type");
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -103,35 +81,25 @@ namespace FinanceSystem.API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<PaymentTypeDto>> Update(Guid id, UpdatePaymentTypeDto updatePaymentTypeDto)
         {
-            _logger.LogInformation("Updating payment type with ID: {TypeId}", id);
-
             try
             {
                 var existingType = await _paymentTypeService.GetByIdAsync(id);
 
                 if (existingType.IsSystem)
-                {
-                    _logger.LogWarning("User attempted to update a system payment type");
                     return BadRequest(new { message = "Cannot update system payment type" });
-                }
 
                 if (existingType.UserId != HttpContext.GetCurrentUserId())
-                {
-                    _logger.LogWarning("User attempted to update payment type that doesn't belong to them");
                     return Forbid();
-                }
 
                 var paymentType = await _paymentTypeService.UpdateAsync(id, updatePaymentTypeDto);
                 return Ok(paymentType);
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Payment type not found");
                 return NotFound(new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogWarning(ex, "Invalid operation when updating payment type");
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -139,35 +107,25 @@ namespace FinanceSystem.API.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid id)
         {
-            _logger.LogInformation("Deleting payment type with ID: {TypeId}", id);
-
             try
             {
                 var existingType = await _paymentTypeService.GetByIdAsync(id);
 
                 if (existingType.IsSystem)
-                {
-                    _logger.LogWarning("User attempted to delete a system payment type");
                     return BadRequest(new { message = "Cannot delete system payment type" });
-                }
 
                 if (existingType.UserId != HttpContext.GetCurrentUserId())
-                {
-                    _logger.LogWarning("User attempted to delete payment type that doesn't belong to them");
                     return Forbid();
-                }
 
                 await _paymentTypeService.DeleteAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Payment type not found");
                 return NotFound(new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogWarning(ex, "Invalid operation when deleting payment type");
                 return BadRequest(new { message = ex.Message });
             }
         }

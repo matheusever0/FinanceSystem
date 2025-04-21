@@ -1,6 +1,7 @@
 ﻿using FinanceSystem.API.Extensions;
 using FinanceSystem.Application.DTOs.Login;
 using FinanceSystem.Application.Interfaces;
+using FinanceSystem.Resources;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -38,7 +39,7 @@ namespace FinanceSystem.API.Controllers
 
             if (identity is null || !identity.IsAuthenticated)
             {
-                return this.ApiUnauthorized<object>("Auth.TokenInvalid");
+                return this.ApiUnauthorized<object>(ResourceFinanceApi.Auth_TokenInvalid);
             }
 
             var username = User.Identity?.Name;
@@ -52,7 +53,7 @@ namespace FinanceSystem.API.Controllers
 
             if (identity is null || !identity.IsAuthenticated)
             {
-                return this.ApiUnauthorized<object>("Auth.UserNotAuthenticated");
+                return this.ApiUnauthorized<object>(ResourceFinanceApi.Auth_UserNotAuthenticated);
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

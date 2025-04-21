@@ -10,12 +10,10 @@ namespace FinanceSystem.API.Controllers
     public class PermissionsController : ControllerBase
     {
         private readonly IPermissionService _permissionService;
-        private readonly ILogger<PermissionsController> _logger;
 
-        public PermissionsController(IPermissionService permissionService, ILogger<PermissionsController> logger)
+        public PermissionsController(IPermissionService permissionService)
         {
             _permissionService = permissionService;
-            _logger = logger;
         }
 
         [HttpGet]
@@ -62,7 +60,6 @@ namespace FinanceSystem.API.Controllers
         [Authorize]
         public async Task<ActionResult> GetPermissionsByRoleId(Guid roleId)
         {
-            _logger.LogInformation("Obtendo permissões para o perfil {RoleId}", roleId);
             var permissions = await _permissionService.GetPermissionsByRoleIdAsync(roleId);
             return Ok(permissions);
         }
@@ -87,17 +84,8 @@ namespace FinanceSystem.API.Controllers
         [Authorize]
         public async Task<ActionResult> GetPermissionsByUserId(Guid userId)
         {
-            _logger.LogInformation("Obtendo permissões para o usuário {UserId}", userId);
-            try
-            {
-                var permissions = await _permissionService.GetPermissionsByUserIdAsync(userId);
-                return Ok(permissions);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao obter permissões para o usuário {UserId}", userId);
-                throw;
-            }
+            var permissions = await _permissionService.GetPermissionsByUserIdAsync(userId);
+            return Ok(permissions);
         }
     }
 }
