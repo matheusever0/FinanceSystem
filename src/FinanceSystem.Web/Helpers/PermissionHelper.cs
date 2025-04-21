@@ -1,17 +1,11 @@
 ﻿using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Services;
-using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace FinanceSystem.Web.Helpers
 {
     public static class PermissionHelper
     {
-        public static async Task<bool> HasPermissionAsync(this Controller controller, string permissionSystemName)
-        {
-            return await HasPermissionAsync(controller.HttpContext, permissionSystemName);
-        }
-
         public static async Task<bool> HasPermissionAsync(HttpContext httpContext, string permissionSystemName)
         {
             var logger = httpContext.RequestServices.GetService<ILogger<object>>();

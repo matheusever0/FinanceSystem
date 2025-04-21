@@ -12,12 +12,10 @@ namespace FinanceSystem.API.Controllers
     public class RolesController : ControllerBase
     {
         private readonly IRoleService _roleService;
-        private readonly ILogger<RolesController> _logger;
 
-        public RolesController(IRoleService roleService, ILogger<RolesController> logger)
+        public RolesController(IRoleService roleService)
         {
             _roleService = roleService;
-            _logger = logger;
         }
 
         [HttpGet]
@@ -37,9 +35,9 @@ namespace FinanceSystem.API.Controllers
                 var role = await _roleService.GetByIdAsync(id);
                 return Ok(role);
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return this.ApiNotFound<RoleDto>(ResourceFinanceApi.Role_NotFound);
+                return NotFound(ex.Message);
             }
         }
 
@@ -52,9 +50,9 @@ namespace FinanceSystem.API.Controllers
                 var role = await _roleService.CreateAsync(createRoleDto);
                 return CreatedAtAction(nameof(GetById), new { id = role.Id }, role);
             }
-            catch (InvalidOperationException ex) when (ex.Message == ResourceFinanceApi.Role_NameExists)
+            catch (InvalidOperationException ex)
             {
-                return this.ApiBadRequest<RoleDto>(ex.Message);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -67,13 +65,13 @@ namespace FinanceSystem.API.Controllers
                 var role = await _roleService.UpdateAsync(id, updateRoleDto);
                 return Ok(role);
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return this.ApiNotFound<RoleDto>(ResourceFinanceApi.Role_NotFound);
+                return NotFound(ex.Message);
             }
             catch (InvalidOperationException ex) when (ex.Message == ResourceFinanceApi.Role_NameExists)
             {
-                return this.ApiBadRequest<RoleDto>(ex.Message);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -86,13 +84,13 @@ namespace FinanceSystem.API.Controllers
                 await _roleService.DeleteAsync(id);
                 return NoContent();
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return this.ApiNotFound<RoleDto>(ResourceFinanceApi.Role_NotFound);
+                return NotFound(ex.Message);
             }
-            catch (InvalidOperationException ex) when (ex.Message == ResourceFinanceApi.Role_HasUsers)
+            catch (InvalidOperationException ex)
             {
-                return this.ApiBadRequest<RoleDto>(ex.Message);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -105,9 +103,9 @@ namespace FinanceSystem.API.Controllers
                 var result = await _roleService.HasPermissionAsync(roleId, permissionName);
                 return Ok(result);
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return this.ApiNotFound<bool>(ResourceFinanceApi.Role_NotFound);
+                return NotFound(ex.Message);
             }
         }
 
@@ -120,9 +118,9 @@ namespace FinanceSystem.API.Controllers
                 var role = await _roleService.UpdateRolePermissionsAsync(roleId, permissionIds);
                 return Ok(role);
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return this.ApiNotFound<RoleDto>(ResourceFinanceApi.Role_NotFound);
+                return NotFound(ex.Message);
             }
         }
     }

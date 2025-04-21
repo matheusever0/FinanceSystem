@@ -35,9 +35,9 @@ namespace FinanceSystem.API.Controllers
                 var user = await _userService.GetByIdAsync(id);
                 return Ok(user);
             }
-            catch (KeyNotFoundException)
+            catch (Exception ex)
             {
-                return this.ApiNotFound<UserDto>(ResourceFinanceApi.User_NotFound);
+                return NotFound(ex.Message);
             }
         }
 
@@ -50,10 +50,9 @@ namespace FinanceSystem.API.Controllers
                 var user = await _userService.CreateAsync(createUserDto);
                 return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
             }
-            catch (InvalidOperationException ex) when (ex.Message == ResourceFinanceApi.User_UsernameExists
-                                                     || ex.Message == ResourceFinanceApi.User_EmailExists)
+            catch (Exception ex)
             {
-                return this.ApiBadRequest<UserDto>(ex.Message);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -66,14 +65,13 @@ namespace FinanceSystem.API.Controllers
                 var user = await _userService.UpdateAsync(id, updateUserDto);
                 return Ok(user);
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return this.ApiNotFound<UserDto>(ResourceFinanceApi.User_NotFound);
+                return NotFound(ex.Message);
             }
-            catch (InvalidOperationException ex) when (ex.Message == ResourceFinanceApi.User_UsernameExists
-                                                     || ex.Message == ResourceFinanceApi.User_EmailExists)
+            catch (Exception ex)
             {
-                return this.ApiBadRequest<UserDto>(ex.Message);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -86,9 +84,9 @@ namespace FinanceSystem.API.Controllers
                 await _userService.DeleteAsync(id);
                 return NoContent();
             }
-            catch (KeyNotFoundException)
+            catch (Exception ex)
             {
-                return this.ApiNotFound<UserDto>(ResourceFinanceApi.User_NotFound);
+                return NotFound(ex.Message);
             }
         }
     }

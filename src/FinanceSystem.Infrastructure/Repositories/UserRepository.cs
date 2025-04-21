@@ -16,7 +16,7 @@ namespace FinanceSystem.Infrastructure.Repositories
             var user = await _dbSet
                 .Include(e => e.UserRoles)
                 .ThenInclude(e => e.Role)
-                .Where(e => e.Username == username)
+                .Where(e => e.Username == username && !e.IsDeleted)
                 .FirstOrDefaultAsync();
 
 
@@ -26,7 +26,7 @@ namespace FinanceSystem.Infrastructure.Repositories
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _dbSet
-                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower() && !u.IsDeleted);
         }
 
         public async Task<User?> GetUserWithRolesAsync(Guid id)
@@ -42,6 +42,7 @@ namespace FinanceSystem.Infrastructure.Repositories
             return await _dbSet
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
+                .Where(e => !e.IsDeleted)
                 .ToListAsync();
         }
     }

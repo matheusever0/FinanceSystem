@@ -5,7 +5,6 @@
     var actionName = ViewContext.RouteData.Values["Action"]?.ToString();
     var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
     var username = User?.Identity?.Name?.ToUpper() ?? "não autenticado";
-    var userId = User?.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
     var token = Context.Session.GetString("JWToken") ?? "token ausente";
 }
 <!DOCTYPE html>
@@ -41,15 +40,7 @@
                 </div>
                 <div>
                     <div class="fw-bold">@username</div>
-                    <small>@(User.IsInRole("Admin") ? "Administrador" : User.IsInRole("Moderator") ? "Moderador" : "Usuário")</small>
                 </div>
-            </div>
-            <!-- Botão de Sair -->
-            <div class="header-actions">
-                <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display: none;"></form>
-                <button class="btn btn-light text-dark" onclick="document.getElementById('logoutForm').submit();">
-                    <i class="fas fa-sign-out-alt"></i> Sair
-                </button>
             </div>
         </div>
 
@@ -111,7 +102,7 @@
                 </a>
                 <div class="collapse @(controllerName == "PaymentTypes" || controllerName == "PaymentMethods" ? "show" : "")" id="collapseConfiguration">
                     <div class="bg-dark py-2">
-                        @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "paymenttypes.view"))
+                        @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "paymenttypes.view"))
                         {
                             <a asp-controller="PaymentTypes" asp-action="Index" class="sidebar-menu-link @(controllerName == "PaymentTypes" ? "active" : "")">
                                 <span class="sidebar-menu-icon ps-2"><i class="fas fa-tags"></i></span>
@@ -119,7 +110,7 @@
                             </a>
                         }
 
-                        @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "paymentmethods.view"))
+                        @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "paymentmethods.view"))
                         {
                             <a asp-controller="PaymentMethods" asp-action="Index" class="sidebar-menu-link @(controllerName == "PaymentMethods" ? "active" : "")">
                                 <span class="sidebar-menu-icon ps-2"><i class="fas fa-wallet"></i></span>
@@ -129,7 +120,7 @@
                     </div>
                 </div>
             </div>
-            @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "creditcards.view"))
+            @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "creditcards.view"))
             {
                 <div class="sidebar-menu-item">
                     <a asp-controller="CreditCards" asp-action="Index" class="sidebar-menu-link @(controllerName == "CreditCards" ? "active" : "")">
@@ -140,11 +131,11 @@
             }
         </div>
 
-            @if (User.IsInRole("Admin") || await PermissionHelper.UserHasAnyPermissionAsync(ViewContext.HttpContext, new[] { "users.view", "roles.view" }))
+            @if (await PermissionHelper.UserHasAnyPermissionAsync(ViewContext.HttpContext, new[] { "users.view", "roles.view" }))
             {
                 <div class="sidebar-menu-header">Gerenciamento</div>
 
-                @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "users.view"))
+                @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "users.view"))
                 {
                     <div class="sidebar-menu-item">
                         <a asp-controller="Users" asp-action="Index" class="sidebar-menu-link @(controllerName == "Users" ? "active" : "")">
@@ -154,7 +145,7 @@
                     </div>
                 }
 
-                @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "roles.view"))
+                @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "roles.view"))
                 {
                     <div class="sidebar-menu-item">
                         <a asp-controller="Roles" asp-action="Index" class="sidebar-menu-link @(controllerName == "Roles" ? "active" : "")">
@@ -164,7 +155,7 @@
                     </div>
                 }
 
-                @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "permissions.manage"))
+                @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "permissions.manage"))
                 {
                     <div class="sidebar-menu-item">
                         <a asp-controller="Permissions" asp-action="Index" class="sidebar-menu-link @(controllerName == "Permissions" ? "active" : "")">
@@ -191,15 +182,9 @@
                 <li>
                     <div class="dropdown-item-text">
                         <div class="fw-bold">@username</div>
-                        <div class="small text-muted">@(User.IsInRole("Admin") ? "Administrador" : User.IsInRole("Moderator") ? "Moderador" : "Usuário")</div>
                     </div>
                 </li>
                 <li><hr class="dropdown-divider"></li>
-                <li>
-                    <a class="dropdown-item" href="@Url.Action("Edit", "Users", new { id = userId })">
-                        <i class="fas fa-user-edit fa-sm fa-fw me-2 text-gray-400"></i> Editar Usuário
-                    </a>
-                </li>
                 <li>
                     <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display: none;"></form>
                     <a class="dropdown-item" href="javascript:document.getElementById('logoutForm').submit();">

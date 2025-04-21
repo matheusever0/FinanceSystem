@@ -59,36 +59,15 @@ namespace FinanceSystem.Web.Services
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 await HandleUnauthorizedResponse();
-                var errorMessage = TryExtractMessage(content) ?? "Sessão expirada ou inválida";
+                var errorMessage = string.IsNullOrEmpty(content) ? "Sessão expirada ou inválida" : content;
                 throw new UnauthorizedAccessException(errorMessage);
             }
             if (!response.IsSuccessStatusCode)
             {
-                var errorMessage = TryExtractMessage(content) ?? "Erro desconhecido na API";
+                var errorMessage = string.IsNullOrEmpty(content) ? "Erro desconhecido na API" : content;
                 throw new Exception(errorMessage);
             }
             return content;
-        }
-
-        private string? TryExtractMessage(string json)
-        {
-            try
-            {
-                var apiResponse = JsonSerializer.Deserialize<ApiResponse<object>>(json, _jsonOptions);
-                if (apiResponse != null && !string.IsNullOrEmpty(apiResponse.Message))
-                {
-                    return apiResponse.Message;
-                }
-
-                var errorObj = JsonSerializer.Deserialize<Dictionary<string, string>>(json, _jsonOptions);
-                if (errorObj != null && errorObj.TryGetValue("message", out var msg))
-                    return msg;
-            }
-            catch
-            {
-                _logger.LogWarning("Falha ao extrair mensagem de erro do JSON: {Json}", json);
-            }
-            return null;
         }
 
         public async Task<bool> VerifyTokenAsync(string token)
@@ -112,18 +91,6 @@ namespace FinanceSystem.Web.Services
             var response = await client.GetAsync(endpoint);
             var content = await HandleResponse(response);
 
-            try
-            {
-                var apiResponse = JsonSerializer.Deserialize<ApiResponse<T>>(content, _jsonOptions);
-                if (apiResponse != null && apiResponse.Success)
-                {
-                    return apiResponse.Data;
-                }
-            }
-            catch (JsonException)
-            {
-            }
-
             return JsonSerializer.Deserialize<T>(content, _jsonOptions)!;
         }
 
@@ -137,18 +104,6 @@ namespace FinanceSystem.Web.Services
             var responseContent = await HandleResponse(response);
             _logger.LogInformation("Resposta do endpoint {Endpoint}: {ResponseContent}", endpoint, responseContent);
 
-            try
-            {
-                var apiResponse = JsonSerializer.Deserialize<ApiResponse<T>>(responseContent, _jsonOptions);
-                if (apiResponse != null && apiResponse.Success)
-                {
-                    return apiResponse.Data;
-                }
-            }
-            catch (JsonException)
-            {
-            }
-
             return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions)!;
         }
 
@@ -159,18 +114,6 @@ namespace FinanceSystem.Web.Services
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await client.PutAsync(endpoint, content);
             var responseContent = await HandleResponse(response);
-
-            try
-            {
-                var apiResponse = JsonSerializer.Deserialize<ApiResponse<T>>(responseContent, _jsonOptions);
-                if (apiResponse != null && apiResponse.Success)
-                {
-                    return apiResponse.Data;
-                }
-            }
-            catch (JsonException)
-            {
-            }
 
             return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions)!;
         }
@@ -187,18 +130,6 @@ namespace FinanceSystem.Web.Services
             var client = CreateClient(token);
             var response = await client.DeleteAsync(endpoint);
             var responseContent = await HandleResponse(response);
-
-            try
-            {
-                var apiResponse = JsonSerializer.Deserialize<ApiResponse<T>>(responseContent, _jsonOptions);
-                if (apiResponse != null && apiResponse.Success)
-                {
-                    return apiResponse.Data;
-                }
-            }
-            catch (JsonException)
-            {
-            }
 
             return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions)!;
         }

@@ -158,24 +158,6 @@ namespace FinanceSystem.Infrastructure.Data
 
                     adminUser.AddRole(adminRole);
                     await _context.SaveChangesAsync();
-
-                    var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
-                    if (userRole != null)
-                    {
-                        var regularUser = new User(
-                            "user",
-                            "user@example.com",
-                            _authService.HashPassword("user")
-                        );
-
-                        await _context.Users.AddAsync(regularUser);
-                        await _context.SaveChangesAsync();
-
-                        regularUser.AddRole(userRole);
-                        await _context.SaveChangesAsync();
-                    }
-
-                    _logger.LogInformation("Default users created successfully");
                 }
 
                 if (!await _context.PaymentTypes.AnyAsync())

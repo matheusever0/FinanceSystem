@@ -1,4 +1,5 @@
 ﻿using FinanceSystem.Web.Extensions;
+using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Models.Permission;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -6,7 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceSystem.Web.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize]
+    [RequirePermission("permissions.manage")]
     public class PermissionsController : Controller
     {
         private readonly IPermissionService _permissionService;

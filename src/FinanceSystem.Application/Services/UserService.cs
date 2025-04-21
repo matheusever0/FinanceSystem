@@ -136,44 +136,39 @@ namespace FinanceSystem.Application.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var user = await _unitOfWork.Users.GetByIdAsync(id);
-            if (user == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
+            var user = await _unitOfWork.Users.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
+            user.Delete();
 
-            await _unitOfWork.Users.DeleteAsync(user);
+            await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.CompleteAsync();
         }
 
         public async Task<LoginResponseDto> LoginAsync(LoginDto loginDto)
         {
-            var user = await _unitOfWork.Users.GetByUsernameAsync(loginDto.Username);
-            if (user == null)
+            var user = await _unitOfWork.Users.GetByUsernameAsync(loginDto.Username) ?? throw new InvalidOperationException(ResourceFinanceApi.Auth_InvalidCredentials);
+
+            if (user.IsActive)
             {
-                throw new InvalidOperationException(ResourceFinanceApi.Auth_InvalidCredentials);
+                if (!_authService.VerifyPassword(loginDto.Password, user.PasswordHash))
+                {
+                    throw new InvalidOperationException(ResourceFinanceApi.Auth_InvalidCredentials);
+                }
+
+                user.SetLastLogin();
+                await _unitOfWork.Users.UpdateAsync(user);
+                await _unitOfWork.CompleteAsync();
+
+                var token = await _authService.GenerateJwtToken(user);
+
+                return new LoginResponseDto
+                {
+                    Token = token,
+                    Expiration = DateTime.Now.AddHours(1),
+                    User = _mapper.Map<UserDto>(user)
+                };
             }
 
-            if (!user.IsActive)
-            {
-                throw new InvalidOperationException(ResourceFinanceApi.Auth_UserDeactivated);
-            }
-
-            if (!_authService.VerifyPassword(loginDto.Password, user.PasswordHash))
-            {
-                throw new InvalidOperationException(ResourceFinanceApi.Auth_InvalidCredentials);
-            }
-
-            user.SetLastLogin();
-            await _unitOfWork.Users.UpdateAsync(user);
-            await _unitOfWork.CompleteAsync();
-
-            var token = await _authService.GenerateJwtToken(user);
-
-            return new LoginResponseDto
-            {
-                Token = token,
-                Expiration = DateTime.Now.AddHours(1),
-                User = _mapper.Map<UserDto>(user)
-            };
+            throw new InvalidOperationException(ResourceFinanceApi.Auth_UserDeactivated);
         }
     }
 }

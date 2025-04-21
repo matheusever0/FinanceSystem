@@ -24,11 +24,11 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var response = await _userService.LoginAsync(loginDto);
-                return this.ApiOk(response);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return this.ApiUnauthorized<LoginResponseDto>(ex.Message);
+                return Unauthorized(ex.Message);
             }
         }
 
@@ -39,11 +39,11 @@ namespace FinanceSystem.API.Controllers
 
             if (identity is null || !identity.IsAuthenticated)
             {
-                return this.ApiUnauthorized<object>(ResourceFinanceApi.Auth_TokenInvalid);
+                return Unauthorized(ResourceFinanceApi.Auth_TokenInvalid);
             }
 
             var username = User.Identity?.Name;
-            return this.ApiOk(new { username });
+            return Ok(new { username });
         }
 
         [HttpGet("user-permissions")]
@@ -53,7 +53,7 @@ namespace FinanceSystem.API.Controllers
 
             if (identity is null || !identity.IsAuthenticated)
             {
-                return this.ApiUnauthorized<object>(ResourceFinanceApi.Auth_UserNotAuthenticated);
+                return Unauthorized(ResourceFinanceApi.Auth_UserNotAuthenticated);
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -67,7 +67,7 @@ namespace FinanceSystem.API.Controllers
                 isModerator = User.IsInRole("Moderator")
             };
 
-            return this.ApiOk(permissions);
+            return Ok(permissions);
         }
     }
 }

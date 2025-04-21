@@ -1,6 +1,5 @@
 ﻿using FinanceSystem.Application.DTOs.Permission;
 using FinanceSystem.Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceSystem.API.Controllers
@@ -17,7 +16,6 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> GetAll()
         {
             var permissions = await _permissionService.GetAllAsync();
@@ -25,7 +23,6 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> GetById(Guid id)
         {
             var permission = await _permissionService.GetByIdAsync(id);
@@ -33,7 +30,6 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> Create(CreatePermissionDto createPermissionDto)
         {
             var permission = await _permissionService.CreateAsync(createPermissionDto);
@@ -41,7 +37,6 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> Update(Guid id, UpdatePermissionDto updatePermissionDto)
         {
             var permission = await _permissionService.UpdateAsync(id, updatePermissionDto);
@@ -49,7 +44,6 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> Delete(Guid id)
         {
             await _permissionService.DeleteAsync(id);
@@ -57,7 +51,6 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpGet("role/{roleId}")]
-        [Authorize]
         public async Task<ActionResult> GetPermissionsByRoleId(Guid roleId)
         {
             var permissions = await _permissionService.GetPermissionsByRoleIdAsync(roleId);
@@ -65,7 +58,6 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpPost("role/{roleId}/permission/{permissionId}")]
-        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> AssignPermissionToRole(Guid roleId, Guid permissionId)
         {
             var result = await _permissionService.AssignPermissionToRoleAsync(roleId, permissionId);
@@ -73,7 +65,7 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpDelete("role/{roleId}/permission/{permissionId}")]
-        [Authorize(Roles = "Admin")]
+
         public async Task<ActionResult> RemovePermissionFromRole(Guid roleId, Guid permissionId)
         {
             var result = await _permissionService.RemovePermissionFromRoleAsync(roleId, permissionId);
@@ -81,7 +73,6 @@ namespace FinanceSystem.API.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        [Authorize]
         public async Task<ActionResult> GetPermissionsByUserId(Guid userId)
         {
             var permissions = await _permissionService.GetPermissionsByUserIdAsync(userId);

@@ -7,6 +7,7 @@
         public string Email { get; protected set; }
         public string PasswordHash { get; protected set; }
         public bool IsActive { get; protected set; }
+        public bool IsDeleted { get; protected set; }
         public DateTime CreatedAt { get; protected set; }
         public DateTime? LastLogin { get; protected set; }
         public ICollection<UserRole> UserRoles { get; protected set; }
@@ -24,6 +25,7 @@
             Email = email;
             PasswordHash = passwordHash;
             IsActive = true;
+            IsDeleted = false;
             CreatedAt = DateTime.Now;
             UserRoles = new List<UserRole>();
         }
@@ -68,6 +70,10 @@
             var userRole = UserRoles.FirstOrDefault(ur => ur.RoleId == role.Id);
             if (userRole != null)
                 UserRoles.Remove(userRole);
+        }
+        public void Delete()
+        {
+            IsDeleted = true;
         }
     }
 }
