@@ -364,4 +364,4 @@ FodyWeavers.xsd
 
 # Ignorar appsettings.Development.json
 appsettings.Development.json
-/Hermes.Api/appsettings.Development.json
+appsettings.json
