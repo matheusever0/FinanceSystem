@@ -29,8 +29,6 @@
             <div class="login-body">
                 <form asp-action="Login" asp-controller="Account" method="post">
                     @Html.AntiForgeryToken()
-                    <div asp-validation-summary="All" class="text-danger"></div>
-
                     <div class="form-floating mb-3">
                         <input asp-for="Username" name="Username" id="Username" class="form-control" placeholder="Nome de usuário" />
                         <label for="Username">Nome de usuário</label>
@@ -48,6 +46,12 @@
                             <i class="fas fa-sign-in-alt me-2"></i>Entrar
                         </button>
                     </div>
+                    @if (ViewData.ModelState["CustomError"]?.Errors.Count > 0)
+                    {
+                        <div class="alert alert-danger p-2 small mb-2 text-center">
+                            @ViewData.ModelState["CustomError"]?.Errors.FirstOrDefault()?.ErrorMessage?.Trim('"')
+                        </div>
+                    }
                 </form>
             </div>
         </div>

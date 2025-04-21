@@ -44,31 +44,25 @@ namespace FinanceSystem.Web.Controllers
 
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning($"Login inválido para usuário: {model.Username}");
                 return View(model);
             }
 
             try
             {
-                _logger.LogInformation($"Tentando login para usuário: {model.Username}");
 
                 var result = await _userService.LoginAsync(model);
 
                 if (result == null)
                 {
                     ModelState.AddModelError(string.Empty, "Falha na autenticação");
-                    _logger.LogWarning($"Login falhou para usuário: {model.Username} - Resultado nulo");
                     return View(model);
                 }
 
                 if (string.IsNullOrEmpty(result.Token))
                 {
                     ModelState.AddModelError(string.Empty, "Token inválido");
-                    _logger.LogWarning($"Login falhou para usuário: {model.Username} - Token vazio");
                     return View(model);
                 }
-
-                _logger.LogInformation($"Login bem-sucedido para {model.Username}");
 
                 HttpContext.SetJwtToken(result.Token);
 
@@ -77,7 +71,6 @@ namespace FinanceSystem.Web.Controllers
                 if (principal == null)
                 {
                     ModelState.AddModelError(string.Empty, "Falha ao gerar identidade");
-                    _logger.LogWarning($"Login falhou para usuário: {model.Username} - Principal nulo");
                     return View(model);
                 }
 
@@ -96,8 +89,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Erro durante login para usuário {model.Username}");
-                ModelState.AddModelError(string.Empty, "Erro de autenticação: " + ex.Message);
+                ModelState.AddModelError("CustomError", ex.Message);
                 return View(model);
             }
         }
