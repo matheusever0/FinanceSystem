@@ -24,7 +24,7 @@
             Email = email;
             PasswordHash = passwordHash;
             IsActive = true;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTime.Now;
             UserRoles = new List<UserRole>();
         }
 
@@ -55,7 +55,7 @@
 
         public void SetLastLogin()
         {
-            LastLogin = DateTime.UtcNow;
+            LastLogin = DateTime.Now;
         }
 
         public void AddRole(Role role)

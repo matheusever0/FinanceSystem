@@ -26,7 +26,7 @@ public class PaymentInstallment
         Amount = amount;
         DueDate = dueDate;
         Status = PaymentStatus.Pending;
-        CreatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.Now;
 
         PaymentId = payment.Id;
         Payment = payment;
@@ -36,18 +36,18 @@ public class PaymentInstallment
     {
         PaymentDate = paymentDate;
         Status = PaymentStatus.Paid;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.Now;
     }
 
     public void MarkAsOverdue()
     {
         Status = PaymentStatus.Overdue;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.Now;
     }
 
     public void Cancel()
     {
         Status = PaymentStatus.Cancelled;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.Now;
     }
 }

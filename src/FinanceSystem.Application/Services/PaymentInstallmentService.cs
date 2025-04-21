@@ -2,6 +2,7 @@
 using FinanceSystem.Application.DTOs.PaymentInstallment;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Interfaces.Services;
+using FinanceSystem.Resources;
 
 namespace FinanceSystem.Application.Services
 {
@@ -20,7 +21,7 @@ namespace FinanceSystem.Application.Services
         {
             var paymentInstallment = await _unitOfWork.PaymentInstallments.GetByIdAsync(id);
             if (paymentInstallment == null)
-                throw new KeyNotFoundException($"Payment installment with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.PaymentInstallment_NotFound);
 
             return _mapper.Map<PaymentInstallmentDto>(paymentInstallment);
         }
@@ -53,7 +54,7 @@ namespace FinanceSystem.Application.Services
         {
             var paymentInstallment = await _unitOfWork.PaymentInstallments.GetByIdAsync(id);
             if (paymentInstallment == null)
-                throw new KeyNotFoundException($"Payment installment with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.PaymentInstallment_NotFound);
 
             paymentInstallment.MarkAsPaid(paymentDate);
             await _unitOfWork.PaymentInstallments.UpdateAsync(paymentInstallment);
@@ -66,7 +67,7 @@ namespace FinanceSystem.Application.Services
         {
             var paymentInstallment = await _unitOfWork.PaymentInstallments.GetByIdAsync(id);
             if (paymentInstallment == null)
-                throw new KeyNotFoundException($"Payment installment with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.PaymentInstallment_NotFound);
 
             paymentInstallment.MarkAsOverdue();
             await _unitOfWork.PaymentInstallments.UpdateAsync(paymentInstallment);
@@ -79,7 +80,7 @@ namespace FinanceSystem.Application.Services
         {
             var paymentInstallment = await _unitOfWork.PaymentInstallments.GetByIdAsync(id);
             if (paymentInstallment == null)
-                throw new KeyNotFoundException($"Payment installment with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.PaymentInstallment_NotFound);
 
             paymentInstallment.Cancel();
             await _unitOfWork.PaymentInstallments.UpdateAsync(paymentInstallment);

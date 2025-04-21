@@ -13,29 +13,23 @@ namespace FinanceSystem.API.Controllers
     {
         private readonly IIncomeInstallmentService _incomeInstallmentService;
         private readonly IIncomeService _incomeService;
-        private readonly ILogger<IncomeInstallmentsController> _logger;
 
         public IncomeInstallmentsController(
             IIncomeInstallmentService incomeInstallmentService,
-            IIncomeService incomeService,
-            ILogger<IncomeInstallmentsController> logger)
+            IIncomeService incomeService)
         {
             _incomeInstallmentService = incomeInstallmentService;
             _incomeService = incomeService;
-            _logger = logger;
         }
 
         [HttpGet("income/{incomeId}")]
         public async Task<ActionResult<IEnumerable<IncomeInstallmentDto>>> GetByIncome(Guid incomeId)
         {
-            _logger.LogInformation("Obtendo parcelas para a entrada ID: {IncomeId}", incomeId);
-
             try
             {
                 var income = await _incomeService.GetByIdAsync(incomeId);
                 if (income.UserId != HttpContext.GetCurrentUserId())
                 {
-                    _logger.LogWarning("Usuário tentou acessar parcelas para uma entrada que não pertence a ele");
                     return Forbid();
                 }
 
@@ -44,7 +38,6 @@ namespace FinanceSystem.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Entrada não encontrada");
                 return NotFound(new { message = ex.Message });
             }
         }
@@ -52,8 +45,6 @@ namespace FinanceSystem.API.Controllers
         [HttpGet("due-date")]
         public async Task<ActionResult<IEnumerable<IncomeInstallmentDto>>> GetByDueDate([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
-            _logger.LogInformation("Obtendo parcelas entre {StartDate} e {EndDate}", startDate, endDate);
-
             var userId = HttpContext.GetCurrentUserId();
             var installments = await _incomeInstallmentService.GetByDueDateAsync(userId, startDate, endDate);
 
@@ -63,8 +54,6 @@ namespace FinanceSystem.API.Controllers
         [HttpGet("pending")]
         public async Task<ActionResult<IEnumerable<IncomeInstallmentDto>>> GetPending()
         {
-            _logger.LogInformation("Obtendo parcelas pendentes");
-
             var userId = HttpContext.GetCurrentUserId();
             var installments = await _incomeInstallmentService.GetPendingAsync(userId);
 
@@ -74,8 +63,6 @@ namespace FinanceSystem.API.Controllers
         [HttpGet("received")]
         public async Task<ActionResult<IEnumerable<IncomeInstallmentDto>>> GetReceived()
         {
-            _logger.LogInformation("Obtendo parcelas recebidas");
-
             var userId = HttpContext.GetCurrentUserId();
             var installments = await _incomeInstallmentService.GetReceivedAsync(userId);
 
@@ -85,8 +72,6 @@ namespace FinanceSystem.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<IncomeInstallmentDto>> GetById(Guid id)
         {
-            _logger.LogInformation("Obtendo parcela com ID: {InstallmentId}", id);
-
             try
             {
                 var installment = await _incomeInstallmentService.GetByIdAsync(id);
@@ -94,7 +79,6 @@ namespace FinanceSystem.API.Controllers
                 var income = await _incomeService.GetByIdAsync(installment.IncomeId);
                 if (income.UserId != HttpContext.GetCurrentUserId())
                 {
-                    _logger.LogWarning("Usuário tentou acessar parcela que não pertence a sua entrada");
                     return Forbid();
                 }
 
@@ -102,7 +86,6 @@ namespace FinanceSystem.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Parcela não encontrada");
                 return NotFound(new { message = ex.Message });
             }
         }
@@ -110,8 +93,6 @@ namespace FinanceSystem.API.Controllers
         [HttpPost("{id}/received")]
         public async Task<ActionResult<IncomeInstallmentDto>> MarkAsReceived(Guid id, [FromBody] DateTime? receivedDate)
         {
-            _logger.LogInformation("Marcando parcela com ID: {InstallmentId} como recebida", id);
-
             try
             {
                 var installment = await _incomeInstallmentService.GetByIdAsync(id);
@@ -119,17 +100,15 @@ namespace FinanceSystem.API.Controllers
                 var income = await _incomeService.GetByIdAsync(installment.IncomeId);
                 if (income.UserId != HttpContext.GetCurrentUserId())
                 {
-                    _logger.LogWarning("Usuário tentou marcar como recebida uma parcela que não pertence a sua entrada");
                     return Forbid();
                 }
 
-                var date = receivedDate ?? DateTime.UtcNow;
+                var date = receivedDate ?? DateTime.Now;
                 var updatedInstallment = await _incomeInstallmentService.MarkAsReceivedAsync(id, date);
                 return Ok(updatedInstallment);
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Parcela não encontrada");
                 return NotFound(new { message = ex.Message });
             }
         }
@@ -137,8 +116,6 @@ namespace FinanceSystem.API.Controllers
         [HttpPost("{id}/cancel")]
         public async Task<ActionResult<IncomeInstallmentDto>> Cancel(Guid id)
         {
-            _logger.LogInformation("Cancelando parcela com ID: {InstallmentId}", id);
-
             try
             {
                 var installment = await _incomeInstallmentService.GetByIdAsync(id);
@@ -146,7 +123,6 @@ namespace FinanceSystem.API.Controllers
                 var income = await _incomeService.GetByIdAsync(installment.IncomeId);
                 if (income.UserId != HttpContext.GetCurrentUserId())
                 {
-                    _logger.LogWarning("Usuário tentou cancelar uma parcela que não pertence a sua entrada");
                     return Forbid();
                 }
 
@@ -155,7 +131,6 @@ namespace FinanceSystem.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Parcela não encontrada");
                 return NotFound(new { message = ex.Message });
             }
         }

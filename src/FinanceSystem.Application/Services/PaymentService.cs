@@ -3,6 +3,7 @@ using FinanceSystem.Application.DTOs.Payment;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Enums;
 using FinanceSystem.Domain.Interfaces.Services;
+using FinanceSystem.Resources;
 
 namespace FinanceSystem.Application.Services
 {
@@ -21,7 +22,7 @@ namespace FinanceSystem.Application.Services
         {
             var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id);
             if (payment == null)
-                throw new KeyNotFoundException($"Payment with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
 
             return _mapper.Map<PaymentDto>(payment);
         }
@@ -66,36 +67,36 @@ namespace FinanceSystem.Application.Services
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                throw new KeyNotFoundException($"User with ID {userId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
 
             var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(createPaymentDto.PaymentTypeId);
             if (paymentType == null)
-                throw new KeyNotFoundException($"Payment type with ID {createPaymentDto.PaymentTypeId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
 
             if (!paymentType.IsSystem && paymentType.UserId != userId)
-                throw new UnauthorizedAccessException("User does not have access to this payment type");
+                throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
             var paymentMethod = await _unitOfWork.PaymentMethods.GetByIdAsync(createPaymentDto.PaymentMethodId);
             if (paymentMethod == null)
-                throw new KeyNotFoundException($"Payment method with ID {createPaymentDto.PaymentMethodId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.PaymentMethod_NotFound);
 
             if (!paymentMethod.IsSystem && paymentMethod.UserId != userId)
-                throw new UnauthorizedAccessException("User does not have access to this payment method");
+                throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
             if (paymentMethod.Type == PaymentMethodType.CreditCard && !createPaymentDto.CreditCardId.HasValue)
-                throw new InvalidOperationException("Credit card ID is required for credit card payments");
+                throw new InvalidOperationException(ResourceFinanceApi.Payment_CreditCardRequired);
 
             if (createPaymentDto.CreditCardId.HasValue)
             {
                 var creditCard = await _unitOfWork.CreditCards.GetByIdAsync(createPaymentDto.CreditCardId.Value);
                 if (creditCard == null)
-                    throw new KeyNotFoundException($"Credit card with ID {createPaymentDto.CreditCardId.Value} not found");
+                    throw new KeyNotFoundException(ResourceFinanceApi.CreditCard_NotFound);
 
                 if (creditCard.UserId != userId)
-                    throw new UnauthorizedAccessException("User does not have access to this credit card");
+                    throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
                 if (creditCard.AvailableLimit < createPaymentDto.Amount)
-                    throw new InvalidOperationException("Insufficient credit card limit");
+                    throw new InvalidOperationException(ResourceFinanceApi.Payment_InsufficientCreditLimit);
 
                 creditCard.DecrementAvailableLimit(createPaymentDto.Amount);
                 await _unitOfWork.CreditCards.UpdateAsync(creditCard);
@@ -132,7 +133,7 @@ namespace FinanceSystem.Application.Services
         {
             var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id);
             if (payment == null)
-                throw new KeyNotFoundException($"Payment with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
 
             if (!string.IsNullOrEmpty(updatePaymentDto.Description))
                 payment.UpdateDescription(updatePaymentDto.Description);
@@ -154,7 +155,7 @@ namespace FinanceSystem.Application.Services
                         if (updatePaymentDto.PaymentDate.HasValue)
                             payment.MarkAsPaid(updatePaymentDto.PaymentDate.Value);
                         else
-                            payment.MarkAsPaid(DateTime.UtcNow);
+                            payment.MarkAsPaid(DateTime.Now);
                         break;
                     case PaymentStatus.Overdue:
                         payment.MarkAsOverdue();
@@ -169,10 +170,10 @@ namespace FinanceSystem.Application.Services
             {
                 var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(updatePaymentDto.PaymentTypeId.Value);
                 if (paymentType == null)
-                    throw new KeyNotFoundException($"Payment type with ID {updatePaymentDto.PaymentTypeId.Value} not found");
+                    throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
 
                 if (!paymentType.IsSystem && paymentType.UserId != payment.UserId)
-                    throw new UnauthorizedAccessException("User does not have access to this payment type");
+                    throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
                 payment.UpdateType(paymentType);
 
@@ -182,10 +183,10 @@ namespace FinanceSystem.Application.Services
             {
                 var paymentMethod = await _unitOfWork.PaymentMethods.GetByIdAsync(updatePaymentDto.PaymentMethodId.Value);
                 if (paymentMethod == null)
-                    throw new KeyNotFoundException($"Payment method with ID {updatePaymentDto.PaymentMethodId.Value} not found");
+                    throw new KeyNotFoundException(ResourceFinanceApi.PaymentMethod_NotFound);
 
                 if (!paymentMethod.IsSystem && paymentMethod.UserId != payment.UserId)
-                    throw new UnauthorizedAccessException("User does not have access to this payment method");
+                    throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
                 payment.UpdateMethod(paymentMethod);
 
@@ -206,10 +207,10 @@ namespace FinanceSystem.Application.Services
         {
             var payment = await _unitOfWork.Payments.GetByIdAsync(id);
             if (payment == null)
-                throw new KeyNotFoundException($"Payment with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
 
             if (payment.Status == PaymentStatus.Paid)
-                throw new InvalidOperationException("Cannot delete a paid payment");
+                throw new InvalidOperationException(ResourceFinanceApi.Payment_AlreadyPaid);
 
             await _unitOfWork.Payments.DeleteAsync(payment);
             await _unitOfWork.CompleteAsync();
@@ -219,7 +220,7 @@ namespace FinanceSystem.Application.Services
         {
             var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id);
             if (payment == null)
-                throw new KeyNotFoundException($"Payment with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
 
             payment.MarkAsPaid(paymentDate);
             await _unitOfWork.Payments.UpdateAsync(payment);
@@ -232,7 +233,7 @@ namespace FinanceSystem.Application.Services
         {
             var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id);
             if (payment == null)
-                throw new KeyNotFoundException($"Payment with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
 
             payment.MarkAsOverdue();
             await _unitOfWork.Payments.UpdateAsync(payment);
@@ -245,7 +246,7 @@ namespace FinanceSystem.Application.Services
         {
             var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id);
             if (payment == null)
-                throw new KeyNotFoundException($"Payment with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
 
             payment.Cancel();
             await _unitOfWork.Payments.UpdateAsync(payment);

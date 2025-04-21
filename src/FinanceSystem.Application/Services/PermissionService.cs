@@ -3,6 +3,7 @@ using FinanceSystem.Application.DTOs.Permission;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Entities;
 using FinanceSystem.Domain.Interfaces.Services;
+using FinanceSystem.Resources;
 
 namespace FinanceSystem.Application.Services
 {
@@ -21,7 +22,7 @@ namespace FinanceSystem.Application.Services
         {
             var permission = await _unitOfWork.Permissions.GetByIdAsync(id);
             if (permission == null)
-                throw new KeyNotFoundException($"Permission with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
 
             return _mapper.Map<PermissionDto>(permission);
         }
@@ -36,7 +37,7 @@ namespace FinanceSystem.Application.Services
         {
             var existingPermission = await _unitOfWork.Permissions.GetBySystemNameAsync(createPermissionDto.SystemName);
             if (existingPermission != null)
-                throw new InvalidOperationException($"Permission with SystemName '{createPermissionDto.SystemName}' already exists");
+                throw new InvalidOperationException(ResourceFinanceApi.Permission_SystemNameExists);
 
             var permission = new Permission(createPermissionDto.Name, createPermissionDto.SystemName, createPermissionDto.Description);
 
@@ -50,7 +51,7 @@ namespace FinanceSystem.Application.Services
         {
             var permission = await _unitOfWork.Permissions.GetByIdAsync(id);
             if (permission == null)
-                throw new KeyNotFoundException($"Permission with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Permission_NotFound);
 
             if (!string.IsNullOrEmpty(updatePermissionDto.Name))
             {
@@ -72,7 +73,7 @@ namespace FinanceSystem.Application.Services
         {
             var permission = await _unitOfWork.Permissions.GetByIdAsync(id);
             if (permission == null)
-                throw new KeyNotFoundException($"Permission with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Permission_NotFound);
 
             await _unitOfWork.Permissions.DeleteAsync(permission);
             await _unitOfWork.CompleteAsync();
@@ -82,7 +83,7 @@ namespace FinanceSystem.Application.Services
         {
             var role = await _unitOfWork.Roles.GetByIdAsync(roleId);
             if (role == null)
-                throw new KeyNotFoundException($"Role with ID {roleId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
 
             var permissions = await _unitOfWork.Permissions.GetPermissionsByRoleIdAsync(roleId);
             return _mapper.Map<IEnumerable<PermissionDto>>(permissions);
@@ -92,11 +93,11 @@ namespace FinanceSystem.Application.Services
         {
             var role = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(roleId);
             if (role == null)
-                throw new KeyNotFoundException($"Role with ID {roleId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
 
             var permission = await _unitOfWork.Permissions.GetByIdAsync(permissionId);
             if (permission == null)
-                throw new KeyNotFoundException($"Permission with ID {permissionId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Permission_NotFound);
 
             if (role.RolePermissions.Any(rp => rp.PermissionId == permissionId))
                 return false;
@@ -110,11 +111,11 @@ namespace FinanceSystem.Application.Services
         {
             var role = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(roleId);
             if (role == null)
-                throw new KeyNotFoundException($"Role with ID {roleId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
 
             var permission = await _unitOfWork.Permissions.GetByIdAsync(permissionId);
             if (permission == null)
-                throw new KeyNotFoundException($"Permission with ID {permissionId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Permission_NotFound);
 
             if (!role.RolePermissions.Any(rp => rp.PermissionId == permissionId))
                 return false;
@@ -128,7 +129,7 @@ namespace FinanceSystem.Application.Services
         {
             var user = await _unitOfWork.Users.GetUserWithRolesAsync(userId);
             if (user == null)
-                throw new KeyNotFoundException($"User with ID {userId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
 
             var roleIds = user.UserRoles.Select(ur => ur.RoleId).ToList();
 

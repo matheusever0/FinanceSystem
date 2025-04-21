@@ -46,7 +46,7 @@ public class Payment
         Status = PaymentStatus.Pending;
         IsRecurring = isRecurring;
         Notes = notes;
-        CreatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.Now;
 
         PaymentTypeId = paymentType.Id;
         PaymentType = paymentType;
@@ -143,6 +143,6 @@ public class Payment
 
     private void UpdateUpdatedAt()
     {
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.Now;
     }
 }

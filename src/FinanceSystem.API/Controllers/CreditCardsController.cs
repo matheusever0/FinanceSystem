@@ -12,19 +12,15 @@ namespace FinanceSystem.API.Controllers
     public class CreditCardsController : ControllerBase
     {
         private readonly ICreditCardService _creditCardService;
-        private readonly ILogger<CreditCardsController> _logger;
 
-        public CreditCardsController(ICreditCardService creditCardService, ILogger<CreditCardsController> logger)
+        public CreditCardsController(ICreditCardService creditCardService)
         {
             _creditCardService = creditCardService;
-            _logger = logger;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CreditCardDto>>> GetAll()
         {
-            _logger.LogInformation("Getting all credit cards for user");
-
             var userId = HttpContext.GetCurrentUserId();
             var creditCards = await _creditCardService.GetByUserIdAsync(userId);
 
@@ -34,15 +30,12 @@ namespace FinanceSystem.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<CreditCardDto>> GetById(Guid id)
         {
-            _logger.LogInformation("Getting credit card with ID: {CardId}", id);
-
             try
             {
                 var creditCard = await _creditCardService.GetByIdAsync(id);
 
                 if (creditCard.UserId != HttpContext.GetCurrentUserId())
                 {
-                    _logger.LogWarning("User attempted to access credit card that doesn't belong to them");
                     return Forbid();
                 }
 
@@ -50,7 +43,6 @@ namespace FinanceSystem.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Credit card not found");
                 return NotFound(new { message = ex.Message });
             }
         }
@@ -58,8 +50,6 @@ namespace FinanceSystem.API.Controllers
         [HttpPost]
         public async Task<ActionResult<CreditCardDto>> Create(CreateCreditCardDto createCreditCardDto)
         {
-            _logger.LogInformation("Creating new credit card");
-
             try
             {
                 var userId = HttpContext.GetCurrentUserId();
@@ -69,22 +59,18 @@ namespace FinanceSystem.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Referenced entity not found");
                 return NotFound(new { message = ex.Message });
             }
             catch (UnauthorizedAccessException ex)
             {
-                _logger.LogWarning(ex, "Unauthorized access when creating credit card");
                 return Forbid();
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogWarning(ex, "Invalid operation when creating credit card");
                 return BadRequest(new { message = ex.Message });
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid argument when creating credit card");
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -92,14 +78,11 @@ namespace FinanceSystem.API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<CreditCardDto>> Update(Guid id, UpdateCreditCardDto updateCreditCardDto)
         {
-            _logger.LogInformation("Updating credit card with ID: {CardId}", id);
-
             try
             {
                 var existingCard = await _creditCardService.GetByIdAsync(id);
                 if (existingCard.UserId != HttpContext.GetCurrentUserId())
                 {
-                    _logger.LogWarning("User attempted to update credit card that doesn't belong to them");
                     return Forbid();
                 }
 
@@ -108,12 +91,10 @@ namespace FinanceSystem.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Credit card not found");
                 return NotFound(new { message = ex.Message });
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Invalid argument when updating credit card");
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -121,14 +102,11 @@ namespace FinanceSystem.API.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid id)
         {
-            _logger.LogInformation("Deleting credit card with ID: {CardId}", id);
-
             try
             {
                 var existingCard = await _creditCardService.GetByIdAsync(id);
                 if (existingCard.UserId != HttpContext.GetCurrentUserId())
                 {
-                    _logger.LogWarning("User attempted to delete credit card that doesn't belong to them");
                     return Forbid();
                 }
 
@@ -137,12 +115,10 @@ namespace FinanceSystem.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Credit card not found");
                 return NotFound(new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogWarning(ex, "Invalid operation when deleting credit card");
                 return BadRequest(new { message = ex.Message });
             }
         }

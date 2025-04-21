@@ -22,7 +22,7 @@ public class PaymentType
         Name = name;
         Description = description;
         IsSystem = true;
-        CreatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.Now;
         Payments = new List<Payment>();
     }
 
@@ -34,7 +34,7 @@ public class PaymentType
         IsSystem = false;
         UserId = user.Id;
         User = user;
-        CreatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.Now;
         Payments = new List<Payment>();
     }
 

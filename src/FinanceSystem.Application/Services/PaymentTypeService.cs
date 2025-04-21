@@ -2,6 +2,7 @@
 using FinanceSystem.Application.DTOs.PaymentType;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Interfaces.Services;
+using FinanceSystem.Resources;
 
 namespace FinanceSystem.Application.Services
 {
@@ -20,7 +21,7 @@ namespace FinanceSystem.Application.Services
         {
             var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id);
             if (paymentType == null)
-                throw new KeyNotFoundException($"Payment type with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
 
             return _mapper.Map<PaymentTypeDto>(paymentType);
         }
@@ -47,11 +48,11 @@ namespace FinanceSystem.Application.Services
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                throw new KeyNotFoundException($"User with ID {userId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
 
             var existingType = await _unitOfWork.PaymentTypes.GetByNameAsync(createPaymentTypeDto.Name);
             if (existingType != null && (existingType.IsSystem || existingType.UserId == userId))
-                throw new InvalidOperationException($"Payment type with name '{createPaymentTypeDto.Name}' already exists");
+                throw new InvalidOperationException(ResourceFinanceApi.PaymentType_NameExists);
 
             var paymentType = new PaymentType(
                 createPaymentTypeDto.Name,
@@ -69,16 +70,16 @@ namespace FinanceSystem.Application.Services
         {
             var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id);
             if (paymentType == null)
-                throw new KeyNotFoundException($"Payment type with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
 
             if (paymentType.IsSystem)
-                throw new InvalidOperationException("Cannot update system payment type");
+                throw new InvalidOperationException(ResourceFinanceApi.PaymentType_SystemCannotUpdate);
 
             if (!string.IsNullOrEmpty(updatePaymentTypeDto.Name) && updatePaymentTypeDto.Name != paymentType.Name)
             {
                 var existingType = await _unitOfWork.PaymentTypes.GetByNameAsync(updatePaymentTypeDto.Name);
                 if (existingType != null && existingType.Id != id)
-                    throw new InvalidOperationException($"Payment type with name '{updatePaymentTypeDto.Name}' already exists");
+                    throw new InvalidOperationException(ResourceFinanceApi.PaymentType_NameExists);
 
                 paymentType.UpdateName(updatePaymentTypeDto.Name);
             }
@@ -96,14 +97,14 @@ namespace FinanceSystem.Application.Services
         {
             var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id);
             if (paymentType == null)
-                throw new KeyNotFoundException($"Payment type with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
 
             if (paymentType.IsSystem)
-                throw new InvalidOperationException("Cannot delete system payment type");
+                throw new InvalidOperationException(ResourceFinanceApi.PaymentType_SystemCannotDelete);
 
             var payments = await _unitOfWork.Payments.GetPaymentsByTypeAsync(paymentType.UserId.Value, id);
             if (payments.Any())
-                throw new InvalidOperationException("Cannot delete payment type that is being used in payments");
+                throw new InvalidOperationException(ResourceFinanceApi.PaymentType_InUse);
 
             await _unitOfWork.PaymentTypes.DeleteAsync(paymentType);
             await _unitOfWork.CompleteAsync();

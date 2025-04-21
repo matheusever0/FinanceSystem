@@ -3,6 +3,7 @@ using FinanceSystem.Application.DTOs.PaymentMethod;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Enums;
 using FinanceSystem.Domain.Interfaces.Services;
+using FinanceSystem.Resources;
 
 namespace FinanceSystem.Application.Services
 {
@@ -21,7 +22,7 @@ namespace FinanceSystem.Application.Services
         {
             var paymentMethod = await _unitOfWork.PaymentMethods.GetByIdAsync(id);
             if (paymentMethod == null)
-                throw new KeyNotFoundException($"Payment method with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.PaymentMethod_NotFound);
 
             return _mapper.Map<PaymentMethodDto>(paymentMethod);
         }
@@ -58,7 +59,7 @@ namespace FinanceSystem.Application.Services
 
             var existingMethod = await _unitOfWork.PaymentMethods.GetByNameAsync(createPaymentMethodDto.Name);
             if (existingMethod != null && (existingMethod.IsSystem || existingMethod.UserId == userId))
-                throw new InvalidOperationException($"Payment method with name '{createPaymentMethodDto.Name}' already exists");
+                throw new InvalidOperationException(ResourceFinanceApi.PaymentMethod_NameExists);
 
             var paymentMethod = new PaymentMethod(
                 createPaymentMethodDto.Name,
@@ -77,16 +78,16 @@ namespace FinanceSystem.Application.Services
         {
             var paymentMethod = await _unitOfWork.PaymentMethods.GetByIdAsync(id);
             if (paymentMethod == null)
-                throw new KeyNotFoundException($"Payment method with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.PaymentMethod_NotFound);
 
             if (paymentMethod.IsSystem)
-                throw new InvalidOperationException("Cannot update system payment method");
+                throw new InvalidOperationException(ResourceFinanceApi.PaymentMethod_SystemCannotUpdate);
 
             if (!string.IsNullOrEmpty(updatePaymentMethodDto.Name) && updatePaymentMethodDto.Name != paymentMethod.Name)
             {
                 var existingMethod = await _unitOfWork.PaymentMethods.GetByNameAsync(updatePaymentMethodDto.Name);
                 if (existingMethod != null && existingMethod.Id != id)
-                    throw new InvalidOperationException($"Payment method with name '{updatePaymentMethodDto.Name}' already exists");
+                    throw new InvalidOperationException(ResourceFinanceApi.PaymentMethod_NameExists);
 
                 paymentMethod.UpdateName(updatePaymentMethodDto.Name);
             }
@@ -104,20 +105,20 @@ namespace FinanceSystem.Application.Services
         {
             var paymentMethod = await _unitOfWork.PaymentMethods.GetByIdAsync(id);
             if (paymentMethod == null)
-                throw new KeyNotFoundException($"Payment method with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.PaymentMethod_NotFound);
 
             if (paymentMethod.IsSystem)
-                throw new InvalidOperationException("Cannot delete system payment method");
+                throw new InvalidOperationException(ResourceFinanceApi.PaymentMethod_SystemCannotDelete);
 
             var payments = await _unitOfWork.Payments.GetPaymentsByMethodAsync(paymentMethod.UserId.Value, id);
             if (payments.Any())
-                throw new InvalidOperationException("Cannot delete payment method that is being used in payments");
+                throw new InvalidOperationException(ResourceFinanceApi.PaymentMethod_InUse);
 
             if (paymentMethod.Type == PaymentMethodType.CreditCard)
             {
                 var creditCards = await _unitOfWork.CreditCards.GetCreditCardsByUserIdAsync(paymentMethod.UserId.Value);
                 if (creditCards.Any(cc => cc.PaymentMethodId == id))
-                    throw new InvalidOperationException("Cannot delete payment method that has credit cards linked to it");
+                    throw new InvalidOperationException(ResourceFinanceApi.PaymentMethod_HasCreditCards);
             }
 
             await _unitOfWork.PaymentMethods.DeleteAsync(paymentMethod);

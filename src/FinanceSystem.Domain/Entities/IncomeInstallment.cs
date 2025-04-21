@@ -29,7 +29,7 @@ namespace FinanceSystem.Domain.Entities
             Amount = amount;
             DueDate = dueDate;
             Status = IncomeStatus.Pending;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTime.Now;
 
             IncomeId = income.Id;
             Income = income;
@@ -39,13 +39,13 @@ namespace FinanceSystem.Domain.Entities
         {
             ReceivedDate = receivedDate;
             Status = IncomeStatus.Received;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.Now;
         }
 
         public void Cancel()
         {
             Status = IncomeStatus.Cancelled;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.Now;
         }
     }
 }

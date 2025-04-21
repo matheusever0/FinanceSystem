@@ -1,5 +1,7 @@
-﻿using FinanceSystem.Application.DTOs.Role;
+﻿using FinanceSystem.API.Extensions;
+using FinanceSystem.Application.DTOs.Role;
 using FinanceSystem.Application.Interfaces;
+using FinanceSystem.Resources;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,7 +24,6 @@ namespace FinanceSystem.API.Controllers
         [Authorize]
         public async Task<ActionResult> GetAll()
         {
-            _logger.LogInformation("Obtendo todos os perfis");
             var roles = await _roleService.GetAllAsync();
             return Ok(roles);
         }
@@ -31,54 +32,98 @@ namespace FinanceSystem.API.Controllers
         [Authorize]
         public async Task<ActionResult> GetById(Guid id)
         {
-            _logger.LogInformation("Obtendo perfil por ID: {RoleId}", id);
-            var role = await _roleService.GetByIdAsync(id);
-            return Ok(role);
+            try
+            {
+                var role = await _roleService.GetByIdAsync(id);
+                return Ok(role);
+            }
+            catch (KeyNotFoundException)
+            {
+                return this.ApiNotFound<RoleDto>(ResourceFinanceApi.Role_NotFound);
+            }
         }
 
         [HttpPost]
         [Authorize]
         public async Task<ActionResult> Create(CreateRoleDto createRoleDto)
         {
-            _logger.LogInformation("Criando novo perfil: {Name}", createRoleDto.Name);
-            var role = await _roleService.CreateAsync(createRoleDto);
-            return CreatedAtAction(nameof(GetById), new { id = role.Id }, role);
+            try
+            {
+                var role = await _roleService.CreateAsync(createRoleDto);
+                return CreatedAtAction(nameof(GetById), new { id = role.Id }, role);
+            }
+            catch (InvalidOperationException ex) when (ex.Message == ResourceFinanceApi.Role_NameExists)
+            {
+                return this.ApiBadRequest<RoleDto>(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
         [Authorize]
         public async Task<ActionResult> Update(Guid id, UpdateRoleDto updateRoleDto)
         {
-            _logger.LogInformation("Atualizando perfil: {RoleId}", id);
-            var role = await _roleService.UpdateAsync(id, updateRoleDto);
-            return Ok(role);
+            try
+            {
+                var role = await _roleService.UpdateAsync(id, updateRoleDto);
+                return Ok(role);
+            }
+            catch (KeyNotFoundException)
+            {
+                return this.ApiNotFound<RoleDto>(ResourceFinanceApi.Role_NotFound);
+            }
+            catch (InvalidOperationException ex) when (ex.Message == ResourceFinanceApi.Role_NameExists)
+            {
+                return this.ApiBadRequest<RoleDto>(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<ActionResult> Delete(Guid id)
         {
-            _logger.LogInformation("Excluindo perfil: {RoleId}", id);
-            await _roleService.DeleteAsync(id);
-            return NoContent();
+            try
+            {
+                await _roleService.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return this.ApiNotFound<RoleDto>(ResourceFinanceApi.Role_NotFound);
+            }
+            catch (InvalidOperationException ex) when (ex.Message == ResourceFinanceApi.Role_HasUsers)
+            {
+                return this.ApiBadRequest<RoleDto>(ex.Message);
+            }
         }
 
         [HttpGet("{roleId}/has-permission/{permissionName}")]
         [Authorize]
         public async Task<ActionResult> HasPermission(Guid roleId, string permissionName)
         {
-            _logger.LogInformation("Verificando se perfil {RoleId} tem permissão {Permission}", roleId, permissionName);
-            var result = await _roleService.HasPermissionAsync(roleId, permissionName);
-            return Ok(result);
+            try
+            {
+                var result = await _roleService.HasPermissionAsync(roleId, permissionName);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException)
+            {
+                return this.ApiNotFound<bool>(ResourceFinanceApi.Role_NotFound);
+            }
         }
 
         [HttpPut("{roleId}/permissions")]
         [Authorize]
         public async Task<ActionResult> UpdateRolePermissions(Guid roleId, [FromBody] List<Guid> permissionIds)
         {
-            _logger.LogInformation("Atualizando permissões do perfil {RoleId}", roleId);
-            var role = await _roleService.UpdateRolePermissionsAsync(roleId, permissionIds);
-            return Ok(role);
+            try
+            {
+                var role = await _roleService.UpdateRolePermissionsAsync(roleId, permissionIds);
+                return Ok(role);
+            }
+            catch (KeyNotFoundException)
+            {
+                return this.ApiNotFound<RoleDto>(ResourceFinanceApi.Role_NotFound);
+            }
         }
     }
 }

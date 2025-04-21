@@ -40,6 +40,8 @@ namespace FinanceSystem.Infrastructure.Services
                 }
             }
 
+            Console.WriteLine(DateTime.Now);
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),

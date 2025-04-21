@@ -3,6 +3,7 @@ using FinanceSystem.Application.DTOs.CreditCard;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Enums;
 using FinanceSystem.Domain.Interfaces.Services;
+using FinanceSystem.Resources;
 
 namespace FinanceSystem.Application.Services
 {
@@ -21,7 +22,7 @@ namespace FinanceSystem.Application.Services
         {
             var creditCard = await _unitOfWork.CreditCards.GetCreditCardWithDetailsAsync(id);
             if (creditCard == null)
-                throw new KeyNotFoundException($"Credit card with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.CreditCard_NotFound);
 
             return _mapper.Map<CreditCardDto>(creditCard);
         }
@@ -36,17 +37,17 @@ namespace FinanceSystem.Application.Services
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                throw new KeyNotFoundException($"User with ID {userId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
 
             var paymentMethod = await _unitOfWork.PaymentMethods.GetByIdAsync(createCreditCardDto.PaymentMethodId);
             if (paymentMethod == null)
-                throw new KeyNotFoundException($"Payment method with ID {createCreditCardDto.PaymentMethodId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.PaymentMethod_NotFound);
 
             if (paymentMethod.Type != PaymentMethodType.CreditCard)
-                throw new InvalidOperationException("Payment method must be of type Credit Card");
+                throw new InvalidOperationException(ResourceFinanceApi.CreditCard_InvalidMethodType);
 
             if (!paymentMethod.IsSystem && paymentMethod.UserId != userId)
-                throw new UnauthorizedAccessException("User does not have access to this payment method");
+                throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
             var creditCard = new CreditCard(
                 createCreditCardDto.Name,
@@ -69,7 +70,7 @@ namespace FinanceSystem.Application.Services
         {
             var creditCard = await _unitOfWork.CreditCards.GetByIdAsync(id);
             if (creditCard == null)
-                throw new KeyNotFoundException($"Credit card with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.CreditCard_NotFound);
 
             if (!string.IsNullOrEmpty(updateCreditCardDto.Name))
                 creditCard.UpdateName(updateCreditCardDto.Name);
@@ -90,7 +91,7 @@ namespace FinanceSystem.Application.Services
         {
             var creditCard = await _unitOfWork.CreditCards.GetByIdAsync(id);
             if (creditCard == null)
-                throw new KeyNotFoundException($"Credit card with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.CreditCard_NotFound);
 
             await _unitOfWork.CreditCards.DeleteAsync(creditCard);
             await _unitOfWork.CompleteAsync();

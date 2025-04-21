@@ -4,6 +4,7 @@ using FinanceSystem.Application.DTOs.User;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Entities;
 using FinanceSystem.Domain.Interfaces.Services;
+using FinanceSystem.Resources;
 
 namespace FinanceSystem.Application.Services
 {
@@ -24,7 +25,7 @@ namespace FinanceSystem.Application.Services
         {
             var user = await _unitOfWork.Users.GetUserWithRolesAsync(id);
             if (user == null)
-                throw new KeyNotFoundException($"User with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
 
             return _mapper.Map<UserDto>(user);
         }
@@ -39,11 +40,11 @@ namespace FinanceSystem.Application.Services
         {
             var existingUserName = await _unitOfWork.Users.GetByUsernameAsync(createUserDto.Username);
             if (existingUserName != null)
-                throw new InvalidOperationException($"Username '{createUserDto.Username}' already exists");
+                throw new InvalidOperationException(ResourceFinanceApi.User_UsernameExists);
 
             var existingEmail = await _unitOfWork.Users.GetByEmailAsync(createUserDto.Email);
             if (existingEmail != null)
-                throw new InvalidOperationException($"Email '{createUserDto.Email}' already exists");
+                throw new InvalidOperationException(ResourceFinanceApi.User_EmailExists);
 
             var passwordHash = _authService.HashPassword(createUserDto.Password);
 
@@ -71,13 +72,13 @@ namespace FinanceSystem.Application.Services
         {
             var user = await _unitOfWork.Users.GetUserWithRolesAsync(id);
             if (user == null)
-                throw new KeyNotFoundException($"User with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
 
             if (!string.IsNullOrEmpty(updateUserDto.Username))
             {
                 var existingUserName = await _unitOfWork.Users.GetByUsernameAsync(updateUserDto.Username);
                 if (existingUserName != null && existingUserName.Id != id)
-                    throw new InvalidOperationException($"Username '{updateUserDto.Username}' already exists");
+                    throw new InvalidOperationException(ResourceFinanceApi.User_UsernameExists);
 
                 user.UpdateUsername(updateUserDto.Username);
             }
@@ -86,7 +87,7 @@ namespace FinanceSystem.Application.Services
             {
                 var existingEmail = await _unitOfWork.Users.GetByEmailAsync(updateUserDto.Email);
                 if (existingEmail != null && existingEmail.Id != id)
-                    throw new InvalidOperationException($"Email '{updateUserDto.Email}' already exists");
+                    throw new InvalidOperationException(ResourceFinanceApi.User_EmailExists);
 
                 user.UpdateEmail(updateUserDto.Email);
             }
@@ -137,7 +138,7 @@ namespace FinanceSystem.Application.Services
         {
             var user = await _unitOfWork.Users.GetByIdAsync(id);
             if (user == null)
-                throw new KeyNotFoundException($"User with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
 
             await _unitOfWork.Users.DeleteAsync(user);
             await _unitOfWork.CompleteAsync();
@@ -147,13 +148,19 @@ namespace FinanceSystem.Application.Services
         {
             var user = await _unitOfWork.Users.GetByUsernameAsync(loginDto.Username);
             if (user == null)
-                throw new InvalidOperationException("Auth.InvalidCredentials");
+            {
+                throw new InvalidOperationException(ResourceFinanceApi.Auth_InvalidCredentials);
+            }
 
             if (!user.IsActive)
-                throw new InvalidOperationException("Auth.UserDeactivated");
+            {
+                throw new InvalidOperationException(ResourceFinanceApi.Auth_UserDeactivated);
+            }
 
             if (!_authService.VerifyPassword(loginDto.Password, user.PasswordHash))
-                throw new InvalidOperationException("Auth.InvalidCredentials");
+            {
+                throw new InvalidOperationException(ResourceFinanceApi.Auth_InvalidCredentials);
+            }
 
             user.SetLastLogin();
             await _unitOfWork.Users.UpdateAsync(user);
@@ -164,7 +171,7 @@ namespace FinanceSystem.Application.Services
             return new LoginResponseDto
             {
                 Token = token,
-                Expiration = DateTime.UtcNow.AddHours(1),
+                Expiration = DateTime.Now.AddHours(1),
                 User = _mapper.Map<UserDto>(user)
             };
         }
