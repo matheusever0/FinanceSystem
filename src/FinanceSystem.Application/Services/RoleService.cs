@@ -3,6 +3,7 @@ using FinanceSystem.Application.DTOs.Role;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Entities;
 using FinanceSystem.Domain.Interfaces.Services;
+using FinanceSystem.Resources;
 
 namespace FinanceSystem.Application.Services
 {
@@ -21,7 +22,7 @@ namespace FinanceSystem.Application.Services
         {
             var role = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(id);
             if (role == null)
-                throw new KeyNotFoundException($"Role with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
 
             return _mapper.Map<RoleDto>(role);
         }
@@ -36,7 +37,7 @@ namespace FinanceSystem.Application.Services
         {
             var existingRole = await _unitOfWork.Roles.GetByNameAsync(createRoleDto.Name);
             if (existingRole != null)
-                throw new InvalidOperationException($"Role '{createRoleDto.Name}' already exists");
+                throw new InvalidOperationException(ResourceFinanceApi.Role_NameExists);
 
             var role = new Role(createRoleDto.Name, createRoleDto.Description);
 
@@ -50,13 +51,13 @@ namespace FinanceSystem.Application.Services
         {
             var role = await _unitOfWork.Roles.GetByIdAsync(id);
             if (role == null)
-                throw new KeyNotFoundException($"Role with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
 
             if (!string.IsNullOrEmpty(updateRoleDto.Name))
             {
                 var existingRole = await _unitOfWork.Roles.GetByNameAsync(updateRoleDto.Name);
                 if (existingRole != null && existingRole.Id != id)
-                    throw new InvalidOperationException($"Role '{updateRoleDto.Name}' already exists");
+                    throw new InvalidOperationException(ResourceFinanceApi.Role_NameExists);
 
                 role.UpdateName(updateRoleDto.Name);
             }
@@ -76,12 +77,12 @@ namespace FinanceSystem.Application.Services
         {
             var role = await _unitOfWork.Roles.GetByIdAsync(id);
             if (role == null)
-                throw new KeyNotFoundException($"Role with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
 
             var rolesWithUsers = await _unitOfWork.Roles.GetAllWithUsersAsync();
             var roleWithUsers = rolesWithUsers.FirstOrDefault(r => r?.Id == id);
             if (roleWithUsers != null && roleWithUsers.UserRoles.Any())
-                throw new InvalidOperationException("Cannot delete role because it is assigned to users");
+                throw new InvalidOperationException(ResourceFinanceApi.Role_HasUsers);
 
             await _unitOfWork.Roles.DeleteAsync(role);
             await _unitOfWork.CompleteAsync();
@@ -91,7 +92,7 @@ namespace FinanceSystem.Application.Services
         {
             var role = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(roleId);
             if (role == null)
-                throw new KeyNotFoundException($"Role with ID {roleId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
 
             var permission = await _unitOfWork.Permissions.GetBySystemNameAsync(permissionSystemName);
             if (permission == null)
@@ -104,7 +105,7 @@ namespace FinanceSystem.Application.Services
         {
             var role = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(roleId);
             if (role == null)
-                throw new KeyNotFoundException($"Role with ID {roleId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
 
             var currentPermissionIds = role.RolePermissions.Select(rp => rp.PermissionId).ToList();
 

@@ -3,6 +3,7 @@ using FinanceSystem.Application.DTOs.IncomeType;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Entities;
 using FinanceSystem.Domain.Interfaces.Services;
+using FinanceSystem.Resources;
 
 namespace FinanceSystem.Application.Services
 {
@@ -21,7 +22,7 @@ namespace FinanceSystem.Application.Services
         {
             var incomeType = await _unitOfWork.IncomeTypes.GetByIdAsync(id);
             if (incomeType == null)
-                throw new KeyNotFoundException($"Income type with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.IncomeType_NotFound);
 
             return _mapper.Map<IncomeTypeDto>(incomeType);
         }
@@ -48,11 +49,11 @@ namespace FinanceSystem.Application.Services
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                throw new KeyNotFoundException($"User with ID {userId} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
 
             var existingType = await _unitOfWork.IncomeTypes.GetByNameAsync(createIncomeTypeDto.Name);
             if (existingType != null)
-                throw new InvalidOperationException($"Income type with name '{createIncomeTypeDto.Name}' already exists");
+                throw new InvalidOperationException(ResourceFinanceApi.IncomeType_NameExists);
 
             var incomeType = new IncomeType(
                 createIncomeTypeDto.Name,
@@ -70,16 +71,16 @@ namespace FinanceSystem.Application.Services
         {
             var incomeType = await _unitOfWork.IncomeTypes.GetByIdAsync(id);
             if (incomeType == null)
-                throw new KeyNotFoundException($"Income type with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.IncomeType_NotFound);
 
             if (incomeType.IsSystem)
-                throw new InvalidOperationException("Cannot update system income type");
+                throw new InvalidOperationException(ResourceFinanceApi.IncomeType_SystemCannotUpdate);
 
             if (!string.IsNullOrEmpty(updateIncomeTypeDto.Name))
             {
                 var existingType = await _unitOfWork.IncomeTypes.GetByNameAsync(updateIncomeTypeDto.Name);
                 if (existingType != null && existingType.Id != id)
-                    throw new InvalidOperationException($"Income type with name '{updateIncomeTypeDto.Name}' already exists");
+                    throw new InvalidOperationException(ResourceFinanceApi.IncomeType_NameExists);
 
                 incomeType.UpdateName(updateIncomeTypeDto.Name);
             }
@@ -97,14 +98,14 @@ namespace FinanceSystem.Application.Services
         {
             var incomeType = await _unitOfWork.IncomeTypes.GetByIdAsync(id);
             if (incomeType == null)
-                throw new KeyNotFoundException($"Income type with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.IncomeType_NotFound);
 
             if (incomeType.IsSystem)
-                throw new InvalidOperationException("Cannot delete system income type");
+                throw new InvalidOperationException(ResourceFinanceApi.IncomeType_SystemCannotDelete);
 
             var incomes = await _unitOfWork.Incomes.GetIncomesByTypeAsync(incomeType.UserId ?? Guid.Empty, id);
             if (incomes.Any())
-                throw new InvalidOperationException("Cannot delete income type that is being used in incomes");
+                throw new InvalidOperationException(ResourceFinanceApi.IncomeType_InUse);
 
             await _unitOfWork.IncomeTypes.DeleteAsync(incomeType);
             await _unitOfWork.CompleteAsync();

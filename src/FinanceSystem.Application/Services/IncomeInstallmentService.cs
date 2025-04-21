@@ -2,6 +2,7 @@
 using FinanceSystem.Application.DTOs.IncomeInstallment;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Interfaces.Services;
+using FinanceSystem.Resources;
 
 namespace FinanceSystem.Application.Services
 {
@@ -20,7 +21,7 @@ namespace FinanceSystem.Application.Services
         {
             var installment = await _unitOfWork.IncomeInstallments.GetByIdAsync(id);
             if (installment == null)
-                throw new KeyNotFoundException($"Income installment with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.IncomeInstallment_NotFound);
 
             return _mapper.Map<IncomeInstallmentDto>(installment);
         }
@@ -53,7 +54,7 @@ namespace FinanceSystem.Application.Services
         {
             var installment = await _unitOfWork.IncomeInstallments.GetByIdAsync(id);
             if (installment == null)
-                throw new KeyNotFoundException($"Income installment with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.IncomeInstallment_NotFound);
 
             installment.MarkAsReceived(receivedDate ?? DateTime.UtcNow);
             await _unitOfWork.IncomeInstallments.UpdateAsync(installment);
@@ -66,7 +67,7 @@ namespace FinanceSystem.Application.Services
         {
             var installment = await _unitOfWork.IncomeInstallments.GetByIdAsync(id);
             if (installment == null)
-                throw new KeyNotFoundException($"Income installment with ID {id} not found");
+                throw new KeyNotFoundException(ResourceFinanceApi.IncomeInstallment_NotFound);
 
             installment.Cancel();
             await _unitOfWork.IncomeInstallments.UpdateAsync(installment);
