@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b5998" />
+      <stop offset="100%" stop-color="#8b9dc3" />
+    </linearGradient>
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1cc88a" />
+      <stop offset="100%" stop-color="#0bb36e" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Main F symbol with chart line -->
+  <g>
+    <path d="M180,80 h120 v30 h-90 v40 h70 v30 h-70 v90" stroke="url(#logoGradient)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    
+    <!-- Chart line on the F -->
+    <path d="M220,135 l30,-20 l40,10 l30,-30" stroke="url(#accentGradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+    
+    <!-- Dollar symbol integrated with S -->
+    <path d="M380,90 c-25,-15 -50,-10 -70,5 c-20,15 -25,45 -5,65 c20,20 60,30 80,45 c20,15 25,40 5,60 c-20,20 -50,20 -80,0" stroke="url(#logoGradient)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M360,60 v180" stroke="url(#logoGradient)" stroke-width="16" stroke-linecap="round" fill="none"/>
+  </g>
+  
+  <!-- Text: FinanceSystem -->
+  <text x="480" y="160" font-family="Segoe UI, Helvetica, sans-serif" font-size="60" font-weight="600" fill="#3b5998">
+    Finance<tspan fill="#1cc88a">System</tspan>
+  </text>
+  
+  <!-- Text: by SeveroTech -->
+  <text x="480" y="200" font-family="Segoe UI, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#6c757d">
+    by SeveroTech
+  </text>
+</svg>

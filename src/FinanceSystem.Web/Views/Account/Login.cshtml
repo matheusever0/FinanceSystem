@@ -14,17 +14,18 @@
     <link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" asp-append-version="true">
     <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" asp-append-version="true">
     <link href="~/css/base/variables.css" rel="stylesheet" asp-append-version="true">
+    <link href="~/css/components/logo.css" rel="stylesheet" asp-append-version="true">
     <link href="~/css/pages/login.css" rel="stylesheet" asp-append-version="true">
+    <link rel="icon" type="image/svg+xml" href="~/images/favicon.svg" asp-append-version="true">
+    <link rel="icon" type="image/png" sizes="32x32" href="~/images/favicon-32x32.png" asp-append-version="true">
+    <link rel="icon" type="image/png" sizes="16x16" href="~/images/favicon-16x16.png" asp-append-version="true">
+    <link rel="apple-touch-icon" sizes="180x180" href="~/images/apple-touch-icon.png" asp-append-version="true">
 </head>
 <body class="login-page">
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <div class="logo">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <h2>Finance System</h2>
-                <p class="mb-0">Controle financeiro inteligente</p>
+                <!-- O logo será inserido via JavaScript -->
             </div>
             <div class="login-body">
                 <form asp-action="Login" asp-controller="Account" method="post">
@@ -59,10 +60,9 @@
             <small>&copy; 2025 Finance System - Todos os direitos reservados</small>
         </div>
     </div>
-    @section Scripts {
-        <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
-        <script src="~/lib/jquery/jquery.min.js" asp-append-version="true"></script>
-        <script src="~/js/components/forms.js" asp-append-version="true"></script>
-    }
+
+    <script src="~/lib/jquery/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    <script src="~/js/pages/login-logo.js" asp-append-version="true"></script>
 </body>
 </html>
