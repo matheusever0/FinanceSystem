@@ -12,6 +12,7 @@ namespace FinanceSystem.Web.Controllers
     [Authorize]
     public class HomeController : Controller
     {
+        public const int pagoEnum = 2;
         private readonly IPaymentService _paymentService;
         private readonly ICreditCardService _creditCardService;
         private readonly IIncomeService _incomeService;
@@ -49,9 +50,6 @@ namespace FinanceSystem.Web.Controllers
                 var paymentsMonth = await _paymentService.GetPaymentsByMonthAsync(DateTime.Now.Month, DateTime.Now.Year, token);
                 var overdueIncomes = await _incomeService.GetOverdueIncomesAsync(token);
 
-                var pagoEnum = 2;
-
-                // Calcular saldo dinâmico
                 decimal totalIncome = receivedIncomes.Where(e => e.Status == pagoEnum).Sum(i => i.Amount);
                 decimal totalPayments = payments.Where(e => e.Status == pagoEnum).Sum(i => i.Amount);
                 decimal totalBalance = totalIncome - totalPayments;
@@ -97,8 +95,8 @@ namespace FinanceSystem.Web.Controllers
                     var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
                     var incomes = await _incomeService.GetIncomesByMonthAsync(month, year, token);
 
-                    var monthPaymentTotal = payments.Where(e => e.Status == 2).Sum(p => p.Amount);
-                    var monthIncomeTotal = incomes.Where(e => e.Status == 2).Sum(i => i.Amount);
+                    var monthPaymentTotal = payments.Where(e => e.Status == pagoEnum).Sum(p => p.Amount);
+                    var monthIncomeTotal = incomes.Where(e => e.Status == pagoEnum).Sum(i => i.Amount);
 
                     result.Add(new MonthlyComparisonData
                     {

@@ -11,7 +11,6 @@
     var totalOverdueAmount = paymentsOverdue.Sum(p => p.Amount);
     var totalBalance = ViewBag.TotalBalance ?? 0m;
     var creditCards = ViewBag.CreditCards as IEnumerable<CreditCardModel> ?? new List<CreditCardModel>();
-    var monthlyData = ViewBag.MonthlyData as Dictionary<string, decimal> ?? new Dictionary<string, decimal>();
     var pendingIncomes = ViewBag.PendingIncomes as IEnumerable<IncomeModel> ?? new List<IncomeModel>();
     var totalPendingIncomes = pendingIncomes.Sum(i => i.Amount);
     var incomesMonth = ViewBag.IncomesMonth ?? 0m;
