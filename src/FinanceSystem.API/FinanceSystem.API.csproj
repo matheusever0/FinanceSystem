@@ -20,6 +20,7 @@
     <ProjectReference Include="..\FinanceSystem.Domain\FinanceSystem.Domain.csproj" />
     <ProjectReference Include="..\FinanceSystem.Application\FinanceSystem.Application.csproj" />
     <ProjectReference Include="..\FinanceSystem.Infrastructure\FinanceSystem.Infrastructure.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Resources\FinanceSystem.Resources.csproj" />
   </ItemGroup>
 
   <ItemGroup>
