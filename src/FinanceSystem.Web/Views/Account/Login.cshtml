@@ -14,7 +14,6 @@
     <link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" asp-append-version="true">
     <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" asp-append-version="true">
     <link href="~/css/base/variables.css" rel="stylesheet" asp-append-version="true">
-    <link href="~/css/components/logo.css" rel="stylesheet" asp-append-version="true">
     <link href="~/css/pages/login.css" rel="stylesheet" asp-append-version="true">
     <link rel="icon" type="image/svg+xml" href="~/images/favicon.svg" asp-append-version="true">
     <link rel="icon" type="image/png" sizes="32x32" href="~/images/favicon-32x32.png" asp-append-version="true">
@@ -24,37 +23,35 @@
 <body class="login-page">
     <div class="login-container">
         <div class="login-card">
-            <div class="login-header">
-                <!-- O logo será inserido via JavaScript -->
+            <div class="login-logo">
+                <img src="~/images/login-logo.svg" alt="FinanceSystem Logo" />
             </div>
-            <div class="login-body">
-                <form asp-action="Login" asp-controller="Account" method="post">
-                    @Html.AntiForgeryToken()
-                    <div class="form-floating mb-3">
-                        <input asp-for="Username" name="Username" id="Username" class="form-control" placeholder="Nome de usuário" />
-                        <label for="Username">Nome de usuário</label>
-                        <span asp-validation-for="Username" class="text-danger"></span>
-                    </div>
+            <form asp-action="Login" asp-controller="Account" method="post" class="login-form">
+                @Html.AntiForgeryToken()
+                <div class="form-floating mb-3">
+                    <input asp-for="Username" name="Username" id="Username" class="form-control" placeholder="Nome de usuário" />
+                    <label for="Username">Nome de usuário</label>
+                    <span asp-validation-for="Username" class="text-danger"></span>
+                </div>
 
-                    <div class="form-floating mb-4">
-                        <input asp-for="Password" name="Password" id="Password" class="form-control" type="password" placeholder="Senha" />
-                        <label for="Password">Senha</label>
-                        <span asp-validation-for="Password" class="text-danger"></span>
-                    </div>
+                <div class="form-floating mb-4">
+                    <input asp-for="Password" name="Password" id="Password" class="form-control" type="password" placeholder="Senha" />
+                    <label for="Password">Senha</label>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
 
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-login">
-                            <i class="fas fa-sign-in-alt me-2"></i>Entrar
-                        </button>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-login">
+                        <i class="fas fa-sign-in-alt me-2"></i>Entrar
+                    </button>
+                </div>
+                @if (ViewData.ModelState["CustomError"]?.Errors.Count > 0)
+                {
+                    <div class="alert alert-danger p-2 small mb-2 text-center mt-3">
+                        @ViewData.ModelState["CustomError"]?.Errors.FirstOrDefault()?.ErrorMessage?.Trim('"')
                     </div>
-                    @if (ViewData.ModelState["CustomError"]?.Errors.Count > 0)
-                    {
-                        <div class="alert alert-danger p-2 small mb-2 text-center">
-                            @ViewData.ModelState["CustomError"]?.Errors.FirstOrDefault()?.ErrorMessage?.Trim('"')
-                        </div>
-                    }
-                </form>
-            </div>
+                }
+            </form>
         </div>
         <div class="login-footer">
             <small>&copy; 2025 Finance System - Todos os direitos reservados</small>
@@ -63,6 +60,5 @@
 
     <script src="~/lib/jquery/jquery.min.js" asp-append-version="true"></script>
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
-    <script src="~/js/pages/login-logo.js" asp-append-version="true"></script>
 </body>
 </html>

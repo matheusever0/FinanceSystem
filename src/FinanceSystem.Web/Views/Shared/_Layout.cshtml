@@ -33,10 +33,11 @@
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <i class="fas fa-chart-line"></i>
-            <span>Finance System</span>
+            <div class="sidebar-logo-container">
+                <img src="~/images/logo.svg" alt="FinanceSystem Logo" />
+            </div>
+            <span>FinanceSystem</span>
         </div>
-
         <div class="sidebar-header">
             <div class="sidebar-user">
                 <div class="user-avatar">
@@ -226,7 +227,6 @@
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/menu.js" asp-append-version="true"></script>
-    <script src="~/js/components/logo.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
