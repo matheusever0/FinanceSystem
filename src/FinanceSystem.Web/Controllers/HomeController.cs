@@ -46,19 +46,23 @@ namespace FinanceSystem.Web.Controllers
                 var payments = await _paymentService.GetAllPaymentsAsync(token);
                 var incomesMonth = await _incomeService.GetIncomesByMonthAsync(DateTime.Now.Month, DateTime.Now.Year, token);
                 var paymentsMonth = await _paymentService.GetPaymentsByMonthAsync(DateTime.Now.Month, DateTime.Now.Year, token);
+                var overdueIncomes = await _incomeService.GetOverdueIncomesAsync(token);
+
+                var pagoEnum = 2;
 
                 // Calcular saldo dinâmico
-                decimal totalIncome = receivedIncomes.Sum(i => i.Amount);
-                decimal totalPayments = payments.Sum(i => i.Amount);
+                decimal totalIncome = receivedIncomes.Where(e => e.Status == pagoEnum).Sum(i => i.Amount);
+                decimal totalPayments = payments.Where(e => e.Status == pagoEnum).Sum(i => i.Amount);
                 decimal totalBalance = totalIncome - totalPayments;
 
                 ViewBag.TotalBalance = totalBalance;
                 ViewBag.PendingPayments = pendingPayments;
                 ViewBag.PaymentsOverdue = overduePayments;
+                ViewBag.OverdueIncomes = overdueIncomes;
                 ViewBag.PendingIncomes = pendingIncomes;
                 ViewBag.CreditCards = creditCards;
-                ViewBag.IncomesMonth = incomesMonth.Sum(i => i.Amount);
-                ViewBag.PaymentsMonth = paymentsMonth.Sum(i => i.Amount);
+                ViewBag.IncomesMonth = incomesMonth.Where(e => e.Status == pagoEnum).Sum(i => i.Amount);
+                ViewBag.PaymentsMonth = paymentsMonth.Where(e => e.Status == pagoEnum).Sum(i => i.Amount);
 
                 // Manter lógica existente de gráficos mensais
                 var monthlyData = await GetMonthlyDataAsync(token);
@@ -90,7 +94,7 @@ namespace FinanceSystem.Web.Controllers
                 {
                     var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
 
-                    var monthTotal = payments.Sum(p => p.Amount);
+                    var monthTotal = payments.Where(e => e.Status == 2).Sum(p => p.Amount);
                     result.Add(monthName, monthTotal);
                 }
                 catch (Exception ex)

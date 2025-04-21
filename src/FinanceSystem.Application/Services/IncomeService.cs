@@ -46,6 +46,12 @@ namespace FinanceSystem.Application.Services
             return _mapper.Map<IEnumerable<IncomeDto>>(incomes);
         }
 
+        public async Task<IEnumerable<IncomeDto>> GetOverdueAsync(Guid userId)
+        {
+            var payments = await _unitOfWork.Incomes.GetOverdueIncomesByUserIdAsync(userId);
+            return _mapper.Map<IEnumerable<IncomeDto>>(payments);
+        }
+
         public async Task<IEnumerable<IncomeDto>> GetReceivedAsync(Guid userId)
         {
             var incomes = await _unitOfWork.Incomes.GetReceivedIncomesByUserIdAsync(userId);

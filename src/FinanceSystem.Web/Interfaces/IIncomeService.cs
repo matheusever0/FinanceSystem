@@ -9,6 +9,7 @@ namespace FinanceSystem.Web.Services
         Task<IEnumerable<IncomeModel>> GetIncomesByMonthAsync(int month, int year, string token);
         Task<IEnumerable<IncomeModel>> GetPendingIncomesAsync(string token);
         Task<IEnumerable<IncomeModel>> GetReceivedIncomesAsync(string token);
+        Task<IEnumerable<IncomeModel>> GetOverdueIncomesAsync(string token);
         Task<IEnumerable<IncomeModel>> GetIncomesByTypeAsync(string typeId, string token);
         Task<IncomeModel> CreateIncomeAsync(CreateIncomeModel model, string token);
         Task<IncomeModel> UpdateIncomeAsync(string id, UpdateIncomeModel model, string token);

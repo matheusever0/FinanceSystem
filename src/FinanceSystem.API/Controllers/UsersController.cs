@@ -1,7 +1,5 @@
-﻿using FinanceSystem.API.Extensions;
-using FinanceSystem.Application.DTOs.User;
+﻿using FinanceSystem.Application.DTOs.User;
 using FinanceSystem.Application.Interfaces;
-using FinanceSystem.Resources;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

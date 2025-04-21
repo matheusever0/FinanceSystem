@@ -1,5 +1,6 @@
 ﻿using FinanceSystem.API.Extensions;
 using FinanceSystem.Application.DTOs.Income;
+using FinanceSystem.Application.DTOs.Payment;
 using FinanceSystem.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -66,6 +67,15 @@ namespace FinanceSystem.API.Controllers
         {
             var userId = HttpContext.GetCurrentUserId();
             var incomes = await _incomeService.GetPendingAsync(userId);
+
+            return Ok(incomes);
+        }
+
+        [HttpGet("overdue")]
+        public async Task<ActionResult<IEnumerable<PaymentDto>>> GetOverdue()
+        {
+            var userId = HttpContext.GetCurrentUserId();
+            var incomes = await _incomeService.GetOverdueAsync(userId);
 
             return Ok(incomes);
         }

@@ -220,5 +220,19 @@ namespace FinanceSystem.Web.Services
                 throw;
             }
         }
+
+        public async Task<IEnumerable<IncomeModel>> GetOverdueIncomesAsync(string token)
+        {
+            try
+            {
+                _logger.LogInformation("Obtendo receitas vencidas");
+                return await _apiService.GetAsync<IEnumerable<IncomeModel>>("/api/incomes/overdue", token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter receitas vencidas");
+                throw;
+            }
+        }
     }
 }

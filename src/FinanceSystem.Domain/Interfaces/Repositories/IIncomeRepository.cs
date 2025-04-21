@@ -10,5 +10,6 @@ namespace FinanceSystem.Domain.Interfaces.Repositories
         Task<IEnumerable<Income>> GetPendingIncomesByUserIdAsync(Guid userId);
         Task<IEnumerable<Income>> GetReceivedIncomesByUserIdAsync(Guid userId);
         Task<IEnumerable<Income>> GetIncomesByTypeAsync(Guid userId, Guid incomeTypeId);
+        Task<IEnumerable<Income>> GetOverdueIncomesByUserIdAsync(Guid userId);
     }
 }

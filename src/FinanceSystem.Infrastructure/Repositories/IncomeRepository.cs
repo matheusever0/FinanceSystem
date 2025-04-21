@@ -45,6 +45,14 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Income>> GetOverdueIncomesByUserIdAsync(Guid userId)
+        {
+            return await _dbSet
+                .Where(p => p.UserId == userId && p.DueDate < DateTime.Now && !p.ReceivedDate.HasValue)
+                .Include(p => p.IncomeType)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Income>> GetReceivedIncomesByUserIdAsync(Guid userId)
         {
             return await _dbSet

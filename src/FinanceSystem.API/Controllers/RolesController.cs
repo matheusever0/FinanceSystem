@@ -1,5 +1,4 @@
-﻿using FinanceSystem.API.Extensions;
-using FinanceSystem.Application.DTOs.Role;
+﻿using FinanceSystem.Application.DTOs.Role;
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Resources;
 using Microsoft.AspNetCore.Authorization;
