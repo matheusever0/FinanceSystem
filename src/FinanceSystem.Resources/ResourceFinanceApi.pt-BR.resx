@@ -98,16 +98,133 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
-	  <data name="Auth.InvalidCredentials" xml:space="preserve">
-    <value>Nome de usuário ou senha inválidos</value>
-  </data>
-  <data name="Auth.UserDeactivated" xml:space="preserve">
-    <value>Conta de usuário está desativada</value>
-  </data>
-  <data name="Auth.UserNotAuthenticated" xml:space="preserve">
-    <value>Usuário não está autenticado</value>
-  </data>
-  <data name="Auth.TokenInvalid" xml:space="preserve">
-    <value>Token inválido ou expirado</value>
-  </data>
+	<data name="Auth_InvalidCredentials" xml:space="preserve">
+	  <value>Nome de usuário ou senha inválidos</value>
+	</data>
+	<data name="Auth_UserDeactivated" xml:space="preserve">
+	  <value>Conta de usuário está desativada</value>
+	</data>
+	<data name="Auth_UserNotAuthenticated" xml:space="preserve">
+	  <value>Usuário não está autenticado</value>
+	</data>
+	<data name="Auth_TokenInvalid" xml:space="preserve">
+	  <value>Token inválido ou expirado</value>
+	</data>
+	<data name="User_NotFound" xml:space="preserve">
+	  <value>Usuário não encontrado</value>
+	</data>
+	<data name="User_UsernameExists" xml:space="preserve">
+	  <value>Nome de usuário já existe</value>
+	</data>
+	<data name="User_EmailExists" xml:space="preserve">
+	  <value>E-mail já existe</value>
+	</data>
+	<data name="Role_NotFound" xml:space="preserve">
+	  <value>Perfil não encontrado</value>
+	</data>
+	<data name="Role_NameExists" xml:space="preserve">
+	  <value>Nome de perfil já existe</value>
+	</data>
+	<data name="Role_HasUsers" xml:space="preserve">
+	  <value>Não é possível excluir perfil porque está atribuído a usuários</value>
+	</data>
+	<data name="Permission_NotFound" xml:space="preserve">
+	  <value>Permissão não encontrada</value>
+	</data>
+	<data name="Permission_SystemNameExists" xml:space="preserve">
+	  <value>Permissão com este nome de sistema já existe</value>
+	</data>
+	<data name="Payment_NotFound" xml:space="preserve">
+	  <value>Pagamento não encontrado</value>
+	</data>
+	<data name="Payment_CreditCardRequired" xml:space="preserve">
+	  <value>ID do cartão de crédito é obrigatório para pagamentos com cartão de crédito</value>
+	</data>
+	<data name="Payment_InsufficientCreditLimit" xml:space="preserve">
+	  <value>Limite de cartão de crédito insuficiente</value>
+	</data>
+	<data name="Payment_AlreadyPaid" xml:space="preserve">
+	  <value>Não é possível excluir um pagamento já pago</value>
+	</data>
+	<data name="Income_NotFound" xml:space="preserve">
+	  <value>Receita não encontrada</value>
+	</data>
+	<data name="Income_AlreadyReceived" xml:space="preserve">
+	  <value>Não é possível excluir uma receita já recebida</value>
+	</data>
+	<data name="PaymentType_NotFound" xml:space="preserve">
+	  <value>Tipo de pagamento não encontrado</value>
+	</data>
+	<data name="PaymentType_NameExists" xml:space="preserve">
+	  <value>Tipo de pagamento com este nome já existe</value>
+	</data>
+	<data name="PaymentType_SystemCannotUpdate" xml:space="preserve">
+	  <value>Não é possível atualizar tipo de pagamento do sistema</value>
+	</data>
+	<data name="PaymentType_SystemCannotDelete" xml:space="preserve">
+	  <value>Não é possível excluir tipo de pagamento do sistema</value>
+	</data>
+	<data name="PaymentType_InUse" xml:space="preserve">
+	  <value>Não é possível excluir tipo de pagamento que está sendo usado em pagamentos</value>
+	</data>
+	<data name="IncomeType_NotFound" xml:space="preserve">
+	  <value>Tipo de receita não encontrado</value>
+	</data>
+	<data name="IncomeType_NameExists" xml:space="preserve">
+	  <value>Tipo de receita com este nome já existe</value>
+	</data>
+	<data name="IncomeType_SystemCannotUpdate" xml:space="preserve">
+	  <value>Não é possível atualizar tipo de receita do sistema</value>
+	</data>
+	<data name="IncomeType_SystemCannotDelete" xml:space="preserve">
+	  <value>Não é possível excluir tipo de receita do sistema</value>
+	</data>
+	<data name="IncomeType_InUse" xml:space="preserve">
+	  <value>Não é possível excluir tipo de receita que está sendo usado em receitas</value>
+	</data>
+	<data name="PaymentMethod_NotFound" xml:space="preserve">
+	  <value>Método de pagamento não encontrado</value>
+	</data>
+	<data name="PaymentMethod_NameExists" xml:space="preserve">
+	  <value>Método de pagamento com este nome já existe</value>
+	</data>
+	<data name="PaymentMethod_SystemCannotUpdate" xml:space="preserve">
+	  <value>Não é possível atualizar método de pagamento do sistema</value>
+	</data>
+	<data name="PaymentMethod_SystemCannotDelete" xml:space="preserve">
+	  <value>Não é possível excluir método de pagamento do sistema</value>
+	</data>
+	<data name="PaymentMethod_InUse" xml:space="preserve">
+	  <value>Não é possível excluir método de pagamento que está sendo usado em pagamentos</value>
+	</data>
+	<data name="PaymentMethod_HasCreditCards" xml:space="preserve">
+	  <value>Não é possível excluir método de pagamento que possui cartões de crédito vinculados</value>
+	</data>
+	<data name="CreditCard_NotFound" xml:space="preserve">
+	  <value>Cartão de crédito não encontrado</value>
+	</data>
+	<data name="CreditCard_InvalidDays" xml:space="preserve">
+	  <value>Dia de fechamento e vencimento devem estar entre 1 e 31</value>
+	</data>
+	<data name="CreditCard_InvalidMethodType" xml:space="preserve">
+	  <value>Método de pagamento deve ser do tipo Cartão de Crédito</value>
+	</data>
+	<data name="PaymentInstallment_NotFound" xml:space="preserve">
+	  <value>Parcela de pagamento não encontrada</value>
+	</data>
+	<data name="IncomeInstallment_NotFound" xml:space="preserve">
+	  <value>Parcela de receita não encontrada</value>
+	</data>
+	<data name="Error_Unauthorized" xml:space="preserve">
+	  <value>Você não tem permissão para acessar este recurso</value>
+	</data>
+	<data name="Error_InvalidOperation" xml:space="preserve">
+	  <value>Operação inválida</value>
+	</data>
+	<data name="Error_NotFound" xml:space="preserve">
+	  <value>Recurso não encontrado</value>
+	</data>
+	<data name="Error_Generic" xml:space="preserve">
+	  <value>Ocorreu um erro inesperado</value>
+	</data>
 </root>

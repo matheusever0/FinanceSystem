@@ -65,7 +65,7 @@ namespace FinanceSystem.Resources {
         /// </summary>
         public static string Auth_InvalidCredentials {
             get {
-                return ResourceManager.GetString("Auth.InvalidCredentials", resourceCulture);
+                return ResourceManager.GetString("Auth_InvalidCredentials", resourceCulture);
             }
         }
         
@@ -74,7 +74,7 @@ namespace FinanceSystem.Resources {
         /// </summary>
         public static string Auth_TokenInvalid {
             get {
-                return ResourceManager.GetString("Auth.TokenInvalid", resourceCulture);
+                return ResourceManager.GetString("Auth_TokenInvalid", resourceCulture);
             }
         }
         
@@ -83,7 +83,7 @@ namespace FinanceSystem.Resources {
         /// </summary>
         public static string Auth_UserDeactivated {
             get {
-                return ResourceManager.GetString("Auth.UserDeactivated", resourceCulture);
+                return ResourceManager.GetString("Auth_UserDeactivated", resourceCulture);
             }
         }
         
@@ -92,7 +92,358 @@ namespace FinanceSystem.Resources {
         /// </summary>
         public static string Auth_UserNotAuthenticated {
             get {
-                return ResourceManager.GetString("Auth.UserNotAuthenticated", resourceCulture);
+                return ResourceManager.GetString("Auth_UserNotAuthenticated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Closing day and due day must be between 1 and 31.
+        /// </summary>
+        public static string CreditCard_InvalidDays {
+            get {
+                return ResourceManager.GetString("CreditCard_InvalidDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Payment method must be of type Credit Card.
+        /// </summary>
+        public static string CreditCard_InvalidMethodType {
+            get {
+                return ResourceManager.GetString("CreditCard_InvalidMethodType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Credit card not found.
+        /// </summary>
+        public static string CreditCard_NotFound {
+            get {
+                return ResourceManager.GetString("CreditCard_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a An unexpected error occurred.
+        /// </summary>
+        public static string Error_Generic {
+            get {
+                return ResourceManager.GetString("Error_Generic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Invalid operation.
+        /// </summary>
+        public static string Error_InvalidOperation {
+            get {
+                return ResourceManager.GetString("Error_InvalidOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Resource not found.
+        /// </summary>
+        public static string Error_NotFound {
+            get {
+                return ResourceManager.GetString("Error_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a You don&apos;t have permission to access this resource.
+        /// </summary>
+        public static string Error_Unauthorized {
+            get {
+                return ResourceManager.GetString("Error_Unauthorized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Cannot delete a received income.
+        /// </summary>
+        public static string Income_AlreadyReceived {
+            get {
+                return ResourceManager.GetString("Income_AlreadyReceived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Income not found.
+        /// </summary>
+        public static string Income_NotFound {
+            get {
+                return ResourceManager.GetString("Income_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Income installment not found.
+        /// </summary>
+        public static string IncomeInstallment_NotFound {
+            get {
+                return ResourceManager.GetString("IncomeInstallment_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Cannot delete income type that is being used in incomes.
+        /// </summary>
+        public static string IncomeType_InUse {
+            get {
+                return ResourceManager.GetString("IncomeType_InUse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Income type with this name already exists.
+        /// </summary>
+        public static string IncomeType_NameExists {
+            get {
+                return ResourceManager.GetString("IncomeType_NameExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Income type not found.
+        /// </summary>
+        public static string IncomeType_NotFound {
+            get {
+                return ResourceManager.GetString("IncomeType_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Cannot delete system income type.
+        /// </summary>
+        public static string IncomeType_SystemCannotDelete {
+            get {
+                return ResourceManager.GetString("IncomeType_SystemCannotDelete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Cannot update system income type.
+        /// </summary>
+        public static string IncomeType_SystemCannotUpdate {
+            get {
+                return ResourceManager.GetString("IncomeType_SystemCannotUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Cannot delete a paid payment.
+        /// </summary>
+        public static string Payment_AlreadyPaid {
+            get {
+                return ResourceManager.GetString("Payment_AlreadyPaid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Credit card ID is required for credit card payments.
+        /// </summary>
+        public static string Payment_CreditCardRequired {
+            get {
+                return ResourceManager.GetString("Payment_CreditCardRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Insufficient credit card limit.
+        /// </summary>
+        public static string Payment_InsufficientCreditLimit {
+            get {
+                return ResourceManager.GetString("Payment_InsufficientCreditLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Payment not found.
+        /// </summary>
+        public static string Payment_NotFound {
+            get {
+                return ResourceManager.GetString("Payment_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Payment installment not found.
+        /// </summary>
+        public static string PaymentInstallment_NotFound {
+            get {
+                return ResourceManager.GetString("PaymentInstallment_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Cannot delete payment method that has credit cards linked to it.
+        /// </summary>
+        public static string PaymentMethod_HasCreditCards {
+            get {
+                return ResourceManager.GetString("PaymentMethod_HasCreditCards", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Cannot delete payment method that is being used in payments.
+        /// </summary>
+        public static string PaymentMethod_InUse {
+            get {
+                return ResourceManager.GetString("PaymentMethod_InUse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Payment method with this name already exists.
+        /// </summary>
+        public static string PaymentMethod_NameExists {
+            get {
+                return ResourceManager.GetString("PaymentMethod_NameExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Payment method not found.
+        /// </summary>
+        public static string PaymentMethod_NotFound {
+            get {
+                return ResourceManager.GetString("PaymentMethod_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Cannot delete system payment method.
+        /// </summary>
+        public static string PaymentMethod_SystemCannotDelete {
+            get {
+                return ResourceManager.GetString("PaymentMethod_SystemCannotDelete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Cannot update system payment method.
+        /// </summary>
+        public static string PaymentMethod_SystemCannotUpdate {
+            get {
+                return ResourceManager.GetString("PaymentMethod_SystemCannotUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Cannot delete payment type that is being used in payments.
+        /// </summary>
+        public static string PaymentType_InUse {
+            get {
+                return ResourceManager.GetString("PaymentType_InUse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Payment type with this name already exists.
+        /// </summary>
+        public static string PaymentType_NameExists {
+            get {
+                return ResourceManager.GetString("PaymentType_NameExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Payment type not found.
+        /// </summary>
+        public static string PaymentType_NotFound {
+            get {
+                return ResourceManager.GetString("PaymentType_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Cannot delete system payment type.
+        /// </summary>
+        public static string PaymentType_SystemCannotDelete {
+            get {
+                return ResourceManager.GetString("PaymentType_SystemCannotDelete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Cannot update system payment type.
+        /// </summary>
+        public static string PaymentType_SystemCannotUpdate {
+            get {
+                return ResourceManager.GetString("PaymentType_SystemCannotUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Permission not found.
+        /// </summary>
+        public static string Permission_NotFound {
+            get {
+                return ResourceManager.GetString("Permission_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Permission with this system name already exists.
+        /// </summary>
+        public static string Permission_SystemNameExists {
+            get {
+                return ResourceManager.GetString("Permission_SystemNameExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Cannot delete role because it is assigned to users.
+        /// </summary>
+        public static string Role_HasUsers {
+            get {
+                return ResourceManager.GetString("Role_HasUsers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Role name already exists.
+        /// </summary>
+        public static string Role_NameExists {
+            get {
+                return ResourceManager.GetString("Role_NameExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Role not found.
+        /// </summary>
+        public static string Role_NotFound {
+            get {
+                return ResourceManager.GetString("Role_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Email already exists.
+        /// </summary>
+        public static string User_EmailExists {
+            get {
+                return ResourceManager.GetString("User_EmailExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a User not found.
+        /// </summary>
+        public static string User_NotFound {
+            get {
+                return ResourceManager.GetString("User_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a Username already exists.
+        /// </summary>
+        public static string User_UsernameExists {
+            get {
+                return ResourceManager.GetString("User_UsernameExists", resourceCulture);
             }
         }
     }

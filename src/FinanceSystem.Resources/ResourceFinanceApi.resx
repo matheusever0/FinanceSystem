@@ -98,16 +98,133 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
-	  <data name="Auth.InvalidCredentials" xml:space="preserve">
-    <value>Invalid username or password</value>
-  </data>
-  <data name="Auth.UserDeactivated" xml:space="preserve">
-    <value>User account is deactivated</value>
-  </data>
-  <data name="Auth.UserNotAuthenticated" xml:space="preserve">
-    <value>User is not authenticated</value>
-  </data>
-  <data name="Auth.TokenInvalid" xml:space="preserve">
-    <value>Invalid or expired token</value>
-  </data>
+	<data name="Auth_InvalidCredentials" xml:space="preserve">
+	  <value>Invalid username or password</value>
+	</data>
+	<data name="Auth_UserDeactivated" xml:space="preserve">
+	  <value>User account is deactivated</value>
+	</data>
+	<data name="Auth_UserNotAuthenticated" xml:space="preserve">
+	  <value>User is not authenticated</value>
+	</data>
+	<data name="Auth_TokenInvalid" xml:space="preserve">
+	  <value>Invalid or expired token</value>
+	</data>
+	<data name="User_NotFound" xml:space="preserve">
+	  <value>User not found</value>
+	</data>
+	<data name="User_UsernameExists" xml:space="preserve">
+	  <value>Username already exists</value>
+	</data>
+	<data name="User_EmailExists" xml:space="preserve">
+	  <value>Email already exists</value>
+	</data>
+	<data name="Role_NotFound" xml:space="preserve">
+	  <value>Role not found</value>
+	</data>
+	<data name="Role_NameExists" xml:space="preserve">
+	  <value>Role name already exists</value>
+	</data>
+	<data name="Role_HasUsers" xml:space="preserve">
+	  <value>Cannot delete role because it is assigned to users</value>
+	</data>
+	<data name="Permission_NotFound" xml:space="preserve">
+	  <value>Permission not found</value>
+	</data>
+	<data name="Permission_SystemNameExists" xml:space="preserve">
+	  <value>Permission with this system name already exists</value>
+	</data>
+	<data name="Payment_NotFound" xml:space="preserve">
+	  <value>Payment not found</value>
+	</data>
+	<data name="Payment_CreditCardRequired" xml:space="preserve">
+	  <value>Credit card ID is required for credit card payments</value>
+	</data>
+	<data name="Payment_InsufficientCreditLimit" xml:space="preserve">
+	  <value>Insufficient credit card limit</value>
+	</data>
+	<data name="Payment_AlreadyPaid" xml:space="preserve">
+	  <value>Cannot delete a paid payment</value>
+	</data>
+	<data name="Income_NotFound" xml:space="preserve">
+	  <value>Income not found</value>
+	</data>
+	<data name="Income_AlreadyReceived" xml:space="preserve">
+	  <value>Cannot delete a received income</value>
+	</data>
+	<data name="PaymentType_NotFound" xml:space="preserve">
+	  <value>Payment type not found</value>
+	</data>
+	<data name="PaymentType_NameExists" xml:space="preserve">
+	  <value>Payment type with this name already exists</value>
+	</data>
+	<data name="PaymentType_SystemCannotUpdate" xml:space="preserve">
+	  <value>Cannot update system payment type</value>
+	</data>
+	<data name="PaymentType_SystemCannotDelete" xml:space="preserve">
+	  <value>Cannot delete system payment type</value>
+	</data>
+	<data name="PaymentType_InUse" xml:space="preserve">
+	  <value>Cannot delete payment type that is being used in payments</value>
+	</data>
+	<data name="IncomeType_NotFound" xml:space="preserve">
+	  <value>Income type not found</value>
+	</data>
+	<data name="IncomeType_NameExists" xml:space="preserve">
+	  <value>Income type with this name already exists</value>
+	</data>
+	<data name="IncomeType_SystemCannotUpdate" xml:space="preserve">
+	  <value>Cannot update system income type</value>
+	</data>
+	<data name="IncomeType_SystemCannotDelete" xml:space="preserve">
+	  <value>Cannot delete system income type</value>
+	</data>
+	<data name="IncomeType_InUse" xml:space="preserve">
+	  <value>Cannot delete income type that is being used in incomes</value>
+	</data>
+	<data name="PaymentMethod_NotFound" xml:space="preserve">
+	  <value>Payment method not found</value>
+	</data>
+	<data name="PaymentMethod_NameExists" xml:space="preserve">
+	  <value>Payment method with this name already exists</value>
+	</data>
+	<data name="PaymentMethod_SystemCannotUpdate" xml:space="preserve">
+	  <value>Cannot update system payment method</value>
+	</data>
+	<data name="PaymentMethod_SystemCannotDelete" xml:space="preserve">
+	  <value>Cannot delete system payment method</value>
+	</data>
+	<data name="PaymentMethod_InUse" xml:space="preserve">
+	  <value>Cannot delete payment method that is being used in payments</value>
+	</data>
+	<data name="PaymentMethod_HasCreditCards" xml:space="preserve">
+	  <value>Cannot delete payment method that has credit cards linked to it</value>
+	</data>
+	<data name="CreditCard_NotFound" xml:space="preserve">
+	  <value>Credit card not found</value>
+	</data>
+	<data name="CreditCard_InvalidDays" xml:space="preserve">
+	  <value>Closing day and due day must be between 1 and 31</value>
+	</data>
+	<data name="CreditCard_InvalidMethodType" xml:space="preserve">
+	  <value>Payment method must be of type Credit Card</value>
+	</data>
+	<data name="PaymentInstallment_NotFound" xml:space="preserve">
+	  <value>Payment installment not found</value>
+	</data>
+	<data name="IncomeInstallment_NotFound" xml:space="preserve">
+	  <value>Income installment not found</value>
+	</data>
+	<data name="Error_Unauthorized" xml:space="preserve">
+	  <value>You don't have permission to access this resource</value>
+	</data>
+	<data name="Error_InvalidOperation" xml:space="preserve">
+	  <value>Invalid operation</value>
+	</data>
+	<data name="Error_NotFound" xml:space="preserve">
+	  <value>Resource not found</value>
+	</data>
+	<data name="Error_Generic" xml:space="preserve">
+	  <value>An unexpected error occurred</value>
+	</data>
 </root>

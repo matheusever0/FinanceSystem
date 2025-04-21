@@ -25,7 +25,7 @@ namespace FinanceSystem.Application.Services
         {
             var user = await _unitOfWork.Users.GetUserWithRolesAsync(id);
             if (user == null)
-                throw new KeyNotFoundException("User.NotFound");
+                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
 
             return _mapper.Map<UserDto>(user);
         }
@@ -40,11 +40,11 @@ namespace FinanceSystem.Application.Services
         {
             var existingUserName = await _unitOfWork.Users.GetByUsernameAsync(createUserDto.Username);
             if (existingUserName != null)
-                throw new InvalidOperationException("User.UsernameExists");
+                throw new InvalidOperationException(ResourceFinanceApi.User_UsernameExists);
 
             var existingEmail = await _unitOfWork.Users.GetByEmailAsync(createUserDto.Email);
             if (existingEmail != null)
-                throw new InvalidOperationException("User.EmailExists");
+                throw new InvalidOperationException(ResourceFinanceApi.User_EmailExists);
 
             var passwordHash = _authService.HashPassword(createUserDto.Password);
 
@@ -72,13 +72,13 @@ namespace FinanceSystem.Application.Services
         {
             var user = await _unitOfWork.Users.GetUserWithRolesAsync(id);
             if (user == null)
-                throw new KeyNotFoundException("User.NotFound");
+                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
 
             if (!string.IsNullOrEmpty(updateUserDto.Username))
             {
                 var existingUserName = await _unitOfWork.Users.GetByUsernameAsync(updateUserDto.Username);
                 if (existingUserName != null && existingUserName.Id != id)
-                    throw new InvalidOperationException("User.UsernameExists");
+                    throw new InvalidOperationException(ResourceFinanceApi.User_UsernameExists);
 
                 user.UpdateUsername(updateUserDto.Username);
             }
@@ -87,7 +87,7 @@ namespace FinanceSystem.Application.Services
             {
                 var existingEmail = await _unitOfWork.Users.GetByEmailAsync(updateUserDto.Email);
                 if (existingEmail != null && existingEmail.Id != id)
-                    throw new InvalidOperationException("User.EmailExists");
+                    throw new InvalidOperationException(ResourceFinanceApi.User_EmailExists);
 
                 user.UpdateEmail(updateUserDto.Email);
             }
@@ -138,7 +138,7 @@ namespace FinanceSystem.Application.Services
         {
             var user = await _unitOfWork.Users.GetByIdAsync(id);
             if (user == null)
-                throw new KeyNotFoundException("User.NotFound");
+                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
 
             await _unitOfWork.Users.DeleteAsync(user);
             await _unitOfWork.CompleteAsync();

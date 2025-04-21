@@ -1,6 +1,5 @@
 ﻿using FinanceSystem.Application.DTOs.Common;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
 
 namespace FinanceSystem.API.Extensions
 {
@@ -13,42 +12,36 @@ namespace FinanceSystem.API.Extensions
         }
 
         public static ActionResult ApiError<T>(this ControllerBase controller,
-            string messageKey,
-            IStringLocalizer localizer,
+            string message,
             int statusCode = StatusCodes.Status400BadRequest)
         {
-            var response = ApiResponse<T>.ErrorResult(messageKey, statusCode);
-            response.Message = localizer[messageKey].Value;
-
+            var response = ApiResponse<T>.ErrorResult(message, statusCode);
+            response.Message = message; 
             return controller.StatusCode(statusCode, response);
         }
 
         public static ActionResult ApiUnauthorized<T>(this ControllerBase controller,
-            string messageKey,
-            IStringLocalizer localizer)
+            string message)
         {
-            return controller.ApiError<T>(messageKey, localizer, StatusCodes.Status401Unauthorized);
+            return controller.ApiError<T>(message, StatusCodes.Status401Unauthorized);
         }
 
         public static ActionResult ApiNotFound<T>(this ControllerBase controller,
-            string messageKey,
-            IStringLocalizer localizer)
+            string message)
         {
-            return controller.ApiError<T>(messageKey, localizer, StatusCodes.Status404NotFound);
+            return controller.ApiError<T>(message, StatusCodes.Status404NotFound);
         }
 
         public static ActionResult ApiBadRequest<T>(this ControllerBase controller,
-            string messageKey,
-            IStringLocalizer localizer)
+            string message)
         {
-            return controller.ApiError<T>(messageKey, localizer, StatusCodes.Status400BadRequest);
+            return controller.ApiError<T>(message, StatusCodes.Status400BadRequest);
         }
 
         public static ActionResult ApiForbidden<T>(this ControllerBase controller,
-            string messageKey,
-            IStringLocalizer localizer)
+            string message)
         {
-            return controller.ApiError<T>(messageKey, localizer, StatusCodes.Status403Forbidden);
+            return controller.ApiError<T>(message, StatusCodes.Status403Forbidden);
         }
     }
 }

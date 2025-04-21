@@ -1,9 +1,7 @@
 ﻿using FinanceSystem.API.Extensions;
 using FinanceSystem.Application.DTOs.Login;
 using FinanceSystem.Application.Interfaces;
-using FinanceSystem.Resources;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
 using System.Security.Claims;
 
 namespace FinanceSystem.API.Controllers
@@ -13,14 +11,10 @@ namespace FinanceSystem.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly IStringLocalizer<ResourceFinanceApi> _localizer;
 
-        public AuthController(
-            IUserService userService,
-            IStringLocalizer<ResourceFinanceApi> localizer)
+        public AuthController(IUserService userService)
         {
             _userService = userService;
-            _localizer = localizer;
         }
 
         [HttpPost("login")]
@@ -33,26 +27,22 @@ namespace FinanceSystem.API.Controllers
             }
             catch (Exception ex)
             {
-                return this.ApiUnauthorized<LoginResponseDto>(ex.Message, _localizer);
+                return this.ApiUnauthorized<LoginResponseDto>(ex.Message);
             }
         }
 
         [HttpGet("verify-token")]
         public IActionResult VerifyToken()
         {
-
             var identity = User.Identity;
 
             if (identity is null || !identity.IsAuthenticated)
             {
-                return this.ApiUnauthorized<object>(
-                    ResourceFinanceApi.Auth_TokenInvalid,
-                    _localizer);
+                return this.ApiUnauthorized<object>("Auth.TokenInvalid");
             }
 
             var username = User.Identity?.Name;
             return this.ApiOk(new { username });
-
         }
 
         [HttpGet("user-permissions")]
@@ -62,9 +52,7 @@ namespace FinanceSystem.API.Controllers
 
             if (identity is null || !identity.IsAuthenticated)
             {
-                return this.ApiUnauthorized<object>(
-                    ResourceFinanceApi.Auth_UserNotAuthenticated,
-                    _localizer);
+                return this.ApiUnauthorized<object>("Auth.UserNotAuthenticated");
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

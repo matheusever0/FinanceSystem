@@ -365,3 +365,5 @@ FodyWeavers.xsd
 # Ignorar appsettings.Development.json
 appsettings.Development.json
 appsettings.json
+/src/FinanceSystem.API/appsettings.Development.json
+/src/FinanceSystem.API/appsettings.json
