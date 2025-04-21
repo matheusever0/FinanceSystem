@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using FinanceSystem.Resources;
+using System.Security.Claims;
 
 namespace FinanceSystem.API.Extensions
 {
@@ -9,7 +10,7 @@ namespace FinanceSystem.API.Extensions
             var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim == null)
             {
-                throw new UnauthorizedAccessException("User is not authenticated.");
+                throw new UnauthorizedAccessException(ResourceFinanceApi.Auth_UserNotAuthenticated);
             }
             return Guid.Parse(userIdClaim);
         }

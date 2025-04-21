@@ -103,7 +103,7 @@ namespace FinanceSystem.API.Controllers
                     return Forbid();
                 }
 
-                var date = paymentDate ?? DateTime.UtcNow;
+                var date = paymentDate ?? DateTime.Now;
                 var updatedInstallment = await _paymentInstallmentService.MarkAsPaidAsync(id, date);
                 return Ok(updatedInstallment);
             }

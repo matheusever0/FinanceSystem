@@ -47,7 +47,7 @@ public class CreditCard
         DueDay = dueDay;
         Limit = limit;
         AvailableLimit = limit;
-        CreatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.Now;
 
         UserId = user.Id;
         User = user;
@@ -59,7 +59,7 @@ public class CreditCard
     public void UpdateName(string name)
     {
         Name = name;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.Now;
     }
 
     public void UpdateDays(int closingDay, int dueDay)
@@ -72,7 +72,7 @@ public class CreditCard
 
         ClosingDay = closingDay;
         DueDay = dueDay;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.Now;
     }
 
     public void UpdateLimit(decimal limit)
@@ -80,7 +80,7 @@ public class CreditCard
         var difference = limit - Limit;
         Limit = limit;
         AvailableLimit += difference;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.Now;
     }
 
     public void DecrementAvailableLimit(decimal amount)
@@ -89,7 +89,7 @@ public class CreditCard
             throw new InvalidOperationException("Insufficient available limit");
 
         AvailableLimit -= amount;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.Now;
     }
 
     public void IncrementAvailableLimit(decimal amount)
@@ -99,6 +99,6 @@ public class CreditCard
         else
             AvailableLimit += amount;
 
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.Now;
     }
 }

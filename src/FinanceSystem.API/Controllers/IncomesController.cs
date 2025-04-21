@@ -175,7 +175,7 @@ namespace FinanceSystem.API.Controllers
                     return Forbid();
                 }
 
-                var date = receivedDate ?? DateTime.UtcNow;
+                var date = receivedDate ?? DateTime.Now;
                 var income = await _incomeService.MarkAsReceivedAsync(id, date);
                 return Ok(income);
             }

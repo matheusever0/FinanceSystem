@@ -103,7 +103,7 @@ namespace FinanceSystem.API.Controllers
                     return Forbid();
                 }
 
-                var date = receivedDate ?? DateTime.UtcNow;
+                var date = receivedDate ?? DateTime.Now;
                 var updatedInstallment = await _incomeInstallmentService.MarkAsReceivedAsync(id, date);
                 return Ok(updatedInstallment);
             }

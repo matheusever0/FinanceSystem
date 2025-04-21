@@ -184,7 +184,7 @@ namespace FinanceSystem.API.Controllers
                     return Forbid();
                 }
 
-                var date = paymentDate ?? DateTime.UtcNow;
+                var date = paymentDate ?? DateTime.Now;
                 var payment = await _paymentService.MarkAsPaidAsync(id, date);
                 return Ok(payment);
             }

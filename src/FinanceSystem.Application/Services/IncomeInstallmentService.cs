@@ -56,7 +56,7 @@ namespace FinanceSystem.Application.Services
             if (installment == null)
                 throw new KeyNotFoundException(ResourceFinanceApi.IncomeInstallment_NotFound);
 
-            installment.MarkAsReceived(receivedDate ?? DateTime.UtcNow);
+            installment.MarkAsReceived(receivedDate ?? DateTime.Now);
             await _unitOfWork.IncomeInstallments.UpdateAsync(installment);
             await _unitOfWork.CompleteAsync();
 

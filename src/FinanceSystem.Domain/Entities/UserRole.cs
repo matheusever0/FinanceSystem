@@ -16,7 +16,7 @@
             User = user;
             RoleId = role.Id;
             Role = role;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTime.Now;
         }
     }
 }

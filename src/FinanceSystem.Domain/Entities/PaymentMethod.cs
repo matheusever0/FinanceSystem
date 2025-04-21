@@ -27,7 +27,7 @@ public class PaymentMethod
         Description = description;
         Type = type;
         IsSystem = true;
-        CreatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.Now;
         Payments = new List<Payment>();
         CreditCards = new List<CreditCard>();
     }
@@ -41,7 +41,7 @@ public class PaymentMethod
         IsSystem = false;
         UserId = user.Id;
         User = user;
-        CreatedAt = DateTime.UtcNow;
+        CreatedAt = DateTime.Now;
         Payments = new List<Payment>();
         CreditCards = new List<CreditCard>();
     }

@@ -155,7 +155,7 @@ namespace FinanceSystem.Application.Services
                         if (updatePaymentDto.PaymentDate.HasValue)
                             payment.MarkAsPaid(updatePaymentDto.PaymentDate.Value);
                         else
-                            payment.MarkAsPaid(DateTime.UtcNow);
+                            payment.MarkAsPaid(DateTime.Now);
                         break;
                     case PaymentStatus.Overdue:
                         payment.MarkAsOverdue();

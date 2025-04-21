@@ -84,7 +84,7 @@ namespace FinanceSystem.Web.Services
 
             if (_userPermissionsCache.TryGetValue(cacheKey, out var cachedResult))
             {
-                if (DateTime.UtcNow.Subtract(cachedResult.Timestamp).TotalMinutes < 5)
+                if (DateTime.Now.Subtract(cachedResult.Timestamp).TotalMinutes < 5)
                 {
                     _logger.LogDebug("Retornando permissões em cache para o usuário: {UserId}", userId);
                     return cachedResult.Permissions;
@@ -96,7 +96,7 @@ namespace FinanceSystem.Web.Services
                 _logger.LogDebug("Buscando permissões da API para o usuário: {UserId}", userId);
                 var permissions = await _apiService.GetAsync<IEnumerable<PermissionModel>>($"/api/permissions/user/{userId}", token);
 
-                _userPermissionsCache[cacheKey] = (DateTime.UtcNow, permissions);
+                _userPermissionsCache[cacheKey] = (DateTime.Now, permissions);
 
                 return permissions;
             }

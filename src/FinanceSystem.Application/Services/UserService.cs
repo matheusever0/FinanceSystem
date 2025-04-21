@@ -171,7 +171,7 @@ namespace FinanceSystem.Application.Services
             return new LoginResponseDto
             {
                 Token = token,
-                Expiration = DateTime.UtcNow.AddHours(1),
+                Expiration = DateTime.Now.AddHours(1),
                 User = _mapper.Map<UserDto>(user)
             };
         }

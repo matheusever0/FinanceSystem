@@ -123,7 +123,7 @@ namespace FinanceSystem.Application.Services
                         if (updateIncomeDto.ReceivedDate.HasValue)
                             income.MarkAsReceived(updateIncomeDto.ReceivedDate.Value);
                         else
-                            income.MarkAsReceived(DateTime.UtcNow);
+                            income.MarkAsReceived(DateTime.Now);
                         break;
                     case IncomeStatus.Cancelled:
                         income.Cancel();
@@ -176,7 +176,7 @@ namespace FinanceSystem.Application.Services
             if (income == null)
                 throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
 
-            income.MarkAsReceived(receivedDate ?? DateTime.UtcNow);
+            income.MarkAsReceived(receivedDate ?? DateTime.Now);
             await _unitOfWork.Incomes.UpdateAsync(income);
             await _unitOfWork.CompleteAsync();
 

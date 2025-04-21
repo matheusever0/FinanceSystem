@@ -44,7 +44,7 @@ namespace FinanceSystem.Domain.Entities
             Status = IncomeStatus.Pending;
             IsRecurring = isRecurring;
             Notes = notes;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTime.Now;
 
             IncomeTypeId = incomeType.Id;
             IncomeType = incomeType;
@@ -132,7 +132,7 @@ namespace FinanceSystem.Domain.Entities
 
         private void UpdateUpdatedAt()
         {
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.Now;
         }
     }
 }
