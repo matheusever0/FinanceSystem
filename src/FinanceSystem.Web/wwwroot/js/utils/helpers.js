@@ -1,13 +1,94 @@
 ﻿/**
- * Utilitários de validação para o sistema Finance System
+ * Utilitários globais para o sistema Finance System
  */
+
+// ===== FORMATADORES =====
+
+/**
+ * Formata um valor numérico como moeda brasileira
+ * @param {number} value - Valor a ser formatado
+ * @returns {string} - Valor formatado
+ */
+function formatCurrency(value) {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(value);
+}
+
+/**
+ * Formata uma data no padrão brasileiro
+ * @param {Date|string} date - Data a ser formatada
+ * @returns {string} - Data formatada
+ */
+function formatDate(date) {
+    if (typeof date === 'string') {
+        date = new Date(date);
+    }
+    return date.toLocaleDateString('pt-BR');
+}
+
+/**
+ * Formata uma data com hora no padrão brasileiro
+ * @param {Date|string} date - Data a ser formatada
+ * @returns {string} - Data formatada
+ */
+function formatDateTime(date) {
+    if (typeof date === 'string') {
+        date = new Date(date);
+    }
+    return date.toLocaleString('pt-BR');
+}
+
+/**
+ * Formata um número como percentual
+ * @param {number} value - Valor a ser formatado
+ * @param {number} decimals - Número de casas decimais
+ * @returns {string} - Valor formatado
+ */
+function formatPercent(value, decimals = 2) {
+    return value.toFixed(decimals) + '%';
+}
+
+/**
+ * Formata um número com separadores de milhar
+ * @param {number} value - Valor a ser formatado
+ * @returns {string} - Valor formatado
+ */
+function formatNumber(value) {
+    return new Intl.NumberFormat('pt-BR').format(value);
+}
+
+/**
+ * Formata um CPF (000.000.000-00)
+ * @param {string} cpf - CPF a ser formatado
+ * @returns {string} - CPF formatado
+ */
+function formatCPF(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+    if (cpf.length !== 11) return cpf;
+    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+}
+
+/**
+ * Formata um CNPJ (00.000.000/0000-00)
+ * @param {string} cnpj - CNPJ a ser formatado
+ * @returns {string} - CNPJ formatado
+ */
+function formatCNPJ(cnpj) {
+    cnpj = cnpj.replace(/\D/g, '');
+    if (cnpj.length !== 14) return cnpj;
+    return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+}
+
+// ===== VALIDADORES =====
 
 /**
  * Verifica se um valor é um número válido
  * @param {any} value - Valor a ser verificado
  * @returns {boolean} - Resultado da verificação
  */
-export function isValidNumber(value) {
+function isValidNumber(value) {
     return !isNaN(parseFloat(value)) && isFinite(value);
 }
 
@@ -36,7 +117,7 @@ function isValidEmail(email) {
  * @returns {boolean} - Resultado da validação
  */
 function isValidCPF(cpf) {
-    cpf = cpf.replace(/[^\d]/g, '');
+    cpf = cpf.replace(/\D/g, '');
 
     if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
 
@@ -64,53 +145,11 @@ function isValidCPF(cpf) {
 }
 
 /**
- * Valida um CNPJ
- * @param {string} cnpj - CNPJ a ser validado
- * @returns {boolean} - Resultado da validação
- */
-function isValidCNPJ(cnpj) {
-    cnpj = cnpj.replace(/[^\d]/g, '');
-
-    if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false;
-
-    // Validação dos dígitos verificadores
-    let size = cnpj.length - 2;
-    let numbers = cnpj.substring(0, size);
-    let digits = cnpj.substring(size);
-    let sum = 0;
-    let pos = size - 7;
-
-    for (let i = size; i >= 1; i--) {
-        sum += numbers.charAt(size - i) * pos--;
-        if (pos < 2) pos = 9;
-    }
-
-    let result = sum % 11 < 2 ? 0 : 11 - sum % 11;
-    if (result !== parseInt(digits.charAt(0))) return false;
-
-    size += 1;
-    numbers = cnpj.substring(0, size);
-    sum = 0;
-    pos = size - 7;
-
-    for (let i = size; i >= 1; i--) {
-        sum += numbers.charAt(size - i) * pos--;
-        if (pos < 2) pos = 9;
-    }
-
-    result = sum % 11 < 2 ? 0 : 11 - sum % 11;
-    if (result !== parseInt(digits.charAt(1))) return false;
-
-    return true;
-}
-
-/**
  * Valida uma data
  * @param {string} date - Data a ser validada (formato dd/mm/yyyy)
  * @returns {boolean} - Resultado da validação
  */
 function isValidDate(date) {
-    // Verifica formato dd/mm/yyyy
     if (!/^\d{2}\/\d{2}\/\d{4}$/.test(date)) return false;
 
     const parts = date.split('/');
@@ -118,13 +157,9 @@ function isValidDate(date) {
     const month = parseInt(parts[1], 10);
     const year = parseInt(parts[2], 10);
 
-    // Verifica mês válido
     if (month < 1 || month > 12) return false;
 
-    // Verifica dias por mês
     const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-    // Ajuste para ano bissexto
     if (year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) {
         daysInMonth[1] = 29;
     }
@@ -141,23 +176,4 @@ function isValidPassword(password) {
     return password.length >= 6 &&
         /[a-zA-Z]/.test(password) &&
         /\d/.test(password);
-}
-
-/**
- * Valida um CEP
- * @param {string} cep - CEP a ser validado
- * @returns {boolean} - Resultado da validação
- */
-function isValidCEP(cep) {
-    return /^\d{5}-\d{3}$/.test(cep) || /^\d{8}$/.test(cep);
-}
-
-/**
- * Valida um telefone
- * @param {string} phone - Telefone a ser validado
- * @returns {boolean} - Resultado da validação
- */
-function isValidPhone(phone) {
-    phone = phone.replace(/\D/g, '');
-    return phone.length >= 10 && phone.length <= 11;
 }
