@@ -11,46 +11,52 @@ namespace FinanceSystem.Web.Controllers
     public class IncomeInstallmentsController : Controller
     {
         private readonly IIncomeService _incomeService;
-        private readonly ILogger<IncomeInstallmentsController> _logger;
 
-        public IncomeInstallmentsController(
-            IIncomeService incomeService,
-            ILogger<IncomeInstallmentsController> logger)
+        private const string ERROR_PARENT_INCOME_NOT_FOUND = "Não foi possível identificar a receita relacionada a esta parcela.";
+        private const string ERROR_MARK_RECEIVED = "Erro ao marcar parcela como recebida: {0}";
+        private const string ERROR_CANCEL = "Erro ao cancelar parcela: {0}";
+
+        private const string SUCCESS_MARK_RECEIVED = "Parcela marcada como recebida com sucesso!";
+        private const string SUCCESS_CANCEL = "Parcela cancelada com sucesso!";
+
+        public IncomeInstallmentsController(IIncomeService incomeService)
         {
-            _incomeService = incomeService;
-            _logger = logger;
+            _incomeService = incomeService ?? throw new ArgumentNullException(nameof(incomeService));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequirePermission("incomes.edit")]
-        [Route("{id}/MarkAsReceived")]
         public async Task<IActionResult> MarkAsReceived(string id, DateTime? receivedDate = null)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                TempData["ErrorMessage"] = ERROR_PARENT_INCOME_NOT_FOUND;
+                return RedirectToAction("Index", "Incomes");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
-
                 var incomeId = TempData["IncomeId"]?.ToString() ??
                     (await _incomeService.GetInstallmentParentIncomeAsync(id, token));
 
                 if (string.IsNullOrEmpty(incomeId))
                 {
-                    TempData["ErrorMessage"] = "Não foi possível identificar a receita relacionada a esta parcela.";
+                    TempData["ErrorMessage"] = ERROR_PARENT_INCOME_NOT_FOUND;
                     return RedirectToAction("Index", "Incomes");
                 }
 
                 await _incomeService.MarkInstallmentAsReceivedAsync(id, receivedDate ?? DateTime.Now, token);
+                TempData["SuccessMessage"] = SUCCESS_MARK_RECEIVED;
 
-                TempData["SuccessMessage"] = "Parcela marcada como recebida com sucesso!";
                 return RedirectToAction("Details", "Incomes", new { id = incomeId });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao marcar parcela como recebida");
-                TempData["ErrorMessage"] = $"Erro ao marcar parcela como recebida: {ex.Message}";
-
+                TempData["ErrorMessage"] = string.Format(ERROR_MARK_RECEIVED, ex.Message);
                 var incomeId = TempData["IncomeId"]?.ToString();
+
                 if (!string.IsNullOrEmpty(incomeId))
                 {
                     return RedirectToAction("Details", "Incomes", new { id = incomeId });
@@ -63,33 +69,36 @@ namespace FinanceSystem.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequirePermission("incomes.edit")]
-        [Route("{id}/Cancel")]
         public async Task<IActionResult> Cancel(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                TempData["ErrorMessage"] = ERROR_PARENT_INCOME_NOT_FOUND;
+                return RedirectToAction("Index", "Incomes");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
-
                 var incomeId = TempData["IncomeId"]?.ToString() ??
                     (await _incomeService.GetInstallmentParentIncomeAsync(id, token));
 
                 if (string.IsNullOrEmpty(incomeId))
                 {
-                    TempData["ErrorMessage"] = "Não foi possível identificar a receita relacionada a esta parcela.";
+                    TempData["ErrorMessage"] = ERROR_PARENT_INCOME_NOT_FOUND;
                     return RedirectToAction("Index", "Incomes");
                 }
 
                 await _incomeService.CancelInstallmentAsync(id, token);
+                TempData["SuccessMessage"] = SUCCESS_CANCEL;
 
-                TempData["SuccessMessage"] = "Parcela cancelada com sucesso!";
                 return RedirectToAction("Details", "Incomes", new { id = incomeId });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao cancelar parcela");
-                TempData["ErrorMessage"] = $"Erro ao cancelar parcela: {ex.Message}";
-
+                TempData["ErrorMessage"] = string.Format(ERROR_CANCEL, ex.Message);
                 var incomeId = TempData["IncomeId"]?.ToString();
+
                 if (!string.IsNullOrEmpty(incomeId))
                 {
                     return RedirectToAction("Details", "Incomes", new { id = incomeId });

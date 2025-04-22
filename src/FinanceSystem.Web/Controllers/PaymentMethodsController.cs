@@ -13,14 +13,27 @@ namespace FinanceSystem.Web.Controllers
     public class PaymentMethodsController : Controller
     {
         private readonly IPaymentMethodService _paymentMethodService;
-        private readonly ILogger<PaymentMethodsController> _logger;
 
-        public PaymentMethodsController(
-            IPaymentMethodService paymentMethodService,
-            ILogger<PaymentMethodsController> logger)
+        private const string ERROR_LOADING_PAYMENT_METHODS = "Erro ao carregar métodos de pagamento: {0}";
+        private const string ERROR_LOADING_SYSTEM_PAYMENT_METHODS = "Erro ao carregar métodos de pagamento do sistema: {0}";
+        private const string ERROR_LOADING_USER_PAYMENT_METHODS = "Erro ao carregar métodos de pagamento do usuário: {0}";
+        private const string ERROR_LOADING_PAYMENT_METHODS_BY_TYPE = "Erro ao carregar métodos de pagamento por tipo: {0}";
+        private const string ERROR_LOADING_PAYMENT_METHOD_DETAILS = "Erro ao carregar detalhes do método de pagamento: {0}";
+        private const string ERROR_CREATING_PAYMENT_METHOD = "Erro ao criar método de pagamento: {0}";
+        private const string ERROR_LOADING_PAYMENT_METHOD_EDIT = "Erro ao carregar método de pagamento para edição: {0}";
+        private const string ERROR_UPDATING_PAYMENT_METHOD = "Erro ao atualizar método de pagamento: {0}";
+        private const string ERROR_LOADING_PAYMENT_METHOD_DELETE = "Erro ao carregar método de pagamento para exclusão: {0}";
+        private const string ERROR_DELETING_PAYMENT_METHOD = "Erro ao excluir método de pagamento: {0}";
+        private const string ERROR_CANNOT_EDIT_SYSTEM_METHOD = "Não é possível editar métodos de pagamento do sistema";
+        private const string ERROR_CANNOT_DELETE_SYSTEM_METHOD = "Não é possível excluir métodos de pagamento do sistema";
+
+        private const string SUCCESS_CREATE_PAYMENT_METHOD = "Método de pagamento criado com sucesso!";
+        private const string SUCCESS_UPDATE_PAYMENT_METHOD = "Método de pagamento atualizado com sucesso!";
+        private const string SUCCESS_DELETE_PAYMENT_METHOD = "Método de pagamento excluído com sucesso!";
+
+        public PaymentMethodsController(IPaymentMethodService paymentMethodService)
         {
-            _paymentMethodService = paymentMethodService;
-            _logger = logger;
+            _paymentMethodService = paymentMethodService ?? throw new ArgumentNullException(nameof(paymentMethodService));
         }
 
         public async Task<IActionResult> Index()
@@ -33,8 +46,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar métodos de pagamento");
-                TempData["ErrorMessage"] = $"Erro ao carregar métodos de pagamento: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_METHODS, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -51,8 +63,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar métodos de pagamento do sistema");
-                TempData["ErrorMessage"] = $"Erro ao carregar métodos de pagamento do sistema: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_SYSTEM_PAYMENT_METHODS, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -69,14 +80,18 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar métodos de pagamento do usuário");
-                TempData["ErrorMessage"] = $"Erro ao carregar métodos de pagamento do usuário: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_USER_PAYMENT_METHODS, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
 
         public async Task<IActionResult> ByType(int type)
         {
+            if (type <= 0)
+            {
+                return BadRequest("Tipo de método de pagamento inválido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
@@ -90,24 +105,33 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar métodos de pagamento por tipo");
-                TempData["ErrorMessage"] = $"Erro ao carregar métodos de pagamento por tipo: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_METHODS_BY_TYPE, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
 
         public async Task<IActionResult> Details(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do método de pagamento não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
+
+                if (paymentMethod == null)
+                {
+                    return NotFound("Método de pagamento não encontrado");
+                }
+
                 return View(paymentMethod);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar detalhes do método de pagamento");
-                TempData["ErrorMessage"] = $"Erro ao carregar detalhes do método de pagamento: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_METHOD_DETAILS, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -124,37 +148,48 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("paymentmethods.create")]
         public async Task<IActionResult> Create(CreatePaymentMethodModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.PaymentMethodTypes = GetPaymentMethodTypes();
+                return View(model);
+            }
+
             try
             {
-                if (ModelState.IsValid)
-                {
-                    var token = HttpContext.GetJwtToken();
-                    var paymentMethod = await _paymentMethodService.CreatePaymentMethodAsync(model, token);
-                    TempData["SuccessMessage"] = "Método de pagamento criado com sucesso!";
-                    return RedirectToAction(nameof(Details), new { id = paymentMethod.Id });
-                }
+                var token = HttpContext.GetJwtToken();
+                var paymentMethod = await _paymentMethodService.CreatePaymentMethodAsync(model, token);
+                TempData["SuccessMessage"] = SUCCESS_CREATE_PAYMENT_METHOD;
+                return RedirectToAction(nameof(Details), new { id = paymentMethod.Id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao criar método de pagamento");
-                ModelState.AddModelError(string.Empty, $"Erro ao criar método de pagamento: {ex.Message}");
+                ModelState.AddModelError(string.Empty, string.Format(ERROR_CREATING_PAYMENT_METHOD, ex.Message));
+                ViewBag.PaymentMethodTypes = GetPaymentMethodTypes();
+                return View(model);
             }
-
-            ViewBag.PaymentMethodTypes = GetPaymentMethodTypes();
-            return View(model);
         }
 
         [RequirePermission("paymentmethods.edit")]
         public async Task<IActionResult> Edit(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do método de pagamento não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
 
+                if (paymentMethod == null)
+                {
+                    return NotFound("Método de pagamento não encontrado");
+                }
+
                 if (paymentMethod.IsSystem)
                 {
-                    TempData["ErrorMessage"] = "Não é possível editar métodos de pagamento do sistema";
+                    TempData["ErrorMessage"] = ERROR_CANNOT_EDIT_SYSTEM_METHOD;
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
@@ -168,8 +203,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar método de pagamento para edição");
-                TempData["ErrorMessage"] = $"Erro ao carregar método de pagamento para edição: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_METHOD_EDIT, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -179,30 +213,39 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("paymentmethods.edit")]
         public async Task<IActionResult> Edit(string id, UpdatePaymentMethodModel model)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do método de pagamento não fornecido");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
 
+                if (paymentMethod == null)
+                {
+                    return NotFound("Método de pagamento não encontrado");
+                }
+
                 if (paymentMethod.IsSystem)
                 {
-                    TempData["ErrorMessage"] = "Não é possível editar métodos de pagamento do sistema";
+                    TempData["ErrorMessage"] = ERROR_CANNOT_EDIT_SYSTEM_METHOD;
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
-                if (ModelState.IsValid)
-                {
-                    await _paymentMethodService.UpdatePaymentMethodAsync(id, model, token);
-                    TempData["SuccessMessage"] = "Método de pagamento atualizado com sucesso!";
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-
-                return View(model);
+                await _paymentMethodService.UpdatePaymentMethodAsync(id, model, token);
+                TempData["SuccessMessage"] = SUCCESS_UPDATE_PAYMENT_METHOD;
+                return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar método de pagamento");
-                ModelState.AddModelError(string.Empty, $"Erro ao atualizar método de pagamento: {ex.Message}");
+                ModelState.AddModelError(string.Empty, string.Format(ERROR_UPDATING_PAYMENT_METHOD, ex.Message));
                 return View(model);
             }
         }
@@ -210,14 +253,24 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("paymentmethods.delete")]
         public async Task<IActionResult> Delete(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do método de pagamento não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
 
+                if (paymentMethod == null)
+                {
+                    return NotFound("Método de pagamento não encontrado");
+                }
+
                 if (paymentMethod.IsSystem)
                 {
-                    TempData["ErrorMessage"] = "Não é possível excluir métodos de pagamento do sistema";
+                    TempData["ErrorMessage"] = ERROR_CANNOT_DELETE_SYSTEM_METHOD;
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
@@ -225,8 +278,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar método de pagamento para exclusão");
-                TempData["ErrorMessage"] = $"Erro ao carregar método de pagamento para exclusão: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_METHOD_DELETE, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -236,25 +288,34 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("paymentmethods.delete")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do método de pagamento não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
 
+                if (paymentMethod == null)
+                {
+                    return NotFound("Método de pagamento não encontrado");
+                }
+
                 if (paymentMethod.IsSystem)
                 {
-                    TempData["ErrorMessage"] = "Não é possível excluir métodos de pagamento do sistema";
+                    TempData["ErrorMessage"] = ERROR_CANNOT_DELETE_SYSTEM_METHOD;
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
                 await _paymentMethodService.DeletePaymentMethodAsync(id, token);
-                TempData["SuccessMessage"] = "Método de pagamento excluído com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_DELETE_PAYMENT_METHOD;
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao excluir método de pagamento");
-                TempData["ErrorMessage"] = $"Erro ao excluir método de pagamento: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_PAYMENT_METHOD, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }

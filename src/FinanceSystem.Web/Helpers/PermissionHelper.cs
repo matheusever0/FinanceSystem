@@ -1,4 +1,5 @@
 ﻿using FinanceSystem.Web.Extensions;
+using FinanceSystem.Web.Models.Permission;
 using FinanceSystem.Web.Services;
 using System.Security.Claims;
 
@@ -59,5 +60,14 @@ namespace FinanceSystem.Web.Helpers
             }
             return false;
         }
+
+
+        public static bool PodeEditarSomenteProprioUsuario(this IEnumerable<PermissionModel> permissions)
+        {
+            return permissions.Any(e => e.SystemName == "users.edit.unique") &&
+                   !permissions.Any(e => e.SystemName != "users.edit.unique" && e.SystemName.Contains("users.edit"));
+        }
+
+
     }
 }

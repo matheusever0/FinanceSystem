@@ -5,6 +5,8 @@ using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace FinanceSystem.Web.Controllers
 {
@@ -12,22 +14,26 @@ namespace FinanceSystem.Web.Controllers
     {
         private readonly IUserService _userService;
         private readonly IApiService _apiService;
-        private readonly ILogger<AccountController> _logger;
+
+        private const string ERROR_AUTHENTICATION_FAILED = "Falha na autenticação";
+        private const string ERROR_INVALID_TOKEN = "Token inválido";
+        private const string ERROR_IDENTITY_GENERATION = "Falha ao gerar identidade";
+        private const string ERROR_LOGOUT = "Erro ao fazer logout: {0}";
+
+        private const string SUCCESS_LOGIN = "Login realizado com sucesso!";
 
         public AccountController(
             IUserService userService,
-            IApiService apiService,
-            ILogger<AccountController> logger)
+            IApiService apiService)
         {
-            _userService = userService;
-            _apiService = apiService;
-            _logger = logger;
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
         }
 
         [HttpGet]
-        public IActionResult Login(string returnUrl = null, bool expired = false)
+        public IActionResult Login(string returnUrl)
         {
-            if (User.Identity!.IsAuthenticated)
+            if (HttpContext.IsUserAuthenticated())
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -38,7 +44,7 @@ namespace FinanceSystem.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginModel model, string returnUrl = null)
+        public async Task<IActionResult> Login(LoginModel model, string returnUrl)
         {
             ViewData["ReturnUrl"] = returnUrl;
 
@@ -49,18 +55,17 @@ namespace FinanceSystem.Web.Controllers
 
             try
             {
-
                 var result = await _userService.LoginAsync(model);
 
                 if (result == null)
                 {
-                    ModelState.AddModelError(string.Empty, "Falha na autenticação");
+                    ModelState.AddModelError(string.Empty, ERROR_AUTHENTICATION_FAILED);
                     return View(model);
                 }
 
                 if (string.IsNullOrEmpty(result.Token))
                 {
-                    ModelState.AddModelError(string.Empty, "Token inválido");
+                    ModelState.AddModelError(string.Empty, ERROR_INVALID_TOKEN);
                     return View(model);
                 }
 
@@ -70,7 +75,7 @@ namespace FinanceSystem.Web.Controllers
 
                 if (principal == null)
                 {
-                    ModelState.AddModelError(string.Empty, "Falha ao gerar identidade");
+                    ModelState.AddModelError(string.Empty, ERROR_IDENTITY_GENERATION);
                     return View(model);
                 }
 
@@ -83,7 +88,7 @@ namespace FinanceSystem.Web.Controllers
                         ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1)
                     });
 
-                TempData["SuccessMessage"] = "Login realizado com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_LOGIN;
 
                 return RedirectToLocal(returnUrl);
             }
@@ -92,15 +97,6 @@ namespace FinanceSystem.Web.Controllers
                 ModelState.AddModelError("CustomError", ex.Message);
                 return View(model);
             }
-        }
-
-        private IActionResult RedirectToLocal(string returnUrl)
-        {
-            if (Url.IsLocalUrl(returnUrl))
-            {
-                return Redirect(returnUrl);
-            }
-            return RedirectToAction("Index", "Home");
         }
 
         [HttpPost]
@@ -115,8 +111,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro durante o logout");
-                TempData["ErrorMessage"] = $"Erro ao fazer logout: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOGOUT, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -124,6 +119,16 @@ namespace FinanceSystem.Web.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        private IActionResult RedirectToLocal(string returnUrl)
+        {
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }

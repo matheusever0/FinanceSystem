@@ -13,16 +13,28 @@ namespace FinanceSystem.Web.Controllers
     {
         private readonly ICreditCardService _creditCardService;
         private readonly IPaymentMethodService _paymentMethodService;
-        private readonly ILogger<CreditCardsController> _logger;
+
+        private const string ERROR_LOADING_CARDS = "Erro ao carregar cartões de crédito: {0}";
+        private const string ERROR_LOADING_CARD_DETAILS = "Erro ao carregar detalhes do cartão de crédito: {0}";
+        private const string ERROR_PREPARING_FORM = "Erro ao preparar formulário: {0}";
+        private const string ERROR_CREATING_CARD = "Erro ao criar cartão de crédito: {0}";
+        private const string ERROR_UPDATING_CARD = "Erro ao atualizar cartão de crédito: {0}";
+        private const string ERROR_LOADING_CARD_EDIT = "Erro ao carregar cartão de crédito para edição: {0}";
+        private const string ERROR_LOADING_CARD_DELETE = "Erro ao carregar cartão de crédito para exclusão: {0}";
+        private const string ERROR_DELETING_CARD = "Erro ao excluir cartão de crédito: {0}";
+
+        private const string SUCCESS_CREATE_CARD = "Cartão de crédito criado com sucesso!";
+        private const string SUCCESS_UPDATE_CARD = "Cartão de crédito atualizado com sucesso!";
+        private const string SUCCESS_DELETE_CARD = "Cartão de crédito excluído com sucesso!";
+
+        private const int CREDIT_CARD_PAYMENT_TYPE = 2;
 
         public CreditCardsController(
             ICreditCardService creditCardService,
-            IPaymentMethodService paymentMethodService,
-            ILogger<CreditCardsController> logger)
+            IPaymentMethodService paymentMethodService)
         {
-            _creditCardService = creditCardService;
-            _paymentMethodService = paymentMethodService;
-            _logger = logger;
+            _creditCardService = creditCardService ?? throw new ArgumentNullException(nameof(creditCardService));
+            _paymentMethodService = paymentMethodService ?? throw new ArgumentNullException(nameof(paymentMethodService));
         }
 
         public async Task<IActionResult> Index()
@@ -35,24 +47,33 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar cartões de crédito");
-                TempData["ErrorMessage"] = $"Erro ao carregar cartões de crédito: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_CARDS, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
 
         public async Task<IActionResult> Details(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do cartão de crédito não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var creditCard = await _creditCardService.GetCreditCardByIdAsync(id, token);
+
+                if (creditCard == null)
+                {
+                    return NotFound("Cartão de crédito não encontrado");
+                }
+
                 return View(creditCard);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar detalhes do cartão de crédito");
-                TempData["ErrorMessage"] = $"Erro ao carregar detalhes do cartão de crédito: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_CARD_DETAILS, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -63,14 +84,13 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 var token = HttpContext.GetJwtToken();
-                var creditCardPaymentMethods = await _paymentMethodService.GetByTypeAsync(2, token);
+                var creditCardPaymentMethods = await _paymentMethodService.GetByTypeAsync(CREDIT_CARD_PAYMENT_TYPE, token);
                 ViewBag.PaymentMethods = creditCardPaymentMethods;
                 return View();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao preparar formulário de criação de cartão de crédito");
-                TempData["ErrorMessage"] = $"Erro ao preparar formulário: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_PREPARING_FORM, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -80,43 +100,44 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("creditcards.create")]
         public async Task<IActionResult> Create(CreateCreditCardModel model)
         {
-            var token = HttpContext.GetJwtToken();
-
-            try
+            if (!ModelState.IsValid)
             {
-                if (ModelState.IsValid)
-                {
-                    var creditCard = await _creditCardService.CreateCreditCardAsync(model, token);
-                    TempData["SuccessMessage"] = "Cartão de crédito criado com sucesso!";
-                    return RedirectToAction(nameof(Details), new { id = creditCard.Id });
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao criar cartão de crédito");
-                ModelState.AddModelError(string.Empty, $"Erro ao criar cartão de crédito: {ex.Message}");
+                await LoadPaymentMethodsForView();
+                return View(model);
             }
 
             try
             {
-                var creditCardPaymentMethods = await _paymentMethodService.GetByTypeAsync(2, token);
-                ViewBag.PaymentMethods = creditCardPaymentMethods;
+                var token = HttpContext.GetJwtToken();
+                var creditCard = await _creditCardService.CreateCreditCardAsync(model, token);
+                TempData["SuccessMessage"] = SUCCESS_CREATE_CARD;
+                return RedirectToAction(nameof(Details), new { id = creditCard.Id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao recarregar métodos de pagamento para criação de cartão de crédito");
+                ModelState.AddModelError(string.Empty, string.Format(ERROR_CREATING_CARD, ex.Message));
+                await LoadPaymentMethodsForView();
+                return View(model);
             }
-
-            return View(model);
         }
 
         [RequirePermission("creditcards.edit")]
         public async Task<IActionResult> Edit(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do cartão de crédito não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var creditCard = await _creditCardService.GetCreditCardByIdAsync(id, token);
+
+                if (creditCard == null)
+                {
+                    return NotFound("Cartão de crédito não encontrado");
+                }
 
                 var model = new UpdateCreditCardModel
                 {
@@ -130,8 +151,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar cartão de crédito para edição");
-                TempData["ErrorMessage"] = $"Erro ao carregar cartão de crédito para edição: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_CARD_EDIT, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -141,21 +161,26 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("creditcards.edit")]
         public async Task<IActionResult> Edit(string id, UpdateCreditCardModel model)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do cartão de crédito não fornecido");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
             try
             {
-                if (ModelState.IsValid)
-                {
-                    var token = HttpContext.GetJwtToken();
-                    await _creditCardService.UpdateCreditCardAsync(id, model, token);
-                    TempData["SuccessMessage"] = "Cartão de crédito atualizado com sucesso!";
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-                return View(model);
+                var token = HttpContext.GetJwtToken();
+                await _creditCardService.UpdateCreditCardAsync(id, model, token);
+                TempData["SuccessMessage"] = SUCCESS_UPDATE_CARD;
+                return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar cartão de crédito");
-                ModelState.AddModelError(string.Empty, $"Erro ao atualizar cartão de crédito: {ex.Message}");
+                ModelState.AddModelError(string.Empty, string.Format(ERROR_UPDATING_CARD, ex.Message));
                 return View(model);
             }
         }
@@ -163,16 +188,26 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("creditcards.delete")]
         public async Task<IActionResult> Delete(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do cartão de crédito não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var creditCard = await _creditCardService.GetCreditCardByIdAsync(id, token);
+
+                if (creditCard == null)
+                {
+                    return NotFound("Cartão de crédito não encontrado");
+                }
+
                 return View(creditCard);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar cartão de crédito para exclusão");
-                TempData["ErrorMessage"] = $"Erro ao carregar cartão de crédito para exclusão: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_CARD_DELETE, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -182,18 +217,36 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("creditcards.delete")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do cartão de crédito não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 await _creditCardService.DeleteCreditCardAsync(id, token);
-                TempData["SuccessMessage"] = "Cartão de crédito excluído com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_DELETE_CARD;
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao excluir cartão de crédito");
-                TempData["ErrorMessage"] = $"Erro ao excluir cartão de crédito: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_CARD, ex.Message);
                 return RedirectToAction(nameof(Index));
+            }
+        }
+
+        private async Task LoadPaymentMethodsForView()
+        {
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var creditCardPaymentMethods = await _paymentMethodService.GetByTypeAsync(CREDIT_CARD_PAYMENT_TYPE, token);
+                ViewBag.PaymentMethods = creditCardPaymentMethods;
+            }
+            catch
+            {
+                ViewBag.PaymentMethods = new List<object>();
             }
         }
     }

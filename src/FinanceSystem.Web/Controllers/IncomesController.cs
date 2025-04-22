@@ -13,16 +13,34 @@ namespace FinanceSystem.Web.Controllers
     {
         private readonly IIncomeService _incomeService;
         private readonly IIncomeTypeService _incomeTypeService;
-        private readonly ILogger<IncomesController> _logger;
+
+        private const string ERROR_LOADING_INCOMES = "Erro ao carregar receitas: {0}";
+        private const string ERROR_LOADING_PENDING_INCOMES = "Erro ao carregar receitas pendentes: {0}";
+        private const string ERROR_LOADING_RECEIVED_INCOMES = "Erro ao carregar receitas recebidas: {0}";
+        private const string ERROR_LOADING_MONTHLY_INCOMES = "Erro ao carregar receitas por mês: {0}";
+        private const string ERROR_LOADING_INCOMES_BY_TYPE = "Erro ao carregar receitas por tipo: {0}";
+        private const string ERROR_LOADING_INCOME_DETAILS = "Erro ao carregar detalhes da receita: {0}";
+        private const string ERROR_PREPARING_FORM = "Erro ao preparar formulário: {0}";
+        private const string ERROR_CREATING_INCOME = "Erro ao criar receita: {0}";
+        private const string ERROR_LOADING_INCOME_EDIT = "Erro ao carregar receita para edição: {0}";
+        private const string ERROR_UPDATING_INCOME = "Erro ao atualizar receita: {0}";
+        private const string ERROR_LOADING_INCOME_DELETE = "Erro ao carregar receita para exclusão: {0}";
+        private const string ERROR_DELETING_INCOME = "Erro ao excluir receita: {0}";
+        private const string ERROR_MARK_RECEIVED = "Erro ao marcar receita como recebida: {0}";
+        private const string ERROR_CANCEL_INCOME = "Erro ao cancelar receita: {0}";
+
+        private const string SUCCESS_CREATE_INCOME = "Receita criada com sucesso!";
+        private const string SUCCESS_UPDATE_INCOME = "Receita atualizada com sucesso!";
+        private const string SUCCESS_DELETE_INCOME = "Receita excluída com sucesso!";
+        private const string SUCCESS_MARK_RECEIVED = "Receita marcada como recebida com sucesso!";
+        private const string SUCCESS_CANCEL_INCOME = "Receita cancelada com sucesso!";
 
         public IncomesController(
             IIncomeService incomeService,
-            IIncomeTypeService incomeTypeService,
-            ILogger<IncomesController> logger)
+            IIncomeTypeService incomeTypeService)
         {
-            _incomeService = incomeService;
-            _incomeTypeService = incomeTypeService;
-            _logger = logger;
+            _incomeService = incomeService ?? throw new ArgumentNullException(nameof(incomeService));
+            _incomeTypeService = incomeTypeService ?? throw new ArgumentNullException(nameof(incomeTypeService));
         }
 
         public async Task<IActionResult> Index()
@@ -35,8 +53,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar receitas");
-                TempData["ErrorMessage"] = $"Erro ao carregar receitas: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOMES, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -52,8 +69,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar receitas pendentes");
-                TempData["ErrorMessage"] = $"Erro ao carregar receitas pendentes: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PENDING_INCOMES, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -69,24 +85,24 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar receitas recebidas");
-                TempData["ErrorMessage"] = $"Erro ao carregar receitas recebidas: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_RECEIVED_INCOMES, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
 
         public async Task<IActionResult> ByMonth(int month, int year)
         {
+            var currentDate = DateTime.Now;
+
             if (month <= 0 || month > 12)
             {
-                var currentDate = DateTime.Now;
                 month = currentDate.Month;
                 year = currentDate.Year;
             }
 
             if (year <= 0)
             {
-                year = DateTime.Now.Year;
+                year = currentDate.Year;
             }
 
             try
@@ -102,19 +118,28 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar receitas por mês");
-                TempData["ErrorMessage"] = $"Erro ao carregar receitas por mês: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_MONTHLY_INCOMES, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
 
         public async Task<IActionResult> ByType(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do tipo de receita não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var incomes = await _incomeService.GetIncomesByTypeAsync(id, token);
                 var incomeType = await _incomeTypeService.GetIncomeTypeByIdAsync(id, token);
+
+                if (incomeType == null)
+                {
+                    return NotFound("Tipo de receita não encontrado");
+                }
 
                 ViewBag.Title = $"Receitas por Tipo: {incomeType.Name}";
                 ViewBag.TypeId = id;
@@ -123,24 +148,33 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar receitas por tipo");
-                TempData["ErrorMessage"] = $"Erro ao carregar receitas por tipo: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOMES_BY_TYPE, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
 
         public async Task<IActionResult> Details(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID da receita não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var income = await _incomeService.GetIncomeByIdAsync(id, token);
+
+                if (income == null)
+                {
+                    return NotFound("Receita não encontrada");
+                }
+
                 return View(income);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar detalhes da receita");
-                TempData["ErrorMessage"] = $"Erro ao carregar detalhes da receita: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_DETAILS, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -152,15 +186,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
-
                 ViewBag.IncomeTypes = incomeTypes;
-
                 return View();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao preparar formulário de criação de receita");
-                TempData["ErrorMessage"] = $"Erro ao preparar formulário: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_PREPARING_FORM, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -170,46 +201,46 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("incomes.create")]
         public async Task<IActionResult> Create(CreateIncomeModel model)
         {
-            var token = HttpContext.GetJwtToken();
-
-            try
+            if (!ModelState.IsValid)
             {
-                if (ModelState.IsValid)
-                {
-                    _logger.LogInformation("Usuário {UserName} criando nova receita", User.Identity.Name);
-                    var income = await _incomeService.CreateIncomeAsync(model, token);
-                    TempData["SuccessMessage"] = "Receita criada com sucesso!";
-                    return RedirectToAction(nameof(Details), new { id = income.Id });
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao criar receita");
-                ModelState.AddModelError(string.Empty, $"Erro ao criar receita: {ex.Message}");
+                await LoadIncomeTypesForView();
+                return View(model);
             }
 
             try
             {
-                var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
-                ViewBag.IncomeTypes = incomeTypes;
+                var token = HttpContext.GetJwtToken();
+                var income = await _incomeService.CreateIncomeAsync(model, token);
+                TempData["SuccessMessage"] = SUCCESS_CREATE_INCOME;
+                return RedirectToAction(nameof(Details), new { id = income.Id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao recarregar dados de referência para criação de receita");
+                ModelState.AddModelError(string.Empty, string.Format(ERROR_CREATING_INCOME, ex.Message));
+                await LoadIncomeTypesForView();
+                return View(model);
             }
-
-            return View(model);
         }
 
         [RequirePermission("incomes.edit")]
         public async Task<IActionResult> Edit(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID da receita não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var income = await _incomeService.GetIncomeByIdAsync(id, token);
-                var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
 
+                if (income == null)
+                {
+                    return NotFound("Receita não encontrada");
+                }
+
+                var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
                 ViewBag.IncomeTypes = incomeTypes;
 
                 var model = new UpdateIncomeModel
@@ -229,8 +260,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar receita para edição");
-                TempData["ErrorMessage"] = $"Erro ao carregar receita para edição: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_EDIT, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -240,49 +270,55 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("incomes.edit")]
         public async Task<IActionResult> Edit(string id, UpdateIncomeModel model)
         {
-            var token = HttpContext.GetJwtToken();
-
-            try
+            if (string.IsNullOrEmpty(id))
             {
-                if (ModelState.IsValid)
-                {
-                    await _incomeService.UpdateIncomeAsync(id, model, token);
-                    TempData["SuccessMessage"] = "Receita atualizada com sucesso!";
-                    return RedirectToAction(nameof(Details), new { id });
-                }
+                return BadRequest("ID da receita não fornecido");
             }
-            catch (Exception ex)
+
+            if (!ModelState.IsValid)
             {
-                _logger.LogError(ex, "Erro ao atualizar receita");
-                ModelState.AddModelError(string.Empty, $"Erro ao atualizar receita: {ex.Message}");
+                await LoadIncomeTypesForView();
+                return View(model);
             }
 
             try
             {
-                var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
-                ViewBag.IncomeTypes = incomeTypes;
+                var token = HttpContext.GetJwtToken();
+                await _incomeService.UpdateIncomeAsync(id, model, token);
+                TempData["SuccessMessage"] = SUCCESS_UPDATE_INCOME;
+                return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao recarregar dados de referência para edição de receita");
+                ModelState.AddModelError(string.Empty, string.Format(ERROR_UPDATING_INCOME, ex.Message));
+                await LoadIncomeTypesForView();
+                return View(model);
             }
-
-            return View(model);
         }
 
         [RequirePermission("incomes.delete")]
         public async Task<IActionResult> Delete(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID da receita não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var income = await _incomeService.GetIncomeByIdAsync(id, token);
+
+                if (income == null)
+                {
+                    return NotFound("Receita não encontrada");
+                }
+
                 return View(income);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar receita para exclusão");
-                TempData["ErrorMessage"] = $"Erro ao carregar receita para exclusão: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_DELETE, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -292,17 +328,21 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("incomes.delete")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID da receita não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 await _incomeService.DeleteIncomeAsync(id, token);
-                TempData["SuccessMessage"] = "Receita excluída com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_DELETE_INCOME;
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao excluir receita");
-                TempData["ErrorMessage"] = $"Erro ao excluir receita: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_INCOME, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -312,17 +352,21 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("incomes.edit")]
         public async Task<IActionResult> MarkAsReceived(string id, DateTime? receivedDate = null)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID da receita não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 await _incomeService.MarkAsReceivedAsync(id, receivedDate ?? DateTime.Now, token);
-                TempData["SuccessMessage"] = "Receita marcada como recebida com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_MARK_RECEIVED;
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao marcar receita como recebida");
-                TempData["ErrorMessage"] = $"Erro ao marcar receita como recebida: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_MARK_RECEIVED, ex.Message);
                 return RedirectToAction(nameof(Details), new { id });
             }
         }
@@ -332,18 +376,36 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("incomes.edit")]
         public async Task<IActionResult> Cancel(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID da receita não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 await _incomeService.CancelIncomeAsync(id, token);
-                TempData["SuccessMessage"] = "Receita cancelada com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_CANCEL_INCOME;
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao cancelar receita");
-                TempData["ErrorMessage"] = $"Erro ao cancelar receita: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_CANCEL_INCOME, ex.Message);
                 return RedirectToAction(nameof(Details), new { id });
+            }
+        }
+
+        private async Task LoadIncomeTypesForView()
+        {
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
+                ViewBag.IncomeTypes = incomeTypes;
+            }
+            catch
+            {
+                ViewBag.IncomeTypes = new List<object>();
             }
         }
     }

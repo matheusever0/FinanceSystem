@@ -1,9 +1,14 @@
 ﻿using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
+using FinanceSystem.Web.Helpers;
 using FinanceSystem.Web.Models.User;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FinanceSystem.Web.Controllers
 {
@@ -13,18 +18,32 @@ namespace FinanceSystem.Web.Controllers
         private readonly IUserService _userService;
         private readonly IRoleService _roleService;
         private readonly IPermissionService _permissionService;
-        private readonly ILogger<UsersController> _logger;
+
+        private const string ERROR_LOADING_USERS = "Erro ao carregar usuários: {0}";
+        private const string ERROR_LOADING_USER_DETAILS = "Erro ao carregar detalhes do usuário: {0}";
+        private const string ERROR_PREPARING_FORM = "Erro ao preparar formulário: {0}";
+        private const string ERROR_CREATING_USER = "Erro ao criar usuário: {0}";
+        private const string ERROR_EDITING_USER = "Erro ao carregar usuário para edição: {0}";
+        private const string ERROR_UPDATING_USER = "Erro ao atualizar usuário: {0}";
+        private const string ERROR_DELETING_USER = "Erro ao excluir usuário: {0}";
+        private const string ERROR_LOADING_USER_DELETE = "Erro ao carregar usuário para exclusão: {0}";
+        private const string ERROR_PERMISSION_DENIED = "Você não tem permissão para editar outros usuários, apenas o seu.";
+
+        private const string SUCCESS_USER_CREATED = "Usuário criado com sucesso!";
+        private const string SUCCESS_USER_UPDATED = "Usuário atualizado com sucesso!";
+        private const string SUCCESS_USER_DELETED = "Usuário excluído com sucesso!";
+
+        private const string VALIDATION_SELECT_ROLE = "É necessário selecionar pelo menos um perfil.";
+        private const string VALIDATION_EMAIL_REQUIRED = "É necessário ter um email cadastrado.";
 
         public UsersController(
             IUserService userService,
             IRoleService roleService,
-            IPermissionService permissionService,
-            ILogger<UsersController> logger)
+            IPermissionService permissionService)
         {
-            _userService = userService;
-            _roleService = roleService;
-            _permissionService = permissionService;
-            _logger = logger;
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _roleService = roleService ?? throw new ArgumentNullException(nameof(roleService));
+            _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         }
 
         [RequirePermission("users.view")]
@@ -32,15 +51,13 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                _logger.LogInformation("Usuário {UserName} acessando listagem de usuários", User.Identity.Name);
                 var token = HttpContext.GetJwtToken();
                 var users = await _userService.GetAllUsersAsync(token);
                 return View(users);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar listagem de usuários");
-                TempData["ErrorMessage"] = $"Erro ao carregar usuários: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_USERS, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -48,17 +65,26 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("users.view")]
         public async Task<IActionResult> Details(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do usuário não fornecido");
+            }
+
             try
             {
-                _logger.LogInformation("Usuário {UserName} visualizando detalhes do usuário {UserId}", User.Identity.Name, id);
                 var token = HttpContext.GetJwtToken();
                 var user = await _userService.GetUserByIdAsync(id, token);
+
+                if (user == null)
+                {
+                    return NotFound("Usuário não encontrado");
+                }
+
                 return View(user);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar detalhes do usuário {UserId}", id);
-                TempData["ErrorMessage"] = $"Erro ao carregar detalhes do usuário: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_USER_DETAILS, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -68,22 +94,14 @@ namespace FinanceSystem.Web.Controllers
         {
             try
             {
-                _logger.LogInformation("Usuário {UserName} acessando página de criação de usuário", User.Identity.Name);
                 var token = HttpContext.GetJwtToken();
                 var roles = await _roleService.GetAllRolesAsync(token);
-
-                if (!User.IsInRole("Administrador"))
-                {
-                    roles = roles.Where(r => r.Name != "Administrador").ToList();
-                }
-
                 ViewBag.Roles = roles;
                 return View();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao preparar formulário de criação de usuário");
-                TempData["ErrorMessage"] = $"Erro ao preparar formulário: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_PREPARING_FORM, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -93,92 +111,81 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("users.create")]
         public async Task<IActionResult> Create(CreateUserModel model, List<string> selectedRoles)
         {
+            var token = HttpContext.GetJwtToken();
+
             try
             {
-                var token = HttpContext.GetJwtToken();
-
-                if (!User.IsInRole("Administrador") && selectedRoles != null)
+                if (selectedRoles == null || !selectedRoles.Any())
                 {
-                    selectedRoles = selectedRoles.Where(r => r != "Administrador").ToList();
-                }
-
-                if (selectedRoles != null && selectedRoles.Any())
-                {
-                    model.Roles = selectedRoles;
-                }
-                else
-                {
-                    ModelState.AddModelError("Roles", "É necessário selecionar pelo menos um perfil.");
+                    ModelState.AddModelError("Roles", VALIDATION_SELECT_ROLE);
                     var roles = await _roleService.GetAllRolesAsync(token);
-                    if (!User.IsInRole("Administrador"))
-                    {
-                        roles = roles.Where(r => r.Name != "Administrador").ToList();
-                    }
                     ViewBag.Roles = roles;
                     return View(model);
                 }
 
-                if (ModelState.IsValid)
+                model.Roles = selectedRoles;
+
+                if (!ModelState.IsValid)
                 {
-                    _logger.LogInformation("Usuário {UserName} criando novo usuário {NewUserName}", User.Identity.Name, model.Username);
-                    await _userService.CreateUserAsync(model, token);
-                    TempData["SuccessMessage"] = "Usuário criado com sucesso!";
-                    return RedirectToAction(nameof(Index));
+                    var roles = await _roleService.GetAllRolesAsync(token);
+                    ViewBag.Roles = roles;
+                    return View(model);
                 }
 
-                var rolesList = await _roleService.GetAllRolesAsync(token);
-
-                if (!User.IsInRole("Administrador"))
-                {
-                    rolesList = rolesList.Where(r => r.Name != "Administrador").ToList();
-                }
-
-                ViewBag.Roles = rolesList;
-                return View(model);
+                await _userService.CreateUserAsync(model, token);
+                TempData["SuccessMessage"] = SUCCESS_USER_CREATED;
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao criar usuário {Username}", model.Username);
-                TempData["ErrorMessage"] = $"Erro ao criar usuário: {ex.Message}";
-                return RedirectToAction(nameof(Index));
+                TempData["ErrorMessage"] = string.Format(ERROR_CREATING_USER, ex.Message);
+
+                try
+                {
+                    var roles = await _roleService.GetAllRolesAsync(token);
+                    ViewBag.Roles = roles;
+                    return View(model);
+                }
+                catch
+                {
+                    return RedirectToAction(nameof(Index));
+                }
             }
         }
 
         [RequirePermission("users.edit, users.edit.unique")]
         public async Task<IActionResult> Edit(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do usuário não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
+                var currentUserId = HttpContext.GetCurrentUserId();
                 var user = await _userService.GetUserByIdAsync(id, token);
 
-                var permissions = await _permissionService.GetPermissionsByUserIdAsync(HttpContext.GetCurrentUserId(), token);
-                var any = permissions.Any(e => e.SystemName.Contains("users.edit.unique") && !e.SystemName.Contains("users.edit") && HttpContext.GetCurrentUserId() != user.Id);
-
-                if (any)
+                if (user == null)
                 {
-                    TempData["ErrorMessage"] = "Você não tem permissão para editar outros usuários apenas o seu.";
+                    return NotFound("Usuário não encontrado");
+                }
+
+                var permissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId, token);
+                var canEditOnlyOwnUser = PermissionHelper.PodeEditarSomenteProprioUsuario(permissions);
+
+                if (canEditOnlyOwnUser && currentUserId != user.Id)
+                {
+                    TempData["ErrorMessage"] = ERROR_PERMISSION_DENIED;
                     return RedirectToAction(nameof(Index));
                 }
 
-
-                bool isTargetUserAdmin = user.Roles.Contains("Administrador");
-
-                if (!User.IsInRole("Administrador") && isTargetUserAdmin)
-                {
-                    _logger.LogWarning("Usuário {UserName} tentou editar um administrador {AdminId}", User.Identity.Name, id);
-                    TempData["ErrorMessage"] = "Você não tem permissão para editar administradores.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                _logger.LogInformation("Usuário {UserName} editando usuário {UserId}", User.Identity.Name, id);
                 var roles = await _roleService.GetAllRolesAsync(token);
-
-                if (!User.IsInRole("Administrador"))
+                if (canEditOnlyOwnUser)
                 {
-                    roles = roles.Where(r => r.Name != "Administrador").ToList();
+                    roles = roles.Where(r => r.Name != "Admin").ToList();
                 }
-
                 ViewBag.Roles = roles;
 
                 var model = new UpdateUserModel
@@ -193,8 +200,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar usuário {UserId} para edição", id);
-                TempData["ErrorMessage"] = $"Erro ao carregar usuário para edição: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_EDITING_USER, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -204,117 +210,127 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("users.edit, users.edit.unique")]
         public async Task<IActionResult> Edit(string id, UpdateUserModel model, List<string> selectedRoles)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do usuário não fornecido");
+            }
+
+            var token = HttpContext.GetJwtToken();
+
             try
             {
-                var token = HttpContext.GetJwtToken();
-
+                var currentUserId = HttpContext.GetCurrentUserId();
                 var currentUser = await _userService.GetUserByIdAsync(id, token);
 
-                var permissions = await _permissionService.GetPermissionsByUserIdAsync(HttpContext.GetCurrentUserId(), token);
-
-                var any = permissions.Any(e => e.SystemName.Contains("users.edit.unique") && !e.SystemName.Contains("users.edit") && HttpContext.GetCurrentUserId() != currentUser.Id);
-
-                if (any)
+                if (currentUser == null)
                 {
-                    TempData["ErrorMessage"] = "Você não tem permissão para editar outros usuários apenas o seu.";
+                    return NotFound("Usuário não encontrado");
+                }
+
+                var permissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId, token);
+                var canEditOnlyOwnUser = PermissionHelper.PodeEditarSomenteProprioUsuario(permissions);
+
+                if (canEditOnlyOwnUser && currentUserId != currentUser.Id)
+                {
+                    TempData["ErrorMessage"] = ERROR_PERMISSION_DENIED;
                     return RedirectToAction(nameof(Index));
                 }
 
-
-                bool isTargetUserAdmin = currentUser.Roles.Contains("Administrador");
-
-                if (!User.IsInRole("Administrador") && isTargetUserAdmin)
+                if (string.IsNullOrEmpty(model.Email))
                 {
-                    _logger.LogWarning("Usuário {UserName} tentou editar um administrador {AdminId}", User.Identity.Name, id);
-                    TempData["ErrorMessage"] = "Você não tem permissão para editar administradores.";
-                    return RedirectToAction(nameof(Index));
+                    ModelState.AddModelError("Email", VALIDATION_EMAIL_REQUIRED);
                 }
 
-                if (!User.IsInRole("Administrador") && selectedRoles != null)
+                if (selectedRoles == null || !selectedRoles.Any())
                 {
-                    selectedRoles = selectedRoles.Where(r => r != "Administrador").ToList();
+                    ModelState.AddModelError("Roles", VALIDATION_SELECT_ROLE);
 
-                    if (isTargetUserAdmin)
-                    {
-                        selectedRoles.Add("Administrador");
-                    }
-                }
-
-                if (selectedRoles != null && selectedRoles.Any())
-                {
-                    model.Roles = selectedRoles;
-                }
-                else
-                {
-                    ModelState.AddModelError("Roles", "É necessário selecionar pelo menos um perfil.");
                     var rolesList = await _roleService.GetAllRolesAsync(token);
-
-                    if (!User.IsInRole("Administrador"))
+                    if (canEditOnlyOwnUser)
                     {
-                        rolesList = rolesList.Where(r => r.Name != "Administrador").ToList();
+                        rolesList = rolesList.Where(r => r.Name != "Admin").ToList();
                     }
-
                     ViewBag.Roles = rolesList;
+
                     return View(model);
                 }
+
+                model.Roles = selectedRoles;
 
                 if (string.IsNullOrWhiteSpace(model.Password))
                 {
                     ModelState.Remove("Password");
                 }
 
-                if (ModelState.IsValid)
+                if (!ModelState.IsValid)
                 {
-                    _logger.LogInformation("Usuário {UserName} atualizando usuário {UserId} - Status Ativo: {IsActive}",
-                        User.Identity.Name, id, model.IsActive);
+                    var roles = await _roleService.GetAllRolesAsync(token);
+                    if (canEditOnlyOwnUser)
+                    {
+                        roles = roles.Where(r => r.Name != "Admin").ToList();
+                    }
+                    ViewBag.Roles = roles;
 
-                    await _userService.UpdateUserAsync(id, model, token);
-                    TempData["SuccessMessage"] = "Usuário atualizado com sucesso!";
-                    return RedirectToAction(nameof(Index));
+                    return View(model);
                 }
 
-                var roles = await _roleService.GetAllRolesAsync(token);
-
-                if (!User.IsInRole("Administrador"))
-                {
-                    roles = roles.Where(r => r.Name != "Administrador").ToList();
-                }
-
-                ViewBag.Roles = roles;
-                return View(model);
+                await _userService.UpdateUserAsync(id, model, token);
+                TempData["SuccessMessage"] = SUCCESS_USER_UPDATED;
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar usuário {UserId}", id);
-                TempData["ErrorMessage"] = $"Erro ao atualizar usuário: {ex.Message}";
-                return RedirectToAction(nameof(Index));
+                TempData["ErrorMessage"] = string.Format(ERROR_UPDATING_USER, ex.Message);
+
+                try
+                {
+                    var roles = await _roleService.GetAllRolesAsync(token);
+                    var canEditOnlyOwnUser = await CheckCanEditOnlyOwnUserAsync(token);
+
+                    if (canEditOnlyOwnUser)
+                    {
+                        roles = roles.Where(r => r.Name != "Admin").ToList();
+                    }
+
+                    ViewBag.Roles = roles;
+                    return View(model);
+                }
+                catch
+                {
+                    return RedirectToAction(nameof(Index));
+                }
             }
         }
 
         [RequirePermission("users.delete")]
         public async Task<IActionResult> Delete(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do usuário não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var user = await _userService.GetUserByIdAsync(id, token);
 
-                bool isTargetUserAdmin = user.Roles.Contains("Administrador");
-
-                if (!User.IsInRole("Administrador") && isTargetUserAdmin)
+                if (user == null)
                 {
-                    _logger.LogWarning("Usuário {UserName} tentou excluir um administrador {AdminId}", User.Identity.Name, id);
-                    TempData["ErrorMessage"] = "Você não tem permissão para excluir administradores.";
+                    return NotFound("Usuário não encontrado");
+                }
+
+                if (id == HttpContext.GetCurrentUserId())
+                {
+                    TempData["ErrorMessage"] = "Não é possível excluir o próprio usuário";
                     return RedirectToAction(nameof(Index));
                 }
 
-                _logger.LogInformation("Usuário {UserName} acessando página de exclusão do usuário {UserId}", User.Identity.Name, id);
                 return View(user);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar usuário {UserId} para exclusão", id);
-                TempData["ErrorMessage"] = $"Erro ao carregar usuário para exclusão: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_USER_DELETE, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -324,31 +340,36 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("users.delete")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do usuário não fornecido");
+            }
+
             try
             {
-                var token = HttpContext.GetJwtToken();
-
-                var user = await _userService.GetUserByIdAsync(id, token);
-                bool isTargetUserAdmin = user.Roles.Contains("Administrador");
-
-                if (!User.IsInRole("Administrador") && isTargetUserAdmin)
+                if (id == HttpContext.GetCurrentUserId())
                 {
-                    _logger.LogWarning("Usuário {UserName} tentou excluir um administrador {AdminId}", User.Identity.Name, id);
-                    TempData["ErrorMessage"] = "Você não tem permissão para excluir administradores.";
+                    TempData["ErrorMessage"] = "Não é possível excluir o próprio usuário";
                     return RedirectToAction(nameof(Index));
                 }
 
-                _logger.LogInformation("Usuário {UserName} excluindo usuário {UserId}", User.Identity.Name, id);
+                var token = HttpContext.GetJwtToken();
                 await _userService.DeleteUserAsync(id, token);
-                TempData["SuccessMessage"] = "Usuário excluído com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_USER_DELETED;
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao excluir usuário {UserId}", id);
-                TempData["ErrorMessage"] = $"Erro ao excluir usuário: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_USER, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
+        }
+
+        private async Task<bool> CheckCanEditOnlyOwnUserAsync(string token)
+        {
+            var currentUserId = HttpContext.GetCurrentUserId();
+            var permissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId, token);
+            return PermissionHelper.PodeEditarSomenteProprioUsuario(permissions);
         }
     }
 }

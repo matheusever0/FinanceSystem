@@ -15,20 +15,44 @@ namespace FinanceSystem.Web.Controllers
         private readonly IPaymentTypeService _paymentTypeService;
         private readonly IPaymentMethodService _paymentMethodService;
         private readonly ICreditCardService _creditCardService;
-        private readonly ILogger<PaymentsController> _logger;
+
+        private const string ERROR_LOADING_PAYMENTS = "Erro ao carregar pagamentos: {0}";
+        private const string ERROR_LOADING_PENDING_PAYMENTS = "Erro ao carregar pagamentos pendentes: {0}";
+        private const string ERROR_LOADING_OVERDUE_PAYMENTS = "Erro ao carregar pagamentos vencidos: {0}";
+        private const string ERROR_LOADING_MONTHLY_PAYMENTS = "Erro ao carregar pagamentos por mês: {0}";
+        private const string ERROR_LOADING_PAYMENTS_BY_TYPE = "Erro ao carregar pagamentos por tipo: {0}";
+        private const string ERROR_LOADING_PAYMENTS_BY_METHOD = "Erro ao carregar pagamentos por método: {0}";
+        private const string ERROR_LOADING_PAYMENT_DETAILS = "Erro ao carregar detalhes do pagamento: {0}";
+        private const string ERROR_PREPARING_FORM = "Erro ao preparar formulário: {0}";
+        private const string ERROR_CREATING_PAYMENT = "Erro ao criar pagamento: {0}";
+        private const string ERROR_LOADING_PAYMENT_EDIT = "Erro ao carregar pagamento para edição: {0}";
+        private const string ERROR_UPDATING_PAYMENT = "Erro ao atualizar pagamento: {0}";
+        private const string ERROR_LOADING_PAYMENT_DELETE = "Erro ao carregar pagamento para exclusão: {0}";
+        private const string ERROR_DELETING_PAYMENT = "Erro ao excluir pagamento: {0}";
+        private const string ERROR_MARK_PAID = "Erro ao marcar pagamento como pago: {0}";
+        private const string ERROR_MARK_OVERDUE = "Erro ao marcar pagamento como vencido: {0}";
+        private const string ERROR_CANCEL_PAYMENT = "Erro ao cancelar pagamento: {0}";
+        private const string ERROR_CREDIT_CARD_REQUIRED = "Cartão de crédito é obrigatório para este método de pagamento.";
+
+        private const string SUCCESS_CREATE_PAYMENT = "Pagamento criado com sucesso!";
+        private const string SUCCESS_UPDATE_PAYMENT = "Pagamento atualizado com sucesso!";
+        private const string SUCCESS_DELETE_PAYMENT = "Pagamento excluído com sucesso!";
+        private const string SUCCESS_MARK_PAID = "Pagamento marcado como pago com sucesso!";
+        private const string SUCCESS_MARK_OVERDUE = "Pagamento marcado como vencido com sucesso!";
+        private const string SUCCESS_CANCEL_PAYMENT = "Pagamento cancelado com sucesso!";
+
+        private const int CREDIT_CARD_PAYMENT_TYPE = 2;
 
         public PaymentsController(
             IPaymentService paymentService,
             IPaymentTypeService paymentTypeService,
             IPaymentMethodService paymentMethodService,
-            ICreditCardService creditCardService,
-            ILogger<PaymentsController> logger)
+            ICreditCardService creditCardService)
         {
-            _paymentService = paymentService;
-            _paymentTypeService = paymentTypeService;
-            _paymentMethodService = paymentMethodService;
-            _creditCardService = creditCardService;
-            _logger = logger;
+            _paymentService = paymentService ?? throw new ArgumentNullException(nameof(paymentService));
+            _paymentTypeService = paymentTypeService ?? throw new ArgumentNullException(nameof(paymentTypeService));
+            _paymentMethodService = paymentMethodService ?? throw new ArgumentNullException(nameof(paymentMethodService));
+            _creditCardService = creditCardService ?? throw new ArgumentNullException(nameof(creditCardService));
         }
 
         public async Task<IActionResult> Index()
@@ -41,8 +65,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar pagamentos");
-                TempData["ErrorMessage"] = $"Erro ao carregar pagamentos: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENTS, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -58,8 +81,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar pagamentos pendentes");
-                TempData["ErrorMessage"] = $"Erro ao carregar pagamentos pendentes: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PENDING_PAYMENTS, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -75,24 +97,24 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar pagamentos vencidos");
-                TempData["ErrorMessage"] = $"Erro ao carregar pagamentos vencidos: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_OVERDUE_PAYMENTS, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
 
         public async Task<IActionResult> ByMonth(int month, int year)
         {
+            var currentDate = DateTime.Now;
+
             if (month <= 0 || month > 12)
             {
-                var currentDate = DateTime.Now;
                 month = currentDate.Month;
                 year = currentDate.Year;
             }
 
             if (year <= 0)
             {
-                year = DateTime.Now.Year;
+                year = currentDate.Year;
             }
 
             try
@@ -108,19 +130,29 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar pagamentos por mês");
-                TempData["ErrorMessage"] = $"Erro ao carregar pagamentos por mês: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_MONTHLY_PAYMENTS, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
 
         public async Task<IActionResult> ByType(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do tipo de pagamento não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
-                var payments = await _paymentService.GetPaymentsByTypeAsync(id, token);
                 var paymentType = await _paymentTypeService.GetPaymentTypeByIdAsync(id, token);
+
+                if (paymentType == null)
+                {
+                    return NotFound("Tipo de pagamento não encontrado");
+                }
+
+                var payments = await _paymentService.GetPaymentsByTypeAsync(id, token);
 
                 ViewBag.Title = $"Pagamentos por Tipo: {paymentType.Name}";
                 ViewBag.TypeId = id;
@@ -129,19 +161,29 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar pagamentos por tipo");
-                TempData["ErrorMessage"] = $"Erro ao carregar pagamentos por tipo: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENTS_BY_TYPE, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
 
         public async Task<IActionResult> ByMethod(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do método de pagamento não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
-                var payments = await _paymentService.GetPaymentsByMethodAsync(id, token);
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
+
+                if (paymentMethod == null)
+                {
+                    return NotFound("Método de pagamento não encontrado");
+                }
+
+                var payments = await _paymentService.GetPaymentsByMethodAsync(id, token);
 
                 ViewBag.Title = $"Pagamentos por Método: {paymentMethod.Name}";
                 ViewBag.MethodId = id;
@@ -150,24 +192,33 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar pagamentos por método");
-                TempData["ErrorMessage"] = $"Erro ao carregar pagamentos por método: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENTS_BY_METHOD, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
 
         public async Task<IActionResult> Details(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do pagamento não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var payment = await _paymentService.GetPaymentByIdAsync(id, token);
+
+                if (payment == null)
+                {
+                    return NotFound("Pagamento não encontrado");
+                }
+
                 return View(payment);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar detalhes do pagamento");
-                TempData["ErrorMessage"] = $"Erro ao carregar detalhes do pagamento: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_DETAILS, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -178,20 +229,12 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 var token = HttpContext.GetJwtToken();
-                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
-                var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
-                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
-
-                ViewBag.PaymentTypes = paymentTypes;
-                ViewBag.PaymentMethods = paymentMethods;
-                ViewBag.CreditCards = creditCards;
-
+                await LoadReferenceDataForView(token);
                 return View();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao preparar formulário de criação de pagamento");
-                TempData["ErrorMessage"] = $"Erro ao preparar formulário: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_PREPARING_FORM, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -209,9 +252,9 @@ namespace FinanceSystem.Web.Controllers
                 {
                     var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(model.PaymentMethodId, token);
 
-                    if (paymentMethod != null && paymentMethod.Type == 2)
+                    if (paymentMethod != null && paymentMethod.Type == CREDIT_CARD_PAYMENT_TYPE)
                     {
-                        ModelState.AddModelError("CreditCardId", "Cartão de crédito é obrigatório para este método de pagamento.");
+                        ModelState.AddModelError("CreditCardId", ERROR_CREDIT_CARD_REQUIRED);
                     }
                     else
                     {
@@ -219,45 +262,42 @@ namespace FinanceSystem.Web.Controllers
                     }
                 }
 
-                if (ModelState.IsValid)
+                if (!ModelState.IsValid)
                 {
-                    _logger.LogInformation("Usuário {UserName} criando novo pagamento", User.Identity.Name);
-                    var payment = await _paymentService.CreatePaymentAsync(model, token);
-                    TempData["SuccessMessage"] = "Pagamento criado com sucesso!";
-                    return RedirectToAction(nameof(Details), new { id = payment.Id });
+                    await LoadReferenceDataForView(token);
+                    return View(model);
                 }
+
+                var payment = await _paymentService.CreatePaymentAsync(model, token);
+                TempData["SuccessMessage"] = SUCCESS_CREATE_PAYMENT;
+                return RedirectToAction(nameof(Details), new { id = payment.Id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao criar pagamento");
-                ModelState.AddModelError(string.Empty, $"Erro ao criar pagamento: {ex.Message}");
+                ModelState.AddModelError(string.Empty, string.Format(ERROR_CREATING_PAYMENT, ex.Message));
+                await LoadReferenceDataForView(token);
+                return View(model);
             }
-
-            try
-            {
-                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
-                var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
-                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
-
-                ViewBag.PaymentTypes = paymentTypes;
-                ViewBag.PaymentMethods = paymentMethods;
-                ViewBag.CreditCards = creditCards;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao recarregar dados de referência para criação de pagamento");
-            }
-
-            return View(model);
         }
 
         [RequirePermission("payments.edit")]
         public async Task<IActionResult> Edit(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do pagamento não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var payment = await _paymentService.GetPaymentByIdAsync(id, token);
+
+                if (payment == null)
+                {
+                    return NotFound("Pagamento não encontrado");
+                }
+
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
 
@@ -279,8 +319,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar pagamento para edição");
-                TempData["ErrorMessage"] = $"Erro ao carregar pagamento para edição: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_EDIT, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -290,52 +329,75 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("payments.edit")]
         public async Task<IActionResult> Edit(string id, UpdatePaymentModel model)
         {
-            var token = HttpContext.GetJwtToken();
-
-            try
+            if (string.IsNullOrEmpty(id))
             {
-                if (ModelState.IsValid)
-                {
-                    await _paymentService.UpdatePaymentAsync(id, model, token);
-                    TempData["SuccessMessage"] = "Pagamento atualizado com sucesso!";
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao atualizar pagamento");
-                ModelState.AddModelError(string.Empty, $"Erro ao atualizar pagamento: {ex.Message}");
+                return BadRequest("ID do pagamento não fornecido");
             }
 
-                        try
+            if (!ModelState.IsValid)
             {
+                var token = HttpContext.GetJwtToken();
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
 
                 ViewBag.PaymentTypes = paymentTypes;
                 ViewBag.PaymentMethods = paymentMethods;
+
+                return View(model);
+            }
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                await _paymentService.UpdatePaymentAsync(id, model, token);
+                TempData["SuccessMessage"] = SUCCESS_UPDATE_PAYMENT;
+                return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao recarregar dados de referência para edição de pagamento");
-            }
+                ModelState.AddModelError(string.Empty, string.Format(ERROR_UPDATING_PAYMENT, ex.Message));
 
-            return View(model);
+                try
+                {
+                    var token = HttpContext.GetJwtToken();
+                    var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
+                    var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
+
+                    ViewBag.PaymentTypes = paymentTypes;
+                    ViewBag.PaymentMethods = paymentMethods;
+                }
+                catch
+                {
+                    // Se falhar ao carregar dados de referência, continua sem exibir as listas
+                }
+
+                return View(model);
+            }
         }
 
         [RequirePermission("payments.delete")]
         public async Task<IActionResult> Delete(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do pagamento não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var payment = await _paymentService.GetPaymentByIdAsync(id, token);
+
+                if (payment == null)
+                {
+                    return NotFound("Pagamento não encontrado");
+                }
+
                 return View(payment);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar pagamento para exclusão");
-                TempData["ErrorMessage"] = $"Erro ao carregar pagamento para exclusão: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_DELETE, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -345,17 +407,21 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("payments.delete")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do pagamento não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 await _paymentService.DeletePaymentAsync(id, token);
-                TempData["SuccessMessage"] = "Pagamento excluído com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_DELETE_PAYMENT;
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao excluir pagamento");
-                TempData["ErrorMessage"] = $"Erro ao excluir pagamento: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_PAYMENT, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -365,17 +431,21 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("payments.edit")]
         public async Task<IActionResult> MarkAsPaid(string id, DateTime? paymentDate = null)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do pagamento não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 await _paymentService.MarkAsPaidAsync(id, paymentDate ?? DateTime.Now, token);
-                TempData["SuccessMessage"] = "Pagamento marcado como pago com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_MARK_PAID;
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao marcar pagamento como pago");
-                TempData["ErrorMessage"] = $"Erro ao marcar pagamento como pago: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_MARK_PAID, ex.Message);
                 return RedirectToAction(nameof(Details), new { id });
             }
         }
@@ -385,17 +455,21 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("payments.edit")]
         public async Task<IActionResult> MarkAsOverdue(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do pagamento não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 await _paymentService.MarkAsOverdueAsync(id, token);
-                TempData["SuccessMessage"] = "Pagamento marcado como vencido com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_MARK_OVERDUE;
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao marcar pagamento como vencido");
-                TempData["ErrorMessage"] = $"Erro ao marcar pagamento como vencido: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_MARK_OVERDUE, ex.Message);
                 return RedirectToAction(nameof(Details), new { id });
             }
         }
@@ -405,18 +479,42 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("payments.edit")]
         public async Task<IActionResult> Cancel(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do pagamento não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 await _paymentService.CancelPaymentAsync(id, token);
-                TempData["SuccessMessage"] = "Pagamento cancelado com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_CANCEL_PAYMENT;
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao cancelar pagamento");
-                TempData["ErrorMessage"] = $"Erro ao cancelar pagamento: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_CANCEL_PAYMENT, ex.Message);
                 return RedirectToAction(nameof(Details), new { id });
+            }
+        }
+
+        private async Task LoadReferenceDataForView(string token)
+        {
+            try
+            {
+                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
+                var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
+                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
+
+                ViewBag.PaymentTypes = paymentTypes;
+                ViewBag.PaymentMethods = paymentMethods;
+                ViewBag.CreditCards = creditCards;
+            }
+            catch
+            {
+                ViewBag.PaymentTypes = new List<object>();
+                ViewBag.PaymentMethods = new List<object>();
+                ViewBag.CreditCards = new List<object>();
             }
         }
     }

@@ -2,7 +2,6 @@
 using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Resources;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace FinanceSystem.API.Controllers
 {
@@ -43,30 +42,6 @@ namespace FinanceSystem.API.Controllers
 
             var username = User.Identity?.Name;
             return Ok(new { username });
-        }
-
-        [HttpGet("user-permissions")]
-        public IActionResult GetUserPermissions()
-        {
-            var identity = User.Identity;
-
-            if (identity is null || !identity.IsAuthenticated)
-            {
-                return Unauthorized(ResourceFinanceApi.Auth_UserNotAuthenticated);
-            }
-
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
-
-            var permissions = new
-            {
-                userId,
-                roles,
-                isAdmin = User.IsInRole("Admin"),
-                isModerator = User.IsInRole("Moderator")
-            };
-
-            return Ok(permissions);
         }
     }
 }

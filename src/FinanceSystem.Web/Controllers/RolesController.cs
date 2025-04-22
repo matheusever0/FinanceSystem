@@ -13,10 +13,25 @@ namespace FinanceSystem.Web.Controllers
         private readonly IRoleService _roleService;
         private readonly IPermissionService _permissionService;
 
+        private const string ERROR_LOADING_ROLES = "Erro ao carregar perfis: {0}";
+        private const string ERROR_LOADING_ROLE_DETAILS = "Erro ao carregar detalhes do perfil: {0}";
+        private const string ERROR_CREATING_ROLE = "Erro ao criar perfil: {0}";
+        private const string ERROR_LOADING_ROLE_EDIT = "Erro ao carregar perfil para edição: {0}";
+        private const string ERROR_UPDATING_ROLE = "Erro ao atualizar perfil: {0}";
+        private const string ERROR_LOADING_ROLE_DELETE = "Erro ao carregar perfil para exclusão: {0}";
+        private const string ERROR_DELETING_ROLE = "Erro ao excluir perfil: {0}";
+        private const string ERROR_MANAGING_ROLE_PERMISSIONS = "Erro ao gerenciar permissões do perfil: {0}";
+        private const string ERROR_UPDATING_ROLE_PERMISSIONS = "Erro ao atualizar permissões do perfil: {0}";
+
+        private const string SUCCESS_CREATE_ROLE = "Perfil criado com sucesso!";
+        private const string SUCCESS_UPDATE_ROLE = "Perfil atualizado com sucesso!";
+        private const string SUCCESS_DELETE_ROLE = "Perfil excluído com sucesso!";
+        private const string SUCCESS_UPDATE_ROLE_PERMISSIONS = "Permissões do perfil atualizadas com sucesso!";
+
         public RolesController(IRoleService roleService, IPermissionService permissionService)
         {
-            _roleService = roleService;
-            _permissionService = permissionService;
+            _roleService = roleService ?? throw new ArgumentNullException(nameof(roleService));
+            _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         }
 
         [RequirePermission("roles.view")]
@@ -30,7 +45,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao carregar perfis: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_ROLES, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -38,10 +53,20 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("roles.view")]
         public async Task<IActionResult> Details(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do perfil não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
+
+                if (role == null)
+                {
+                    return NotFound("Perfil não encontrado");
+                }
 
                 var permissions = await _permissionService.GetPermissionsByRoleIdAsync(id, token);
                 ViewBag.Permissions = permissions;
@@ -50,7 +75,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao carregar detalhes do perfil: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_ROLE_DETAILS, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -66,31 +91,42 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("roles.create")]
         public async Task<IActionResult> Create(CreateRoleModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
             try
             {
-                if (ModelState.IsValid)
-                {
-                    var token = HttpContext.GetJwtToken();
-                    await _roleService.CreateRoleAsync(model, token);
-                    TempData["SuccessMessage"] = "Perfil criado com sucesso!";
-                    return RedirectToAction(nameof(Index));
-                }
-                return View(model);
+                var token = HttpContext.GetJwtToken();
+                await _roleService.CreateRoleAsync(model, token);
+                TempData["SuccessMessage"] = SUCCESS_CREATE_ROLE;
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao criar perfil: {ex.Message}";
-                return RedirectToAction(nameof(Index));
+                TempData["ErrorMessage"] = string.Format(ERROR_CREATING_ROLE, ex.Message);
+                return View(model);
             }
         }
 
         [RequirePermission("roles.edit")]
         public async Task<IActionResult> Edit(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do perfil não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
+
+                if (role == null)
+                {
+                    return NotFound("Perfil não encontrado");
+                }
 
                 var model = new UpdateRoleModel
                 {
@@ -102,7 +138,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao carregar perfil para edição: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_ROLE_EDIT, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -112,36 +148,53 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("roles.edit")]
         public async Task<IActionResult> Edit(string id, UpdateRoleModel model)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do perfil não fornecido");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
             try
             {
-                if (ModelState.IsValid)
-                {
-                    var token = HttpContext.GetJwtToken();
-                    await _roleService.UpdateRoleAsync(id, model, token);
-                    TempData["SuccessMessage"] = "Perfil atualizado com sucesso!";
-                    return RedirectToAction(nameof(Index));
-                }
-                return View(model);
+                var token = HttpContext.GetJwtToken();
+                await _roleService.UpdateRoleAsync(id, model, token);
+                TempData["SuccessMessage"] = SUCCESS_UPDATE_ROLE;
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao atualizar perfil: {ex.Message}";
-                return RedirectToAction(nameof(Index));
+                TempData["ErrorMessage"] = string.Format(ERROR_UPDATING_ROLE, ex.Message);
+                return View(model);
             }
         }
 
         [RequirePermission("roles.delete")]
         public async Task<IActionResult> Delete(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do perfil não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
+
+                if (role == null)
+                {
+                    return NotFound("Perfil não encontrado");
+                }
+
                 return View(role);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao carregar perfil para exclusão: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_ROLE_DELETE, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -151,16 +204,21 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("roles.delete")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do perfil não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 await _roleService.DeleteRoleAsync(id, token);
-                TempData["SuccessMessage"] = "Perfil excluído com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_DELETE_ROLE;
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao excluir perfil: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_ROLE, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -168,10 +226,21 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("permissions.manage")]
         public async Task<IActionResult> ManagePermissions(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do perfil não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
+
+                if (role == null)
+                {
+                    return NotFound("Perfil não encontrado");
+                }
+
                 var allPermissions = await _permissionService.GetAllPermissionsAsync(token);
                 var rolePermissions = await _permissionService.GetPermissionsByRoleIdAsync(id, token);
 
@@ -183,7 +252,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao gerenciar permissões do perfil: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_MANAGING_ROLE_PERMISSIONS, ex.Message);
                 return RedirectToAction(nameof(Details), new { id });
             }
         }
@@ -193,20 +262,30 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("permissions.manage")]
         public async Task<IActionResult> ManagePermissions(string id, List<string> selectedPermissions)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do perfil não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
+                var role = await _roleService.GetRoleByIdAsync(id, token);
+
+                if (role == null)
+                {
+                    return NotFound("Perfil não encontrado");
+                }
 
                 var permissionList = selectedPermissions ?? new List<string>();
-
                 await _roleService.UpdateRolePermissionsAsync(id, permissionList, token);
 
-                TempData["SuccessMessage"] = "Permissões do perfil atualizadas com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_UPDATE_ROLE_PERMISSIONS;
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao atualizar permissões do perfil: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_UPDATING_ROLE_PERMISSIONS, ex.Message);
                 return RedirectToAction(nameof(Details), new { id });
             }
         }

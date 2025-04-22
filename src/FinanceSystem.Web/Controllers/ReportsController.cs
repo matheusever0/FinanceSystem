@@ -15,20 +15,26 @@ namespace FinanceSystem.Web.Controllers
         private readonly IPaymentTypeService _paymentTypeService;
         private readonly IPaymentMethodService _paymentMethodService;
         private readonly ICreditCardService _creditCardService;
-        private readonly ILogger<ReportsController> _logger;
+
+        private const string ERROR_GENERATING_MONTHLY_REPORT = "Erro ao gerar relatório mensal: {0}";
+        private const string ERROR_GENERATING_ANNUAL_REPORT = "Erro ao gerar relatório anual: {0}";
+        private const string ERROR_GENERATING_CREDIT_CARDS_REPORT = "Erro ao gerar relatório de cartões de crédito: {0}";
+        private const string ERROR_GENERATING_PRINT_REPORT = "Erro ao gerar relatório para impressão: {0}";
+
+        private const int STATUS_PAID = 2;
+        private const int STATUS_PENDING = 1;
+        private const int STATUS_OVERDUE = 3;
 
         public ReportsController(
             IPaymentService paymentService,
             IPaymentTypeService paymentTypeService,
             IPaymentMethodService paymentMethodService,
-            ICreditCardService creditCardService,
-            ILogger<ReportsController> logger)
+            ICreditCardService creditCardService)
         {
-            _paymentService = paymentService;
-            _paymentTypeService = paymentTypeService;
-            _paymentMethodService = paymentMethodService;
-            _creditCardService = creditCardService;
-            _logger = logger;
+            _paymentService = paymentService ?? throw new ArgumentNullException(nameof(paymentService));
+            _paymentTypeService = paymentTypeService ?? throw new ArgumentNullException(nameof(paymentTypeService));
+            _paymentMethodService = paymentMethodService ?? throw new ArgumentNullException(nameof(paymentMethodService));
+            _creditCardService = creditCardService ?? throw new ArgumentNullException(nameof(creditCardService));
         }
 
         public async Task<IActionResult> Monthly(int? month, int? year)
@@ -41,7 +47,6 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
 
                 var payments = await _paymentService.GetPaymentsByMonthAsync(month.Value, year.Value, token);
-
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
 
                 var paymentsByType = payments
@@ -56,9 +61,9 @@ namespace FinanceSystem.Web.Controllers
                     .ToList();
 
                 var totalAmount = payments.Sum(p => p.Amount);
-                var paidAmount = payments.Where(p => p.Status == 2).Sum(p => p.Amount);
-                var pendingAmount = payments.Where(p => p.Status == 1).Sum(p => p.Amount);
-                var overdueAmount = payments.Where(p => p.Status == 3).Sum(p => p.Amount);
+                var paidAmount = payments.Where(p => p.Status == STATUS_PAID).Sum(p => p.Amount);
+                var pendingAmount = payments.Where(p => p.Status == STATUS_PENDING).Sum(p => p.Amount);
+                var overdueAmount = payments.Where(p => p.Status == STATUS_OVERDUE).Sum(p => p.Amount);
 
                 ViewBag.PaymentTypes = paymentTypes;
                 ViewBag.PaymentsByType = paymentsByType;
@@ -73,8 +78,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao gerar relatório mensal");
-                TempData["ErrorMessage"] = $"Erro ao gerar relatório: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_GENERATING_MONTHLY_REPORT, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -84,23 +88,8 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 year ??= DateTime.Now.Year;
-
                 var token = HttpContext.GetJwtToken();
-
-                var monthlyData = new Dictionary<string, decimal>();
-                for (int month = 1; month <= 12; month++)
-                {
-                    var monthName = new DateTime(year.Value, month, 1).ToString("MMM");
-                    try
-                    {
-                        var payments = await _paymentService.GetPaymentsByMonthAsync(month, year.Value, token);
-                        monthlyData.Add(monthName, payments.Sum(p => p.Amount));
-                    }
-                    catch (Exception)
-                    {
-                        monthlyData.Add(monthName, 0);
-                    }
-                }
+                var monthlyData = await GetMonthlyDataForYear(year.Value, token);
 
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
@@ -118,8 +107,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao gerar relatório anual");
-                TempData["ErrorMessage"] = $"Erro ao gerar relatório: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_GENERATING_ANNUAL_REPORT, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -129,43 +117,15 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 var token = HttpContext.GetJwtToken();
-
                 var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
-
-                var cardData = new List<object>();
-                foreach (var card in creditCards)
-                {
-                    try
-                    {
-                        var payments = await _paymentService.GetPaymentsByMethodAsync(card.PaymentMethodId, token);
-                        var totalAmount = payments.Sum(p => p.Amount);
-                        var paidAmount = payments.Where(p => p.Status == 2).Sum(p => p.Amount);
-                        var pendingAmount = payments.Where(p => p.Status == 1).Sum(p => p.Amount);
-
-                        cardData.Add(new
-                        {
-                            Card = card,
-                            Payments = payments,
-                            TotalAmount = totalAmount,
-                            PaidAmount = paidAmount,
-                            PendingAmount = pendingAmount,
-                            UsagePercentage = (card.Limit - card.AvailableLimit) / card.Limit * 100
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Erro ao obter dados do cartão {CardId}", card.Id);
-                    }
-                }
+                var cardData = await GetCreditCardData(creditCards, token);
 
                 ViewBag.CardData = cardData;
-
                 return View(creditCards);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao gerar relatório de cartões de crédito");
-                TempData["ErrorMessage"] = $"Erro ao gerar relatório: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_GENERATING_CREDIT_CARDS_REPORT, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -173,16 +133,25 @@ namespace FinanceSystem.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> PrintMonthly(int month, int year)
         {
+            if (month <= 0 || month > 12)
+            {
+                return BadRequest("Mês inválido");
+            }
+
+            if (year <= 0)
+            {
+                return BadRequest("Ano inválido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
-
                 var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
 
                 var totalAmount = payments.Sum(p => p.Amount);
-                var paidAmount = payments.Where(p => p.Status == 2).Sum(p => p.Amount);
-                var pendingAmount = payments.Where(p => p.Status == 1).Sum(p => p.Amount);
-                var overdueAmount = payments.Where(p => p.Status == 3).Sum(p => p.Amount);
+                var paidAmount = payments.Where(p => p.Status == STATUS_PAID).Sum(p => p.Amount);
+                var pendingAmount = payments.Where(p => p.Status == STATUS_PENDING).Sum(p => p.Amount);
+                var overdueAmount = payments.Where(p => p.Status == STATUS_OVERDUE).Sum(p => p.Amount);
 
                 ViewBag.Month = month;
                 ViewBag.Year = year;
@@ -196,10 +165,83 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao gerar relatório mensal para impressão");
-                TempData["ErrorMessage"] = $"Erro ao gerar relatório: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_GENERATING_PRINT_REPORT, ex.Message);
                 return RedirectToAction("Monthly", new { month, year });
             }
+        }
+
+        private async Task<Dictionary<string, decimal>> GetMonthlyDataForYear(int year, string token)
+        {
+            var monthlyData = new Dictionary<string, decimal>();
+
+            for (int month = 1; month <= 12; month++)
+            {
+                var monthName = new DateTime(year, month, 1).ToString("MMM");
+                try
+                {
+                    var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
+                    monthlyData.Add(monthName, payments.Sum(p => p.Amount));
+                }
+                catch
+                {
+                    monthlyData.Add(monthName, 0);
+                }
+            }
+
+            return monthlyData;
+        }
+
+        private async Task<List<object>> GetCreditCardData(IEnumerable<object> creditCards, string token)
+        {
+            var cardData = new List<object>();
+
+            foreach (var card in creditCards)
+            {
+                try
+                {
+                    var paymentMethodId = GetPropertyValue(card, "PaymentMethodId")?.ToString();
+
+                    if (string.IsNullOrEmpty(paymentMethodId))
+                    {
+                        continue;
+                    }
+
+                    var payments = await _paymentService.GetPaymentsByMethodAsync(paymentMethodId, token);
+                    var totalAmount = payments.Sum(p => p.Amount);
+                    var paidAmount = payments.Where(p => p.Status == STATUS_PAID).Sum(p => p.Amount);
+                    var pendingAmount = payments.Where(p => p.Status == STATUS_PENDING).Sum(p => p.Amount);
+
+                    var limit = Convert.ToDecimal(GetPropertyValue(card, "Limit"));
+                    var availableLimit = Convert.ToDecimal(GetPropertyValue(card, "AvailableLimit"));
+                    decimal usagePercentage = 0;
+
+                    if (limit > 0)
+                    {
+                        usagePercentage = (limit - availableLimit) / limit * 100;
+                    }
+
+                    cardData.Add(new
+                    {
+                        Card = card,
+                        Payments = payments,
+                        TotalAmount = totalAmount,
+                        PaidAmount = paidAmount,
+                        PendingAmount = pendingAmount,
+                        UsagePercentage = usagePercentage
+                    });
+                }
+                catch
+                {
+                    // Se falhar ao processar um cartão específico, continua com os outros
+                }
+            }
+
+            return cardData;
+        }
+
+        private object GetPropertyValue(object obj, string propertyName)
+        {
+            return obj.GetType().GetProperty(propertyName)?.GetValue(obj, null);
         }
     }
 }

@@ -12,14 +12,26 @@ namespace FinanceSystem.Web.Controllers
     public class IncomeTypesController : Controller
     {
         private readonly IIncomeTypeService _incomeTypeService;
-        private readonly ILogger<IncomeTypesController> _logger;
 
-        public IncomeTypesController(
-            IIncomeTypeService incomeTypeService,
-            ILogger<IncomeTypesController> logger)
+        private const string ERROR_LOADING_INCOME_TYPES = "Erro ao carregar tipos de receita: {0}";
+        private const string ERROR_LOADING_SYSTEM_INCOME_TYPES = "Erro ao carregar tipos de receita do sistema: {0}";
+        private const string ERROR_LOADING_USER_INCOME_TYPES = "Erro ao carregar tipos de receita do usuário: {0}";
+        private const string ERROR_LOADING_INCOME_TYPE_DETAILS = "Erro ao carregar detalhes do tipo de receita: {0}";
+        private const string ERROR_CREATING_INCOME_TYPE = "Erro ao criar tipo de receita: {0}";
+        private const string ERROR_LOADING_INCOME_TYPE_EDIT = "Erro ao carregar tipo de receita para edição: {0}";
+        private const string ERROR_UPDATING_INCOME_TYPE = "Erro ao atualizar tipo de receita: {0}";
+        private const string ERROR_LOADING_INCOME_TYPE_DELETE = "Erro ao carregar tipo de receita para exclusão: {0}";
+        private const string ERROR_DELETING_INCOME_TYPE = "Erro ao excluir tipo de receita: {0}";
+        private const string ERROR_CANNOT_EDIT_SYSTEM_TYPE = "Não é possível editar tipos de receita do sistema";
+        private const string ERROR_CANNOT_DELETE_SYSTEM_TYPE = "Não é possível excluir tipos de receita do sistema";
+
+        private const string SUCCESS_CREATE_INCOME_TYPE = "Tipo de receita criado com sucesso!";
+        private const string SUCCESS_UPDATE_INCOME_TYPE = "Tipo de receita atualizado com sucesso!";
+        private const string SUCCESS_DELETE_INCOME_TYPE = "Tipo de receita excluído com sucesso!";
+
+        public IncomeTypesController(IIncomeTypeService incomeTypeService)
         {
-            _incomeTypeService = incomeTypeService;
-            _logger = logger;
+            _incomeTypeService = incomeTypeService ?? throw new ArgumentNullException(nameof(incomeTypeService));
         }
 
         public async Task<IActionResult> Index()
@@ -32,8 +44,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar tipos de receita");
-                TempData["ErrorMessage"] = $"Erro ao carregar tipos de receita: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_TYPES, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -50,8 +61,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar tipos de receita do sistema");
-                TempData["ErrorMessage"] = $"Erro ao carregar tipos de receita do sistema: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_SYSTEM_INCOME_TYPES, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -68,24 +78,33 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar tipos de receita do usuário");
-                TempData["ErrorMessage"] = $"Erro ao carregar tipos de receita do usuário: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_USER_INCOME_TYPES, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
 
         public async Task<IActionResult> Details(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do tipo de receita não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var incomeType = await _incomeTypeService.GetIncomeTypeByIdAsync(id, token);
+
+                if (incomeType == null)
+                {
+                    return NotFound("Tipo de receita não encontrado");
+                }
+
                 return View(incomeType);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar detalhes do tipo de receita");
-                TempData["ErrorMessage"] = $"Erro ao carregar detalhes do tipo de receita: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_TYPE_DETAILS, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -101,21 +120,21 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("incomes.create")]
         public async Task<IActionResult> Create(CreateIncomeTypeModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
             try
             {
-                if (ModelState.IsValid)
-                {
-                    var token = HttpContext.GetJwtToken();
-                    var incomeType = await _incomeTypeService.CreateIncomeTypeAsync(model, token);
-                    TempData["SuccessMessage"] = "Tipo de receita criado com sucesso!";
-                    return RedirectToAction(nameof(Details), new { id = incomeType.Id });
-                }
-                return View(model);
+                var token = HttpContext.GetJwtToken();
+                var incomeType = await _incomeTypeService.CreateIncomeTypeAsync(model, token);
+                TempData["SuccessMessage"] = SUCCESS_CREATE_INCOME_TYPE;
+                return RedirectToAction(nameof(Details), new { id = incomeType.Id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao criar tipo de receita");
-                ModelState.AddModelError(string.Empty, $"Erro ao criar tipo de receita: {ex.Message}");
+                ModelState.AddModelError(string.Empty, string.Format(ERROR_CREATING_INCOME_TYPE, ex.Message));
                 return View(model);
             }
         }
@@ -123,14 +142,24 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("incomes.edit")]
         public async Task<IActionResult> Edit(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do tipo de receita não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var incomeType = await _incomeTypeService.GetIncomeTypeByIdAsync(id, token);
 
+                if (incomeType == null)
+                {
+                    return NotFound("Tipo de receita não encontrado");
+                }
+
                 if (incomeType.IsSystem)
                 {
-                    TempData["ErrorMessage"] = "Não é possível editar tipos de receita do sistema";
+                    TempData["ErrorMessage"] = ERROR_CANNOT_EDIT_SYSTEM_TYPE;
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
@@ -144,8 +173,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar tipo de receita para edição");
-                TempData["ErrorMessage"] = $"Erro ao carregar tipo de receita para edição: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_TYPE_EDIT, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -155,29 +183,39 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("incomes.edit")]
         public async Task<IActionResult> Edit(string id, UpdateIncomeTypeModel model)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do tipo de receita não fornecido");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var incomeType = await _incomeTypeService.GetIncomeTypeByIdAsync(id, token);
 
+                if (incomeType == null)
+                {
+                    return NotFound("Tipo de receita não encontrado");
+                }
+
                 if (incomeType.IsSystem)
                 {
-                    TempData["ErrorMessage"] = "Não é possível editar tipos de receita do sistema";
+                    TempData["ErrorMessage"] = ERROR_CANNOT_EDIT_SYSTEM_TYPE;
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
-                if (ModelState.IsValid)
-                {
-                    await _incomeTypeService.UpdateIncomeTypeAsync(id, model, token);
-                    TempData["SuccessMessage"] = "Tipo de receita atualizado com sucesso!";
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-                return View(model);
+                await _incomeTypeService.UpdateIncomeTypeAsync(id, model, token);
+                TempData["SuccessMessage"] = SUCCESS_UPDATE_INCOME_TYPE;
+                return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar tipo de receita");
-                ModelState.AddModelError(string.Empty, $"Erro ao atualizar tipo de receita: {ex.Message}");
+                ModelState.AddModelError(string.Empty, string.Format(ERROR_UPDATING_INCOME_TYPE, ex.Message));
                 return View(model);
             }
         }
@@ -185,14 +223,24 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("incomes.delete")]
         public async Task<IActionResult> Delete(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do tipo de receita não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var incomeType = await _incomeTypeService.GetIncomeTypeByIdAsync(id, token);
 
+                if (incomeType == null)
+                {
+                    return NotFound("Tipo de receita não encontrado");
+                }
+
                 if (incomeType.IsSystem)
                 {
-                    TempData["ErrorMessage"] = "Não é possível excluir tipos de receita do sistema";
+                    TempData["ErrorMessage"] = ERROR_CANNOT_DELETE_SYSTEM_TYPE;
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
@@ -200,8 +248,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar tipo de receita para exclusão");
-                TempData["ErrorMessage"] = $"Erro ao carregar tipo de receita para exclusão: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_TYPE_DELETE, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -211,25 +258,34 @@ namespace FinanceSystem.Web.Controllers
         [RequirePermission("incomes.delete")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do tipo de receita não fornecido");
+            }
+
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var incomeType = await _incomeTypeService.GetIncomeTypeByIdAsync(id, token);
 
+                if (incomeType == null)
+                {
+                    return NotFound("Tipo de receita não encontrado");
+                }
+
                 if (incomeType.IsSystem)
                 {
-                    TempData["ErrorMessage"] = "Não é possível excluir tipos de receita do sistema";
+                    TempData["ErrorMessage"] = ERROR_CANNOT_DELETE_SYSTEM_TYPE;
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
                 await _incomeTypeService.DeleteIncomeTypeAsync(id, token);
-                TempData["SuccessMessage"] = "Tipo de receita excluído com sucesso!";
+                TempData["SuccessMessage"] = SUCCESS_DELETE_INCOME_TYPE;
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao excluir tipo de receita");
-                TempData["ErrorMessage"] = $"Erro ao excluir tipo de receita: {ex.Message}";
+                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_INCOME_TYPE, ex.Message);
                 return RedirectToAction(nameof(Index));
             }
         }

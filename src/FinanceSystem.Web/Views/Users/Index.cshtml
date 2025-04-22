@@ -1,4 +1,5 @@
-﻿@using FinanceSystem.Web.Helpers
+﻿@using FinanceSystem.Web.Extensions
+@using FinanceSystem.Web.Helpers
 @using FinanceSystem.Web.Models.User
 @model IEnumerable<UserModel>
 
@@ -8,7 +9,7 @@
 
 <h1>Gerenciamento de Usuários</h1>
 
-@if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(Context, "users.create"))
+@if (await PermissionHelper.HasPermissionAsync(Context, "users.create"))
 {
     <p>
         <a asp-action="Create" class="btn btn-primary">
@@ -51,7 +52,7 @@
                             <td>@(item.LastLogin.HasValue ? item.LastLogin.Value.ToString("dd/MM/yyyy HH:mm") : "Nunca")</td>
                             <td>
                                 <div class="btn-group">
-                                    @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(Context, "users.edit"))
+                                    @if (await PermissionHelper.HasPermissionAsync(Context, "users.edit"))
                                     {
                                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
                                             <i class="fas fa-edit me-1"></i>Editar
@@ -60,7 +61,7 @@
                                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
                                         <i class="fas fa-info-circle me-1"></i>Detalhes
                                     </a>
-                                    @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(Context, "users.delete"))
+                                    @if (await PermissionHelper.HasPermissionAsync(Context, "users.delete") && item.Id != Context.GetCurrentUserId())
                                     {
                                         <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
                                             <i class="fas fa-trash me-1"></i>Excluir
