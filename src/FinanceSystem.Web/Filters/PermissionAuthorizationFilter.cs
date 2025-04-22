@@ -39,16 +39,28 @@ namespace FinanceSystem.Web.Filters
                 return;
             }
 
-            if (!await _permissionAuthorizationService.HasPermissionAsync(context.HttpContext.User, _permissionSystemName))
+            var permissions = _permissionSystemName.Split(',').Select(p => p.Trim());
+            var hasAnyPermission = false;
+
+            foreach (var permission in permissions)
             {
-                _logger.LogWarning("Acesso negado: usuário {User} não possui permissão {Permission}",
+                if (await _permissionAuthorizationService.HasPermissionAsync(context.HttpContext.User, permission))
+                {
+                    hasAnyPermission = true;
+                    break;
+                }
+            }
+
+            if (!hasAnyPermission)
+            {
+                _logger.LogWarning("Acesso negado: usuário {User} não possui nenhuma das permissões: {Permission}",
                     context.HttpContext.GetUserName(), _permissionSystemName);
 
                 context.Result = new RedirectToActionResult("AccessDenied", "Account", null);
                 return;
             }
 
-            _logger.LogInformation("Acesso concedido: usuário {User} possui permissão {Permission}",
+            _logger.LogInformation("Acesso concedido: usuário {User} possui ao menos uma das permissões: {Permission}",
                 context.HttpContext.GetUserName(), _permissionSystemName);
         }
     }

@@ -1,20 +1,29 @@
-﻿namespace FinanceSystem.Web.Extensions
+﻿using System.Security.Claims;
+
+namespace FinanceSystem.Web.Extensions
 {
     public static class HttpContextUserExtensions
     {
-                                                        public static string GetUserName(this HttpContext context, string defaultValue = "guest")
+        public static string GetUserName(this HttpContext context, string defaultValue = "guest")
         {
             return context?.User?.Identity?.Name ?? defaultValue;
         }
 
-                                                public static bool IsUserAuthenticated(this HttpContext context)
+        public static bool IsUserAuthenticated(this HttpContext context)
         {
             return context?.User?.Identity?.IsAuthenticated ?? false;
         }
 
-                                                        public static bool UserIsInRole(this HttpContext context, string role)
+        public static bool UserIsInRole(this HttpContext context, string role)
         {
             return context?.User?.IsInRole(role) ?? false;
+        }
+
+        public static string GetCurrentUserId(this HttpContext httpContext)
+        {
+            var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return userIdClaim;
         }
     }
 }

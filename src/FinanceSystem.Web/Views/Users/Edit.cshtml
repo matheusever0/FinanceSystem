@@ -1,4 +1,5 @@
-﻿@using FinanceSystem.Web.Models.Role
+﻿@using FinanceSystem.Web.Helpers
+@using FinanceSystem.Web.Models.Role
 @using FinanceSystem.Web.Models.User
 @model UpdateUserModel
 
@@ -7,6 +8,8 @@
     var roles = ViewBag.Roles as IEnumerable<RoleModel>;
     var isAdmin = User.IsInRole("Administrador");
     var adminRole = Model.Roles.Contains("Administrador");
+    var uniqueUser = await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "users.edit.unique");
+    var editUser = await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "users.edit");
 }
 
 <h1>Editar Usuário</h1>
@@ -98,7 +101,14 @@
 
             <div class="mb-3">
                 <button type="submit" class="btn btn-primary">Salvar</button>
-                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                @if (uniqueUser && !editUser)
+                {
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                }
+                else
+                {
+                    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                }             
             </div>
         </form>
     </div>

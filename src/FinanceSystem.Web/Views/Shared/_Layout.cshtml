@@ -6,6 +6,7 @@
     var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
     var username = User?.Identity?.Name?.ToUpper() ?? "não autenticado";
     var token = Context.Session.GetString("JWToken") ?? "token ausente";
+    var userId = User?.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
 }
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -190,6 +191,11 @@
                     </div>
                 </li>
                 <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item" href="@Url.Action("Edit", "Users", new { id = userId })">
+                        <i class="fas fa-user-edit fa-sm fa-fw me-2 text-gray-400"></i> Editar Usuário
+                    </a>
+                </li>
                 <li>
                     <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display: none;"></form>
                     <a class="dropdown-item" href="javascript:document.getElementById('logoutForm').submit();">

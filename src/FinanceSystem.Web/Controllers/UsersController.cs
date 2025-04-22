@@ -12,15 +12,18 @@ namespace FinanceSystem.Web.Controllers
     {
         private readonly IUserService _userService;
         private readonly IRoleService _roleService;
+        private readonly IPermissionService _permissionService;
         private readonly ILogger<UsersController> _logger;
 
         public UsersController(
             IUserService userService,
             IRoleService roleService,
+            IPermissionService permissionService,
             ILogger<UsersController> logger)
         {
             _userService = userService;
             _roleService = roleService;
+            _permissionService = permissionService;
             _logger = logger;
         }
 
@@ -141,13 +144,23 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
-        [RequirePermission("users.edit")]
+        [RequirePermission("users.edit, users.edit.unique")]
         public async Task<IActionResult> Edit(string id)
         {
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var user = await _userService.GetUserByIdAsync(id, token);
+
+                var permissions = await _permissionService.GetPermissionsByUserIdAsync(HttpContext.GetCurrentUserId(), token);
+                var any = permissions.Any(e => e.SystemName.Contains("users.edit.unique") && !e.SystemName.Contains("users.edit") && HttpContext.GetCurrentUserId() != user.Id);
+
+                if (any)
+                {
+                    TempData["ErrorMessage"] = "Você não tem permissão para editar outros usuários apenas o seu.";
+                    return RedirectToAction(nameof(Index));
+                }
+
 
                 bool isTargetUserAdmin = user.Roles.Contains("Administrador");
 
@@ -188,7 +201,7 @@ namespace FinanceSystem.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequirePermission("users.edit")]
+        [RequirePermission("users.edit, users.edit.unique")]
         public async Task<IActionResult> Edit(string id, UpdateUserModel model, List<string> selectedRoles)
         {
             try
@@ -196,6 +209,18 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
 
                 var currentUser = await _userService.GetUserByIdAsync(id, token);
+
+                var permissions = await _permissionService.GetPermissionsByUserIdAsync(HttpContext.GetCurrentUserId(), token);
+
+                var any = permissions.Any(e => e.SystemName.Contains("users.edit.unique") && !e.SystemName.Contains("users.edit") && HttpContext.GetCurrentUserId() != currentUser.Id);
+
+                if (any)
+                {
+                    TempData["ErrorMessage"] = "Você não tem permissão para editar outros usuários apenas o seu.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+
                 bool isTargetUserAdmin = currentUser.Roles.Contains("Administrador");
 
                 if (!User.IsInRole("Administrador") && isTargetUserAdmin)
