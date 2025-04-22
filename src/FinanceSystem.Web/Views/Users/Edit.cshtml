@@ -5,9 +5,8 @@
 @{
     ViewData["Title"] = "Editar Usuário";
     var roles = ViewBag.Roles as IEnumerable<RoleModel>;
-    var isAdmin = User.IsInRole("Admin");
-
-        var adminRole = Model.Roles.Contains("Admin");
+    var isAdmin = User.IsInRole("Administrador");
+    var adminRole = Model.Roles.Contains("Administrador");
 }
 
 <h1>Editar Usuário</h1>
@@ -75,11 +74,11 @@
                         <div id="selectedRolesContainer" class="mt-3">
                             @foreach (var roleName in Model.Roles)
                             {
-                                if (roleName == "Admin" && !isAdmin)
+                                if (roleName == "Administrador" && !isAdmin)
                                 {
                                     <div class="badge bg-primary p-2 me-2 mb-2">
-                                        <input type="hidden" name="selectedRoles" value="Admin" />
-                                        Admin <i class="fas fa-lock ms-1" title="Role protegida"></i>
+                                        <input type="hidden" name="selectedRoles" value="Administrador" />
+                                        Administrador <i class="fas fa-lock ms-1" title="Role protegida"></i>
                                     </div>
                                 }
                                 else

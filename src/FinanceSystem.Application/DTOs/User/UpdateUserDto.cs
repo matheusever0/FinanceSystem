@@ -11,7 +11,7 @@ namespace FinanceSystem.Application.DTOs.User
         public string Email { get; set; }
 
         [StringLength(100, MinimumLength = 6)]
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         public List<string> Roles { get; set; }
 
