@@ -48,6 +48,8 @@ namespace FinanceSystem.Web.Controllers
         {
             ViewData["ReturnUrl"] = returnUrl;
 
+            ModelState.Remove("ReturnUrl");
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -85,7 +87,7 @@ namespace FinanceSystem.Web.Controllers
                     new AuthenticationProperties
                     {
                         IsPersistent = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1)
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
                     });
 
                 TempData["SuccessMessage"] = SUCCESS_LOGIN;

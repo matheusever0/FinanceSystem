@@ -33,7 +33,7 @@ namespace FinanceSystem.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            if (HttpContext.IsUserAuthenticated())
+            if (!HttpContext.IsUserAuthenticated())
             {
                 return RedirectToAction("Login", "Account");
             }
