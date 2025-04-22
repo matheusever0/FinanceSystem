@@ -30,12 +30,6 @@ namespace FinanceSystem.Web.Services
                     return false;
                 }
 
-                if (user.IsInRole("Admin"))
-                {
-                    _logger.LogInformation("Usuário admin acessando recurso com permissão: {PermissionName}", permissionSystemName);
-                    return true;
-                }
-
                 var token = _httpContextAccessor?.HttpContext?.GetJwtToken();
                 if (string.IsNullOrEmpty(token))
                 {
@@ -57,7 +51,8 @@ namespace FinanceSystem.Web.Services
                     "Verificação de permissão para usuário {User}: {PermissionName} = {HasPermission}",
                     user.Identity.Name,
                     permissionSystemName,
-                    hasPermission);
+                    hasPermission
+                );
 
                 return hasPermission;
             }

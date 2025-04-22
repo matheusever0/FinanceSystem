@@ -9,80 +9,37 @@ namespace FinanceSystem.Web.Helpers
         public static async Task<bool> HasPermissionAsync(HttpContext httpContext, string permissionSystemName)
         {
             var logger = httpContext.RequestServices.GetService<ILogger<object>>();
-            logger?.LogInformation("Verificando permissão: {Permission}", permissionSystemName);
-
-            if (!httpContext.IsUserAuthenticated())
-            {
-                logger?.LogWarning("Usuário não autenticado tentando verificar permissão {Permission}", permissionSystemName);
-                return false;
-            }
-
-            if (httpContext.User.IsInRole("Admin"))
-            {
-                logger?.LogInformation("Usuário admin - permissão concedida para {Permission}", permissionSystemName);
-                return true;
-            }
-
-            var token = httpContext.GetJwtToken();
-
-            if (string.IsNullOrEmpty(token))
-            {
-                logger?.LogWarning("Token não encontrado ao verificar permissão {Permission}", permissionSystemName);
-                return false;
-            }
 
             try
             {
-                var permissionService = httpContext.RequestServices.GetService<IPermissionService>();
-                if (permissionService == null)
+                if (!httpContext.IsUserAuthenticated())
                 {
-                    logger?.LogError("Serviço de permissões não disponível");
+                    logger?.LogWarning("Usuário não autenticado tentando acessar {Permission}", permissionSystemName);
                     return false;
                 }
 
+                var permissionService = httpContext.RequestServices.GetRequiredService<IPermissionService>();
                 var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-                if (userIdClaim == null)
+                var token = httpContext.GetJwtToken();
+
+                if (userIdClaim == null || string.IsNullOrEmpty(token))
                 {
-                    logger?.LogWarning("Claim de ID não encontrada para usuário");
+                    logger?.LogWarning("Dados de usuário incompletos para verificação de permissão");
                     return false;
                 }
 
-                if (httpContext.User.IsInRole("Moderator"))
-                {
-                    var moderatorPermissions = new[] {
-                        "users.view", "users.create", "users.edit",
-                        "roles.view"
-                    };
+                var permissions = await permissionService.GetPermissionsByUserIdAsync(userIdClaim.Value, token);
 
-                    if (moderatorPermissions.Contains(permissionSystemName))
-                    {
-                        logger?.LogInformation("Permissão concedida via fallback para moderador: {Permission}", permissionSystemName);
-                        return true;
-                    }
-                }
+                var hasPermission = permissions.Any(p => p.SystemName == permissionSystemName);
 
-                try
-                {
-                    var permissions = await permissionService.GetPermissionsByUserIdAsync(userIdClaim.Value, token);
-                    var hasPermission = permissions.Any(p => p.SystemName == permissionSystemName);
+                logger?.LogInformation(
+                    "Verificação de permissão para usuário {User}: {Permission} = {HasPermission}",
+                    userIdClaim.Value,
+                    permissionSystemName,
+                    hasPermission
+                );
 
-                    logger?.LogInformation("Verificação de permissão via API para {Permission}: {Result}",
-                        permissionSystemName, hasPermission ? "concedida" : "negada");
-
-                    return hasPermission;
-                }
-                catch (Exception apiEx)
-                {
-                    logger?.LogError(apiEx, "Erro ao consultar permissões na API. Usando fallback.");
-
-                    if (httpContext.User.IsInRole("User"))
-                    {
-                        var userPermissions = new[] { "users.view" };
-                        return userPermissions.Contains(permissionSystemName);
-                    }
-
-                    return false;
-                }
+                return hasPermission;
             }
             catch (Exception ex)
             {
@@ -91,20 +48,15 @@ namespace FinanceSystem.Web.Helpers
             }
         }
 
-        public static async Task<bool> UserHasAnyPermissionAsync(HttpContext httpContext, string[] permissionSystemNames)
+        public static async Task<bool> UserHasAnyPermissionAsync(
+            HttpContext httpContext,
+            params string[] permissionSystemNames)
         {
-            if (!httpContext.IsUserAuthenticated())
-                return false;
-
-            if (httpContext.User.IsInRole("Admin"))
-                return true;
-
             foreach (var permission in permissionSystemNames)
             {
                 if (await HasPermissionAsync(httpContext, permission))
                     return true;
             }
-
             return false;
         }
     }

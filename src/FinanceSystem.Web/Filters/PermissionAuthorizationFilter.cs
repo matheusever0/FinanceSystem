@@ -7,18 +7,18 @@ namespace FinanceSystem.Web.Filters
 {
     public class PermissionAuthorizationFilter : IAsyncAuthorizationFilter
     {
-        private readonly IWebPermissionAuthorizationService _permissionAuthorizationService;
-        private readonly string _permissionSystemName;
+        private readonly IWebPermissionAuthorizationService _permissionService;
         private readonly ILogger<PermissionAuthorizationFilter> _logger;
+        private readonly string _permissionSystemName;
 
         public PermissionAuthorizationFilter(
-            IWebPermissionAuthorizationService permissionAuthorizationService,
+            IWebPermissionAuthorizationService permissionService,
             ILogger<PermissionAuthorizationFilter> logger,
             string permissionSystemName)
         {
-            _permissionAuthorizationService = permissionAuthorizationService;
-            _permissionSystemName = permissionSystemName;
+            _permissionService = permissionService;
             _logger = logger;
+            _permissionSystemName = permissionSystemName;
         }
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
@@ -32,19 +32,12 @@ namespace FinanceSystem.Web.Filters
                 return;
             }
 
-            if (context.HttpContext.User.IsInRole("Admin"))
-            {
-                _logger.LogInformation("Acesso concedido: usuário admin {User} acessando recurso",
-                    context.HttpContext.GetUserName());
-                return;
-            }
-
             var permissions = _permissionSystemName.Split(',').Select(p => p.Trim());
             var hasAnyPermission = false;
 
             foreach (var permission in permissions)
             {
-                if (await _permissionAuthorizationService.HasPermissionAsync(context.HttpContext.User, permission))
+                if (await _permissionService.HasPermissionAsync(context.HttpContext.User, permission))
                 {
                     hasAnyPermission = true;
                     break;
@@ -54,8 +47,7 @@ namespace FinanceSystem.Web.Filters
             if (!hasAnyPermission)
             {
                 _logger.LogWarning("Acesso negado: usuário {User} não possui nenhuma das permissões: {Permission}",
-                    context.HttpContext.GetUserName(), _permissionSystemName);
-
+                context.HttpContext.GetUserName(), _permissionSystemName);
                 context.Result = new RedirectToActionResult("AccessDenied", "Account", null);
                 return;
             }
