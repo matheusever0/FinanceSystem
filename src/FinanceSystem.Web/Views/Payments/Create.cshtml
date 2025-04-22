@@ -26,7 +26,7 @@
             <h6 class="m-0 font-weight-bold text-primary">Informações do Pagamento</h6>
         </div>
         <div class="card-body">
-            <form asp-action="Create" method="post" id="payment-form">
+            <form asp-action="Create" method="post" id="payment-form" data-page="payment">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="row">
@@ -113,10 +113,13 @@
                             <div class="form-text">Número de parcelas (1 para pagamento único).</div>
                         </div>
 
-                        <div class="mb-3 form-check">
-                            <input asp-for="IsRecurring" class="form-check-input" type="checkbox" />
-                            <label asp-for="IsRecurring" class="form-check-label"></label>
-                            <div class="form-text">Marque se este pagamento é recorrente (mensal).</div>
+                        <div class="form-group">
+                            <label asp-for="IsRecurring" class="form-label"></label>
+                            <div class="form-check form-switch mt-2">
+                                <input asp-for="IsRecurring" class="form-check-input" type="checkbox" id="isRecurringSwitch" />
+                                <label class="form-check-label" for="isRecurringSwitch" id="isRecurringLabel">Marque se este pagamento é recorrente (mensal).</label>
+                            </div>
+                            <span asp-validation-for="IsRecurring" class="text-danger"></span>
                         </div>
                     </div>
                 </div>
@@ -141,5 +144,7 @@
 @section Scripts {
     
     <script src="~/js/components/forms.js" asp-append-version="true"></script>
-    <script src="~/js/pages/payments.js" asp-append-version="true"></script>
+    <script src="~/js/utils/helpers.js" asp-append-version="true"></script>
+    <script src="~/js/components/financial.js" asp-append-version="true"></script>
+    <script src="~/js/pages/financial-item.js" asp-append-version="true"></script>
 }

@@ -70,7 +70,7 @@
             </div>
         }
 
-        <form asp-action="Delete" method="post" class="mt-4">
+        <form asp-action="Delete" method="post" class="mt-4" data-page="income">
             <input type="hidden" name="id" value="@Model.Id" />
             <button type="submit" class="btn btn-danger">
                 <i class="fas fa-trash"></i> Confirmar Exclusão
@@ -82,5 +82,7 @@
     </div>
 </div>
 @section Scripts{
-    <script src="~/js/pages/incomes.js" asp-append-version="true"></script>
+    <script src="~/js/utils/helpers.js" asp-append-version="true"></script>
+    <script src="~/js/components/financial.js" asp-append-version="true"></script>
+    <script src="~/js/pages/financial-item.js" asp-append-version="true"></script>
 }

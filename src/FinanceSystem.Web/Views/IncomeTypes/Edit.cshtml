@@ -21,7 +21,7 @@
                 <h6 class="m-0 font-weight-bold text-primary">Informações do Tipo de Receita</h6>
             </div>
             <div class="card-body">
-                <form asp-action="Edit" method="post">
+                <form asp-action="Edit" method="post" data-page="income">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <input type="hidden" name="id" value="@ViewContext.RouteData.Values["id"]" />
 
@@ -77,5 +77,6 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/pages/incomes.js" asp-append-version="true"></script>
+    <script src="~/js/utils/helpers.js" asp-append-version="true"></script>
+    <script src="~/js/components/financial.js" asp-append-version="true"></script>
 }

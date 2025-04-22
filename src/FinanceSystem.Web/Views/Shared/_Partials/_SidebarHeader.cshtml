@@ -1,0 +1,21 @@
+﻿@{
+    var username = User?.Identity?.Name?.ToUpper() ?? "não autenticado";
+}
+
+
+<div class="sidebar-brand">
+    <div class="sidebar-logo-container">
+        <img src="~/images/login-logo.svg" alt="FinanceSystem Logo" />
+    </div>
+    <span>FinanceSystem</span>
+</div>
+<div class="sidebar-header">
+    <div class="sidebar-user">
+        <div class="user-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <div>
+            <div class="fw-bold">@username</div>
+        </div>
+    </div>
+</div>

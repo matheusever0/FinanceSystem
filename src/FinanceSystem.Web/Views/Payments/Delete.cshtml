@@ -67,7 +67,7 @@
                     <h6 class="m-0 font-weight-bold text-danger">Confirmar Exclusão</h6>
                 </div>
                 <div class="card-body">
-                    <form asp-action="Delete" method="post">
+                    <form asp-action="Delete" method="post" data-page="payment">
                         @Html.AntiForgeryToken()
                         <p>Ao confirmar esta operação, você está excluindo permanentemente:</p>
                         <ul>
@@ -93,5 +93,7 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/pages/payments.js" asp-append-version="true"></script>
+    <script src="~/js/utils/helpers.js" asp-append-version="true"></script>
+    <script src="~/js/components/financial.js" asp-append-version="true"></script>
+    <script src="~/js/pages/financial-item.js" asp-append-version="true"></script>
 }

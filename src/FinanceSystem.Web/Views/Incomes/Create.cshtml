@@ -22,7 +22,7 @@
                 <h6 class="m-0 font-weight-bold text-primary">Informações da Receita</h6>
             </div>
             <div class="card-body">
-                <form asp-action="Create" method="post">
+                <form asp-action="Create" method="post" data-page="income">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                     <div class="row mb-3">
@@ -77,7 +77,7 @@
                                 <label asp-for="IsRecurring" class="control-label"></label>
                                 <div class="form-check form-switch mt-2">
                                     <input asp-for="IsRecurring" class="form-check-input" type="checkbox" id="isRecurringSwitch" />
-                                    <label class="form-check-label" for="isRecurringSwitch" id="isRecurringLabel">Não</label>
+                                    <label class="form-check-label" for="isRecurringSwitch" id="isRecurringLabel">Marque se este pagamento é recorrente (mensal).</label>
                                 </div>
                                 <span asp-validation-for="IsRecurring" class="text-danger"></span>
                             </div>
@@ -139,5 +139,7 @@
 
 @section Scripts {
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/pages/incomes.js" asp-append-version="true"></script>
+    <script src="~/js/utils/helpers.js" asp-append-version="true"></script>
+    <script src="~/js/components/financial.js" asp-append-version="true"></script>
+    <script src="~/js/pages/financial-item.js" asp-append-version="true"></script>
 }

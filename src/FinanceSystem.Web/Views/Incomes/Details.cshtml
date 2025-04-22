@@ -122,7 +122,7 @@
                         <div class="col-md-6">
                             @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.edit"))
                             {
-                                <form asp-controller="Incomes" asp-action="MarkAsReceived" asp-route-id="@Model.Id" method="post">
+                                <form asp-controller="Incomes" asp-action="MarkAsReceived" asp-route-id="@Model.Id" method="post" data-page="income">
                                     <button type="button" class="btn btn-success btn-block" data-bs-toggle="modal" data-bs-target="#markReceivedModal">
                                         <i class="fas fa-check"></i> Marcar como Recebido
                                     </button>
@@ -132,7 +132,7 @@
                         <div class="col-md-6">
                             @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.edit"))
                             {
-                                <form asp-controller="Incomes" asp-action="Cancel" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Tem certeza que deseja cancelar esta receita?');">
+                                <form asp-controller="Incomes" asp-action="Cancel" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Tem certeza que deseja cancelar esta receita?');" data-page="income">
                                     <button type="submit" class="btn btn-danger btn-block">
                                         <i class="fas fa-ban"></i> Cancelar Receita
                                     </button>
@@ -235,10 +235,10 @@
                                                             data-installment-id="@installment.Id"
                                                             data-bs-toggle="modal"
                                                             data-bs-target="#markInstallmentReceivedModal"
-                                                            title="Marcar como Recebido">
+                                                            data-action="received">
                                                         <i class="fas fa-check"></i>
                                                     </button>
-                                                    <form asp-controller="IncomeInstallments" asp-action="Cancel" asp-route-id="@installment.Id" method="post" onsubmit="return confirm('Tem certeza que deseja cancelar esta parcela?');">
+                                                    <form asp-controller="IncomeInstallments" asp-action="Cancel" asp-route-id="@installment.Id" method="post" onsubmit="return confirm('Tem certeza que deseja cancelar esta parcela?');" data-page="income">
                                                         @{
                                                             TempData["IncomeId"] = Model.Id;
                                                         }
@@ -264,7 +264,7 @@
 <div class="modal fade" id="markReceivedModal" tabindex="-1" aria-labelledby="markReceivedModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form asp-controller="Incomes" asp-action="MarkAsReceived" asp-route-id="@Model.Id" method="post">
+            <form asp-controller="Incomes" asp-action="MarkAsReceived" asp-route-id="@Model.Id" method="post" data-page="income">
                 <div class="modal-header">
                     <h5 class="modal-title" id="markReceivedModalLabel">Marcar Receita como Recebida</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
@@ -288,7 +288,7 @@
 <div class="modal fade" id="markInstallmentReceivedModal" tabindex="-1" aria-labelledby="markInstallmentReceivedModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="markInstallmentReceivedForm" asp-controller="IncomeInstallments" asp-action="MarkAsReceived" method="post">
+            <form id="markInstallmentReceivedForm" asp-controller="IncomeInstallments" asp-action="MarkAsReceived" method="post" data-page="income">
                 <input type="hidden" id="installmentId" name="id" value="">
                 @{
                     TempData["IncomeId"] = Model.Id;
@@ -326,5 +326,7 @@
         });
     </script>
 
-    <script src="~/js/pages/incomes.js" asp-append-version="true"></script>
+    <script src="~/js/utils/helpers.js" asp-append-version="true"></script>
+    <script src="~/js/components/financial.js" asp-append-version="true"></script>
+    <script src="~/js/pages/financial-item.js" asp-append-version="true"></script>
 }
