@@ -45,7 +45,7 @@ namespace FinanceSystem.Infrastructure.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(double.Parse(_configuration["JwtSettings:ExpiryHours"] ?? "1")),
+                Expires = DateTime.UtcNow.AddDays(double.Parse(_configuration["JwtSettings:ExpiryDays"] ?? "1")),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature
