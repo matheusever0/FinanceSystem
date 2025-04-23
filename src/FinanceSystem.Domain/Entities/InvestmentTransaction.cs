@@ -17,5 +17,36 @@ namespace FinanceSystem.Domain.Entities
 
         public Guid InvestmentId { get; protected set; }
         public Investment Investment { get; protected set; }
+
+
+        // Construtor protegido
+        protected InvestmentTransaction() { }
+
+        // Construtor público
+        public InvestmentTransaction(
+            DateTime date,
+            TransactionType type,
+            decimal quantity,
+            decimal price,
+            decimal totalValue,
+            decimal taxes,
+            string broker,
+            string notes,
+            Investment investment)
+        {
+            Id = Guid.NewGuid();
+            Date = date;
+            Type = type;
+            Quantity = quantity;
+            Price = price;
+            TotalValue = totalValue;
+            Taxes = taxes;
+            Broker = broker ?? "";
+            Notes = notes ?? "";
+            CreatedAt = DateTime.Now;
+
+            InvestmentId = investment.Id;
+            Investment = investment;
+        }
     }
 }

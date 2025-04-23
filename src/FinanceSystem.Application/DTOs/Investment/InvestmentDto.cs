@@ -18,6 +18,7 @@ namespace FinanceSystem.Application.DTOs.Investment
         public decimal GainLossPercentage { get; set; }
         public decimal GainLossValue { get; set; }
         public DateTime LastUpdate { get; set; }
+        public Guid UserId { get; set; }
         public List<InvestmentTransactionDto> Transactions { get; set; } = new List<InvestmentTransactionDto>();
     }
 }

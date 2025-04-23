@@ -25,6 +25,8 @@ namespace FinanceSystem.Infrastructure
 
             services.AddHostedService<DatabaseInitializer>();
 
+            services.AddHttpClient();
+
             return services;
         }
     }

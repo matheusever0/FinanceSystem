@@ -23,6 +23,8 @@ namespace FinanceSystem.Infrastructure.Data
         public DbSet<Income> Incomes { get; set; }
         public DbSet<IncomeInstallment> IncomeInstallments { get; set; }
         public DbSet<IncomeType> IncomeTypes { get; set; }
+        public DbSet<Investment> Investments { get; set; }
+        public DbSet<InvestmentTransaction> InvestmentTransactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -72,6 +74,14 @@ namespace FinanceSystem.Infrastructure.Data
                 .HasDefaultValueSql("NEWSEQUENTIALID()");
 
             modelBuilder.Entity<IncomeType>()
+                .Property(e => e.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<Investment>()
+                 .Property(e => e.Id)
+                 .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<InvestmentTransaction>()
                 .Property(e => e.Id)
                 .HasDefaultValueSql("NEWSEQUENTIALID()");
 
@@ -182,6 +192,18 @@ namespace FinanceSystem.Infrastructure.Data
                 .WithOne(i => i.IncomeType)
                 .HasForeignKey(i => i.IncomeTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Investment>()
+                .HasOne(i => i.User)
+                .WithMany()
+                .HasForeignKey(i => i.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<InvestmentTransaction>()
+                .HasOne(t => t.Investment)
+                .WithMany(i => i.Transactions)
+                .HasForeignKey(t => t.InvestmentId)
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
     }

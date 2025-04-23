@@ -3,6 +3,8 @@ using FinanceSystem.Application.DTOs.CreditCard;
 using FinanceSystem.Application.DTOs.Income;
 using FinanceSystem.Application.DTOs.IncomeInstallment;
 using FinanceSystem.Application.DTOs.IncomeType;
+using FinanceSystem.Application.DTOs.Investment;
+using FinanceSystem.Application.DTOs.InvestmentTransaction;
 using FinanceSystem.Application.DTOs.Payment;
 using FinanceSystem.Application.DTOs.PaymentInstallment;
 using FinanceSystem.Application.DTOs.PaymentMethod;
@@ -48,6 +50,13 @@ namespace FinanceSystem.Application.Mappings
             CreateMap<IncomeType, IncomeTypeDto>();
 
             CreateMap<IncomeInstallment, IncomeInstallmentDto>();
+
+            CreateMap<Investment, InvestmentDto>()
+                .ForMember(dest => dest.Transactions, opt => opt.MapFrom(src => src.Transactions))
+                .ForMember(dest => dest.TypeDescription, opt => opt.MapFrom(src => src.Type.ToString()));
+
+            CreateMap<InvestmentTransaction, InvestmentTransactionDto>()
+                .ForMember(dest => dest.TypeDescription, opt => opt.MapFrom(src => src.Type.ToString()));
         }
     }
 }

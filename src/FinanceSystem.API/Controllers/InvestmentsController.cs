@@ -34,7 +34,6 @@ namespace FinanceSystem.API.Controllers
             {
                 var investment = await _investmentService.GetByIdAsync(id);
 
-                // Verificar se o investimento pertence ao usuário atual
                 if (investment.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 

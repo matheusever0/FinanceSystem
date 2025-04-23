@@ -15,6 +15,8 @@ namespace FinanceSystem.Domain.Interfaces.Services
         IIncomeRepository Incomes { get; }
         IIncomeTypeRepository IncomeTypes { get; }
         IIncomeInstallmentRepository IncomeInstallments { get; }
+        IInvestmentRepository Investments { get; }
+        IInvestmentTransactionRepository InvestmentTransactions { get; }
         Task<int> CompleteAsync();
     }
 }
