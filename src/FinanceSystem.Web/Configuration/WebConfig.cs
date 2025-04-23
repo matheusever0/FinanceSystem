@@ -11,9 +11,10 @@ namespace FinanceSystem.Web.Configuration
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromHours(1);
+                options.IdleTimeout = TimeSpan.FromHours(24);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
+                options.Cookie.MaxAge = TimeSpan.FromHours(24);
             });
 
             services.AddControllersWithViews(options =>

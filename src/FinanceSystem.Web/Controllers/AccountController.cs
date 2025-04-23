@@ -71,8 +71,6 @@ namespace FinanceSystem.Web.Controllers
                     return View(model);
                 }
 
-                HttpContext.SetJwtToken(result.Token);
-
                 var principal = await _apiService.GetClaimsPrincipalFromToken(result.Token);
 
                 if (principal == null)
@@ -80,7 +78,7 @@ namespace FinanceSystem.Web.Controllers
                     ModelState.AddModelError(string.Empty, ERROR_IDENTITY_GENERATION);
                     return View(model);
                 }
-
+                HttpContext.SetJwtToken(result.Token);
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     principal,
