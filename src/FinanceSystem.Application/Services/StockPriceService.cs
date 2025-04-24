@@ -31,10 +31,9 @@ namespace FinanceSystem.Application.Services
                     PropertyNameCaseInsensitive = true
                 });
 
-                if (result?.Results == null || !result.Results.Any())
-                    throw new Exception($"Nenhum resultado encontrado para o símbolo {symbol}");
-
-                return result.Results[0].RegularMarketPrice;
+                return result?.Results == null || result.Results.Count == 0
+                    ? throw new Exception($"Nenhum resultado encontrado para o símbolo {symbol}")
+                    : result.Results[0].RegularMarketPrice;
             }
             catch (Exception ex)
             {
@@ -56,10 +55,9 @@ namespace FinanceSystem.Application.Services
                     PropertyNameCaseInsensitive = true
                 });
 
-                if (result?.Results == null || !result.Results.Any())
-                    return new List<StockQuoteDto>();
-
-                return result.Results.Select(r => new StockQuoteDto
+                return result?.Results == null || result.Results.Count == 0
+                    ? new List<StockQuoteDto>()
+                    : result.Results.Select(r => new StockQuoteDto
                 {
                     Symbol = r.Symbol,
                     Price = r.RegularMarketPrice,
@@ -77,12 +75,12 @@ namespace FinanceSystem.Application.Services
 
         private class BrapiResponse
         {
-            public List<BrapiResult> Results { get; set; }
+            public required List<BrapiResult> Results { get; set; }
         }
 
         private class BrapiResult
         {
-            public string Symbol { get; set; }
+            public required string Symbol { get; set; }
             public decimal RegularMarketPrice { get; set; }
             public decimal RegularMarketChange { get; set; }
             public decimal RegularMarketChangePercent { get; set; }

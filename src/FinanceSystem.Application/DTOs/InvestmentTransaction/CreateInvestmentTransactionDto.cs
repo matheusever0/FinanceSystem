@@ -24,9 +24,9 @@ namespace FinanceSystem.Application.DTOs.InvestmentTransaction
         public decimal Taxes { get; set; }
 
         [StringLength(50)]
-        public string Broker { get; set; }
+        public required string Broker { get; set; }
 
         [StringLength(500)]
-        public string Notes { get; set; }
+        public required string Notes { get; set; }
     }
 }

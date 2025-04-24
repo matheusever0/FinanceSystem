@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Domain.Enums;
+﻿using FinanceSystem.Domain.Entities;
+using FinanceSystem.Domain.Enums;
 
 public class PaymentInstallment
 {

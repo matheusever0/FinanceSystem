@@ -22,25 +22,27 @@ namespace FinanceSystem.Web.Services
 
         public async Task<bool> HasPermissionAsync(ClaimsPrincipal user, string permissionSystemName)
         {
+            var context = _httpContextAccessor?.HttpContext!;
+
             try
             {
-                if (!user.Identity.IsAuthenticated)
+                if (!context.IsUserAuthenticated())
                 {
                     _logger.LogWarning("Usuário não autenticado tentando acessar recurso que requer permissão: {PermissionName}", permissionSystemName);
                     return false;
                 }
 
-                var token = _httpContextAccessor?.HttpContext?.GetJwtToken();
+                var token = context.GetJwtToken();
                 if (string.IsNullOrEmpty(token))
                 {
-                    _logger.LogWarning("Token não encontrado para usuário autenticado: {User}", user.Identity.Name);
+                    _logger.LogWarning("Token não encontrado para usuário autenticado: {User}", context.GetUserName());
                     return false;
                 }
 
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
                 if (userIdClaim == null)
                 {
-                    _logger.LogWarning("Claim de ID não encontrada para usuário: {User}", user.Identity.Name);
+                    _logger.LogWarning("Claim de ID não encontrada para usuário: {User}", context.GetUserName());
                     return false;
                 }
 
@@ -49,7 +51,7 @@ namespace FinanceSystem.Web.Services
 
                 _logger.LogInformation(
                     "Verificação de permissão para usuário {User}: {PermissionName} = {HasPermission}",
-                    user.Identity.Name,
+                    context.GetUserName(),
                     permissionSystemName,
                     hasPermission
                 );

@@ -5,17 +5,17 @@ namespace FinanceSystem.Domain.Entities
     public class Investment
     {
         public Guid Id { get; protected set; }
-        public string Symbol { get; protected set; }  // Código da ação, FII, ETF
-        public string Name { get; protected set; }    // Nome descritivo
-        public InvestmentType Type { get; protected set; }  // Tipo do investimento
-        public decimal TotalQuantity { get; protected set; }  // Quantidade total
-        public decimal AveragePrice { get; protected set; }  // Preço médio
-        public decimal CurrentPrice { get; protected set; }  // Preço atual
-        public decimal TotalInvested { get; protected set; }  // Valor total investido
-        public decimal CurrentTotal { get; protected set; }  // Valor total atual
-        public decimal GainLossPercentage { get; protected set; }  // Percentual de ganho/perda
-        public decimal GainLossValue { get; protected set; }  // Valor absoluto de ganho/perda
-        public DateTime LastUpdate { get; protected set; }  // Última atualização do preço
+        public string Symbol { get; protected set; }  
+        public string Name { get; protected set; }  
+        public InvestmentType Type { get; protected set; }  
+        public decimal TotalQuantity { get; protected set; } 
+        public decimal AveragePrice { get; protected set; }  
+        public decimal CurrentPrice { get; protected set; }  
+        public decimal TotalInvested { get; protected set; } 
+        public decimal CurrentTotal { get; protected set; } 
+        public decimal GainLossPercentage { get; protected set; } 
+        public decimal GainLossValue { get; protected set; } 
+        public DateTime LastUpdate { get; protected set; }  
         public Guid UserId { get; protected set; }
         public User User { get; protected set; }
 
@@ -23,7 +23,7 @@ namespace FinanceSystem.Domain.Entities
 
         protected Investment()
         {
-            Transactions = new List<InvestmentTransaction>();
+            Transactions = [];
         }
 
         public Investment(
@@ -53,10 +53,9 @@ namespace FinanceSystem.Domain.Entities
             UserId = user.Id;
             User = user;
             LastUpdate = DateTime.Now;
-            Transactions = new List<InvestmentTransaction>();
+            Transactions = [];
         }
 
-        // Método para atualizar o preço atual
         public void UpdateCurrentPrice(decimal newPrice)
         {
             CurrentPrice = newPrice;
@@ -64,7 +63,6 @@ namespace FinanceSystem.Domain.Entities
             LastUpdate = DateTime.Now;
         }
 
-        // Método para recalcular valores após atualização de preço
         private void RecalculateValues()
         {
             CurrentTotal = TotalQuantity * CurrentPrice;
@@ -72,7 +70,6 @@ namespace FinanceSystem.Domain.Entities
             GainLossPercentage = TotalInvested > 0 ? (GainLossValue / TotalInvested) * 100 : 0;
         }
 
-        // Método para adicionar uma transação
         public void AddTransaction(
             DateTime date,
             TransactionType type,
@@ -103,7 +100,6 @@ namespace FinanceSystem.Domain.Entities
             }
         }
 
-        // Método para recalcular após nova transação
         public void RecalculateAfterTransaction(InvestmentTransaction transaction)
         {
             switch (transaction.Type)
@@ -116,7 +112,6 @@ namespace FinanceSystem.Domain.Entities
                     break;
                 case TransactionType.Dividend:
                 case TransactionType.JCP:
-                    // Não altera quantidade nem preço médio
                     break;
                 case TransactionType.Split:
                     RecalculateAfterSplit(transaction.Quantity);
@@ -125,17 +120,14 @@ namespace FinanceSystem.Domain.Entities
                     RecalculateAfterBonus(transaction.Quantity);
                     break;
                 case TransactionType.Yield:
-                    // Não altera quantidade nem preço médio para rendimentos
                     break;
             }
 
             RecalculateValues();
         }
 
-        // Método para recalcular após compra
         private void RecalculateAfterBuy(decimal quantity, decimal price)
         {
-            decimal totalBefore = TotalQuantity * AveragePrice;
             decimal buyValue = quantity * price;
 
             TotalQuantity += quantity;
@@ -145,44 +137,35 @@ namespace FinanceSystem.Domain.Entities
                 AveragePrice = TotalInvested / TotalQuantity;
         }
 
-        // Método para recalcular após venda
         private void RecalculateAfterSell(decimal quantity)
         {
-            // Para venda, diminui a quantidade mas não altera o preço médio
             TotalQuantity -= quantity;
 
-            // Atualiza o valor investido proporcionalmente
             if (TotalQuantity >= 0)
                 TotalInvested = TotalQuantity * AveragePrice;
         }
 
-        // Método para recalcular após desdobramento (split)
         private void RecalculateAfterSplit(decimal factor)
         {
             TotalQuantity *= factor;
             AveragePrice /= factor;
         }
 
-        // Método para recalcular após bonificação
         private void RecalculateAfterBonus(decimal additionalShares)
         {
             decimal totalBefore = TotalQuantity * AveragePrice;
             TotalQuantity += additionalShares;
 
-            // O preço médio diminui pois a quantidade aumentou sem novo investimento
             if (TotalQuantity > 0)
                 AveragePrice = totalBefore / TotalQuantity;
         }
 
-        // Método para recalcular sem uma transação (usado ao deletar uma transação)
         public void RecalculateWithoutTransaction(InvestmentTransaction transaction)
         {
-            // Recalcular todos os valores a partir das transações restantes
             TotalQuantity = 0;
             TotalInvested = 0;
             AveragePrice = 0;
 
-            // Ordenar as transações por data
             var orderedTransactions = Transactions
                 .Where(t => t.Id != transaction.Id)
                 .OrderBy(t => t.Date)
@@ -196,7 +179,6 @@ namespace FinanceSystem.Domain.Entities
             RecalculateValues();
         }
 
-        // Método para atualizar o nome
         public void UpdateName(string name)
         {
             Name = name;

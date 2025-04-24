@@ -18,7 +18,7 @@ namespace FinanceSystem.Web.Models.User
         public string? Password { get; set; }
 
         [Display(Name = "Perfis")]
-        public List<string> Roles { get; set; } = new List<string>();
+        public List<string> Roles { get; set; } = [];
 
         [Display(Name = "Ativo")]
         public bool IsActive { get; set; } = true;

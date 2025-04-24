@@ -95,12 +95,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var paymentType = await _paymentTypeService.GetPaymentTypeByIdAsync(id, token);
 
-                if (paymentType == null)
-                {
-                    return NotFound("Tipo de pagamento não encontrado");
-                }
-
-                return View(paymentType);
+                return paymentType == null ? NotFound("Tipo de pagamento não encontrado") : View(paymentType);
             }
             catch (Exception ex)
             {

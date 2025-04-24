@@ -185,12 +185,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
 
-                if (role == null)
-                {
-                    return NotFound("Perfil não encontrado");
-                }
-
-                return View(role);
+                return role == null ? NotFound("Perfil não encontrado") : View(role);
             }
             catch (Exception ex)
             {
@@ -277,7 +272,7 @@ namespace FinanceSystem.Web.Controllers
                     return NotFound("Perfil não encontrado");
                 }
 
-                var permissionList = selectedPermissions ?? new List<string>();
+                var permissionList = selectedPermissions ?? [];
                 await _roleService.UpdateRolePermissionsAsync(id, permissionList, token);
 
                 TempData["SuccessMessage"] = SUCCESS_UPDATE_ROLE_PERMISSIONS;

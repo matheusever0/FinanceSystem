@@ -19,10 +19,8 @@ namespace FinanceSystem.Domain.Entities
         public Investment Investment { get; protected set; }
 
 
-        // Construtor protegido
         protected InvestmentTransaction() { }
 
-        // Construtor público
         public InvestmentTransaction(
             DateTime date,
             TransactionType type,

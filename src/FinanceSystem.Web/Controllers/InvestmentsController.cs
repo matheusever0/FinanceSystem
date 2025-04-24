@@ -103,7 +103,7 @@ namespace FinanceSystem.Web.Controllers
 
                 // Carregar transações para este investimento
                 var transactions = await _investmentTransactionService.GetTransactionsByInvestmentIdAsync(id, token);
-                investment.Transactions = transactions.ToList();
+                investment.Transactions = [.. transactions];
 
                 return View(investment);
             }
@@ -240,12 +240,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var investment = await _investmentService.GetInvestmentByIdAsync(id, token);
 
-                if (investment == null)
-                {
-                    return NotFound("Investimento não encontrado");
-                }
-
-                return View(investment);
+                return investment == null ? NotFound("Investimento não encontrado") : View(investment);
             }
             catch (Exception ex)
             {

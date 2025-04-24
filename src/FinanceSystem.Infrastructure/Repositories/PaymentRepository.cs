@@ -1,4 +1,5 @@
-﻿using FinanceSystem.Domain.Enums;
+﻿using FinanceSystem.Domain.Entities;
+using FinanceSystem.Domain.Enums;
 using FinanceSystem.Domain.Interfaces.Repositories;
 using FinanceSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;

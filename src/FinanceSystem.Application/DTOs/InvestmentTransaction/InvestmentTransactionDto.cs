@@ -13,8 +13,8 @@ namespace FinanceSystem.Application.DTOs.InvestmentTransaction
         public decimal Price { get; set; }
         public decimal TotalValue { get; set; }
         public decimal Taxes { get; set; }
-        public string Broker { get; set; }
-        public string Notes { get; set; }
+        public required string Broker { get; set; }
+        public required string Notes { get; set; }
         public Guid InvestmentId { get; set; }
         public DateTime CreatedAt { get; set; }
     }

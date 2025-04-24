@@ -4,8 +4,8 @@ namespace FinanceSystem.Application.DTOs.Login
 {
     public class LoginResponseDto
     {
-        public string Token { get; set; }
+        public required string Token { get; set; }
         public DateTime Expiration { get; set; }
-        public UserDto User { get; set; }
+        public required UserDto User { get; set; }
     }
 }

@@ -40,9 +40,9 @@
                         <div class="mb-2">
                             <select id="roleSelector" class="form-select">
                                 <option value="" selected disabled>Selecione um perfil para adicionar...</option>
-                                @foreach (var role in roles)
+                                @foreach (var role in roles.Select(e => e.Name))
                                 {
-                                    <option value="@role.Name">@role.Name</option>
+                                    <option value="@role">@role</option>
                                 }
                             </select>
                             <button type="button" id="addRoleBtn" class="btn btn-sm btn-primary mt-2">

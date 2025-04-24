@@ -20,10 +20,9 @@ namespace FinanceSystem.Application.Services
         public async Task<IncomeInstallmentDto> GetByIdAsync(Guid id)
         {
             var installment = await _unitOfWork.IncomeInstallments.GetByIdAsync(id);
-            if (installment == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.IncomeInstallment_NotFound);
-
-            return _mapper.Map<IncomeInstallmentDto>(installment);
+            return installment == null
+                ? throw new KeyNotFoundException(ResourceFinanceApi.IncomeInstallment_NotFound)
+                : _mapper.Map<IncomeInstallmentDto>(installment);
         }
 
         public async Task<IEnumerable<IncomeInstallmentDto>> GetByIncomeIdAsync(Guid incomeId)
@@ -52,10 +51,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<IncomeInstallmentDto> MarkAsReceivedAsync(Guid id, DateTime? receivedDate = null)
         {
-            var installment = await _unitOfWork.IncomeInstallments.GetByIdAsync(id);
-            if (installment == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.IncomeInstallment_NotFound);
-
+            var installment = await _unitOfWork.IncomeInstallments.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.IncomeInstallment_NotFound);
             installment.MarkAsReceived(receivedDate ?? DateTime.Now);
             await _unitOfWork.IncomeInstallments.UpdateAsync(installment);
             await _unitOfWork.CompleteAsync();
@@ -65,10 +61,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<IncomeInstallmentDto> CancelAsync(Guid id)
         {
-            var installment = await _unitOfWork.IncomeInstallments.GetByIdAsync(id);
-            if (installment == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.IncomeInstallment_NotFound);
-
+            var installment = await _unitOfWork.IncomeInstallments.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.IncomeInstallment_NotFound);
             installment.Cancel();
             await _unitOfWork.IncomeInstallments.UpdateAsync(installment);
             await _unitOfWork.CompleteAsync();

@@ -166,17 +166,17 @@ namespace FinanceSystem.Infrastructure.Data
 
                     var paymentTypes = new List<PaymentType>
                     {
-                        new PaymentType("Alimentação", "Gastos com alimentação, restaurantes, mercado, etc."),
-                        new PaymentType("Moradia", "Gastos com aluguel, condomínio, IPTU, etc."),
-                        new PaymentType("Transporte", "Gastos com combustível, transporte público, manutenção de veículos, etc."),
-                        new PaymentType("Saúde", "Gastos com plano de saúde, medicamentos, consultas médicas, etc."),
-                        new PaymentType("Educação", "Gastos com mensalidades escolares, cursos, livros, etc."),
-                        new PaymentType("Lazer", "Gastos com cinema, viagens, eventos, etc."),
-                        new PaymentType("Vestuário", "Gastos com roupas, calçados, acessórios, etc."),
-                        new PaymentType("Serviços Públicos", "Gastos com água, luz, gás, internet, telefone, etc."),
-                        new PaymentType("Impostos", "Gastos com impostos e taxas governamentais"),
-                        new PaymentType("Investimentos", "Gastos com aplicações financeiras, ações, etc."),
-                        new PaymentType("Outros", "Gastos diversos não classificados em outras categorias")
+                        new("Alimentação", "Gastos com alimentação, restaurantes, mercado, etc."),
+                        new("Moradia", "Gastos com aluguel, condomínio, IPTU, etc."),
+                        new("Transporte", "Gastos com combustível, transporte público, manutenção de veículos, etc."),
+                        new("Saúde", "Gastos com plano de saúde, medicamentos, consultas médicas, etc."),
+                        new("Educação", "Gastos com mensalidades escolares, cursos, livros, etc."),
+                        new("Lazer", "Gastos com cinema, viagens, eventos, etc."),
+                        new("Vestuário", "Gastos com roupas, calçados, acessórios, etc."),
+                        new("Serviços Públicos", "Gastos com água, luz, gás, internet, telefone, etc."),
+                        new("Impostos", "Gastos com impostos e taxas governamentais"),
+                        new("Investimentos", "Gastos com aplicações financeiras, ações, etc."),
+                        new("Outros", "Gastos diversos não classificados em outras categorias")
                     };
 
                     await _context.PaymentTypes.AddRangeAsync(paymentTypes);
@@ -191,19 +191,19 @@ namespace FinanceSystem.Infrastructure.Data
 
                     var paymentMethods = new List<PaymentMethod>
                     {
-                        new PaymentMethod("Dinheiro", "Pagamento em espécie", PaymentMethodType.Cash),
-                        new PaymentMethod("Cartão de Crédito", "Pagamento com cartão de crédito", PaymentMethodType.CreditCard),
-                        new PaymentMethod("Cartão de Débito", "Pagamento com cartão de débito", PaymentMethodType.DebitCard),
-                        new PaymentMethod("Transferência Bancária", "Pagamento por transferência bancária", PaymentMethodType.BankTransfer),
-                        new PaymentMethod("PIX", "Pagamento via PIX", PaymentMethodType.BankTransfer),
-                        new PaymentMethod("Boleto Bancário", "Pagamento por boleto bancário", PaymentMethodType.BankTransfer),
-                        new PaymentMethod("Cheque", "Pagamento com cheque", PaymentMethodType.Check),
-                        new PaymentMethod("PayPal", "Pagamento via PayPal", PaymentMethodType.DigitalWallet),
-                        new PaymentMethod("Google Pay", "Pagamento via Google Pay", PaymentMethodType.DigitalWallet),
-                        new PaymentMethod("Apple Pay", "Pagamento via Apple Pay", PaymentMethodType.DigitalWallet),
-                        new PaymentMethod("Mercado Pago", "Pagamento via Mercado Pago", PaymentMethodType.DigitalWallet),
-                        new PaymentMethod("PicPay", "Pagamento via PicPay", PaymentMethodType.DigitalWallet),
-                        new PaymentMethod("Outro", "Outros métodos de pagamento", PaymentMethodType.Other)
+                        new("Dinheiro", "Pagamento em espécie", PaymentMethodType.Cash),
+                        new("Cartão de Crédito", "Pagamento com cartão de crédito", PaymentMethodType.CreditCard),
+                        new("Cartão de Débito", "Pagamento com cartão de débito", PaymentMethodType.DebitCard),
+                        new("Transferência Bancária", "Pagamento por transferência bancária", PaymentMethodType.BankTransfer),
+                        new("PIX", "Pagamento via PIX", PaymentMethodType.BankTransfer),
+                        new("Boleto Bancário", "Pagamento por boleto bancário", PaymentMethodType.BankTransfer),
+                        new("Cheque", "Pagamento com cheque", PaymentMethodType.Check),
+                        new("PayPal", "Pagamento via PayPal", PaymentMethodType.DigitalWallet),
+                        new("Google Pay", "Pagamento via Google Pay", PaymentMethodType.DigitalWallet),
+                        new("Apple Pay", "Pagamento via Apple Pay", PaymentMethodType.DigitalWallet),
+                        new("Mercado Pago", "Pagamento via Mercado Pago", PaymentMethodType.DigitalWallet),
+                        new("PicPay", "Pagamento via PicPay", PaymentMethodType.DigitalWallet),
+                        new("Outro", "Outros métodos de pagamento", PaymentMethodType.Other)
                     };
 
                     await _context.PaymentMethods.AddRangeAsync(paymentMethods);

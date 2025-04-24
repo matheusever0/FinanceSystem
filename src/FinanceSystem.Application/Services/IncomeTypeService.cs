@@ -21,10 +21,9 @@ namespace FinanceSystem.Application.Services
         public async Task<IncomeTypeDto> GetByIdAsync(Guid id)
         {
             var incomeType = await _unitOfWork.IncomeTypes.GetByIdAsync(id);
-            if (incomeType == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.IncomeType_NotFound);
-
-            return _mapper.Map<IncomeTypeDto>(incomeType);
+            return incomeType == null
+                ? throw new KeyNotFoundException(ResourceFinanceApi.IncomeType_NotFound)
+                : _mapper.Map<IncomeTypeDto>(incomeType);
         }
 
         public async Task<IEnumerable<IncomeTypeDto>> GetAllSystemTypesAsync()
@@ -47,10 +46,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<IncomeTypeDto> CreateAsync(CreateIncomeTypeDto createIncomeTypeDto, Guid userId)
         {
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
-
+            var user = await _unitOfWork.Users.GetByIdAsync(userId) ?? throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
             var existingType = await _unitOfWork.IncomeTypes.GetByNameAsync(createIncomeTypeDto.Name);
             if (existingType != null)
                 throw new InvalidOperationException(ResourceFinanceApi.IncomeType_NameExists);
@@ -69,10 +65,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<IncomeTypeDto> UpdateAsync(Guid id, UpdateIncomeTypeDto updateIncomeTypeDto)
         {
-            var incomeType = await _unitOfWork.IncomeTypes.GetByIdAsync(id);
-            if (incomeType == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.IncomeType_NotFound);
-
+            var incomeType = await _unitOfWork.IncomeTypes.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.IncomeType_NotFound);
             if (incomeType.IsSystem)
                 throw new InvalidOperationException(ResourceFinanceApi.IncomeType_SystemCannotUpdate);
 
@@ -96,10 +89,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var incomeType = await _unitOfWork.IncomeTypes.GetByIdAsync(id);
-            if (incomeType == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.IncomeType_NotFound);
-
+            var incomeType = await _unitOfWork.IncomeTypes.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.IncomeType_NotFound);
             if (incomeType.IsSystem)
                 throw new InvalidOperationException(ResourceFinanceApi.IncomeType_SystemCannotDelete);
 

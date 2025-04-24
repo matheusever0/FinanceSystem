@@ -5,7 +5,7 @@ namespace FinanceSystem.Application.DTOs.CreditCard
     public class UpdateCreditCardDto
     {
         [StringLength(50, MinimumLength = 3)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [Range(1, 31, ErrorMessage = "O dia de fechamento deve estar entre 1 e 31")]
         public int? ClosingDay { get; set; }

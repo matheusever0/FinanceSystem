@@ -13,7 +13,7 @@ public class PaymentType
 
     protected PaymentType()
     {
-        Payments = new List<Payment>();
+        Payments = [];
     }
 
     public PaymentType(string name, string description)
@@ -23,7 +23,7 @@ public class PaymentType
         Description = description;
         IsSystem = true;
         CreatedAt = DateTime.Now;
-        Payments = new List<Payment>();
+        Payments = [];
     }
 
     public PaymentType(string name, string description, User user)
@@ -35,7 +35,7 @@ public class PaymentType
         UserId = user.Id;
         User = user;
         CreatedAt = DateTime.Now;
-        Payments = new List<Payment>();
+        Payments = [];
     }
 
     public void UpdateName(string name)

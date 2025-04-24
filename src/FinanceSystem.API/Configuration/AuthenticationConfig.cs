@@ -12,7 +12,7 @@ namespace FinanceSystem.API.Configuration
             services.Configure<JwtSettings>(jwtSettingsSection);
 
             var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
-            var key = Encoding.ASCII.GetBytes(jwtSettings!.Secret);
+            var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
 
             services.AddAuthentication(x =>
             {

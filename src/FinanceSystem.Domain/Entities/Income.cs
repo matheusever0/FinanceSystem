@@ -25,7 +25,7 @@ namespace FinanceSystem.Domain.Entities
 
         protected Income()
         {
-            Installments = new List<IncomeInstallment>();
+            Installments = [];
         }
 
         public Income(
@@ -52,7 +52,7 @@ namespace FinanceSystem.Domain.Entities
             UserId = user.Id;
             User = user;
 
-            Installments = new List<IncomeInstallment>();
+            Installments = [];
         }
 
         public void MarkAsReceived(DateTime receivedDate)

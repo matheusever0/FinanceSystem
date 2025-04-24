@@ -48,10 +48,7 @@ namespace FinanceSystem.API.Controllers
             {
                 var paymentType = await _paymentTypeService.GetByIdAsync(id);
 
-                if (!paymentType.IsSystem && paymentType.UserId != HttpContext.GetCurrentUserId())
-                    return Forbid();
-
-                return Ok(paymentType);
+                return !paymentType.IsSystem && paymentType.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<PaymentTypeDto>)Forbid() : (ActionResult<PaymentTypeDto>)Ok(paymentType);
             }
             catch (KeyNotFoundException ex)
             {

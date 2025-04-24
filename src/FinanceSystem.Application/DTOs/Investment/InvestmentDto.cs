@@ -6,8 +6,8 @@ namespace FinanceSystem.Application.DTOs.Investment
     public class InvestmentDto
     {
         public Guid Id { get; set; }
-        public string Symbol { get; set; }
-        public string Name { get; set; }
+        public required string Symbol { get; set; }
+        public required string Name { get; set; }
         public InvestmentType Type { get; set; }
         public string TypeDescription => Type.ToString();
         public decimal TotalQuantity { get; set; }
@@ -19,6 +19,6 @@ namespace FinanceSystem.Application.DTOs.Investment
         public decimal GainLossValue { get; set; }
         public DateTime LastUpdate { get; set; }
         public Guid UserId { get; set; }
-        public List<InvestmentTransactionDto> Transactions { get; set; } = new List<InvestmentTransactionDto>();
+        public List<InvestmentTransactionDto> Transactions { get; set; } = [];
     }
 }

@@ -165,12 +165,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var income = await _incomeService.GetIncomeByIdAsync(id, token);
 
-                if (income == null)
-                {
-                    return NotFound("Receita não encontrada");
-                }
-
-                return View(income);
+                return income == null ? NotFound("Receita não encontrada") : View(income);
             }
             catch (Exception ex)
             {
@@ -309,12 +304,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var income = await _incomeService.GetIncomeByIdAsync(id, token);
 
-                if (income == null)
-                {
-                    return NotFound("Receita não encontrada");
-                }
-
-                return View(income);
+                return income == null ? NotFound("Receita não encontrada") : View(income);
             }
             catch (Exception ex)
             {

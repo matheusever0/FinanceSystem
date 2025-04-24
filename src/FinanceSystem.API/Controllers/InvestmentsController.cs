@@ -34,10 +34,7 @@ namespace FinanceSystem.API.Controllers
             {
                 var investment = await _investmentService.GetByIdAsync(id);
 
-                if (investment.UserId != HttpContext.GetCurrentUserId())
-                    return Forbid();
-
-                return Ok(investment);
+                return investment.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<InvestmentDto>)Forbid() : (ActionResult<InvestmentDto>)Ok(investment);
             }
             catch (KeyNotFoundException ex)
             {

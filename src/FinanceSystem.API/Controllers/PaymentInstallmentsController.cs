@@ -77,12 +77,7 @@ namespace FinanceSystem.API.Controllers
                 var installment = await _paymentInstallmentService.GetByIdAsync(id);
 
                 var payment = await _paymentService.GetByIdAsync(installment.PaymentId);
-                if (payment.UserId != HttpContext.GetCurrentUserId())
-                {
-                    return Forbid();
-                }
-
-                return Ok(installment);
+                return payment.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<PaymentInstallmentDto>)Forbid() : (ActionResult<PaymentInstallmentDto>)Ok(installment);
             }
             catch (KeyNotFoundException ex)
             {

@@ -59,12 +59,9 @@ namespace FinanceSystem.Web.Controllers
                 TempData["ErrorMessage"] = string.Format(ERROR_MARK_PAID, ex.Message);
 
                 var paymentId = TempData["PaymentId"]?.ToString();
-                if (!string.IsNullOrEmpty(paymentId))
-                {
-                    return RedirectToAction("Details", "Payments", new { id = paymentId });
-                }
-
-                return RedirectToAction("Index", "Payments");
+                return !string.IsNullOrEmpty(paymentId)
+                    ? RedirectToAction("Details", "Payments", new { id = paymentId })
+                    : (IActionResult)RedirectToAction("Index", "Payments");
             }
         }
 
@@ -101,12 +98,9 @@ namespace FinanceSystem.Web.Controllers
                 TempData["ErrorMessage"] = string.Format(ERROR_MARK_OVERDUE, ex.Message);
 
                 var paymentId = TempData["PaymentId"]?.ToString();
-                if (!string.IsNullOrEmpty(paymentId))
-                {
-                    return RedirectToAction("Details", "Payments", new { id = paymentId });
-                }
-
-                return RedirectToAction("Index", "Payments");
+                return !string.IsNullOrEmpty(paymentId)
+                    ? RedirectToAction("Details", "Payments", new { id = paymentId })
+                    : (IActionResult)RedirectToAction("Index", "Payments");
             }
         }
 
@@ -143,12 +137,9 @@ namespace FinanceSystem.Web.Controllers
                 TempData["ErrorMessage"] = string.Format(ERROR_CANCEL, ex.Message);
 
                 var paymentId = TempData["PaymentId"]?.ToString();
-                if (!string.IsNullOrEmpty(paymentId))
-                {
-                    return RedirectToAction("Details", "Payments", new { id = paymentId });
-                }
-
-                return RedirectToAction("Index", "Payments");
+                return !string.IsNullOrEmpty(paymentId)
+                    ? RedirectToAction("Details", "Payments", new { id = paymentId })
+                    : (IActionResult)RedirectToAction("Index", "Payments");
             }
         }
     }

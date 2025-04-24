@@ -13,7 +13,7 @@
 
         protected IncomeType()
         {
-            Incomes = new List<Income>();
+            Incomes = [];
         }
 
         // Construtor para tipos de sistema
@@ -24,7 +24,7 @@
             Description = description;
             IsSystem = true;
             CreatedAt = DateTime.Now;
-            Incomes = new List<Income>();
+            Incomes = [];
         }
 
         // Construtor para tipos personalizados do usuário
@@ -37,7 +37,7 @@
             UserId = user.Id;
             User = user;
             CreatedAt = DateTime.Now;
-            Incomes = new List<Income>();
+            Incomes = [];
         }
 
         public void UpdateName(string name)

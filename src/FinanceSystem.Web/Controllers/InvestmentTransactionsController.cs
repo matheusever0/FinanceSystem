@@ -15,8 +15,6 @@ namespace FinanceSystem.Web.Controllers
         private readonly IInvestmentTransactionService _transactionService;
         private readonly ILogger<InvestmentTransactionsController> _logger;
 
-        private const string ERROR_LOADING_TRANSACTIONS = "Erro ao carregar transações: {0}";
-        private const string ERROR_LOADING_TRANSACTION_DETAILS = "Erro ao carregar detalhes da transação: {0}";
         private const string ERROR_PREPARING_FORM = "Erro ao preparar formulário: {0}";
         private const string ERROR_CREATING_TRANSACTION = "Erro ao criar transação: {0}";
         private const string ERROR_DELETING_TRANSACTION = "Erro ao excluir transação: {0}";

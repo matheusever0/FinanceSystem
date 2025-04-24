@@ -27,7 +27,7 @@
             IsActive = true;
             IsDeleted = false;
             CreatedAt = DateTime.Now;
-            UserRoles = new List<UserRole>();
+            UserRoles = [];
         }
 
         public void UpdateUsername(string username)

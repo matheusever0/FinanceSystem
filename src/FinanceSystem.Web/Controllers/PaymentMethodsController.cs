@@ -122,12 +122,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
 
-                if (paymentMethod == null)
-                {
-                    return NotFound("Método de pagamento não encontrado");
-                }
-
-                return View(paymentMethod);
+                return paymentMethod == null ? NotFound("Método de pagamento não encontrado") : View(paymentMethod);
             }
             catch (Exception ex)
             {
@@ -322,16 +317,16 @@ namespace FinanceSystem.Web.Controllers
 
         private List<SelectListItem> GetPaymentMethodTypes()
         {
-            return new List<SelectListItem>
-            {
-                new SelectListItem { Value = "1", Text = "Dinheiro" },
-                new SelectListItem { Value = "2", Text = "Cartão de Crédito" },
-                new SelectListItem { Value = "3", Text = "Cartão de Débito" },
-                new SelectListItem { Value = "4", Text = "Transferência Bancária" },
-                new SelectListItem { Value = "5", Text = "Carteira Digital" },
-                new SelectListItem { Value = "6", Text = "Cheque" },
-                new SelectListItem { Value = "7", Text = "Outro" }
-            };
+            return
+            [
+                new() { Value = "1", Text = "Dinheiro" },
+                new() { Value = "2", Text = "Cartão de Crédito" },
+                new() { Value = "3", Text = "Cartão de Débito" },
+                new() { Value = "4", Text = "Transferência Bancária" },
+                new() { Value = "5", Text = "Carteira Digital" },
+                new() { Value = "6", Text = "Cheque" },
+                new() { Value = "7", Text = "Outro" }
+            ];
         }
 
         private static string GetPaymentMethodTypeDescription(int type)

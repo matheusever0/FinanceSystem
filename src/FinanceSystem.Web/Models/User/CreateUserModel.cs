@@ -7,20 +7,20 @@ namespace FinanceSystem.Web.Models.User
         [Required(ErrorMessage = "O nome de usuário é obrigatório")]
         [StringLength(50, MinimumLength = 3, ErrorMessage = "O nome de usuário deve ter entre 3 e 50 caracteres")]
         [Display(Name = "Nome de Usuário")]
-        public string Username { get; set; }
+        public required string Username { get; set; }
 
         [Required(ErrorMessage = "O e-mail é obrigatório")]
         [EmailAddress(ErrorMessage = "E-mail inválido")]
         [Display(Name = "E-mail")]
-        public string Email { get; set; }
+        public required string Email { get; set; }
 
         [Required(ErrorMessage = "A senha é obrigatória")]
         [StringLength(100, MinimumLength = 6, ErrorMessage = "A senha deve ter no mínimo 6 caracteres")]
         [DataType(DataType.Password)]
         [Display(Name = "Senha")]
-        public string Password { get; set; }
+        public required string Password { get; set; }
 
         [Display(Name = "Perfis")]
-        public List<string> Roles { get; set; } = new List<string>();
+        public List<string> Roles { get; set; } = [];
     }
 }

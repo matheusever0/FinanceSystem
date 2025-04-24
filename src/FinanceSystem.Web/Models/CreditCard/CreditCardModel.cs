@@ -4,16 +4,16 @@ namespace FinanceSystem.Web.Models.CreditCard
 {
     public class CreditCardModel
     {
-        public string Id { get; set; }
+        public required string Id { get; set; }
 
         [Display(Name = "Nome")]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [Display(Name = "Últimos 4 Dígitos")]
-        public string LastFourDigits { get; set; }
+        public required string LastFourDigits { get; set; }
 
         [Display(Name = "Bandeira")]
-        public string CardBrand { get; set; }
+        public required string CardBrand { get; set; }
 
         [Display(Name = "Dia de Fechamento")]
         public int ClosingDay { get; set; }
@@ -37,13 +37,13 @@ namespace FinanceSystem.Web.Models.CreditCard
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
         public DateTime? UpdatedAt { get; set; }
 
-        public string UserId { get; set; }
+        public required string UserId { get; set; }
 
         [Display(Name = "Método de Pagamento")]
-        public string PaymentMethodId { get; set; }
+        public required string PaymentMethodId { get; set; }
 
         [Display(Name = "Método de Pagamento")]
-        public string PaymentMethodName { get; set; }
+        public required string PaymentMethodName { get; set; }
 
         [Display(Name = "Limite Utilizado")]
         [DisplayFormat(DataFormatString = "{0:C2}")]

@@ -209,12 +209,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var payment = await _paymentService.GetPaymentByIdAsync(id, token);
 
-                if (payment == null)
-                {
-                    return NotFound("Pagamento não encontrado");
-                }
-
-                return View(payment);
+                return payment == null ? NotFound("Pagamento não encontrado") : View(payment);
             }
             catch (Exception ex)
             {
@@ -388,12 +383,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var payment = await _paymentService.GetPaymentByIdAsync(id, token);
 
-                if (payment == null)
-                {
-                    return NotFound("Pagamento não encontrado");
-                }
-
-                return View(payment);
+                return payment == null ? NotFound("Pagamento não encontrado") : View(payment);
             }
             catch (Exception ex)
             {

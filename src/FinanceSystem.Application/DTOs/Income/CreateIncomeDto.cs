@@ -6,7 +6,7 @@ namespace FinanceSystem.Application.DTOs.Income
     {
         [Required]
         [StringLength(100, MinimumLength = 3)]
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
         [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "O valor deve ser maior que zero")]
@@ -20,7 +20,7 @@ namespace FinanceSystem.Application.DTOs.Income
         public bool IsRecurring { get; set; }
 
         [StringLength(500)]
-        public string Notes { get; set; }
+        public required string Notes { get; set; }
 
         [Required]
         public Guid IncomeTypeId { get; set; }

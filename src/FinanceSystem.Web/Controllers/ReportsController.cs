@@ -239,7 +239,7 @@ namespace FinanceSystem.Web.Controllers
             return cardData;
         }
 
-        private object GetPropertyValue(object obj, string propertyName)
+        private static object? GetPropertyValue(object obj, string propertyName)
         {
             return obj.GetType().GetProperty(propertyName)?.GetValue(obj, null);
         }

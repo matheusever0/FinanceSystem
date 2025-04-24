@@ -51,12 +51,7 @@ namespace FinanceSystem.API.Controllers
             {
                 var incomeType = await _incomeTypeService.GetByIdAsync(id);
 
-                if (!incomeType.IsSystem && incomeType.UserId != HttpContext.GetCurrentUserId())
-                {
-                    return Forbid();
-                }
-
-                return Ok(incomeType);
+                return !incomeType.IsSystem && incomeType.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<IncomeTypeDto>)Forbid() : (ActionResult<IncomeTypeDto>)Ok(incomeType);
             }
             catch (KeyNotFoundException ex)
             {

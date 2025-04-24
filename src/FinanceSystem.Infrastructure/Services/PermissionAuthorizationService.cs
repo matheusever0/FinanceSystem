@@ -25,7 +25,7 @@ namespace FinanceSystem.Infrastructure.Services
                 return false;
 
             var userRoles = user.FindAll(ClaimTypes.Role)?.Select(c => c.Value).ToList();
-            if (userRoles == null || !userRoles.Any())
+            if (userRoles == null || userRoles.Count == 0)
                 return false;
 
             var roles = await _unitOfWork.Roles.FindAsync(r => userRoles.Contains(r.Name));

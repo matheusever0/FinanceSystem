@@ -2,8 +2,8 @@
 {
     public class PaymentByTypeDto
     {
-        public string TypeId { get; set; }
-        public string TypeName { get; set; }
+        public required string TypeId { get; set; }
+        public required string TypeName { get; set; }
         public decimal TotalAmount { get; set; }
     }
 }

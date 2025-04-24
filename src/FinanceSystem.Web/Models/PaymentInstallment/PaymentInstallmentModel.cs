@@ -4,7 +4,7 @@ namespace FinanceSystem.Web.Models.PaymentInstallment
 {
     public class PaymentInstallmentModel
     {
-        public string Id { get; set; }
+        public required string Id { get; set; }
 
         [Display(Name = "Número da Parcela")]
         public int InstallmentNumber { get; set; }
@@ -25,7 +25,7 @@ namespace FinanceSystem.Web.Models.PaymentInstallment
         public int Status { get; set; }
 
         [Display(Name = "Status")]
-        public string StatusDescription { get; set; }
+        public required string StatusDescription { get; set; }
 
         [Display(Name = "Data de Criação")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
@@ -35,7 +35,7 @@ namespace FinanceSystem.Web.Models.PaymentInstallment
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
         public DateTime? UpdatedAt { get; set; }
 
-        public string PaymentId { get; set; }
+        public required string PaymentId { get; set; }
 
         [Display(Name = "Status")]
         public string StatusBadgeClass => GetStatusBadgeClass();

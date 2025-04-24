@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FinanceSystem.Application.DTOs.CreditCard;
 using FinanceSystem.Application.Interfaces;
+using FinanceSystem.Domain.Entities;
 using FinanceSystem.Domain.Enums;
 using FinanceSystem.Domain.Interfaces.Services;
 using FinanceSystem.Resources;
@@ -21,10 +22,9 @@ namespace FinanceSystem.Application.Services
         public async Task<CreditCardDto> GetByIdAsync(Guid id)
         {
             var creditCard = await _unitOfWork.CreditCards.GetCreditCardWithDetailsAsync(id);
-            if (creditCard == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.CreditCard_NotFound);
-
-            return _mapper.Map<CreditCardDto>(creditCard);
+            return creditCard == null
+                ? throw new KeyNotFoundException(ResourceFinanceApi.CreditCard_NotFound)
+                : _mapper.Map<CreditCardDto>(creditCard);
         }
 
         public async Task<IEnumerable<CreditCardDto>> GetByUserIdAsync(Guid userId)
@@ -35,14 +35,8 @@ namespace FinanceSystem.Application.Services
 
         public async Task<CreditCardDto> CreateAsync(CreateCreditCardDto createCreditCardDto, Guid userId)
         {
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
-
-            var paymentMethod = await _unitOfWork.PaymentMethods.GetByIdAsync(createCreditCardDto.PaymentMethodId);
-            if (paymentMethod == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.PaymentMethod_NotFound);
-
+            var user = await _unitOfWork.Users.GetByIdAsync(userId) ?? throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
+            var paymentMethod = await _unitOfWork.PaymentMethods.GetByIdAsync(createCreditCardDto.PaymentMethodId) ?? throw new KeyNotFoundException(ResourceFinanceApi.PaymentMethod_NotFound);
             if (paymentMethod.Type != PaymentMethodType.CreditCard)
                 throw new InvalidOperationException(ResourceFinanceApi.CreditCard_InvalidMethodType);
 
@@ -68,10 +62,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<CreditCardDto> UpdateAsync(Guid id, UpdateCreditCardDto updateCreditCardDto)
         {
-            var creditCard = await _unitOfWork.CreditCards.GetByIdAsync(id);
-            if (creditCard == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.CreditCard_NotFound);
-
+            var creditCard = await _unitOfWork.CreditCards.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.CreditCard_NotFound);
             if (!string.IsNullOrEmpty(updateCreditCardDto.Name))
                 creditCard.UpdateName(updateCreditCardDto.Name);
 
@@ -89,10 +80,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var creditCard = await _unitOfWork.CreditCards.GetByIdAsync(id);
-            if (creditCard == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.CreditCard_NotFound);
-
+            var creditCard = await _unitOfWork.CreditCards.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.CreditCard_NotFound);
             await _unitOfWork.CreditCards.DeleteAsync(creditCard);
             await _unitOfWork.CompleteAsync();
         }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FinanceSystem.Application.DTOs.Payment;
 using FinanceSystem.Application.Interfaces;
+using FinanceSystem.Domain.Entities;
 using FinanceSystem.Domain.Enums;
 using FinanceSystem.Domain.Interfaces.Services;
 using FinanceSystem.Resources;
@@ -21,10 +22,7 @@ namespace FinanceSystem.Application.Services
         public async Task<PaymentDto> GetByIdAsync(Guid id)
         {
             var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id);
-            if (payment == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
-
-            return _mapper.Map<PaymentDto>(payment);
+            return payment == null ? throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound) : _mapper.Map<PaymentDto>(payment);
         }
 
         public async Task<IEnumerable<PaymentDto>> GetAllByUserIdAsync(Guid userId)
@@ -65,21 +63,12 @@ namespace FinanceSystem.Application.Services
 
         public async Task<PaymentDto> CreateAsync(CreatePaymentDto createPaymentDto, Guid userId)
         {
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
-
-            var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(createPaymentDto.PaymentTypeId);
-            if (paymentType == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
-
+            var user = await _unitOfWork.Users.GetByIdAsync(userId) ?? throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
+            var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(createPaymentDto.PaymentTypeId) ?? throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
             if (!paymentType.IsSystem && paymentType.UserId != userId)
                 throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
-            var paymentMethod = await _unitOfWork.PaymentMethods.GetByIdAsync(createPaymentDto.PaymentMethodId);
-            if (paymentMethod == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.PaymentMethod_NotFound);
-
+            var paymentMethod = await _unitOfWork.PaymentMethods.GetByIdAsync(createPaymentDto.PaymentMethodId) ?? throw new KeyNotFoundException(ResourceFinanceApi.PaymentMethod_NotFound);
             if (!paymentMethod.IsSystem && paymentMethod.UserId != userId)
                 throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
@@ -88,10 +77,7 @@ namespace FinanceSystem.Application.Services
 
             if (createPaymentDto.CreditCardId.HasValue)
             {
-                var creditCard = await _unitOfWork.CreditCards.GetByIdAsync(createPaymentDto.CreditCardId.Value);
-                if (creditCard == null)
-                    throw new KeyNotFoundException(ResourceFinanceApi.CreditCard_NotFound);
-
+                var creditCard = await _unitOfWork.CreditCards.GetByIdAsync(createPaymentDto.CreditCardId.Value) ?? throw new KeyNotFoundException(ResourceFinanceApi.CreditCard_NotFound);
                 if (creditCard.UserId != userId)
                     throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
@@ -131,10 +117,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<PaymentDto> UpdateAsync(Guid id, UpdatePaymentDto updatePaymentDto)
         {
-            var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id);
-            if (payment == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
-
+            var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
             if (!string.IsNullOrEmpty(updatePaymentDto.Description))
                 payment.UpdateDescription(updatePaymentDto.Description);
 
@@ -168,10 +151,7 @@ namespace FinanceSystem.Application.Services
 
             if (updatePaymentDto.PaymentTypeId.HasValue)
             {
-                var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(updatePaymentDto.PaymentTypeId.Value);
-                if (paymentType == null)
-                    throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
-
+                var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(updatePaymentDto.PaymentTypeId.Value) ?? throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
                 if (!paymentType.IsSystem && paymentType.UserId != payment.UserId)
                     throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
@@ -181,10 +161,7 @@ namespace FinanceSystem.Application.Services
 
             if (updatePaymentDto.PaymentMethodId.HasValue)
             {
-                var paymentMethod = await _unitOfWork.PaymentMethods.GetByIdAsync(updatePaymentDto.PaymentMethodId.Value);
-                if (paymentMethod == null)
-                    throw new KeyNotFoundException(ResourceFinanceApi.PaymentMethod_NotFound);
-
+                var paymentMethod = await _unitOfWork.PaymentMethods.GetByIdAsync(updatePaymentDto.PaymentMethodId.Value) ?? throw new KeyNotFoundException(ResourceFinanceApi.PaymentMethod_NotFound);
                 if (!paymentMethod.IsSystem && paymentMethod.UserId != payment.UserId)
                     throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
@@ -205,10 +182,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var payment = await _unitOfWork.Payments.GetByIdAsync(id);
-            if (payment == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
-
+            var payment = await _unitOfWork.Payments.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
             if (payment.Status == PaymentStatus.Paid)
                 throw new InvalidOperationException(ResourceFinanceApi.Payment_AlreadyPaid);
 
@@ -218,10 +192,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<PaymentDto> MarkAsPaidAsync(Guid id, DateTime paymentDate)
         {
-            var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id);
-            if (payment == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
-
+            var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
             payment.MarkAsPaid(paymentDate);
             await _unitOfWork.Payments.UpdateAsync(payment);
             await _unitOfWork.CompleteAsync();
@@ -231,10 +202,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<PaymentDto> MarkAsOverdueAsync(Guid id)
         {
-            var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id);
-            if (payment == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
-
+            var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
             payment.MarkAsOverdue();
             await _unitOfWork.Payments.UpdateAsync(payment);
             await _unitOfWork.CompleteAsync();
@@ -244,10 +212,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<PaymentDto> CancelAsync(Guid id)
         {
-            var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id);
-            if (payment == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
-
+            var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
             payment.Cancel();
             await _unitOfWork.Payments.UpdateAsync(payment);
             await _unitOfWork.CompleteAsync();

@@ -20,10 +20,9 @@ namespace FinanceSystem.Application.Services
         public async Task<InvestmentTransactionDto> GetByIdAsync(Guid id)
         {
             var transaction = await _unitOfWork.InvestmentTransactions.GetByIdAsync(id);
-            if (transaction == null)
-                throw new KeyNotFoundException("Transação não encontrada");
-
-            return _mapper.Map<InvestmentTransactionDto>(transaction);
+            return transaction == null
+                ? throw new KeyNotFoundException("Transação não encontrada")
+                : _mapper.Map<InvestmentTransactionDto>(transaction);
         }
 
         public async Task<IEnumerable<InvestmentTransactionDto>> GetByInvestmentIdAsync(Guid investmentId)
@@ -32,25 +31,23 @@ namespace FinanceSystem.Application.Services
             return _mapper.Map<IEnumerable<InvestmentTransactionDto>>(transactions);
         }
 
-        public async Task<InvestmentTransactionDto> CreateAsync(Guid investmentId, CreateInvestmentTransactionDto createTransactionDto)
+        public async Task<InvestmentTransactionDto> CreateAsync(Guid investmentId, CreateInvestmentTransactionDto createInvestmentTransactionDto)
         {
-            var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(investmentId);
-            if (investment == null)
-                throw new KeyNotFoundException("Investimento não encontrado");
+            var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(investmentId) ?? throw new KeyNotFoundException("Investimento não encontrado");
 
             // Calcular o valor total
-            decimal totalValue = createTransactionDto.Quantity * createTransactionDto.Price;
+            decimal totalValue = createInvestmentTransactionDto.Quantity * createInvestmentTransactionDto.Price;
 
             // Criar e adicionar transação
             var transaction = new InvestmentTransaction(
-                createTransactionDto.Date,
-                createTransactionDto.Type,
-                createTransactionDto.Quantity,
-                createTransactionDto.Price,
+                createInvestmentTransactionDto.Date,
+                createInvestmentTransactionDto.Type,
+                createInvestmentTransactionDto.Quantity,
+                createInvestmentTransactionDto.Price,
                 totalValue,
-                createTransactionDto.Taxes,
-                createTransactionDto.Broker,
-                createTransactionDto.Notes,
+                createInvestmentTransactionDto.Taxes,
+                createInvestmentTransactionDto.Broker,
+                createInvestmentTransactionDto.Notes,
                 investment
             );
 
@@ -67,20 +64,20 @@ namespace FinanceSystem.Application.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var transaction = await _unitOfWork.InvestmentTransactions.GetByIdAsync(id);
-            if (transaction == null)
-                throw new KeyNotFoundException("Transação não encontrada");
-
-            // Recuperar o investimento para recalcular após exclusão
+            var transaction = await _unitOfWork.InvestmentTransactions.GetByIdAsync(id) ?? throw new KeyNotFoundException("Transação não encontrada");
             var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(transaction.InvestmentId);
 
             await _unitOfWork.InvestmentTransactions.DeleteAsync(transaction);
 
-            // Recalcular o investimento excluindo esta transação
-            investment.RecalculateWithoutTransaction(transaction);
-            await _unitOfWork.Investments.UpdateAsync(investment);
+            if(investment is not null)
+            {
+                investment.RecalculateWithoutTransaction(transaction);
+                await _unitOfWork.Investments.UpdateAsync(investment);
 
-            await _unitOfWork.CompleteAsync();
+                await _unitOfWork.CompleteAsync();
+            }
+
+
         }
     }
 }

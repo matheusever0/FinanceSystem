@@ -24,10 +24,7 @@ namespace FinanceSystem.Application.Services
         public async Task<UserDto> GetByIdAsync(Guid id)
         {
             var user = await _unitOfWork.Users.GetUserWithRolesAsync(id);
-            if (user == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
-
-            return _mapper.Map<UserDto>(user);
+            return user == null ? throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound) : _mapper.Map<UserDto>(user);
         }
 
         public async Task<IEnumerable<UserDto>> GetAllAsync()
@@ -50,7 +47,7 @@ namespace FinanceSystem.Application.Services
 
             var user = new User(createUserDto.Username, createUserDto.Email, passwordHash);
 
-            if (createUserDto.Roles != null && createUserDto.Roles.Any())
+            if (createUserDto.Roles != null && createUserDto.Roles.Count != 0)
             {
                 foreach (var roleName in createUserDto.Roles)
                 {
@@ -70,10 +67,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<UserDto> UpdateAsync(Guid id, UpdateUserDto updateUserDto)
         {
-            var user = await _unitOfWork.Users.GetUserWithRolesAsync(id);
-            if (user == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
-
+            var user = await _unitOfWork.Users.GetUserWithRolesAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
             if (!string.IsNullOrEmpty(updateUserDto.Username))
             {
                 var existingUserName = await _unitOfWork.Users.GetByUsernameAsync(updateUserDto.Username);

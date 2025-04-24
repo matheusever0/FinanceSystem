@@ -64,12 +64,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var creditCard = await _creditCardService.GetCreditCardByIdAsync(id, token);
 
-                if (creditCard == null)
-                {
-                    return NotFound("Cartão de crédito não encontrado");
-                }
-
-                return View(creditCard);
+                return creditCard == null ? NotFound("Cartão de crédito não encontrado") : View(creditCard);
             }
             catch (Exception ex)
             {
@@ -198,12 +193,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var creditCard = await _creditCardService.GetCreditCardByIdAsync(id, token);
 
-                if (creditCard == null)
-                {
-                    return NotFound("Cartão de crédito não encontrado");
-                }
-
-                return View(creditCard);
+                return creditCard == null ? NotFound("Cartão de crédito não encontrado") : View(creditCard);
             }
             catch (Exception ex)
             {

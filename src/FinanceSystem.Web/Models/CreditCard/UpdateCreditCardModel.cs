@@ -6,7 +6,7 @@ namespace FinanceSystem.Web.Models.CreditCard
     {
         [StringLength(50, MinimumLength = 3, ErrorMessage = "O nome deve ter entre 3 e 50 caracteres")]
         [Display(Name = "Nome")]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [Range(1, 31, ErrorMessage = "O dia de fechamento deve estar entre 1 e 31")]
         [Display(Name = "Dia de Fechamento")]

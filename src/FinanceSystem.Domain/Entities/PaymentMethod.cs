@@ -16,8 +16,8 @@ public class PaymentMethod
 
     protected PaymentMethod()
     {
-        Payments = new List<Payment>();
-        CreditCards = new List<CreditCard>();
+        Payments = [];
+        CreditCards = [];
     }
 
     public PaymentMethod(string name, string description, PaymentMethodType type)
@@ -28,8 +28,8 @@ public class PaymentMethod
         Type = type;
         IsSystem = true;
         CreatedAt = DateTime.Now;
-        Payments = new List<Payment>();
-        CreditCards = new List<CreditCard>();
+        Payments = [];
+        CreditCards = [];
     }
 
     public PaymentMethod(string name, string description, PaymentMethodType type, User user)
@@ -42,8 +42,8 @@ public class PaymentMethod
         UserId = user.Id;
         User = user;
         CreatedAt = DateTime.Now;
-        Payments = new List<Payment>();
-        CreditCards = new List<CreditCard>();
+        Payments = [];
+        CreditCards = [];
     }
 
     public void UpdateName(string name)

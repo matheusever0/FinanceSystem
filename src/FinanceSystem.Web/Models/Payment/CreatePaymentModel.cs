@@ -7,7 +7,7 @@ namespace FinanceSystem.Web.Models.Payment
         [Required(ErrorMessage = "A descrição é obrigatória")]
         [StringLength(100, MinimumLength = 3, ErrorMessage = "A descrição deve ter entre 3 e 100 caracteres")]
         [Display(Name = "Descrição")]
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
         [Required(ErrorMessage = "O valor é obrigatório")]
         [Range(0.01, double.MaxValue, ErrorMessage = "O valor deve ser maior que zero")]
@@ -28,21 +28,21 @@ namespace FinanceSystem.Web.Models.Payment
 
         [Display(Name = "Observações")]
         [StringLength(500, ErrorMessage = "As observações devem ter no máximo 500 caracteres")]
-        public string Notes { get; set; }
+        public required string Notes { get; set; }
 
         [Required(ErrorMessage = "O tipo de pagamento é obrigatório")]
         [Display(Name = "Tipo de Pagamento")]
-        public string PaymentTypeId { get; set; }
+        public required string PaymentTypeId { get; set; }
 
         [Required(ErrorMessage = "O método de pagamento é obrigatório")]
         [Display(Name = "Método de Pagamento")]
-        public string PaymentMethodId { get; set; }
+        public required string PaymentMethodId { get; set; }
 
         [Range(1, 48, ErrorMessage = "O número de parcelas deve estar entre 1 e 48")]
         [Display(Name = "Número de Parcelas")]
         public int NumberOfInstallments { get; set; } = 1;
 
         [Display(Name = "Cartão de Crédito")]
-        public string CreditCardId { get; set; }
+        public required string CreditCardId { get; set; }
     }
 }

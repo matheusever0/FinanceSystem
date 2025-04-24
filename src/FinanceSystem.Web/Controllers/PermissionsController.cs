@@ -62,12 +62,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var permission = await _permissionService.GetPermissionByIdAsync(id, token);
 
-                if (permission == null)
-                {
-                    return NotFound("Permissão não encontrada");
-                }
-
-                return View(permission);
+                return permission == null ? NotFound("Permissão não encontrada") : View(permission);
             }
             catch (Exception ex)
             {
@@ -176,12 +171,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var permission = await _permissionService.GetPermissionByIdAsync(id, token);
 
-                if (permission == null)
-                {
-                    return NotFound("Permissão não encontrada");
-                }
-
-                return View(permission);
+                return permission == null ? NotFound("Permissão não encontrada") : View(permission);
             }
             catch (Exception ex)
             {
@@ -267,9 +257,9 @@ namespace FinanceSystem.Web.Controllers
 
                 var selectedPermissionIds = selectedPermissions != null
                     ? selectedPermissions.Select(p => Guid.Parse(p)).ToList()
-                    : new List<Guid>();
+                    : [];
 
-                await _roleService.UpdateRolePermissionsAsync(roleId, selectedPermissionIds.Select(p => p.ToString()).ToList(), token);
+                await _roleService.UpdateRolePermissionsAsync(roleId, [.. selectedPermissionIds.Select(p => p.ToString())], token);
 
                 TempData["SuccessMessage"] = SUCCESS_UPDATE_ROLE_PERMISSIONS;
                 return RedirectToAction("Details", "Roles", new { id = roleId });

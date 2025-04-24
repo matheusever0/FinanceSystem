@@ -20,12 +20,12 @@ namespace FinanceSystem.API.Configuration
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
 
-                options.RequestCultureProviders = new List<IRequestCultureProvider>
-            {
+                options.RequestCultureProviders =
+            [
                 new QueryStringRequestCultureProvider(),
                 new CookieRequestCultureProvider(),
                 new AcceptLanguageHeaderRequestCultureProvider()
-            };
+            ];
 
             });
 

@@ -26,10 +26,7 @@ namespace FinanceSystem.Application.Services
         public async Task<InvestmentDto> GetByIdAsync(Guid id)
         {
             var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(id);
-            if (investment == null)
-                throw new KeyNotFoundException("Investimento não encontrado");
-
-            return _mapper.Map<InvestmentDto>(investment);
+            return investment == null ? throw new KeyNotFoundException("Investimento não encontrado") : _mapper.Map<InvestmentDto>(investment);
         }
 
         public async Task<IEnumerable<InvestmentDto>> GetAllByUserIdAsync(Guid userId)
@@ -46,10 +43,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<InvestmentDto> CreateAsync(CreateInvestmentDto createInvestmentDto, Guid userId)
         {
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null)
-                throw new KeyNotFoundException("Usuário não encontrado");
-
+            var user = await _unitOfWork.Users.GetByIdAsync(userId) ?? throw new KeyNotFoundException("Usuário não encontrado");
             var existingInvestment = await _unitOfWork.Investments.GetInvestmentBySymbolAsync(userId, createInvestmentDto.Symbol);
             if (existingInvestment != null)
                 throw new InvalidOperationException("Já existe um investimento com este símbolo");
@@ -103,10 +97,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<InvestmentDto> UpdateAsync(Guid id, UpdateInvestmentDto updateInvestmentDto)
         {
-            var investment = await _unitOfWork.Investments.GetByIdAsync(id);
-            if (investment == null)
-                throw new KeyNotFoundException("Investimento não encontrado");
-
+            var investment = await _unitOfWork.Investments.GetByIdAsync(id) ?? throw new KeyNotFoundException("Investimento não encontrado");
             if (!string.IsNullOrEmpty(updateInvestmentDto.Name))
                 investment.UpdateName(updateInvestmentDto.Name);
 
@@ -118,20 +109,14 @@ namespace FinanceSystem.Application.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(id);
-            if (investment == null)
-                throw new KeyNotFoundException("Investimento não encontrado");
-
+            var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(id) ?? throw new KeyNotFoundException("Investimento não encontrado");
             await _unitOfWork.Investments.DeleteAsync(investment);
             await _unitOfWork.CompleteAsync();
         }
 
         public async Task<InvestmentDto> RefreshPriceAsync(Guid id)
         {
-            var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(id);
-            if (investment == null)
-                throw new KeyNotFoundException("Investimento não encontrado");
-
+            var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(id) ?? throw new KeyNotFoundException("Investimento não encontrado");
             try
             {
                 decimal currentPrice = await _stockPriceService.GetCurrentPriceAsync(investment.Symbol);

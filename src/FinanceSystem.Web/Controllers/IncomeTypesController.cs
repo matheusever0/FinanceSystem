@@ -95,12 +95,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var incomeType = await _incomeTypeService.GetIncomeTypeByIdAsync(id, token);
 
-                if (incomeType == null)
-                {
-                    return NotFound("Tipo de receita não encontrado");
-                }
-
-                return View(incomeType);
+                return incomeType == null ? NotFound("Tipo de receita não encontrado") : View(incomeType);
             }
             catch (Exception ex)
             {

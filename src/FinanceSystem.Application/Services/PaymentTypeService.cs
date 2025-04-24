@@ -20,10 +20,9 @@ namespace FinanceSystem.Application.Services
         public async Task<PaymentTypeDto> GetByIdAsync(Guid id)
         {
             var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id);
-            if (paymentType == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
-
-            return _mapper.Map<PaymentTypeDto>(paymentType);
+            return paymentType == null
+                ? throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound)
+                : _mapper.Map<PaymentTypeDto>(paymentType);
         }
 
         public async Task<IEnumerable<PaymentTypeDto>> GetAllSystemTypesAsync()
@@ -46,10 +45,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<PaymentTypeDto> CreateAsync(CreatePaymentTypeDto createPaymentTypeDto, Guid userId)
         {
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
-
+            var user = await _unitOfWork.Users.GetByIdAsync(userId) ?? throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
             var existingType = await _unitOfWork.PaymentTypes.GetByNameAsync(createPaymentTypeDto.Name);
             if (existingType != null && (existingType.IsSystem || existingType.UserId == userId))
                 throw new InvalidOperationException(ResourceFinanceApi.PaymentType_NameExists);
@@ -68,10 +64,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<PaymentTypeDto> UpdateAsync(Guid id, UpdatePaymentTypeDto updatePaymentTypeDto)
         {
-            var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id);
-            if (paymentType == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
-
+            var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
             if (paymentType.IsSystem)
                 throw new InvalidOperationException(ResourceFinanceApi.PaymentType_SystemCannotUpdate);
 
@@ -95,14 +88,11 @@ namespace FinanceSystem.Application.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id);
-            if (paymentType == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
-
+            var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.PaymentType_NotFound);
             if (paymentType.IsSystem)
                 throw new InvalidOperationException(ResourceFinanceApi.PaymentType_SystemCannotDelete);
 
-            var payments = await _unitOfWork.Payments.GetPaymentsByTypeAsync(paymentType.UserId.Value, id);
+            var payments = await _unitOfWork.Payments.GetPaymentsByTypeAsync(paymentType.UserId!.Value, id);
             if (payments.Any())
                 throw new InvalidOperationException(ResourceFinanceApi.PaymentType_InUse);
 

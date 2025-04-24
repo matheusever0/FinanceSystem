@@ -5,9 +5,9 @@ namespace FinanceSystem.Application.DTOs.Common
     public class ApiResponse<T>
     {
         public bool Success { get; set; }
-        public string MessageKey { get; set; }
-        public string Message { get; set; }
-        public T Data { get; set; }
+        public string? MessageKey { get; set; }
+        public string? Message { get; set; }
+        public T? Data { get; set; }
 
         [JsonIgnore] 
         public int StatusCode { get; set; } = 200;

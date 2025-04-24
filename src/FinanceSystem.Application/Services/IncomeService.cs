@@ -22,10 +22,7 @@ namespace FinanceSystem.Application.Services
         public async Task<IncomeDto> GetByIdAsync(Guid id)
         {
             var income = await _unitOfWork.Incomes.GetIncomeWithDetailsAsync(id);
-            if (income == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
-
-            return _mapper.Map<IncomeDto>(income);
+            return income == null ? throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound) : _mapper.Map<IncomeDto>(income);
         }
 
         public async Task<IEnumerable<IncomeDto>> GetAllByUserIdAsync(Guid userId)
@@ -66,14 +63,8 @@ namespace FinanceSystem.Application.Services
 
         public async Task<IncomeDto> CreateAsync(CreateIncomeDto createIncomeDto, Guid userId)
         {
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
-
-            var incomeType = await _unitOfWork.IncomeTypes.GetByIdAsync(createIncomeDto.IncomeTypeId);
-            if (incomeType == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
-
+            var user = await _unitOfWork.Users.GetByIdAsync(userId) ?? throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
+            var incomeType = await _unitOfWork.IncomeTypes.GetByIdAsync(createIncomeDto.IncomeTypeId) ?? throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
             if (!incomeType.IsSystem && incomeType.UserId != userId)
                 throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
@@ -105,10 +96,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<IncomeDto> UpdateAsync(Guid id, UpdateIncomeDto updateIncomeDto)
         {
-            var income = await _unitOfWork.Incomes.GetIncomeWithDetailsAsync(id);
-            if (income == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
-
+            var income = await _unitOfWork.Incomes.GetIncomeWithDetailsAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
             if (!string.IsNullOrEmpty(updateIncomeDto.Description))
                 income.UpdateDescription(updateIncomeDto.Description);
 
@@ -142,10 +130,7 @@ namespace FinanceSystem.Application.Services
 
             if (updateIncomeDto.IncomeTypeId.HasValue)
             {
-                var incomeType = await _unitOfWork.IncomeTypes.GetByIdAsync(updateIncomeDto.IncomeTypeId.Value);
-                if (incomeType == null)
-                    throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
-
+                var incomeType = await _unitOfWork.IncomeTypes.GetByIdAsync(updateIncomeDto.IncomeTypeId.Value) ?? throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
                 if (!incomeType.IsSystem && incomeType.UserId != income.UserId)
                     throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
@@ -165,10 +150,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var income = await _unitOfWork.Incomes.GetByIdAsync(id);
-            if (income == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
-
+            var income = await _unitOfWork.Incomes.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
             if (income.Status == IncomeStatus.Received)
                 throw new InvalidOperationException(ResourceFinanceApi.Income_AlreadyReceived);
 
@@ -178,10 +160,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<IncomeDto> MarkAsReceivedAsync(Guid id, DateTime? receivedDate = null)
         {
-            var income = await _unitOfWork.Incomes.GetIncomeWithDetailsAsync(id);
-            if (income == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
-
+            var income = await _unitOfWork.Incomes.GetIncomeWithDetailsAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
             income.MarkAsReceived(receivedDate ?? DateTime.Now);
             await _unitOfWork.Incomes.UpdateAsync(income);
             await _unitOfWork.CompleteAsync();
@@ -191,10 +170,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<IncomeDto> CancelAsync(Guid id)
         {
-            var income = await _unitOfWork.Incomes.GetIncomeWithDetailsAsync(id);
-            if (income == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
-
+            var income = await _unitOfWork.Incomes.GetIncomeWithDetailsAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound);
             income.Cancel();
             await _unitOfWork.Incomes.UpdateAsync(income);
             await _unitOfWork.CompleteAsync();

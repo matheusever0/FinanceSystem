@@ -75,12 +75,7 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var user = await _userService.GetUserByIdAsync(id, token);
 
-                if (user == null)
-                {
-                    return NotFound("Usuário não encontrado");
-                }
-
-                return View(user);
+                return user == null ? NotFound("Usuário não encontrado") : View(user);
             }
             catch (Exception ex)
             {
@@ -115,7 +110,7 @@ namespace FinanceSystem.Web.Controllers
 
             try
             {
-                if (selectedRoles == null || !selectedRoles.Any())
+                if (selectedRoles == null || selectedRoles.Count == 0)
                 {
                     ModelState.AddModelError("Roles", VALIDATION_SELECT_ROLE);
                     var roles = await _roleService.GetAllRolesAsync(token);
@@ -164,7 +159,7 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 var token = HttpContext.GetJwtToken();
-                var currentUserId = HttpContext.GetCurrentUserId();
+                var currentUserId = HttpContext.GetCurrentUserId()!;
                 var user = await _userService.GetUserByIdAsync(id, token);
 
                 if (user == null)
@@ -184,7 +179,7 @@ namespace FinanceSystem.Web.Controllers
                 var roles = await _roleService.GetAllRolesAsync(token);
                 if (canEditOnlyOwnUser)
                 {
-                    roles = roles.Where(r => r.Name != "Admin").ToList();
+                    roles = [.. roles.Where(r => r.Name != "Admin")];
                 }
                 ViewBag.Roles = roles;
 
@@ -193,7 +188,7 @@ namespace FinanceSystem.Web.Controllers
                     Username = user.Username,
                     Email = user.Email,
                     IsActive = user.IsActive,
-                    Roles = user.Roles ?? new List<string>()
+                    Roles = user.Roles ?? []
                 };
 
                 return View(model);
@@ -219,7 +214,7 @@ namespace FinanceSystem.Web.Controllers
 
             try
             {
-                var currentUserId = HttpContext.GetCurrentUserId();
+                var currentUserId = HttpContext.GetCurrentUserId()!;
                 var currentUser = await _userService.GetUserByIdAsync(id, token);
 
                 if (currentUser == null)
@@ -241,14 +236,14 @@ namespace FinanceSystem.Web.Controllers
                     ModelState.AddModelError("Email", VALIDATION_EMAIL_REQUIRED);
                 }
 
-                if (selectedRoles == null || !selectedRoles.Any())
+                if (selectedRoles == null || selectedRoles.Count == 0)
                 {
                     ModelState.AddModelError("Roles", VALIDATION_SELECT_ROLE);
 
                     var rolesList = await _roleService.GetAllRolesAsync(token);
                     if (canEditOnlyOwnUser)
                     {
-                        rolesList = rolesList.Where(r => r.Name != "Admin").ToList();
+                        rolesList = [.. rolesList.Where(r => r.Name != "Admin")];
                     }
                     ViewBag.Roles = rolesList;
 
@@ -267,7 +262,7 @@ namespace FinanceSystem.Web.Controllers
                     var roles = await _roleService.GetAllRolesAsync(token);
                     if (canEditOnlyOwnUser)
                     {
-                        roles = roles.Where(r => r.Name != "Admin").ToList();
+                        roles = [.. roles.Where(r => r.Name != "Admin")];
                     }
                     ViewBag.Roles = roles;
 
@@ -289,7 +284,7 @@ namespace FinanceSystem.Web.Controllers
 
                     if (canEditOnlyOwnUser)
                     {
-                        roles = roles.Where(r => r.Name != "Admin").ToList();
+                        roles = [.. roles.Where(r => r.Name != "Admin")];
                     }
 
                     ViewBag.Roles = roles;
@@ -367,7 +362,7 @@ namespace FinanceSystem.Web.Controllers
 
         private async Task<bool> CheckCanEditOnlyOwnUserAsync(string token)
         {
-            var currentUserId = HttpContext.GetCurrentUserId();
+            var currentUserId = HttpContext.GetCurrentUserId()!;
             var permissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId, token);
             return PermissionHelper.PodeEditarSomenteProprioUsuario(permissions);
         }

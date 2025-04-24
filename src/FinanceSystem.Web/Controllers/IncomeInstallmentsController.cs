@@ -57,12 +57,9 @@ namespace FinanceSystem.Web.Controllers
                 TempData["ErrorMessage"] = string.Format(ERROR_MARK_RECEIVED, ex.Message);
                 var incomeId = TempData["IncomeId"]?.ToString();
 
-                if (!string.IsNullOrEmpty(incomeId))
-                {
-                    return RedirectToAction("Details", "Incomes", new { id = incomeId });
-                }
-
-                return RedirectToAction("Index", "Incomes");
+                return !string.IsNullOrEmpty(incomeId)
+                    ? RedirectToAction("Details", "Incomes", new { id = incomeId })
+                    : (IActionResult)RedirectToAction("Index", "Incomes");
             }
         }
 
@@ -99,12 +96,9 @@ namespace FinanceSystem.Web.Controllers
                 TempData["ErrorMessage"] = string.Format(ERROR_CANCEL, ex.Message);
                 var incomeId = TempData["IncomeId"]?.ToString();
 
-                if (!string.IsNullOrEmpty(incomeId))
-                {
-                    return RedirectToAction("Details", "Incomes", new { id = incomeId });
-                }
-
-                return RedirectToAction("Index", "Incomes");
+                return !string.IsNullOrEmpty(incomeId)
+                    ? RedirectToAction("Details", "Incomes", new { id = incomeId })
+                    : (IActionResult)RedirectToAction("Index", "Incomes");
             }
         }
     }

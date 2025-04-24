@@ -56,10 +56,7 @@ namespace FinanceSystem.API.Controllers
             {
                 var paymentMethod = await _paymentMethodService.GetByIdAsync(id);
 
-                if (!paymentMethod.IsSystem && paymentMethod.UserId != HttpContext.GetCurrentUserId())
-                    return Forbid();
-
-                return Ok(paymentMethod);
+                return !paymentMethod.IsSystem && paymentMethod.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<PaymentMethodDto>)Forbid() : (ActionResult<PaymentMethodDto>)Ok(paymentMethod);
             }
             catch (KeyNotFoundException ex)
             {

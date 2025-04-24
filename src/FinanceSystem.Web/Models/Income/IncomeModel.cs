@@ -6,10 +6,10 @@ namespace FinanceSystem.Web.Models.Income
     // Modelo principal para exibição de receitas
     public class IncomeModel
     {
-        public string Id { get; set; }
+        public required string Id { get; set; }
 
         [Display(Name = "Descrição")]
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
         [Display(Name = "Valor")]
         [DisplayFormat(DataFormatString = "{0:C2}")]
@@ -27,13 +27,13 @@ namespace FinanceSystem.Web.Models.Income
         public int Status { get; set; }
 
         [Display(Name = "Status")]
-        public string StatusDescription { get; set; }
+        public required string StatusDescription { get; set; }
 
         [Display(Name = "Recorrente")]
         public bool IsRecurring { get; set; }
 
         [Display(Name = "Observações")]
-        public string Notes { get; set; }
+        public required string Notes { get; set; }
 
         [Display(Name = "Data de Criação")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
@@ -43,16 +43,16 @@ namespace FinanceSystem.Web.Models.Income
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
         public DateTime? UpdatedAt { get; set; }
 
-        public string UserId { get; set; }
+        public required string UserId { get; set; }
 
         [Display(Name = "Tipo de Receita")]
-        public string IncomeTypeId { get; set; }
+        public required string IncomeTypeId { get; set; }
 
         [Display(Name = "Tipo de Receita")]
-        public string IncomeTypeName { get; set; }
+        public required string IncomeTypeName { get; set; }
 
         [Display(Name = "Parcelas")]
-        public List<IncomeInstallmentModel> Installments { get; set; } = new List<IncomeInstallmentModel>();
+        public List<IncomeInstallmentModel> Installments { get; set; } = [];
 
         [Display(Name = "Status")]
         public string StatusBadgeClass => GetStatusBadgeClass();

@@ -6,7 +6,7 @@ namespace FinanceSystem.Web.Models.Payment
     {
         [StringLength(100, MinimumLength = 3, ErrorMessage = "A descrição deve ter entre 3 e 100 caracteres")]
         [Display(Name = "Descrição")]
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
         [Range(0.01, double.MaxValue, ErrorMessage = "O valor deve ser maior que zero")]
         [Display(Name = "Valor")]
@@ -28,12 +28,12 @@ namespace FinanceSystem.Web.Models.Payment
 
         [Display(Name = "Observações")]
         [StringLength(500, ErrorMessage = "As observações devem ter no máximo 500 caracteres")]
-        public string Notes { get; set; }
+        public required string Notes { get; set; }
 
         [Display(Name = "Tipo de Pagamento")]
-        public string PaymentTypeId { get; set; }
+        public required string PaymentTypeId { get; set; }
 
         [Display(Name = "Método de Pagamento")]
-        public string PaymentMethodId { get; set; }
+        public required string PaymentMethodId { get; set; }
     }
 }

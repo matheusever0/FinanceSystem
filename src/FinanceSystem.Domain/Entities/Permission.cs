@@ -11,7 +11,7 @@
 
         protected Permission()
         {
-            RolePermissions = new List<RolePermission>();
+            RolePermissions = [];
         }
 
         public Permission(string name, string systemName, string description)
@@ -21,7 +21,7 @@
             SystemName = systemName;
             Description = description;
             CreatedAt = DateTime.Now;
-            RolePermissions = new List<RolePermission>();
+            RolePermissions = [];
         }
 
         public void UpdateName(string name)

@@ -6,16 +6,16 @@ namespace FinanceSystem.Application.DTOs.CreditCard
     {
         [Required]
         [StringLength(50, MinimumLength = 3)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [Required]
         [StringLength(4, MinimumLength = 4)]
         [RegularExpression("^[0-9]*$", ErrorMessage = "Apenas números são permitidos")]
-        public string LastFourDigits { get; set; }
+        public required string LastFourDigits { get; set; }
 
         [Required]
         [StringLength(30, MinimumLength = 2)]
-        public string CardBrand { get; set; }
+        public required string CardBrand { get; set; }
 
         [Required]
         [Range(1, 31, ErrorMessage = "O dia de fechamento deve estar entre 1 e 31")]

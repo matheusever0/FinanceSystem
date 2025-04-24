@@ -5,10 +5,10 @@ namespace FinanceSystem.Web.Models.Payment
 {
     public class PaymentModel
     {
-        public string Id { get; set; }
+        public required string Id { get; set; }
 
         [Display(Name = "Descrição")]
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
         [Display(Name = "Valor")]
         [DisplayFormat(DataFormatString = "{0:C2}")]
@@ -26,13 +26,13 @@ namespace FinanceSystem.Web.Models.Payment
         public int Status { get; set; }
 
         [Display(Name = "Status")]
-        public string StatusDescription { get; set; }
+        public required string StatusDescription { get; set; }
 
         [Display(Name = "Recorrente")]
         public bool IsRecurring { get; set; }
 
         [Display(Name = "Observações")]
-        public string Notes { get; set; }
+        public required string Notes { get; set; }
 
         [Display(Name = "Data de Criação")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
@@ -42,22 +42,22 @@ namespace FinanceSystem.Web.Models.Payment
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
         public DateTime? UpdatedAt { get; set; }
 
-        public string UserId { get; set; }
+        public required string UserId { get; set; }
 
         [Display(Name = "Tipo de Pagamento")]
-        public string PaymentTypeId { get; set; }
+        public required string PaymentTypeId { get; set; }
 
         [Display(Name = "Tipo de Pagamento")]
-        public string PaymentTypeName { get; set; }
+        public required string PaymentTypeName { get; set; }
 
         [Display(Name = "Método de Pagamento")]
-        public string PaymentMethodId { get; set; }
+        public required string PaymentMethodId { get; set; }
 
         [Display(Name = "Método de Pagamento")]
-        public string PaymentMethodName { get; set; }
+        public required string PaymentMethodName { get; set; }
 
         [Display(Name = "Parcelas")]
-        public List<PaymentInstallmentModel> Installments { get; set; } = new List<PaymentInstallmentModel>();
+        public List<PaymentInstallmentModel> Installments { get; set; } = [];
 
         [Display(Name = "Status")]
         public string StatusBadgeClass => GetStatusBadgeClass();

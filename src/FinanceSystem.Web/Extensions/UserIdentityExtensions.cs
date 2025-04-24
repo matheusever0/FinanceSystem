@@ -19,7 +19,7 @@ namespace FinanceSystem.Web.Extensions
             return context?.User?.IsInRole(role) ?? false;
         }
 
-        public static string GetCurrentUserId(this HttpContext httpContext)
+        public static string? GetCurrentUserId(this HttpContext httpContext)
         {
             var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 

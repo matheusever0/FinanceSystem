@@ -34,12 +34,7 @@ namespace FinanceSystem.API.Controllers
             {
                 var creditCard = await _creditCardService.GetByIdAsync(id);
 
-                if (creditCard.UserId != HttpContext.GetCurrentUserId())
-                {
-                    return Forbid();
-                }
-
-                return Ok(creditCard);
+                return creditCard.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<CreditCardDto>)Forbid() : (ActionResult<CreditCardDto>)Ok(creditCard);
             }
             catch (KeyNotFoundException ex)
             {

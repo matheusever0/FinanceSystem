@@ -5,13 +5,13 @@ namespace FinanceSystem.Web.Models.PaymentMethod
 {
     public class PaymentMethodModel
     {
-        public string Id { get; set; }
+        public required string Id { get; set; }
 
         [Display(Name = "Nome")]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [Display(Name = "Descrição")]
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
         [Display(Name = "Método do Sistema")]
         public bool IsSystem { get; set; }
@@ -20,14 +20,14 @@ namespace FinanceSystem.Web.Models.PaymentMethod
         public int Type { get; set; }
 
         [Display(Name = "Tipo")]
-        public string TypeDescription { get; set; }
+        public required string TypeDescription { get; set; }
 
-        public string UserId { get; set; }
+        public required string UserId { get; set; }
 
         [Display(Name = "Data de Criação")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
         public DateTime CreatedAt { get; set; }
 
-        public List<CreditCardModel> CreditCards { get; set; } = new List<CreditCardModel>();
+        public List<CreditCardModel> CreditCards { get; set; } = [];
     }
 }

@@ -2,9 +2,9 @@
 {
     public class InvestmentModel
     {
-        public string Id { get; set; }
-        public string Symbol { get; set; }
-        public string Name { get; set; }
+        public required string Id { get; set; }
+        public required string Symbol { get; set; }
+        public required string Name { get; set; }
         public int Type { get; set; }
         public decimal TotalQuantity { get; set; }
         public decimal AveragePrice { get; set; }
@@ -14,7 +14,7 @@
         public decimal GainLossPercentage { get; set; }
         public decimal GainLossValue { get; set; }
         public DateTime LastUpdate { get; set; }
-        public string UserId { get; set; }
+        public required string UserId { get; set; }
         public List<InvestmentTransactionModel> Transactions { get; set; } = [];
     }
 }

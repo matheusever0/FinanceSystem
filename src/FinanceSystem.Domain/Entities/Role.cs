@@ -11,8 +11,8 @@
 
         protected Role()
         {
-            UserRoles = new List<UserRole>();
-            RolePermissions = new List<RolePermission>();
+            UserRoles = [];
+            RolePermissions = [];
         }
 
         public Role(string name, string description)
@@ -21,8 +21,8 @@
             Name = name;
             Description = description;
             CreatedAt = DateTime.Now;
-            UserRoles = new List<UserRole>();
-            RolePermissions = new List<RolePermission>();
+            UserRoles = [];
+            RolePermissions = [];
         }
 
         public void UpdateName(string name)

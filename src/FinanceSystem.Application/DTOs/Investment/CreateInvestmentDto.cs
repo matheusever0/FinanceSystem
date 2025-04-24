@@ -7,11 +7,11 @@ namespace FinanceSystem.Application.DTOs.Investment
     {
         [Required]
         [StringLength(20)]
-        public string Symbol { get; set; }
+        public required string Symbol { get; set; }
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [Required]
         public InvestmentType Type { get; set; }
@@ -25,7 +25,7 @@ namespace FinanceSystem.Application.DTOs.Investment
         public decimal InitialPrice { get; set; }
 
         [StringLength(100)]
-        public string Broker { get; set; }
+        public required string Broker { get; set; }
 
         [DataType(DataType.Date)]
         public DateTime TransactionDate { get; set; } = DateTime.Now;

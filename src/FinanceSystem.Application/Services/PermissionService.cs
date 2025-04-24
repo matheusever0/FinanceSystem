@@ -21,10 +21,9 @@ namespace FinanceSystem.Application.Services
         public async Task<PermissionDto> GetByIdAsync(Guid id)
         {
             var permission = await _unitOfWork.Permissions.GetByIdAsync(id);
-            if (permission == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
-
-            return _mapper.Map<PermissionDto>(permission);
+            return permission == null
+                ? throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound)
+                : _mapper.Map<PermissionDto>(permission);
         }
 
         public async Task<IEnumerable<PermissionDto>> GetAllAsync()
@@ -49,10 +48,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<PermissionDto> UpdateAsync(Guid id, UpdatePermissionDto updatePermissionDto)
         {
-            var permission = await _unitOfWork.Permissions.GetByIdAsync(id);
-            if (permission == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Permission_NotFound);
-
+            var permission = await _unitOfWork.Permissions.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Permission_NotFound);
             if (!string.IsNullOrEmpty(updatePermissionDto.Name))
             {
                 permission.UpdateName(updatePermissionDto.Name);
@@ -71,34 +67,22 @@ namespace FinanceSystem.Application.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var permission = await _unitOfWork.Permissions.GetByIdAsync(id);
-            if (permission == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Permission_NotFound);
-
+            var permission = await _unitOfWork.Permissions.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Permission_NotFound);
             await _unitOfWork.Permissions.DeleteAsync(permission);
             await _unitOfWork.CompleteAsync();
         }
 
         public async Task<IEnumerable<PermissionDto>> GetPermissionsByRoleIdAsync(Guid roleId)
         {
-            var role = await _unitOfWork.Roles.GetByIdAsync(roleId);
-            if (role == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
-
+            var role = await _unitOfWork.Roles.GetByIdAsync(roleId) ?? throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
             var permissions = await _unitOfWork.Permissions.GetPermissionsByRoleIdAsync(roleId);
             return _mapper.Map<IEnumerable<PermissionDto>>(permissions);
         }
 
         public async Task<bool> AssignPermissionToRoleAsync(Guid roleId, Guid permissionId)
         {
-            var role = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(roleId);
-            if (role == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
-
-            var permission = await _unitOfWork.Permissions.GetByIdAsync(permissionId);
-            if (permission == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Permission_NotFound);
-
+            var role = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(roleId) ?? throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
+            var permission = await _unitOfWork.Permissions.GetByIdAsync(permissionId) ?? throw new KeyNotFoundException(ResourceFinanceApi.Permission_NotFound);
             if (role.RolePermissions.Any(rp => rp.PermissionId == permissionId))
                 return false;
             role.AddPermission(permission);
@@ -109,14 +93,8 @@ namespace FinanceSystem.Application.Services
 
         public async Task<bool> RemovePermissionFromRoleAsync(Guid roleId, Guid permissionId)
         {
-            var role = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(roleId);
-            if (role == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
-
-            var permission = await _unitOfWork.Permissions.GetByIdAsync(permissionId);
-            if (permission == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.Permission_NotFound);
-
+            var role = await _unitOfWork.Roles.GetRoleWithPermissionsAsync(roleId) ?? throw new KeyNotFoundException(ResourceFinanceApi.Role_NotFound);
+            var permission = await _unitOfWork.Permissions.GetByIdAsync(permissionId) ?? throw new KeyNotFoundException(ResourceFinanceApi.Permission_NotFound);
             if (!role.RolePermissions.Any(rp => rp.PermissionId == permissionId))
                 return false;
             role.RemovePermission(permission);
@@ -127,10 +105,7 @@ namespace FinanceSystem.Application.Services
 
         public async Task<IEnumerable<PermissionDto>> GetPermissionsByUserIdAsync(Guid userId)
         {
-            var user = await _unitOfWork.Users.GetUserWithRolesAsync(userId);
-            if (user == null)
-                throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
-
+            var user = await _unitOfWork.Users.GetUserWithRolesAsync(userId) ?? throw new KeyNotFoundException(ResourceFinanceApi.User_NotFound);
             var roleIds = user.UserRoles.Select(ur => ur.RoleId).ToList();
 
             var permissionDtos = new List<PermissionDto>();
