@@ -68,5 +68,27 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .Include(i => i.IncomeType)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Income>> GetRecurringIncomesWithDetailsAsync()
+        {
+            return await _dbSet
+                .Where(i => i.IsRecurring)
+                .Include(i => i.IncomeType)
+                .Include(i => i.User)
+                .Where(e => e.DueDate.Month == DateTime.Now.Month)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Income>> GetIncomesByPeriodAndDetailsAsync(Guid userId, Guid incomeTypeId, string description, DateTime startDate, DateTime endDate)
+        {
+            return await _dbSet
+                .Where(i =>
+                    i.UserId == userId &&
+                    i.IncomeTypeId == incomeTypeId &&
+                    i.Description == description &&
+                    i.DueDate >= startDate &&
+                    i.DueDate <= endDate)
+                .ToListAsync();
+        }
     }
 }

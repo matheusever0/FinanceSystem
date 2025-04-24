@@ -1,12 +1,10 @@
 ﻿using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Interfaces;
 using FinanceSystem.Web.Models.Generics;
-using FinanceSystem.Web.Models.Investment;
 using FinanceSystem.Web.Models.Payment;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -88,11 +86,8 @@ namespace FinanceSystem.Web.Controllers
             ViewBag.MonthlyIncomeValues = JsonSerializer.Serialize(monthlyData.Select(m => m.IncomeAmount));
             ViewBag.MonthlyPaymentValues = JsonSerializer.Serialize(monthlyData.Select(m => m.PaymentAmount));
 
-
-            var investments = Array.Empty<InvestmentModel>();
-
             var investmentService = HttpContext.RequestServices.GetService<IInvestmentService>();
-            investments = (await investmentService.GetAllInvestmentsAsync(token)).ToArray();
+            var investments = (await investmentService!.GetAllInvestmentsAsync(token)).ToArray();
 
             ViewBag.TotalInvested = investments.Sum(i => i.TotalInvested);
             ViewBag.CurrentInvestmentsValue = investments.Sum(i => i.CurrentTotal);

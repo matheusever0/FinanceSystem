@@ -1,4 +1,6 @@
-﻿namespace FinanceSystem.Domain.Interfaces.Repositories
+﻿using FinanceSystem.Domain.Entities;
+
+namespace FinanceSystem.Domain.Interfaces.Repositories
 {
     public interface ICreditCardRepository : IRepositoryBase<CreditCard>
     {

@@ -22,7 +22,8 @@ namespace FinanceSystem.Infrastructure
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IDbInitializer, DbInitializer>();
             services.AddScoped<IPermissionAuthorizationService, PermissionAuthorizationService>();
-
+            services.AddScoped<IRecurrenceService, RecurrenceService>();
+            services.AddHostedService<RecurrenceProcessorService>();
             services.AddHostedService<DatabaseInitializer>();
 
             services.AddHttpClient();

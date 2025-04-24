@@ -85,5 +85,27 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .Include(p => p.Installments)
                 .FirstOrDefaultAsync(p => p.Id == paymentId);
         }
+        public async Task<IEnumerable<Payment>> GetRecurringPaymentsWithDetailsAsync()
+        {
+            return await _dbSet
+                .Where(p => p.IsRecurring)
+                .Include(p => p.PaymentType)
+                .Include(p => p.PaymentMethod)
+                .Include(p => p.User)
+                .Where(e => e.DueDate.Month == DateTime.Now.Month)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Payment>> GetPaymentsByPeriodAndDetailsAsync(Guid userId, Guid paymentTypeId, string description, DateTime startDate, DateTime endDate)
+        {
+            return await _dbSet
+                .Where(p =>
+                    p.UserId == userId &&
+                    p.PaymentTypeId == paymentTypeId &&
+                    p.Description == description &&
+                    p.DueDate >= startDate &&
+                    p.DueDate <= endDate)
+                .ToListAsync();
+        }
     }
 }

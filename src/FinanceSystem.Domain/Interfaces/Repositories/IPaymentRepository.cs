@@ -9,5 +9,7 @@
         Task<IEnumerable<Payment?>> GetPaymentsByTypeAsync(Guid userId, Guid paymentTypeId);
         Task<IEnumerable<Payment?>> GetPaymentsByMethodAsync(Guid userId, Guid paymentMethodId);
         Task<Payment?> GetPaymentWithDetailsAsync(Guid paymentId);
+        Task<IEnumerable<Payment>> GetRecurringPaymentsWithDetailsAsync();
+        Task<IEnumerable<Payment>> GetPaymentsByPeriodAndDetailsAsync(Guid userId, Guid paymentTypeId, string description, DateTime startDate, DateTime endDate);
     }
 }
