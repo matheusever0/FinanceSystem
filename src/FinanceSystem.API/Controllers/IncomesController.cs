@@ -112,7 +112,7 @@ namespace FinanceSystem.API.Controllers
             {
                 return NotFound(new { message = ex.Message });
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 return Forbid();
             }
@@ -140,7 +140,7 @@ namespace FinanceSystem.API.Controllers
             {
                 return NotFound(new { message = ex.Message });
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 return Forbid();
             }

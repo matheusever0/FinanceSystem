@@ -8,19 +8,19 @@ namespace FinanceSystem.Infrastructure
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _context;
-        private IUserRepository _userRepository;
-        private IRoleRepository _roleRepository;
-        private IPermissionRepository _permissionRepository;
-        private IPaymentRepository _paymentRepository;
-        private IPaymentTypeRepository _paymentTypeRepository;
-        private IPaymentMethodRepository _paymentMethodRepository;
-        private ICreditCardRepository _creditCardRepository;
-        private IPaymentInstallmentRepository _paymentInstallmentRepository;
-        private IIncomeRepository _incomeRepository;
-        private IIncomeTypeRepository _incomeTypeRepository;
-        private IIncomeInstallmentRepository _incomeInstallmentRepository;
-        private IInvestmentRepository _investmentRepository;
-        private IInvestmentTransactionRepository _investmentTransactionRepository;
+        private IUserRepository? _userRepository;
+        private IRoleRepository? _roleRepository;
+        private IPermissionRepository? _permissionRepository;
+        private IPaymentRepository? _paymentRepository;
+        private IPaymentTypeRepository? _paymentTypeRepository;
+        private IPaymentMethodRepository? _paymentMethodRepository;
+        private ICreditCardRepository? _creditCardRepository;
+        private IPaymentInstallmentRepository? _paymentInstallmentRepository;
+        private IIncomeRepository? _incomeRepository;
+        private IIncomeTypeRepository? _incomeTypeRepository;
+        private IIncomeInstallmentRepository? _incomeInstallmentRepository;
+        private IInvestmentRepository? _investmentRepository;
+        private IInvestmentTransactionRepository? _investmentTransactionRepository;
 
         private bool _disposed = false;
 

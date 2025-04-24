@@ -10,7 +10,7 @@ namespace FinanceSystem.Infrastructure.Repositories
         {
         }
 
-        public async Task<IEnumerable<CreditCard>> GetCreditCardsByUserIdAsync(Guid userId)
+        public async Task<IEnumerable<CreditCard?>> GetCreditCardsByUserIdAsync(Guid userId)
         {
             return await _dbSet
                 .Where(cc => cc.UserId == userId)
@@ -18,7 +18,7 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<CreditCard> GetCreditCardWithDetailsAsync(Guid creditCardId)
+        public async Task<CreditCard?> GetCreditCardWithDetailsAsync(Guid creditCardId)
         {
             return await _dbSet
                 .Include(cc => cc.PaymentMethod)

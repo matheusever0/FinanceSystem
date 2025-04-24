@@ -11,7 +11,7 @@ namespace FinanceSystem.Infrastructure.Repositories
         {
         }
 
-        public async Task<IEnumerable<Payment>> GetPaymentsByUserIdAsync(Guid userId)
+        public async Task<IEnumerable<Payment?>> GetPaymentsByUserIdAsync(Guid userId)
         {
             return await _dbSet
                 .Where(p => p.UserId == userId)
@@ -20,7 +20,7 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Payment>> GetPaymentsByUserIdAndMonthAsync(Guid userId, int month, int year)
+        public async Task<IEnumerable<Payment?>> GetPaymentsByUserIdAndMonthAsync(Guid userId, int month, int year)
         {
             var directPayments = await _dbSet
                 .Where(p => p.UserId == userId &&
@@ -41,7 +41,7 @@ namespace FinanceSystem.Infrastructure.Repositories
             return directPayments.Union(installmentPayments);
         }
 
-        public async Task<IEnumerable<Payment>> GetPendingPaymentsByUserIdAsync(Guid userId)
+        public async Task<IEnumerable<Payment?>> GetPendingPaymentsByUserIdAsync(Guid userId)
         {
             return await _dbSet
                 .Where(p => p.UserId == userId && p.Status == PaymentStatus.Pending)
@@ -50,7 +50,7 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Payment>> GetOverduePaymentsByUserIdAsync(Guid userId)
+        public async Task<IEnumerable<Payment?>> GetOverduePaymentsByUserIdAsync(Guid userId)
         {
             return await _dbSet
                 .Where(p => p.UserId == userId && p.Status == PaymentStatus.Overdue)
@@ -59,7 +59,7 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Payment>> GetPaymentsByTypeAsync(Guid userId, Guid paymentTypeId)
+        public async Task<IEnumerable<Payment?>> GetPaymentsByTypeAsync(Guid userId, Guid paymentTypeId)
         {
             return await _dbSet
                 .Where(p => p.UserId == userId && p.PaymentTypeId == paymentTypeId)
@@ -68,7 +68,7 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Payment>> GetPaymentsByMethodAsync(Guid userId, Guid paymentMethodId)
+        public async Task<IEnumerable<Payment?>> GetPaymentsByMethodAsync(Guid userId, Guid paymentMethodId)
         {
             return await _dbSet
                 .Where(p => p.UserId == userId && p.PaymentMethodId == paymentMethodId)
@@ -77,7 +77,7 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Payment> GetPaymentWithDetailsAsync(Guid paymentId)
+        public async Task<Payment?> GetPaymentWithDetailsAsync(Guid paymentId)
         {
             return await _dbSet
                 .Include(p => p.PaymentType)

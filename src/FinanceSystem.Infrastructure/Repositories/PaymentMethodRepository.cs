@@ -11,35 +11,35 @@ namespace FinanceSystem.Infrastructure.Repositories
         {
         }
 
-        public async Task<IEnumerable<PaymentMethod>> GetAllSystemMethodsAsync()
+        public async Task<IEnumerable<PaymentMethod?>> GetAllSystemMethodsAsync()
         {
             return await _dbSet
                 .Where(pm => pm.IsSystem)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<PaymentMethod>> GetUserMethodsAsync(Guid userId)
+        public async Task<IEnumerable<PaymentMethod?>> GetUserMethodsAsync(Guid userId)
         {
             return await _dbSet
                 .Where(pm => !pm.IsSystem && pm.UserId == userId)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<PaymentMethod>> GetAllAvailableForUserAsync(Guid userId)
+        public async Task<IEnumerable<PaymentMethod?>> GetAllAvailableForUserAsync(Guid userId)
         {
             return await _dbSet
                 .Where(pm => pm.IsSystem || pm.UserId == userId)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<PaymentMethod>> GetByTypeAsync(PaymentMethodType type)
+        public async Task<IEnumerable<PaymentMethod?>> GetByTypeAsync(PaymentMethodType type)
         {
             return await _dbSet
                 .Where(pm => pm.Type == type)
                 .ToListAsync();
         }
 
-        public async Task<PaymentMethod> GetByNameAsync(string name)
+        public async Task<PaymentMethod?> GetByNameAsync(string name)
         {
             return await _dbSet
                 .FirstOrDefaultAsync(pm => pm.Name.ToLower() == name.ToLower());

@@ -10,28 +10,28 @@ namespace FinanceSystem.Infrastructure.Repositories
         {
         }
 
-        public async Task<IEnumerable<PaymentType>> GetAllSystemTypesAsync()
+        public async Task<IEnumerable<PaymentType?>> GetAllSystemTypesAsync()
         {
             return await _dbSet
                 .Where(pt => pt.IsSystem)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<PaymentType>> GetUserTypesAsync(Guid userId)
+        public async Task<IEnumerable<PaymentType?>> GetUserTypesAsync(Guid userId)
         {
             return await _dbSet
                 .Where(pt => !pt.IsSystem && pt.UserId == userId)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<PaymentType>> GetAllAvailableForUserAsync(Guid userId)
+        public async Task<IEnumerable<PaymentType?>> GetAllAvailableForUserAsync(Guid userId)
         {
             return await _dbSet
                 .Where(pt => pt.IsSystem || pt.UserId == userId)
                 .ToListAsync();
         }
 
-        public async Task<PaymentType> GetByNameAsync(string name)
+        public async Task<PaymentType?> GetByNameAsync(string name)
         {
             return await _dbSet
                 .FirstOrDefaultAsync(pt => pt.Name.ToLower() == name.ToLower());

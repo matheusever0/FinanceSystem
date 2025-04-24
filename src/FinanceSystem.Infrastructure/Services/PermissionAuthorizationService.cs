@@ -14,7 +14,7 @@ namespace FinanceSystem.Infrastructure.Services
 
         public async Task<bool> HasPermissionAsync(ClaimsPrincipal user, string permissionSystemName)
         {
-            if (!user.Identity.IsAuthenticated)
+            if (!user.Identity!.IsAuthenticated)
                 return false;
 
             if (user.IsInRole("Admin"))

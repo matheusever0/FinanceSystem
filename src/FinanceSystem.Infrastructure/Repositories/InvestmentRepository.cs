@@ -12,28 +12,28 @@ namespace FinanceSystem.Infrastructure.Repositories
         {
         }
 
-        public async Task<IEnumerable<Investment>> GetInvestmentsByUserIdAsync(Guid userId)
+        public async Task<IEnumerable<Investment?>> GetInvestmentsByUserIdAsync(Guid userId)
         {
             return await _dbSet
                 .Where(i => i.UserId == userId)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Investment>> GetInvestmentsByTypeAsync(Guid userId, InvestmentType type)
+        public async Task<IEnumerable<Investment?>> GetInvestmentsByTypeAsync(Guid userId, InvestmentType type)
         {
             return await _dbSet
                 .Where(i => i.UserId == userId && i.Type == type)
                 .ToListAsync();
         }
 
-        public async Task<Investment> GetInvestmentWithTransactionsAsync(Guid id)
+        public async Task<Investment?> GetInvestmentWithTransactionsAsync(Guid id)
         {
             return await _dbSet
                 .Include(i => i.Transactions)
                 .FirstOrDefaultAsync(i => i.Id == id);
         }
 
-        public async Task<Investment> GetInvestmentBySymbolAsync(Guid userId, string symbol)
+        public async Task<Investment?> GetInvestmentBySymbolAsync(Guid userId, string symbol)
         {
             return await _dbSet
                 .FirstOrDefaultAsync(i => i.UserId == userId && i.Symbol.ToUpper() == symbol.ToUpper());

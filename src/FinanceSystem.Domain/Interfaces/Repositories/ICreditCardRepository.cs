@@ -2,7 +2,7 @@
 {
     public interface ICreditCardRepository : IRepositoryBase<CreditCard>
     {
-        Task<IEnumerable<CreditCard>> GetCreditCardsByUserIdAsync(Guid userId);
-        Task<CreditCard> GetCreditCardWithDetailsAsync(Guid creditCardId);
+        Task<IEnumerable<CreditCard?>> GetCreditCardsByUserIdAsync(Guid userId);
+        Task<CreditCard?> GetCreditCardWithDetailsAsync(Guid creditCardId);
     }
 }

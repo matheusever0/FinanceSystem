@@ -15,7 +15,7 @@ namespace FinanceSystem.Application.Services
             IConfiguration configuration)
         {
             _httpClient = httpClient;
-            _apiKey = configuration["BrapiApi:ApiKey"];
+            _apiKey = configuration["BrapiApi:ApiKey"]!;
         }
 
         public async Task<decimal> GetCurrentPriceAsync(string symbol)
@@ -46,7 +46,6 @@ namespace FinanceSystem.Application.Services
         {
             try
             {
-                // A API BrAPI permite consultar múltiplos símbolos separados por vírgula
                 var symbolsString = string.Join(",", symbols);
                 var response = await _httpClient.GetAsync($"https://brapi.dev/api/quote/{symbolsString}?token={_apiKey}");
                 response.EnsureSuccessStatusCode();

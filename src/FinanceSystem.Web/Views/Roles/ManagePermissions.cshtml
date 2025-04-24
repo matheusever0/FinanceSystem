@@ -10,12 +10,12 @@
 }
 
 <h1>Gerenciar Permissões</h1>
-<h4>Perfil: @role.Name</h4>
+<h4>Perfil: @role?.Name</h4>
 
 <div class="card">
     <div class="card-body">
         <form asp-action="ManagePermissions" method="post">
-            <input type="hidden" name="id" value="@role.Id" />
+            <input type="hidden" name="id" value="@role?.Id" />
 
             <div class="mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -37,7 +37,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var permission in allPermissions)
+                            @foreach (var permission in allPermissions!)
                             {
                                     <tr>
                                         <td>
@@ -46,7 +46,7 @@
                                                        name="selectedPermissions" 
                                                        value="@permission.Id" 
                                                        class="form-check-input permission-checkbox" 
-                                            @(rolePermissions.Contains(permission.Id) ? "checked" : "") />
+                                            @(rolePermissions!.Contains(permission.Id) ? "checked" : "") />
                                             </div>
                                         </td>
                                         <td>@permission.Name</td>
@@ -61,7 +61,7 @@
 
             <div class="mb-3">
                 <button type="submit" class="btn btn-primary">Salvar Permissões</button>
-                <a asp-action="Details" asp-route-id="@role.Id" class="btn btn-secondary">Cancelar</a>
+                <a asp-action="Details" asp-route-id="@role?.Id" class="btn btn-secondary">Cancelar</a>
             </div>
         </form>
     </div>
