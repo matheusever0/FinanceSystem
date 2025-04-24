@@ -5,7 +5,7 @@
         public string Id { get; set; }
         public string Symbol { get; set; }
         public string Name { get; set; }
-        public string InvestmentType { get; set; }
+        public int Type { get; set; }
         public decimal TotalQuantity { get; set; }
         public decimal AveragePrice { get; set; }
         public decimal CurrentPrice { get; set; }

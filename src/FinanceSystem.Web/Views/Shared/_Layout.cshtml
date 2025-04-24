@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/lib/font-awesome/css/all.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/investments.css" asp-append-version="true" />
     <link rel="icon" type="image/svg+xml" href="~/images/favicon.svg" asp-append-version="true">
     <link rel="icon" type="image/png" sizes="32x32" href="~/images/icon-32x32.png" asp-append-version="true">
     <link rel="icon" type="image/png" sizes="16x16" href="~/images/icon-16x16.png" asp-append-version="true">
@@ -44,6 +45,8 @@
             <partial name="_Partials/_SidebarMenuIncomes" />
             <partial name="_Partials/_SidebarMenuPayments" />
             <partial name="_Partials/_SidebarMenuCreditCards" />
+            <partial name="_Partials/_SidebarMenuInvestments" />
+
         </div>
         <partial name="_Partials/_SidebarMenuAdmin" />
     </div>
@@ -72,6 +75,7 @@
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/menu.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
