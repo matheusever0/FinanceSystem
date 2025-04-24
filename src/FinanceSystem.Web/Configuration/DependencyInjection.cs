@@ -7,6 +7,7 @@ namespace FinanceSystem.Web.Configuration
     {
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
+
             services.AddScoped<IApiService, ApiService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IRoleService, RoleService>();
@@ -18,6 +19,8 @@ namespace FinanceSystem.Web.Configuration
             services.AddScoped<ICreditCardService, CreditCardService>();
             services.AddScoped<IIncomeService, IncomeService>();
             services.AddScoped<IIncomeTypeService, IncomeTypeService>();
+            services.AddScoped<IInvestmentService, InvestmentService>();
+            services.AddScoped<IInvestmentTransactionService, InvestmentTransactionService>();
 
             return services;
         }
