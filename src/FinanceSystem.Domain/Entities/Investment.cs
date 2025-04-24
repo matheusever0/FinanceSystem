@@ -81,7 +81,8 @@ namespace FinanceSystem.Domain.Entities
             decimal totalValue,
             decimal taxes,
             string broker,
-            string notes)
+            string notes,
+            bool isInitial = false)
         {
             var transaction = new InvestmentTransaction(
                 date,
@@ -95,7 +96,11 @@ namespace FinanceSystem.Domain.Entities
                 this);
 
             Transactions.Add(transaction);
-            RecalculateAfterTransaction(transaction);
+
+            if (!isInitial)
+            {
+                RecalculateAfterTransaction(transaction);
+            }
         }
 
         // Método para recalcular após nova transação

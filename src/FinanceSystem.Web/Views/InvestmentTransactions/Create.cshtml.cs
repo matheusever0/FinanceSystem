@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace FinanceSystem.Web.Views.Investments
+namespace FinanceSystem.Web.Views.InvestmentTransactions
 {
     public class _TransactionListModel : PageModel
     {

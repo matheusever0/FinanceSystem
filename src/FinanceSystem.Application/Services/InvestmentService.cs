@@ -91,7 +91,8 @@ namespace FinanceSystem.Application.Services
                 totalInvested,
                 0,
                 createInvestmentDto.Broker,
-                "Transação inicial"
+                "Transação inicial",
+                true
             );
 
             await _unitOfWork.Investments.AddAsync(investment);

@@ -89,7 +89,7 @@ namespace FinanceSystem.API.Controllers
             try
             {
                 var transaction = await _transactionService.GetByIdAsync(id);
-                var investment = await _investmentService.GetByIdAsync(transaction.Id);
+                var investment = await _investmentService.GetByIdAsync(transaction.InvestmentId);
 
                 if (investment.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
