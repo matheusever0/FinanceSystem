@@ -50,12 +50,10 @@ namespace FinanceSystem.Application.Services
             if (user == null)
                 throw new KeyNotFoundException("Usuário não encontrado");
 
-            // Verificar se já existe um investimento com o mesmo símbolo
             var existingInvestment = await _unitOfWork.Investments.GetInvestmentBySymbolAsync(userId, createInvestmentDto.Symbol);
             if (existingInvestment != null)
                 throw new InvalidOperationException("Já existe um investimento com este símbolo");
 
-            // Buscar o preço atual
             decimal currentPrice;
             try
             {
@@ -66,13 +64,11 @@ namespace FinanceSystem.Application.Services
                 currentPrice = createInvestmentDto.InitialPrice;
             }
 
-            // Calcular valores iniciais
             decimal totalInvested = createInvestmentDto.InitialQuantity * createInvestmentDto.InitialPrice;
             decimal currentTotal = createInvestmentDto.InitialQuantity * currentPrice;
             decimal gainLossValue = currentTotal - totalInvested;
             decimal gainLossPercentage = totalInvested > 0 ? (gainLossValue / totalInvested) * 100 : 0;
 
-            // Criar o investimento
             var investment = new Investment(
                 createInvestmentDto.Symbol,
                 createInvestmentDto.Name,
@@ -87,7 +83,6 @@ namespace FinanceSystem.Application.Services
                 user
             );
 
-            // Adicionar a transação inicial
             investment.AddTransaction(
                 createInvestmentDto.TransactionDate,
                 TransactionType.Buy,
@@ -136,7 +131,6 @@ namespace FinanceSystem.Application.Services
             if (investment == null)
                 throw new KeyNotFoundException("Investimento não encontrado");
 
-            // Buscar o preço atual
             try
             {
                 decimal currentPrice = await _stockPriceService.GetCurrentPriceAsync(investment.Symbol);
