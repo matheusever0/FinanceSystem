@@ -18,6 +18,7 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .Where(p => p.UserId == userId)
                 .Include(p => p.PaymentType)
                 .Include(p => p.PaymentMethod)
+                .Include(p => p.Installments)
                 .ToListAsync();
         }
 
@@ -48,6 +49,7 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .Where(p => p.UserId == userId && p.Status == PaymentStatus.Pending)
                 .Include(p => p.PaymentType)
                 .Include(p => p.PaymentMethod)
+                .Include(p => p.Installments)
                 .ToListAsync();
         }
 
@@ -57,6 +59,7 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .Where(p => p.UserId == userId && p.Status == PaymentStatus.Overdue)
                 .Include(p => p.PaymentType)
                 .Include(p => p.PaymentMethod)
+                .Include(p => p.Installments)
                 .ToListAsync();
         }
 
@@ -66,6 +69,7 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .Where(p => p.UserId == userId && p.PaymentTypeId == paymentTypeId)
                 .Include(p => p.PaymentType)
                 .Include(p => p.PaymentMethod)
+                .Include(p => p.Installments)
                 .ToListAsync();
         }
 
@@ -75,6 +79,7 @@ namespace FinanceSystem.Infrastructure.Repositories
                 .Where(p => p.UserId == userId && p.PaymentMethodId == paymentMethodId)
                 .Include(p => p.PaymentType)
                 .Include(p => p.PaymentMethod)
+                .Include(p => p.Installments)
                 .ToListAsync();
         }
 
