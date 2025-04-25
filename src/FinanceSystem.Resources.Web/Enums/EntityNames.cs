@@ -23,6 +23,7 @@ namespace FinanceSystem.Resources.Web.Enums
         Permission,
         Investment,
         Transaction,
-        Report
+        Report,
+        Dashboard
     }
 }

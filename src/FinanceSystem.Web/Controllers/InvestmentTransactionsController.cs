@@ -1,4 +1,7 @@
-﻿using FinanceSystem.Web.Extensions;
+﻿using FinanceSystem.Resources.Web;
+using FinanceSystem.Resources.Web.Enums;
+using FinanceSystem.Resources.Web.Helpers;
+using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Interfaces;
 using FinanceSystem.Web.Models.Investment;
@@ -14,13 +17,6 @@ namespace FinanceSystem.Web.Controllers
         private readonly IInvestmentService _investmentService;
         private readonly IInvestmentTransactionService _transactionService;
         private readonly ILogger<InvestmentTransactionsController> _logger;
-
-        private const string ERROR_PREPARING_FORM = "Erro ao preparar formulário: {0}";
-        private const string ERROR_CREATING_TRANSACTION = "Erro ao criar transação: {0}";
-        private const string ERROR_DELETING_TRANSACTION = "Erro ao excluir transação: {0}";
-
-        private const string SUCCESS_CREATE_TRANSACTION = "Transação criada com sucesso!";
-        private const string SUCCESS_DELETE_TRANSACTION = "Transação excluída com sucesso!";
 
         public InvestmentTransactionsController(
             IInvestmentService investmentService,
@@ -63,7 +59,7 @@ namespace FinanceSystem.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao preparar formulário de criação de transação para investimento: {InvestmentId}", investmentId);
-                TempData["ErrorMessage"] = string.Format(ERROR_PREPARING_FORM, ex.Message);
+                TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PreparingForm;
                 return RedirectToAction("Details", "Investments", new { id = investmentId });
             }
         }
@@ -98,13 +94,13 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _transactionService.CreateTransactionAsync(investmentId, model, token);
-                TempData["SuccessMessage"] = SUCCESS_CREATE_TRANSACTION;
+                TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.Transaction);
                 return RedirectToAction("Details", "Investments", new { id = investmentId });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao criar transação para investimento: {InvestmentId}", investmentId);
-                ModelState.AddModelError(string.Empty, string.Format(ERROR_CREATING_TRANSACTION, ex.Message));
+                ModelState.AddModelError(string.Empty, MessageHelper.GetCreationErrorMessage(EntityNames.Transaction, ex));
 
                 try
                 {
@@ -140,12 +136,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _transactionService.DeleteTransactionAsync(id, token);
-                TempData["SuccessMessage"] = SUCCESS_DELETE_TRANSACTION;
+                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.Transaction);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao excluir transação: {Id}", id);
-                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_TRANSACTION, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.Transaction, ex);
             }
 
             return RedirectToAction("Details", "Investments", new { id = investmentId });

@@ -1,4 +1,7 @@
-﻿using FinanceSystem.Web.Extensions;
+﻿using FinanceSystem.Resources.Web;
+using FinanceSystem.Resources.Web.Enums;
+using FinanceSystem.Resources.Web.Helpers;
+using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Models.CreditCard;
 using FinanceSystem.Web.Services;
@@ -13,19 +16,6 @@ namespace FinanceSystem.Web.Controllers
     {
         private readonly ICreditCardService _creditCardService;
         private readonly IPaymentMethodService _paymentMethodService;
-
-        private const string ERROR_LOADING_CARDS = "Erro ao carregar cartões de crédito: {0}";
-        private const string ERROR_LOADING_CARD_DETAILS = "Erro ao carregar detalhes do cartão de crédito: {0}";
-        private const string ERROR_PREPARING_FORM = "Erro ao preparar formulário: {0}";
-        private const string ERROR_CREATING_CARD = "Erro ao criar cartão de crédito: {0}";
-        private const string ERROR_UPDATING_CARD = "Erro ao atualizar cartão de crédito: {0}";
-        private const string ERROR_LOADING_CARD_EDIT = "Erro ao carregar cartão de crédito para edição: {0}";
-        private const string ERROR_LOADING_CARD_DELETE = "Erro ao carregar cartão de crédito para exclusão: {0}";
-        private const string ERROR_DELETING_CARD = "Erro ao excluir cartão de crédito: {0}";
-
-        private const string SUCCESS_CREATE_CARD = "Cartão de crédito criado com sucesso!";
-        private const string SUCCESS_UPDATE_CARD = "Cartão de crédito atualizado com sucesso!";
-        private const string SUCCESS_DELETE_CARD = "Cartão de crédito excluído com sucesso!";
 
         private const int CREDIT_CARD_PAYMENT_TYPE = 2;
 
@@ -47,7 +37,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_CARDS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.CreditCard, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -68,7 +58,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_CARD_DETAILS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.CreditCard, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -85,7 +75,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_PREPARING_FORM, ex.Message);
+                TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PreparingForm;
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -105,12 +95,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 var creditCard = await _creditCardService.CreateCreditCardAsync(model, token);
-                TempData["SuccessMessage"] = SUCCESS_CREATE_CARD;
+                TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.CreditCard);
                 return RedirectToAction(nameof(Details), new { id = creditCard.Id });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, string.Format(ERROR_CREATING_CARD, ex.Message));
+                ModelState.AddModelError(string.Empty, MessageHelper.GetCreationErrorMessage(EntityNames.CreditCard, ex));
                 await LoadPaymentMethodsForView();
                 return View(model);
             }
@@ -146,7 +136,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_CARD_EDIT, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.CreditCard, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -170,12 +160,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _creditCardService.UpdateCreditCardAsync(id, model, token);
-                TempData["SuccessMessage"] = SUCCESS_UPDATE_CARD;
+                TempData["SuccessMessage"] = MessageHelper.GetUpdateSuccessMessage(EntityNames.CreditCard);
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, string.Format(ERROR_UPDATING_CARD, ex.Message));
+                ModelState.AddModelError(string.Empty, MessageHelper.GetUpdateErrorMessage(EntityNames.CreditCard, ex));
                 return View(model);
             }
         }
@@ -197,7 +187,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_CARD_DELETE, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.CreditCard, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -216,12 +206,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _creditCardService.DeleteCreditCardAsync(id, token);
-                TempData["SuccessMessage"] = SUCCESS_DELETE_CARD;
+                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.CreditCard);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_CARD, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.CreditCard, ex);
                 return RedirectToAction(nameof(Index));
             }
         }

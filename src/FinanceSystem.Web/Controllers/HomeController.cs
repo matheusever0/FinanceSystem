@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text.Json;
+using FinanceSystem.Resources.Web.Enums;
+using FinanceSystem.Resources.Web.Helpers;
 
 namespace FinanceSystem.Web.Controllers
 {
@@ -15,8 +17,6 @@ namespace FinanceSystem.Web.Controllers
     {
         private const int STATUS_PAGO = 2;
         private const int MONTHS_TO_SHOW = 6;
-
-        private const string ERROR_LOADING_DASHBOARD = "Erro ao carregar dashboard: {0}";
 
         private readonly IPaymentService _paymentService;
         private readonly ICreditCardService _creditCardService;
@@ -47,7 +47,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_DASHBOARD, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Dashboard, ex);
                 return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
             }
         }
@@ -94,10 +94,8 @@ namespace FinanceSystem.Web.Controllers
             ViewBag.InvestmentsGainLoss = investments.Sum(i => i.GainLossValue);
             ViewBag.TopPerformingInvestments = investments
                 .OrderByDescending(i => i.GainLossPercentage)
-            .Take(3)
+                .Take(3)
                 .ToList();
-
-
         }
 
         private async Task<List<MonthlyComparisonData>> GetMonthlyComparisonDataAsync(string token)

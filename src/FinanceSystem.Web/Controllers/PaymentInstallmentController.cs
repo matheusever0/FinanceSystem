@@ -1,4 +1,6 @@
-﻿using FinanceSystem.Web.Extensions;
+﻿using FinanceSystem.Resources.Web.Enums;
+using FinanceSystem.Resources.Web.Helpers;
+using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -11,15 +13,6 @@ namespace FinanceSystem.Web.Controllers
     public class PaymentInstallmentsController : Controller
     {
         private readonly IPaymentService _paymentService;
-
-        private const string ERROR_PARENT_PAYMENT_NOT_FOUND = "Não foi possível identificar o pagamento relacionado a esta parcela.";
-        private const string ERROR_MARK_PAID = "Erro ao marcar parcela como paga: {0}";
-        private const string ERROR_MARK_OVERDUE = "Erro ao marcar parcela como vencida: {0}";
-        private const string ERROR_CANCEL = "Erro ao cancelar parcela: {0}";
-
-        private const string SUCCESS_MARK_PAID = "Parcela marcada como paga com sucesso!";
-        private const string SUCCESS_MARK_OVERDUE = "Parcela marcada como vencida com sucesso!";
-        private const string SUCCESS_CANCEL = "Parcela cancelada com sucesso!";
 
         public PaymentInstallmentsController(IPaymentService paymentService)
         {
@@ -45,18 +38,18 @@ namespace FinanceSystem.Web.Controllers
 
                 if (string.IsNullOrEmpty(paymentId))
                 {
-                    TempData["ErrorMessage"] = ERROR_PARENT_PAYMENT_NOT_FOUND;
+                    TempData["ErrorMessage"] = MessageHelper.GetParentEntityNotFoundMessage(EntityNames.Payment);
                     return RedirectToAction("Index", "Payments");
                 }
 
                 await _paymentService.MarkInstallmentAsPaidAsync(id, paymentDate ?? DateTime.Now, token);
 
-                TempData["SuccessMessage"] = SUCCESS_MARK_PAID;
+                TempData["SuccessMessage"] = MessageHelper.GetStatusChangeSuccessMessage(EntityNames.PaymentInstallment, EntityStatus.Paid);
                 return RedirectToAction("Details", "Payments", new { id = paymentId });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_MARK_PAID, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetStatusChangeErrorMessage(EntityNames.PaymentInstallment, EntityStatus.Paid, ex);
 
                 var paymentId = TempData["PaymentId"]?.ToString();
                 return !string.IsNullOrEmpty(paymentId)
@@ -84,18 +77,18 @@ namespace FinanceSystem.Web.Controllers
 
                 if (string.IsNullOrEmpty(paymentId))
                 {
-                    TempData["ErrorMessage"] = ERROR_PARENT_PAYMENT_NOT_FOUND;
+                    TempData["ErrorMessage"] = MessageHelper.GetParentEntityNotFoundMessage(EntityNames.Payment);
                     return RedirectToAction("Index", "Payments");
                 }
 
                 await _paymentService.MarkInstallmentAsOverdueAsync(id, token);
 
-                TempData["SuccessMessage"] = SUCCESS_MARK_OVERDUE;
+                TempData["SuccessMessage"] = MessageHelper.GetStatusChangeSuccessMessage(EntityNames.PaymentInstallment, EntityStatus.Overdue);
                 return RedirectToAction("Details", "Payments", new { id = paymentId });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_MARK_OVERDUE, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetStatusChangeErrorMessage(EntityNames.PaymentInstallment, EntityStatus.Overdue, ex);
 
                 var paymentId = TempData["PaymentId"]?.ToString();
                 return !string.IsNullOrEmpty(paymentId)
@@ -123,18 +116,18 @@ namespace FinanceSystem.Web.Controllers
 
                 if (string.IsNullOrEmpty(paymentId))
                 {
-                    TempData["ErrorMessage"] = ERROR_PARENT_PAYMENT_NOT_FOUND;
+                    TempData["ErrorMessage"] = MessageHelper.GetParentEntityNotFoundMessage(EntityNames.Payment);
                     return RedirectToAction("Index", "Payments");
                 }
 
                 await _paymentService.CancelInstallmentAsync(id, token);
 
-                TempData["SuccessMessage"] = SUCCESS_CANCEL;
+                TempData["SuccessMessage"] = MessageHelper.GetCancelSuccessMessage(EntityNames.PaymentInstallment);
                 return RedirectToAction("Details", "Payments", new { id = paymentId });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_CANCEL, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetCancelErrorMessage(EntityNames.PaymentInstallment, ex);
 
                 var paymentId = TempData["PaymentId"]?.ToString();
                 return !string.IsNullOrEmpty(paymentId)

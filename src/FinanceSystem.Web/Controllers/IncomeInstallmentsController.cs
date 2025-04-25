@@ -1,4 +1,6 @@
-﻿using FinanceSystem.Web.Extensions;
+﻿using FinanceSystem.Resources.Web.Enums;
+using FinanceSystem.Resources.Web.Helpers;
+using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -12,13 +14,6 @@ namespace FinanceSystem.Web.Controllers
     {
         private readonly IIncomeService _incomeService;
 
-        private const string ERROR_PARENT_INCOME_NOT_FOUND = "Não foi possível identificar a receita relacionada a esta parcela.";
-        private const string ERROR_MARK_RECEIVED = "Erro ao marcar parcela como recebida: {0}";
-        private const string ERROR_CANCEL = "Erro ao cancelar parcela: {0}";
-
-        private const string SUCCESS_MARK_RECEIVED = "Parcela marcada como recebida com sucesso!";
-        private const string SUCCESS_CANCEL = "Parcela cancelada com sucesso!";
-
         public IncomeInstallmentsController(IIncomeService incomeService)
         {
             _incomeService = incomeService ?? throw new ArgumentNullException(nameof(incomeService));
@@ -31,7 +26,7 @@ namespace FinanceSystem.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["ErrorMessage"] = ERROR_PARENT_INCOME_NOT_FOUND;
+                TempData["ErrorMessage"] = MessageHelper.GetParentEntityNotFoundMessage(EntityNames.Income);
                 return RedirectToAction("Index", "Incomes");
             }
 
@@ -43,18 +38,18 @@ namespace FinanceSystem.Web.Controllers
 
                 if (string.IsNullOrEmpty(incomeId))
                 {
-                    TempData["ErrorMessage"] = ERROR_PARENT_INCOME_NOT_FOUND;
+                    TempData["ErrorMessage"] = MessageHelper.GetParentEntityNotFoundMessage(EntityNames.Income);
                     return RedirectToAction("Index", "Incomes");
                 }
 
                 await _incomeService.MarkInstallmentAsReceivedAsync(id, receivedDate ?? DateTime.Now, token);
-                TempData["SuccessMessage"] = SUCCESS_MARK_RECEIVED;
+                TempData["SuccessMessage"] = MessageHelper.GetStatusChangeSuccessMessage(EntityNames.IncomeInstallment, EntityStatus.Received);
 
                 return RedirectToAction("Details", "Incomes", new { id = incomeId });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_MARK_RECEIVED, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetStatusChangeErrorMessage(EntityNames.IncomeInstallment, EntityStatus.Received, ex);
                 var incomeId = TempData["IncomeId"]?.ToString();
 
                 return !string.IsNullOrEmpty(incomeId)
@@ -70,7 +65,7 @@ namespace FinanceSystem.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["ErrorMessage"] = ERROR_PARENT_INCOME_NOT_FOUND;
+                TempData["ErrorMessage"] = MessageHelper.GetParentEntityNotFoundMessage(EntityNames.Income);
                 return RedirectToAction("Index", "Incomes");
             }
 
@@ -82,18 +77,18 @@ namespace FinanceSystem.Web.Controllers
 
                 if (string.IsNullOrEmpty(incomeId))
                 {
-                    TempData["ErrorMessage"] = ERROR_PARENT_INCOME_NOT_FOUND;
+                    TempData["ErrorMessage"] = MessageHelper.GetParentEntityNotFoundMessage(EntityNames.Income);
                     return RedirectToAction("Index", "Incomes");
                 }
 
                 await _incomeService.CancelInstallmentAsync(id, token);
-                TempData["SuccessMessage"] = SUCCESS_CANCEL;
+                TempData["SuccessMessage"] = MessageHelper.GetCancelSuccessMessage(EntityNames.IncomeInstallment);
 
                 return RedirectToAction("Details", "Incomes", new { id = incomeId });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_CANCEL, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetCancelErrorMessage(EntityNames.IncomeInstallment, ex);
                 var incomeId = TempData["IncomeId"]?.ToString();
 
                 return !string.IsNullOrEmpty(incomeId)

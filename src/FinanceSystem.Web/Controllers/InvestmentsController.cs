@@ -1,4 +1,7 @@
-﻿using FinanceSystem.Web.Extensions;
+﻿using FinanceSystem.Resources.Web;
+using FinanceSystem.Resources.Web.Enums;
+using FinanceSystem.Resources.Web.Helpers;
+using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Interfaces;
 using FinanceSystem.Web.Models.Investment;
@@ -14,19 +17,6 @@ namespace FinanceSystem.Web.Controllers
         private readonly IInvestmentService _investmentService;
         private readonly IInvestmentTransactionService _investmentTransactionService;
         private readonly ILogger<InvestmentsController> _logger;
-
-        private const string ERROR_LOADING_INVESTMENTS = "Erro ao carregar investimentos: {0}";
-        private const string ERROR_LOADING_INVESTMENT_DETAILS = "Erro ao carregar detalhes do investimento: {0}";
-        private const string ERROR_PREPARING_FORM = "Erro ao preparar formulário: {0}";
-        private const string ERROR_CREATING_INVESTMENT = "Erro ao criar investimento: {0}";
-        private const string ERROR_UPDATING_INVESTMENT = "Erro ao atualizar investimento: {0}";
-        private const string ERROR_DELETING_INVESTMENT = "Erro ao excluir investimento: {0}";
-        private const string ERROR_REFRESHING_PRICE = "Erro ao atualizar preço: {0}";
-
-        private const string SUCCESS_CREATE_INVESTMENT = "Investimento criado com sucesso!";
-        private const string SUCCESS_UPDATE_INVESTMENT = "Investimento atualizado com sucesso!";
-        private const string SUCCESS_DELETE_INVESTMENT = "Investimento excluído com sucesso!";
-        private const string SUCCESS_REFRESH_PRICE = "Preço atualizado com sucesso!";
 
         public InvestmentsController(
             IInvestmentService investmentService,
@@ -49,7 +39,7 @@ namespace FinanceSystem.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao carregar investimentos");
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INVESTMENTS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Investment, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -79,7 +69,7 @@ namespace FinanceSystem.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao carregar investimentos por tipo: {Type}", type);
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INVESTMENTS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Investment, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -110,7 +100,7 @@ namespace FinanceSystem.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao carregar detalhes do investimento: {Id}", id);
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INVESTMENT_DETAILS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Investment, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -130,7 +120,7 @@ namespace FinanceSystem.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao preparar formulário de criação de investimento");
-                TempData["ErrorMessage"] = string.Format(ERROR_PREPARING_FORM, ex.Message);
+                TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PreparingForm;
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -149,13 +139,13 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 var investment = await _investmentService.CreateInvestmentAsync(model, token);
-                TempData["SuccessMessage"] = SUCCESS_CREATE_INVESTMENT;
+                TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.Investment);
                 return RedirectToAction(nameof(Details), new { id = investment.Id });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao criar investimento");
-                ModelState.AddModelError(string.Empty, string.Format(ERROR_CREATING_INVESTMENT, ex.Message));
+                ModelState.AddModelError(string.Empty, MessageHelper.GetCreationErrorMessage(EntityNames.Investment, ex));
                 return View(model);
             }
         }
@@ -178,7 +168,7 @@ namespace FinanceSystem.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao carregar investimento para exclusão: {Id}", id);
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INVESTMENT_DETAILS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Investment, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -197,13 +187,13 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _investmentService.DeleteInvestmentAsync(id, token);
-                TempData["SuccessMessage"] = SUCCESS_DELETE_INVESTMENT;
+                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.Investment);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao excluir investimento: {Id}", id);
-                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_INVESTMENT, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.Investment, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -222,13 +212,13 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _investmentService.RefreshPriceAsync(id, token);
-                TempData["SuccessMessage"] = SUCCESS_REFRESH_PRICE;
+                TempData["SuccessMessage"] = "Preço atualizado com sucesso!";
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao atualizar preço do investimento: {Id}", id);
-                TempData["ErrorMessage"] = string.Format(ERROR_REFRESHING_PRICE, ex.Message);
+                TempData["ErrorMessage"] = ResourceFinanceWeb.Error_RefreshingPrice;
                 return RedirectToAction(nameof(Details), new { id });
             }
         }
@@ -248,7 +238,7 @@ namespace FinanceSystem.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao atualizar preços de todos os investimentos");
-                TempData["ErrorMessage"] = string.Format(ERROR_REFRESHING_PRICE, ex.Message);
+                TempData["ErrorMessage"] = ResourceFinanceWeb.Error_RefreshingPrice;
                 return RedirectToAction(nameof(Index));
             }
         }

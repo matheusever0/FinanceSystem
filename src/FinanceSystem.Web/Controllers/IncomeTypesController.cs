@@ -1,4 +1,6 @@
-﻿using FinanceSystem.Web.Extensions;
+﻿using FinanceSystem.Resources.Web.Enums;
+using FinanceSystem.Resources.Web.Helpers;
+using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Models.IncomeType;
 using FinanceSystem.Web.Services;
@@ -12,22 +14,6 @@ namespace FinanceSystem.Web.Controllers
     public class IncomeTypesController : Controller
     {
         private readonly IIncomeTypeService _incomeTypeService;
-
-        private const string ERROR_LOADING_INCOME_TYPES = "Erro ao carregar tipos de receita: {0}";
-        private const string ERROR_LOADING_SYSTEM_INCOME_TYPES = "Erro ao carregar tipos de receita do sistema: {0}";
-        private const string ERROR_LOADING_USER_INCOME_TYPES = "Erro ao carregar tipos de receita do usuário: {0}";
-        private const string ERROR_LOADING_INCOME_TYPE_DETAILS = "Erro ao carregar detalhes do tipo de receita: {0}";
-        private const string ERROR_CREATING_INCOME_TYPE = "Erro ao criar tipo de receita: {0}";
-        private const string ERROR_LOADING_INCOME_TYPE_EDIT = "Erro ao carregar tipo de receita para edição: {0}";
-        private const string ERROR_UPDATING_INCOME_TYPE = "Erro ao atualizar tipo de receita: {0}";
-        private const string ERROR_LOADING_INCOME_TYPE_DELETE = "Erro ao carregar tipo de receita para exclusão: {0}";
-        private const string ERROR_DELETING_INCOME_TYPE = "Erro ao excluir tipo de receita: {0}";
-        private const string ERROR_CANNOT_EDIT_SYSTEM_TYPE = "Não é possível editar tipos de receita do sistema";
-        private const string ERROR_CANNOT_DELETE_SYSTEM_TYPE = "Não é possível excluir tipos de receita do sistema";
-
-        private const string SUCCESS_CREATE_INCOME_TYPE = "Tipo de receita criado com sucesso!";
-        private const string SUCCESS_UPDATE_INCOME_TYPE = "Tipo de receita atualizado com sucesso!";
-        private const string SUCCESS_DELETE_INCOME_TYPE = "Tipo de receita excluído com sucesso!";
 
         public IncomeTypesController(IIncomeTypeService incomeTypeService)
         {
@@ -44,7 +30,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_TYPES, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.IncomeType, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -61,7 +47,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_SYSTEM_INCOME_TYPES, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.IncomeType, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -78,7 +64,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_USER_INCOME_TYPES, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.IncomeType, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -99,7 +85,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_TYPE_DETAILS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.IncomeType, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -124,12 +110,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 var incomeType = await _incomeTypeService.CreateIncomeTypeAsync(model, token);
-                TempData["SuccessMessage"] = SUCCESS_CREATE_INCOME_TYPE;
+                TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.IncomeType);
                 return RedirectToAction(nameof(Details), new { id = incomeType.Id });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, string.Format(ERROR_CREATING_INCOME_TYPE, ex.Message));
+                ModelState.AddModelError(string.Empty, MessageHelper.GetCreationErrorMessage(EntityNames.IncomeType, ex));
                 return View(model);
             }
         }
@@ -154,7 +140,7 @@ namespace FinanceSystem.Web.Controllers
 
                 if (incomeType.IsSystem)
                 {
-                    TempData["ErrorMessage"] = ERROR_CANNOT_EDIT_SYSTEM_TYPE;
+                    TempData["ErrorMessage"] = MessageHelper.GetCannotEditSystemEntityMessage(EntityNames.IncomeType);
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
@@ -168,7 +154,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_TYPE_EDIT, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.IncomeType, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -200,17 +186,17 @@ namespace FinanceSystem.Web.Controllers
 
                 if (incomeType.IsSystem)
                 {
-                    TempData["ErrorMessage"] = ERROR_CANNOT_EDIT_SYSTEM_TYPE;
+                    TempData["ErrorMessage"] = MessageHelper.GetCannotEditSystemEntityMessage(EntityNames.IncomeType);
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
                 await _incomeTypeService.UpdateIncomeTypeAsync(id, model, token);
-                TempData["SuccessMessage"] = SUCCESS_UPDATE_INCOME_TYPE;
+                TempData["SuccessMessage"] = MessageHelper.GetUpdateSuccessMessage(EntityNames.IncomeType);
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, string.Format(ERROR_UPDATING_INCOME_TYPE, ex.Message));
+                ModelState.AddModelError(string.Empty, MessageHelper.GetUpdateErrorMessage(EntityNames.IncomeType, ex));
                 return View(model);
             }
         }
@@ -235,7 +221,7 @@ namespace FinanceSystem.Web.Controllers
 
                 if (incomeType.IsSystem)
                 {
-                    TempData["ErrorMessage"] = ERROR_CANNOT_DELETE_SYSTEM_TYPE;
+                    TempData["ErrorMessage"] = MessageHelper.GetCannotDeleteSystemEntityMessage(EntityNames.IncomeType);
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
@@ -243,7 +229,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_TYPE_DELETE, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.IncomeType, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -270,17 +256,17 @@ namespace FinanceSystem.Web.Controllers
 
                 if (incomeType.IsSystem)
                 {
-                    TempData["ErrorMessage"] = ERROR_CANNOT_DELETE_SYSTEM_TYPE;
+                    TempData["ErrorMessage"] = MessageHelper.GetCannotDeleteSystemEntityMessage(EntityNames.IncomeType);
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
                 await _incomeTypeService.DeleteIncomeTypeAsync(id, token);
-                TempData["SuccessMessage"] = SUCCESS_DELETE_INCOME_TYPE;
+                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.IncomeType);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_INCOME_TYPE, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.IncomeType, ex);
                 return RedirectToAction(nameof(Index));
             }
         }

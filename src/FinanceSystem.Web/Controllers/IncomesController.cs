@@ -1,4 +1,7 @@
-﻿using FinanceSystem.Web.Extensions;
+﻿using FinanceSystem.Resources.Web;
+using FinanceSystem.Resources.Web.Enums;
+using FinanceSystem.Resources.Web.Helpers;
+using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Models.Income;
 using FinanceSystem.Web.Services;
@@ -13,27 +16,6 @@ namespace FinanceSystem.Web.Controllers
     {
         private readonly IIncomeService _incomeService;
         private readonly IIncomeTypeService _incomeTypeService;
-
-        private const string ERROR_LOADING_INCOMES = "Erro ao carregar receitas: {0}";
-        private const string ERROR_LOADING_PENDING_INCOMES = "Erro ao carregar receitas pendentes: {0}";
-        private const string ERROR_LOADING_RECEIVED_INCOMES = "Erro ao carregar receitas recebidas: {0}";
-        private const string ERROR_LOADING_MONTHLY_INCOMES = "Erro ao carregar receitas por mês: {0}";
-        private const string ERROR_LOADING_INCOMES_BY_TYPE = "Erro ao carregar receitas por tipo: {0}";
-        private const string ERROR_LOADING_INCOME_DETAILS = "Erro ao carregar detalhes da receita: {0}";
-        private const string ERROR_PREPARING_FORM = "Erro ao preparar formulário: {0}";
-        private const string ERROR_CREATING_INCOME = "Erro ao criar receita: {0}";
-        private const string ERROR_LOADING_INCOME_EDIT = "Erro ao carregar receita para edição: {0}";
-        private const string ERROR_UPDATING_INCOME = "Erro ao atualizar receita: {0}";
-        private const string ERROR_LOADING_INCOME_DELETE = "Erro ao carregar receita para exclusão: {0}";
-        private const string ERROR_DELETING_INCOME = "Erro ao excluir receita: {0}";
-        private const string ERROR_MARK_RECEIVED = "Erro ao marcar receita como recebida: {0}";
-        private const string ERROR_CANCEL_INCOME = "Erro ao cancelar receita: {0}";
-
-        private const string SUCCESS_CREATE_INCOME = "Receita criada com sucesso!";
-        private const string SUCCESS_UPDATE_INCOME = "Receita atualizada com sucesso!";
-        private const string SUCCESS_DELETE_INCOME = "Receita excluída com sucesso!";
-        private const string SUCCESS_MARK_RECEIVED = "Receita marcada como recebida com sucesso!";
-        private const string SUCCESS_CANCEL_INCOME = "Receita cancelada com sucesso!";
 
         public IncomesController(
             IIncomeService incomeService,
@@ -53,7 +35,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOMES, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Incomes, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -69,7 +51,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PENDING_INCOMES, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Incomes, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -85,7 +67,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_RECEIVED_INCOMES, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Incomes, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -118,7 +100,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_MONTHLY_INCOMES, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Incomes, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -148,7 +130,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOMES_BY_TYPE, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Incomes, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -169,7 +151,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_DETAILS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Income, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -186,7 +168,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_PREPARING_FORM, ex.Message);
+                TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PreparingForm;
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -206,12 +188,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 var income = await _incomeService.CreateIncomeAsync(model, token);
-                TempData["SuccessMessage"] = SUCCESS_CREATE_INCOME;
+                TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.Income);
                 return RedirectToAction(nameof(Details), new { id = income.Id });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, string.Format(ERROR_CREATING_INCOME, ex.Message));
+                ModelState.AddModelError(string.Empty, MessageHelper.GetCreationErrorMessage(EntityNames.Income, ex));
                 await LoadIncomeTypesForView();
                 return View(model);
             }
@@ -255,7 +237,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_EDIT, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Income, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -280,12 +262,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _incomeService.UpdateIncomeAsync(id, model, token);
-                TempData["SuccessMessage"] = SUCCESS_UPDATE_INCOME;
+                TempData["SuccessMessage"] = MessageHelper.GetUpdateSuccessMessage(EntityNames.Income);
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, string.Format(ERROR_UPDATING_INCOME, ex.Message));
+                ModelState.AddModelError(string.Empty, MessageHelper.GetUpdateErrorMessage(EntityNames.Income, ex));
                 await LoadIncomeTypesForView();
                 return View(model);
             }
@@ -308,7 +290,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_INCOME_DELETE, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Income, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -327,12 +309,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _incomeService.DeleteIncomeAsync(id, token);
-                TempData["SuccessMessage"] = SUCCESS_DELETE_INCOME;
+                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.Income);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_INCOME, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.Income, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -351,12 +333,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _incomeService.MarkAsReceivedAsync(id, receivedDate ?? DateTime.Now, token);
-                TempData["SuccessMessage"] = SUCCESS_MARK_RECEIVED;
+                TempData["SuccessMessage"] = MessageHelper.GetStatusChangeSuccessMessage(EntityNames.Income, EntityStatus.Received);
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_MARK_RECEIVED, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetStatusChangeErrorMessage(EntityNames.Income, EntityStatus.Received, ex);
                 return RedirectToAction(nameof(Details), new { id });
             }
         }
@@ -375,12 +357,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _incomeService.CancelIncomeAsync(id, token);
-                TempData["SuccessMessage"] = SUCCESS_CANCEL_INCOME;
+                TempData["SuccessMessage"] = MessageHelper.GetCancelSuccessMessage(EntityNames.Income);
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_CANCEL_INCOME, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetCancelErrorMessage(EntityNames.Income, ex);
                 return RedirectToAction(nameof(Details), new { id });
             }
         }
