@@ -48,28 +48,20 @@ namespace FinanceSystem.Application.Services
             if (existingInvestment != null)
                 throw new InvalidOperationException("Já existe um investimento com este símbolo");
 
-            decimal currentPrice;
-            try
-            {
-                currentPrice = await _stockPriceService.GetCurrentPriceAsync(createInvestmentDto.Symbol);
-            }
-            catch (Exception)
-            {
-                currentPrice = createInvestmentDto.InitialPrice;
-            }
+            var stockQuoteDto = await _stockPriceService.GetBatchQuoteAsync(createInvestmentDto.Symbol) ?? throw new ArgumentNullException($"Não foi encontrado atualizações para: {createInvestmentDto.Symbol}");
 
             decimal totalInvested = createInvestmentDto.InitialQuantity * createInvestmentDto.InitialPrice;
-            decimal currentTotal = createInvestmentDto.InitialQuantity * currentPrice;
+            decimal currentTotal = createInvestmentDto.InitialQuantity * stockQuoteDto.Price;
             decimal gainLossValue = currentTotal - totalInvested;
             decimal gainLossPercentage = totalInvested > 0 ? (gainLossValue / totalInvested) * 100 : 0;
 
             var investment = new Investment(
                 createInvestmentDto.Symbol,
-                createInvestmentDto.Name,
+                stockQuoteDto.ShortName,
                 createInvestmentDto.Type,
                 createInvestmentDto.InitialQuantity,
                 createInvestmentDto.InitialPrice,
-                currentPrice,
+                stockQuoteDto.Price,
                 totalInvested,
                 currentTotal,
                 gainLossPercentage,
@@ -95,18 +87,6 @@ namespace FinanceSystem.Application.Services
             return _mapper.Map<InvestmentDto>(investment);
         }
 
-        public async Task<InvestmentDto> UpdateAsync(Guid id, UpdateInvestmentDto updateInvestmentDto)
-        {
-            var investment = await _unitOfWork.Investments.GetByIdAsync(id) ?? throw new KeyNotFoundException("Investimento não encontrado");
-            if (!string.IsNullOrEmpty(updateInvestmentDto.Name))
-                investment.UpdateName(updateInvestmentDto.Name);
-
-            await _unitOfWork.Investments.UpdateAsync(investment);
-            await _unitOfWork.CompleteAsync();
-
-            return _mapper.Map<InvestmentDto>(investment);
-        }
-
         public async Task DeleteAsync(Guid id)
         {
             var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(id) ?? throw new KeyNotFoundException("Investimento não encontrado");
@@ -117,18 +97,12 @@ namespace FinanceSystem.Application.Services
         public async Task<InvestmentDto> RefreshPriceAsync(Guid id)
         {
             var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(id) ?? throw new KeyNotFoundException("Investimento não encontrado");
-            try
-            {
-                decimal currentPrice = await _stockPriceService.GetCurrentPriceAsync(investment.Symbol);
-                investment.UpdateCurrentPrice(currentPrice);
 
-                await _unitOfWork.Investments.UpdateAsync(investment);
-                await _unitOfWork.CompleteAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Erro ao atualizar preço: {ex.Message}");
-            }
+            var stockQuote = await _stockPriceService.GetBatchQuoteAsync(investment.Symbol) ?? throw new ArgumentNullException($"Erro ao atualizar preço, devido a não encontrar: {investment.Symbol}");
+            investment.UpdateCurrentPrice(stockQuote.Price);
+
+            await _unitOfWork.Investments.UpdateAsync(investment);
+            await _unitOfWork.CompleteAsync();
 
             return _mapper.Map<InvestmentDto>(investment);
         }
@@ -143,17 +117,20 @@ namespace FinanceSystem.Application.Services
             {
                 var quotes = await _stockPriceService.GetBatchQuotesAsync(symbols);
 
+
                 foreach (var investment in investments)
                 {
                     var quote = quotes.FirstOrDefault(q => q.Symbol.Equals(investment.Symbol, StringComparison.OrdinalIgnoreCase));
                     if (quote != null)
                     {
-                        investment.UpdateCurrentPrice(quote.Price);
+                        investment.UpdateInvestment(quote.Price, quote.ShortName);
                         await _unitOfWork.Investments.UpdateAsync(investment);
                     }
                 }
 
                 await _unitOfWork.CompleteAsync();
+
+
             }
             catch (Exception ex)
             {

@@ -63,6 +63,14 @@ namespace FinanceSystem.Domain.Entities
             LastUpdate = DateTime.Now;
         }
 
+        public void UpdateInvestment(decimal newPrice, string name)
+        {
+            Name = name;
+            CurrentPrice = newPrice;
+            RecalculateValues();
+            LastUpdate = DateTime.Now;
+        }
+
         private void RecalculateValues()
         {
             CurrentTotal = TotalQuantity * CurrentPrice;

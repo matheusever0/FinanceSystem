@@ -131,12 +131,6 @@
                                         <a asp-action="Details" asp-route-id="@investment.Id" class="btn btn-sm btn-info">
                                             <i class="fas fa-info-circle me-1"></i>Detalhes
                                         </a>
-                                        @if (await PermissionHelper.HasPermissionAsync(Context, "investments.edit"))
-                                        {
-                                            <a asp-action="Edit" asp-route-id="@investment.Id" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-edit me-1"></i>Editar
-                                            </a>
-                                        }
                                         @if (await PermissionHelper.HasPermissionAsync(Context, "investments.delete"))
                                         {
                                             <a asp-action="Delete" asp-route-id="@investment.Id" class="btn btn-sm btn-danger">

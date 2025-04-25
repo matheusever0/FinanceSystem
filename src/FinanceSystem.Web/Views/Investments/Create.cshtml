@@ -16,7 +16,7 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="row mb-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="mb-3">
                         <label asp-for="Symbol" class="form-label">Símbolo</label>
                         <input asp-for="Symbol" class="form-control" required />
@@ -26,17 +26,14 @@
                         </small>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="mb-3">
-                        <label asp-for="Name" class="form-label">Nome</label>
-                        <input asp-for="Name" class="form-control" required />
-                        <span asp-validation-for="Name" class="text-danger"></span>
+                        <label asp-for="Broker" class="form-label">Corretora</label>
+                        <input asp-for="Broker" class="form-control" />
+                        <span asp-validation-for="Broker" class="text-danger"></span>
                     </div>
                 </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="mb-3">
                         <label asp-for="Type" class="form-label">Tipo</label>
                         <select asp-for="Type" class="form-select" required>
@@ -48,13 +45,6 @@
                             <option value="5">Renda Fixa</option>
                         </select>
                         <span asp-validation-for="Type" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label asp-for="Broker" class="form-label">Corretora</label>
-                        <input asp-for="Broker" class="form-control" />
-                        <span asp-validation-for="Broker" class="text-danger"></span>
                     </div>
                 </div>
             </div>

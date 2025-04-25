@@ -69,24 +69,6 @@ namespace FinanceSystem.API.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<InvestmentDto>> Update(Guid id, UpdateInvestmentDto updateInvestmentDto)
-        {
-            try
-            {
-                var investment = await _investmentService.GetByIdAsync(id);
-                if (investment.UserId != HttpContext.GetCurrentUserId())
-                    return Forbid();
-
-                var updatedInvestment = await _investmentService.UpdateAsync(id, updateInvestmentDto);
-                return Ok(updatedInvestment);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-        }
-
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid id)
         {

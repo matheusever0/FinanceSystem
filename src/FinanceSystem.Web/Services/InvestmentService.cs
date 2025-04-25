@@ -60,26 +60,12 @@ namespace FinanceSystem.Web.Services
         {
             try
             {
-                _logger.LogInformation("Criando novo investimento: {Symbol} - {Name}", model.Symbol, model.Name);
+                _logger.LogInformation("Criando novo investimento: {Symbol}", model.Symbol);
                 return await _apiService.PostAsync<InvestmentModel>("/api/investments", model, token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao criar investimento: {Symbol} - {Name}", model.Symbol, model.Name);
-                throw;
-            }
-        }
-
-        public async Task<InvestmentModel> UpdateInvestmentAsync(string id, UpdateInvestmentModel model, string token)
-        {
-            try
-            {
-                _logger.LogInformation("Atualizando investimento com ID: {InvestmentId}", id);
-                return await _apiService.PutAsync<InvestmentModel>($"/api/investments/{id}", model, token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao atualizar investimento com ID: {InvestmentId}", id);
+                _logger.LogError(ex, "Erro ao criar investimento: {Symbol}", model.Symbol);
                 throw;
             }
         }
