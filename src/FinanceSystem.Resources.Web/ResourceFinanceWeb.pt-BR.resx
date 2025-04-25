@@ -98,4 +98,84 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
+<data name="Error_Loading" xml:space="preserve">
+  <value>Erro ao carregar {0}: {1}</value>
+</data>
+<data name="Error_Creating" xml:space="preserve">
+  <value>Erro ao criar {0}: {1}</value>
+</data>
+<data name="Error_Updating" xml:space="preserve">
+  <value>Erro ao atualizar {0}: {1}</value>
+</data>
+<data name="Error_Deleting" xml:space="preserve">
+  <value>Erro ao excluir {0}: {1}</value>
+</data>
+<data name="Error_PreparingForm" xml:space="preserve">
+  <value>Erro ao preparar formulário: {0}</value>
+</data>
+<data name="Error_ParentEntityNotFound" xml:space="preserve">
+  <value>Não foi possível identificar o {0} relacionado a esta parcela.</value>
+</data>
+<data name="Error_CannotEditSystemEntity" xml:space="preserve">
+  <value>Não é possível editar {0} do sistema.</value>
+</data>
+<data name="Error_CannotDeleteSystemEntity" xml:space="preserve">
+  <value>Não é possível excluir {0} do sistema.</value>
+</data>
+<data name="Error_MarkStatus" xml:space="preserve">
+  <value>Erro ao marcar {0} como {1}: {2}</value>
+</data>
+<data name="Error_CancelEntity" xml:space="preserve">
+  <value>Erro ao cancelar {0}: {1}</value>
+</data>
+<data name="Error_Generating" xml:space="preserve">
+  <value>Erro ao gerar {0}: {1}</value>
+</data>
+<data name="Error_RefreshingPrice" xml:space="preserve">
+  <value>Erro ao atualizar preço: {0}</value>
+</data>
+<data name="Error_AuthenticationFailed" xml:space="preserve">
+  <value>Falha na autenticação</value>
+</data>
+<data name="Error_InvalidToken" xml:space="preserve">
+  <value>Token inválido</value>
+</data>
+<data name="Error_IdentityGeneration" xml:space="preserve">
+  <value>Falha ao gerar identidade</value>
+</data>
+<data name="Error_Logout" xml:space="preserve">
+  <value>Erro ao fazer logout: {0}</value>
+</data>
+<data name="Error_PermissionDenied" xml:space="preserve">
+  <value>Você não tem permissão para editar outros usuários, apenas o seu.</value>
+</data>
+<data name="Error_CreditCardRequired" xml:space="preserve">
+  <value>Cartão de crédito é obrigatório para este método de pagamento.</value>
+</data>
+
+<data name="Success_Created" xml:space="preserve">
+  <value>{0} criado com sucesso!</value>
+</data>
+<data name="Success_Updated" xml:space="preserve">
+  <value>{0} atualizado com sucesso!</value>
+</data>
+<data name="Success_Deleted" xml:space="preserve">
+  <value>{0} excluído com sucesso!</value>
+</data>
+<data name="Success_StatusChanged" xml:space="preserve">
+  <value>{0} marcado como {1} com sucesso!</value>
+</data>
+<data name="Success_Canceled" xml:space="preserve">
+  <value>{0} cancelado com sucesso!</value>
+</data>
+<data name="Success_Login" xml:space="preserve">
+  <value>Login realizado com sucesso!</value>
+</data>
+
+<data name="Validation_SelectRole" xml:space="preserve">
+  <value>É necessário selecionar pelo menos um perfil.</value>
+</data>
+<data name="Validation_EmailRequired" xml:space="preserve">
+  <value>É necessário ter um email cadastrado.</value>
+</data>
 </root>

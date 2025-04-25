@@ -98,4 +98,84 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
+<data name="Error_Loading" xml:space="preserve">
+  <value>Error loading {0}: {1}</value>
+</data>
+<data name="Error_Creating" xml:space="preserve">
+  <value>Error creating {0}: {1}</value>
+</data>
+<data name="Error_Updating" xml:space="preserve">
+  <value>Error updating {0}: {1}</value>
+</data>
+<data name="Error_Deleting" xml:space="preserve">
+  <value>Error deleting {0}: {1}</value>
+</data>
+<data name="Error_PreparingForm" xml:space="preserve">
+  <value>Error preparing form: {0}</value>
+</data>
+<data name="Error_ParentEntityNotFound" xml:space="preserve">
+  <value>Could not identify the {0} related to this installment.</value>
+</data>
+<data name="Error_CannotEditSystemEntity" xml:space="preserve">
+  <value>Cannot edit system {0}.</value>
+</data>
+<data name="Error_CannotDeleteSystemEntity" xml:space="preserve">
+  <value>Cannot delete system {0}.</value>
+</data>
+<data name="Error_MarkStatus" xml:space="preserve">
+  <value>Error marking {0} as {1}: {2}</value>
+</data>
+<data name="Error_CancelEntity" xml:space="preserve">
+  <value>Error canceling {0}: {1}</value>
+</data>
+<data name="Error_Generating" xml:space="preserve">
+  <value>Error generating {0}: {1}</value>
+</data>
+<data name="Error_RefreshingPrice" xml:space="preserve">
+  <value>Error refreshing price: {0}</value>
+</data>
+<data name="Error_AuthenticationFailed" xml:space="preserve">
+  <value>Authentication failed</value>
+</data>
+<data name="Error_InvalidToken" xml:space="preserve">
+  <value>Invalid token</value>
+</data>
+<data name="Error_IdentityGeneration" xml:space="preserve">
+  <value>Failed to generate identity</value>
+</data>
+<data name="Error_Logout" xml:space="preserve">
+  <value>Error logging out: {0}</value>
+</data>
+<data name="Error_PermissionDenied" xml:space="preserve">
+  <value>You do not have permission to edit other users, only your own.</value>
+</data>
+<data name="Error_CreditCardRequired" xml:space="preserve">
+  <value>Credit card is required for this payment method.</value>
+</data>
+
+<data name="Success_Created" xml:space="preserve">
+  <value>{0} created successfully!</value>
+</data>
+<data name="Success_Updated" xml:space="preserve">
+  <value>{0} updated successfully!</value>
+</data>
+<data name="Success_Deleted" xml:space="preserve">
+  <value>{0} deleted successfully!</value>
+</data>
+<data name="Success_StatusChanged" xml:space="preserve">
+  <value>{0} marked as {1} successfully!</value>
+</data>
+<data name="Success_Canceled" xml:space="preserve">
+  <value>{0} canceled successfully!</value>
+</data>
+<data name="Success_Login" xml:space="preserve">
+  <value>Login successful!</value>
+</data>
+
+<data name="Validation_SelectRole" xml:space="preserve">
+  <value>You must select at least one role.</value>
+</data>
+<data name="Validation_EmailRequired" xml:space="preserve">
+  <value>An email is required.</value>
+</data>
 </root>

@@ -7,20 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Update="ResourceFinanceApi.Designer.cs">
+    <Compile Update="ResourceFinanceWeb.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>ResourceFinanceApi.resx</DependentUpon>
+      <DependentUpon>ResourceFinanceWeb.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="ResourceFinanceApi.pt-BR.resx">
-      <Generator></Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="ResourceFinanceApi.resx">
+    <EmbeddedResource Update="ResourceFinanceWeb.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>ResourceFinanceApi.Designer.cs</LastGenOutput>
+      <LastGenOutput>ResourceFinanceWeb.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

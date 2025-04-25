@@ -1,12 +1,11 @@
-﻿using FinanceSystem.Web.Extensions;
+﻿using FinanceSystem.Resources.Web;
+using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Interfaces;
 using FinanceSystem.Web.Models.Login;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
 
 namespace FinanceSystem.Web.Controllers
 {
@@ -14,13 +13,6 @@ namespace FinanceSystem.Web.Controllers
     {
         private readonly IUserService _userService;
         private readonly IApiService _apiService;
-
-        private const string ERROR_AUTHENTICATION_FAILED = "Falha na autenticação";
-        private const string ERROR_INVALID_TOKEN = "Token inválido";
-        private const string ERROR_IDENTITY_GENERATION = "Falha ao gerar identidade";
-        private const string ERROR_LOGOUT = "Erro ao fazer logout: {0}";
-
-        private const string SUCCESS_LOGIN = "Login realizado com sucesso!";
 
         public AccountController(
             IUserService userService,
@@ -61,13 +53,13 @@ namespace FinanceSystem.Web.Controllers
 
                 if (result == null)
                 {
-                    ModelState.AddModelError(string.Empty, ERROR_AUTHENTICATION_FAILED);
+                    ModelState.AddModelError(string.Empty, ResourceFinanceWeb.Error_AuthenticationFailed);
                     return View(model);
                 }
 
                 if (string.IsNullOrEmpty(result.Token))
                 {
-                    ModelState.AddModelError(string.Empty, ERROR_INVALID_TOKEN);
+                    ModelState.AddModelError(string.Empty, ResourceFinanceWeb.Error_InvalidToken);
                     return View(model);
                 }
 
@@ -75,7 +67,7 @@ namespace FinanceSystem.Web.Controllers
 
                 if (principal == null)
                 {
-                    ModelState.AddModelError(string.Empty, ERROR_IDENTITY_GENERATION);
+                    ModelState.AddModelError(string.Empty, ResourceFinanceWeb.Error_InvalidToken);
                     return View(model);
                 }
                 HttpContext.SetJwtToken(result.Token);
@@ -88,7 +80,7 @@ namespace FinanceSystem.Web.Controllers
                         ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
                     });
 
-                TempData["SuccessMessage"] = SUCCESS_LOGIN;
+                TempData["SuccessMessage"] = ResourceFinanceWeb.Success_Login;
 
                 return RedirectToLocal(returnUrl);
             }
@@ -111,7 +103,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOGOUT, ex.Message);
+                TempData["ErrorMessage"] = string.Format(ResourceFinanceWeb.Error_Logout, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
         }
