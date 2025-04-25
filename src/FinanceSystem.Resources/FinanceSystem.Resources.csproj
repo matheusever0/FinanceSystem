@@ -12,6 +12,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ResourceFinanceApi.resx</DependentUpon>
     </Compile>
+    <Compile Update="ResourceFinanceWeb.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ResourceFinanceWeb.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +26,10 @@
     <EmbeddedResource Update="ResourceFinanceApi.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>ResourceFinanceApi.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="ResourceFinanceWeb.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ResourceFinanceWeb.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 
