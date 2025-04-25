@@ -85,8 +85,9 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label asp-for="NumberOfInstallments" class="control-label"></label>
-                                <input asp-for="NumberOfInstallments" class="form-control" min="1" max="48" />
+                                <input asp-for="NumberOfInstallments" class="form-control" min="1" max="48" value="1" disabled/>
                                 <span asp-validation-for="NumberOfInstallments" class="text-danger"></span>
+                                <div class="form-text">Número de parcelas (1 para pagamento único).</div>
                             </div>
                         </div>
                     </div>
@@ -130,7 +131,7 @@
                     <li><strong>Número de Parcelas:</strong> Se a receita é parcelada, informe quantas parcelas.</li>
                 </ul>
                 <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> As receitas parceladas terão o valor dividido em parcelas iguais, com vencimentos mensais a partir da data informada.
+                    <i class="fas fa-info-circle"></i> Os pagamentos parcelados terão o valor dividido em parcelas iguais, com vencimentos mensais a partir da data informada. <b>No momento não é possivel parcelar.</b>
                 </div>
             </div>
         </div>

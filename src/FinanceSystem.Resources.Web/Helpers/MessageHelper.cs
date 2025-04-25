@@ -13,8 +13,29 @@ namespace FinanceSystem.Resources.Web.Helpers
             if (message.Length == 1)
                 return message.ToUpper();
 
-            return char.ToUpper(message[0]) + message.Substring(1).ToLower();
+            return char.ToUpper(message[0]) + message.Substring(1);
         }
+
+        private static GeneroGramatical DetectarGenero(string nomeEntidade)
+        {
+            if (string.IsNullOrWhiteSpace(nomeEntidade))
+                return GeneroGramatical.Masculino;
+
+            nomeEntidade = nomeEntidade.Trim().ToLowerInvariant();
+
+            if (nomeEntidade.EndsWith("a"))
+                return GeneroGramatical.Feminino;
+
+            return GeneroGramatical.Masculino;
+        }
+
+        private static string GetMensagemComGenero(string entidade, string verboBase)
+        {
+            var genero = DetectarGenero(entidade);
+            var verbo = genero == GeneroGramatical.Feminino ? $"{verboBase}a" : $"{verboBase}o";
+            return CapitalizeFirst($"{entidade} {verbo} com sucesso");
+        }
+
 
         public static string GetLoadingErrorMessage(EntityNames entity, Exception ex)
         {
@@ -80,19 +101,25 @@ namespace FinanceSystem.Resources.Web.Helpers
         public static string GetCreationSuccessMessage(EntityNames entity)
         {
             string entityName = EntityNameHelper.GetEntityName(entity);
-            return CapitalizeFirst(string.Format(ResourceFinanceWeb.Success_Created, entityName));
+            return GetMensagemComGenero(entityName, "criad");
         }
 
         public static string GetUpdateSuccessMessage(EntityNames entity)
         {
             string entityName = EntityNameHelper.GetEntityName(entity);
-            return CapitalizeFirst(string.Format(ResourceFinanceWeb.Success_Updated, entityName));
+            return GetMensagemComGenero(entityName, "atualizad");
         }
 
         public static string GetDeletionSuccessMessage(EntityNames entity)
         {
             string entityName = EntityNameHelper.GetEntityName(entity);
-            return CapitalizeFirst(string.Format(ResourceFinanceWeb.Success_Deleted, entityName));
+            return GetMensagemComGenero(entityName, "excluíd");
+        }
+
+        public static string GetCancelSuccessMessage(EntityNames entity)
+        {
+            string entityName = EntityNameHelper.GetEntityName(entity);
+            return GetMensagemComGenero(entityName, "cancelad");
         }
 
         public static string GetStatusChangeSuccessMessage(EntityNames entity, EntityStatus status)
@@ -100,12 +127,6 @@ namespace FinanceSystem.Resources.Web.Helpers
             string entityName = EntityNameHelper.GetEntityName(entity);
             string statusName = EntityNameHelper.GetStatusName(status);
             return CapitalizeFirst(string.Format(ResourceFinanceWeb.Success_StatusChanged, entityName, statusName));
-        }
-
-        public static string GetCancelSuccessMessage(EntityNames entity)
-        {
-            string entityName = EntityNameHelper.GetEntityName(entity);
-            return CapitalizeFirst(string.Format(ResourceFinanceWeb.Success_Canceled, entityName));
         }
     }
 }
