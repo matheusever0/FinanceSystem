@@ -1,9 +1,4 @@
-﻿@using FinanceSystem.Web.Helpers
-@using FinanceSystem.Web.Models.CreditCard
-@using FinanceSystem.Web.Models.Income
-@using FinanceSystem.Web.Models.Investment
-@using FinanceSystem.Web.Models.Payment
-@{
+﻿@{
     ViewData["Title"] = "Dashboard";
 }
 
@@ -19,17 +14,51 @@
         </a>
     </div>
 
-    <partial name="_Partials/_FinancialSummary" />
-    <partial name="_Partials/_QuickActions" />
-    <partial name="_Partials/_MonthlyComparison" />
-    <partial name="_Partials/_Pendings" />
-    <partial name="_Partials/_InvestmentSummary" />
+    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new FinanceSystem.Web.Models.Shared.CollapseSectionModel
+{
+    Id = "financial-summary",
+    Title = "Resumo Financeiro",
+    Url = Url.Action("GetFinancialSummary", "Home")!,
+    InitiallyExpanded = true
+})
 
+    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new FinanceSystem.Web.Models.Shared.CollapseSectionModel
+{
+    Id = "quick-actions",
+    Title = "Ações Rápidas",
+    Url = Url.Action("GetQuickActions", "Home")!,
+    InitiallyExpanded = true
+})
+
+    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new FinanceSystem.Web.Models.Shared.CollapseSectionModel
+{
+    Id = "monthly-chart",
+    Title = "Receitas x Gastos Mensais",
+    Url = Url.Action("GetMonthlyComparison", "Home")!,
+    InitiallyExpanded = false
+})
+
+    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new FinanceSystem.Web.Models.Shared.CollapseSectionModel
+{
+    Id = "pendings",
+    Title = "Pendências",
+    Url = Url.Action("GetPendings", "Home")!,
+    InitiallyExpanded = false
+})
+
+    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new FinanceSystem.Web.Models.Shared.CollapseSectionModel
+{
+    Id = "investment-summary",
+    Title = "Resumo de Investimentos",
+    Url = Url.Action("GetInvestmentSummary", "Home")!,
+    InitiallyExpanded = false
+})
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="~/js/components/charts.js" asp-append-version="true"></script>
     <script src="~/js/pages/dashboard.js" asp-append-version="true"></script>
+    <script src="~/js/pages/dashboard-collapse.js" asp-append-version="true"></script>
     <script src="~/js/utils/helpers.js" asp-append-version="true"></script>
 }
