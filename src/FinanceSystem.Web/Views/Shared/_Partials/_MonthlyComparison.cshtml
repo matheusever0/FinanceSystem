@@ -1,0 +1,18 @@
+﻿<div class="row">
+    <div class="col-xl-8 col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Receitas x Gastos Mensais</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-area">
+                    <canvas id="monthlyExpensesChart"
+                            data-labels='@Html.Raw(ViewBag.MonthlyLabels)'
+                            data-income-values='@Html.Raw(ViewBag.MonthlyIncomeValues)'
+                            data-payment-values='@Html.Raw(ViewBag.MonthlyPaymentValues)'>
+                    </canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
