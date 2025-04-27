@@ -30,13 +30,6 @@
                     <span>Anual</span>
                 </a>
             }
-            @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "reports.creditcards.view"))
-            {
-                    <a asp-controller="Reports" asp-action="CreditCards" class="sidebar-menu-link @(controllerName == "Payments" && actionName == "Create" ? "active" : "")">
-                    <span class="sidebar-menu-icon ps-2"><i class="fas fa-credit-card"></i></span>
-                        <span>Cartão de Credito</span>
-                    </a>
-            }
         </div>
     </div>
 </div>
