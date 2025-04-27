@@ -45,6 +45,14 @@
 
     @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new CollapseSectionModel
 {
+    Id = "investment-summary",
+    Title = "Resumo de Investimentos",
+    Url = Url.Action("GetInvestmentSummary", "Home")!,
+    InitiallyExpanded = false
+})
+
+    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new CollapseSectionModel
+{
     Id = "monthly-chart",
     Title = "Receitas x Gastos Mensais",
     Url = Url.Action("GetMonthlyComparison", "Home")!,
@@ -56,14 +64,6 @@
     Id = "pendings",
     Title = "Pendências",
     Url = Url.Action("GetPendings", "Home")!,
-    InitiallyExpanded = false
-})
-
-    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new CollapseSectionModel
-{
-    Id = "investment-summary",
-    Title = "Resumo de Investimentos",
-    Url = Url.Action("GetInvestmentSummary", "Home")!,
     InitiallyExpanded = false
 })
 </div>
