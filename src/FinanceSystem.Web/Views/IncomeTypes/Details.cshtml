@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="~/css/pages/income.css" asp-append-version="true">
 }
 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+<div class="d-flex justify-content-end mb-3">
+
     <div>
         @if (!Model.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "incomes.edit"))
         {

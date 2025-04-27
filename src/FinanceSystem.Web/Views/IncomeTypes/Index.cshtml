@@ -8,106 +8,110 @@
     <link rel="stylesheet" href="~/css/pages/income.css" asp-append-version="true">
 }
 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+<div class="d-flex justify-content-end mb-3">
+
     <div>
         @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.create"))
         {
-            <a asp-action="Create" class="btn btn-sm btn-primary">
-                <i class="fas fa-plus-circle"></i> Novo Tipo
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Novo Tipo
             </a>
         }
     </div>
 </div>
 
 <div class="card shadow mb-4">
-    <div class="card-header py-3">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
+        <a data-bs-toggle="collapse" href="#collapseFilters" role="button" aria-expanded="true" aria-controls="collapseFilters">
+            <i class="fas fa-chevron-down"></i>
+        </a>
+    </div>
+    <div class="card-body collapse show" id="collapseFilters">
         <div class="row">
-            <div class="col-md-9">
-                <h6 class="m-0 font-weight-bold text-primary">Tipos de Receita</h6>
-            </div>
-            <div class="col-md-3">
-                <div class="btn-group btn-group-sm" role="group">
-                    <a asp-action="Index" class="btn @(ViewContext.RouteData.Values["action"].ToString() == "Index" ? "btn-primary" : "btn-outline-primary")">
+            <div class="col-md-6 mb-3">
+                <div class="d-flex gap-2">
+                    <a asp-action="Index" class="btn btn-outline-primary @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewBag.Title == null ? "active" : "")">
                         <i class="fas fa-list"></i> Todos
                     </a>
-                    <a asp-action="System" class="btn @(ViewContext.RouteData.Values["action"].ToString() == "System" ? "btn-primary" : "btn-outline-primary")">
+                    <a asp-action="Index" class="btn btn-outline-primary @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewBag.Title == null ? "active" : "")">
                         <i class="fas fa-cog"></i> Sistema
                     </a>
-                    <a asp-action="User" class="btn @(ViewContext.RouteData.Values["action"].ToString() == "User" ? "btn-primary" : "btn-outline-primary")">
+                    <a asp-action="Index" class="btn btn-outline-primary @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewBag.Title == null ? "active" : "")">
                         <i class="fas fa-user"></i> Meus
                     </a>
                 </div>
             </div>
         </div>
     </div>
-    <div class="card-body">
-        @if (Model != null && Model.Any())
-        {
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="incomeTypesTable" width="100%" cellspacing="0">
-                    <thead>
+</div>
+<div class="card-body">
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="incomeTypesTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th>Tipo</th>
+                        <th>Data de Criação</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var incomeType in Model)
+                    {
                         <tr>
-                            <th>Nome</th>
-                            <th>Descrição</th>
-                            <th>Tipo</th>
-                            <th>Data de Criação</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var incomeType in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <a asp-action="Details" asp-route-id="@incomeType.Id">
-                                        @incomeType.Name
+                            <td>
+                                <a asp-action="Details" asp-route-id="@incomeType.Id">
+                                    @incomeType.Name
+                                </a>
+                            </td>
+                            <td>@incomeType.Description</td>
+                            <td>
+                                @if (incomeType.IsSystem)
+                                {
+                                    <span class="badge bg-info">Sistema</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-primary">Personalizado</span>
+                                }
+                            </td>
+                            <td>@incomeType.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a asp-action="Details" asp-route-id="@incomeType.Id" class="btn btn-info" title="Detalhes">
+                                        <i class="fas fa-eye"></i>
                                     </a>
-                                </td>
-                                <td>@incomeType.Description</td>
-                                <td>
-                                    @if (incomeType.IsSystem)
+                                    @if (!incomeType.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "incomes.edit"))
                                     {
-                                        <span class="badge bg-info">Sistema</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-primary">Personalizado</span>
-                                    }
-                                </td>
-                                <td>@incomeType.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm">
-                                        <a asp-action="Details" asp-route-id="@incomeType.Id" class="btn btn-info" title="Detalhes">
-                                            <i class="fas fa-eye"></i>
+                                        <a asp-action="Edit" asp-route-id="@incomeType.Id" class="btn btn-primary" title="Editar">
+                                            <i class="fas fa-edit"></i>
                                         </a>
-                                        @if (!incomeType.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "incomes.edit"))
-                                        {
-                                            <a asp-action="Edit" asp-route-id="@incomeType.Id" class="btn btn-primary" title="Editar">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                        }
-                                        @if (!incomeType.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "incomes.delete"))
-                                        {
-                                            <a asp-action="Delete" asp-route-id="@incomeType.Id" class="btn btn-danger" title="Excluir">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-        else
-        {
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> Nenhum tipo de receita encontrado.
-            </div>
-        }
-    </div>
+                                    }
+                                    @if (!incomeType.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "incomes.delete"))
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@incomeType.Id" class="btn btn-danger" title="Excluir">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> Nenhum tipo de receita encontrado.
+        </div>
+    }
+</div>
 </div>
 
 @section Scripts {

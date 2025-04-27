@@ -4,8 +4,6 @@
 @using FinanceSystem.Web.Models.Payment
 @model IEnumerable<PaymentModel>
 @{
-    ViewData["Title"] = "Relatório Mensal";
-
     var currentMonth = ViewBag.Month;
     var currentYear = ViewBag.Year;
 
@@ -30,6 +28,8 @@
 
     var amountValues = JsonSerializer.Serialize(new[] { paidAmount, pendingAmount, overdueAmount, "0.0m" }, jsonOptions);
     var typeValues2 = JsonSerializer.Serialize(new[] { "Pago", "Pendente", "Vencido", "Cancelado" }, jsonOptions);
+
+    ViewData["Title"] = "Relatório Mensal: " + @monthName.ToUpper() + "/" + @currentYear;
 }
 
 @section Styles {
@@ -37,10 +37,7 @@
 }
 
 <div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">
-            Relatório Mensal: @monthName.ToUpper() / @currentYear
-        </h1>
+    <div class="d-flex justify-content-end mb-3">
         <div>
             <a asp-action="PrintMonthly" asp-route-month="@currentMonth" asp-route-year="@currentYear" target="_blank" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-print me-1"></i> Imprimir Relatório

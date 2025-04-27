@@ -6,8 +6,6 @@
     ViewData["Title"] = "Perfis";
 }
 
-<h1>Gerenciamento de Perfis</h1>
-
 @if (User.IsInRole("Admin") || await PermissionHelper.HasPermissionAsync(Context, "roles.create"))
 {
     <p>

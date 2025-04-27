@@ -210,5 +210,72 @@ namespace FinanceSystem.Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
+        [RequirePermission("permissions.manage")]
+        public async Task<IActionResult> ManagePermissions(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do perfil não fornecido");
+            }
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var role = await _roleService.GetRoleByIdAsync(id, token);
+
+                if (role == null)
+                {
+                    return NotFound("Perfil não encontrado");
+                }
+
+                var allPermissions = await _permissionService.GetAllPermissionsAsync(token);
+                var rolePermissions = await _permissionService.GetPermissionsByRoleIdAsync(id, token);
+
+                ViewBag.Role = role;
+                ViewBag.AllPermissions = allPermissions;
+                ViewBag.RolePermissions = rolePermissions.Select(p => p.Id).ToList();
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Role, ex);
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission("permissions.manage")]
+        public async Task<IActionResult> ManagePermissions(string id, List<string> selectedPermissions)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do perfil não fornecido");
+            }
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var role = await _roleService.GetRoleByIdAsync(id, token);
+
+                if (role == null)
+                {
+                    return NotFound("Perfil não encontrado");
+                }
+
+                var permissionList = selectedPermissions ?? [];
+                await _roleService.UpdateRolePermissionsAsync(id, permissionList, token);
+
+                TempData["SuccessMessage"] = MessageHelper.GetUpdateSuccessMessage(EntityNames.Role);
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = MessageHelper.GetUpdateErrorMessage(EntityNames.Role, ex);
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
     }
 }

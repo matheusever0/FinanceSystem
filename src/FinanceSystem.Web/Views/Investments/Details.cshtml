@@ -3,11 +3,10 @@
 @model InvestmentModel
 
 @{
-    ViewData["Title"] = "Detalhes do Investimento";
+    ViewData["Title"] = "Detalhes do Investimento: " + @Model.Symbol + " - " + @Model.Name;
 }
 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1>@Model.Symbol - @Model.Name</h1>
+<div class="d-flex justify-content-end mb-3">
     <div>
         @if (await PermissionHelper.HasPermissionAsync(Context, "investments.edit"))
         {
@@ -18,12 +17,6 @@
                     <i class="fas fa-sync-alt me-1"></i>Atualizar Preço
                 </button>
             </form>
-        }
-        @if (await PermissionHelper.HasPermissionAsync(Context, "investments.transactions.create"))
-        {
-            <a asp-controller="InvestmentTransactions" asp-action="Create" asp-route-investmentId="@Model.Id" class="btn btn-primary">
-                <i class="fas fa-plus me-1"></i>Nova Transação
-            </a>
         }
         <a asp-action="Index" class="btn btn-secondary">
             <i class="fas fa-arrow-left me-1"></i>Voltar

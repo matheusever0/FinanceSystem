@@ -1,6 +1,5 @@
 ﻿@using FinanceSystem.Web.Models.PaymentMethod
 @{
-    ViewData["Title"] = "Relatório Anual";
 
     var currentYear = ViewBag.Year ?? DateTime.Now.Year;
     var previousYear = currentYear - 1;
@@ -17,13 +16,12 @@
     var monthValues = monthlyData.Values.ToList();
 
     var monthsArray = new[] { "JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ" };
+
+    ViewData["Title"] = "Relatório Anual" + @currentYear;
 }
 
 <div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">
-            Relatório Anual: @currentYear
-        </h1>
+    <div class="d-flex justify-content-end mb-3">
         <div>
             <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-print me-1"></i> Imprimir Relatório

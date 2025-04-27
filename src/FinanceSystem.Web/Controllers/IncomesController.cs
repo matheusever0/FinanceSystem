@@ -56,6 +56,22 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
+        public async Task<IActionResult> Overdue()
+        {
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var incomes = await _incomeService.GetOverdueIncomesAsync(token);
+                ViewBag.Title = "Receitas Vencidas";
+                return View("Index", incomes);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Incomes, ex);
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
         public async Task<IActionResult> Received()
         {
             try

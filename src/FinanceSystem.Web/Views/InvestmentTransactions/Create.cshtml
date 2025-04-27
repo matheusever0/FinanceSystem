@@ -2,11 +2,9 @@
 @model CreateInvestmentTransactionModel
 
 @{
-    ViewData["Title"] = "Nova Transação";
     var investment = ViewBag.Investment as InvestmentModel;
+    ViewData["Title"] = "Nova Transação - " + @investment.Symbol;
 }
-
-<h1>Nova Transação - @investment.Symbol</h1>
 
 <div class="card shadow mb-4">
     <div class="card-header py-3">
