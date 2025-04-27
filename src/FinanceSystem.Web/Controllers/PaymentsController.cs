@@ -1,4 +1,7 @@
-﻿using FinanceSystem.Web.Extensions;
+﻿using FinanceSystem.Resources.Web;
+using FinanceSystem.Resources.Web.Enums;
+using FinanceSystem.Resources.Web.Helpers;
+using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Models.Payment;
 using FinanceSystem.Web.Services;
@@ -15,33 +18,6 @@ namespace FinanceSystem.Web.Controllers
         private readonly IPaymentTypeService _paymentTypeService;
         private readonly IPaymentMethodService _paymentMethodService;
         private readonly ICreditCardService _creditCardService;
-
-        private const string ERROR_LOADING_PAYMENTS = "Erro ao carregar pagamentos: {0}";
-        private const string ERROR_LOADING_PENDING_PAYMENTS = "Erro ao carregar pagamentos pendentes: {0}";
-        private const string ERROR_LOADING_OVERDUE_PAYMENTS = "Erro ao carregar pagamentos vencidos: {0}";
-        private const string ERROR_LOADING_MONTHLY_PAYMENTS = "Erro ao carregar pagamentos por mês: {0}";
-        private const string ERROR_LOADING_PAYMENTS_BY_TYPE = "Erro ao carregar pagamentos por tipo: {0}";
-        private const string ERROR_LOADING_PAYMENTS_BY_METHOD = "Erro ao carregar pagamentos por método: {0}";
-        private const string ERROR_LOADING_PAYMENT_DETAILS = "Erro ao carregar detalhes do pagamento: {0}";
-        private const string ERROR_PREPARING_FORM = "Erro ao preparar formulário: {0}";
-        private const string ERROR_CREATING_PAYMENT = "Erro ao criar pagamento: {0}";
-        private const string ERROR_LOADING_PAYMENT_EDIT = "Erro ao carregar pagamento para edição: {0}";
-        private const string ERROR_UPDATING_PAYMENT = "Erro ao atualizar pagamento: {0}";
-        private const string ERROR_LOADING_PAYMENT_DELETE = "Erro ao carregar pagamento para exclusão: {0}";
-        private const string ERROR_DELETING_PAYMENT = "Erro ao excluir pagamento: {0}";
-        private const string ERROR_MARK_PAID = "Erro ao marcar pagamento como pago: {0}";
-        private const string ERROR_MARK_OVERDUE = "Erro ao marcar pagamento como vencido: {0}";
-        private const string ERROR_CANCEL_PAYMENT = "Erro ao cancelar pagamento: {0}";
-        private const string ERROR_CREDIT_CARD_REQUIRED = "Cartão de crédito é obrigatório para este método de pagamento.";
-
-        private const string SUCCESS_CREATE_PAYMENT = "Pagamento criado com sucesso!";
-        private const string SUCCESS_UPDATE_PAYMENT = "Pagamento atualizado com sucesso!";
-        private const string SUCCESS_DELETE_PAYMENT = "Pagamento excluído com sucesso!";
-        private const string SUCCESS_MARK_PAID = "Pagamento marcado como pago com sucesso!";
-        private const string SUCCESS_MARK_OVERDUE = "Pagamento marcado como vencido com sucesso!";
-        private const string SUCCESS_CANCEL_PAYMENT = "Pagamento cancelado com sucesso!";
-
-        private const int CREDIT_CARD_PAYMENT_TYPE = 2;
 
         public PaymentsController(
             IPaymentService paymentService,
@@ -65,7 +41,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENTS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Payments, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -75,13 +51,13 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 var token = HttpContext.GetJwtToken();
-                var payments = await _paymentService.GetPendingPaymentsAsync(token);
+                var pendingPayments = await _paymentService.GetPendingPaymentsAsync(token);
                 ViewBag.Title = "Pagamentos Pendentes";
-                return View("Index", payments);
+                return View("Index", pendingPayments);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PENDING_PAYMENTS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Payments, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -91,13 +67,13 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 var token = HttpContext.GetJwtToken();
-                var payments = await _paymentService.GetOverduePaymentsAsync(token);
+                var overduePayments = await _paymentService.GetOverduePaymentsAsync(token);
                 ViewBag.Title = "Pagamentos Vencidos";
-                return View("Index", payments);
+                return View("Index", overduePayments);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_OVERDUE_PAYMENTS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Payments, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -120,17 +96,17 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 var token = HttpContext.GetJwtToken();
-                var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
+                var monthlyPayments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
 
                 ViewBag.Month = month;
                 ViewBag.Year = year;
                 ViewBag.Title = $"Pagamentos de {new DateTime(year, month, 1).ToString("MMMM/yyyy")}";
 
-                return View("Index", payments);
+                return View("Index", monthlyPayments);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_MONTHLY_PAYMENTS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Payments, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -145,6 +121,7 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 var token = HttpContext.GetJwtToken();
+                var payments = await _paymentService.GetPaymentsByTypeAsync(id, token);
                 var paymentType = await _paymentTypeService.GetPaymentTypeByIdAsync(id, token);
 
                 if (paymentType == null)
@@ -152,16 +129,14 @@ namespace FinanceSystem.Web.Controllers
                     return NotFound("Tipo de pagamento não encontrado");
                 }
 
-                var payments = await _paymentService.GetPaymentsByTypeAsync(id, token);
-
-                ViewBag.Title = $"Pagamentos por Tipo: {paymentType.Name}";
+                ViewBag.Title = $"Pagamentos do Tipo: {paymentType.Name}";
                 ViewBag.TypeId = id;
 
                 return View("Index", payments);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENTS_BY_TYPE, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Payments, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -176,14 +151,13 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 var token = HttpContext.GetJwtToken();
+                var payments = await _paymentService.GetPaymentsByMethodAsync(id, token);
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
 
                 if (paymentMethod == null)
                 {
                     return NotFound("Método de pagamento não encontrado");
                 }
-
-                var payments = await _paymentService.GetPaymentsByMethodAsync(id, token);
 
                 ViewBag.Title = $"Pagamentos por Método: {paymentMethod.Name}";
                 ViewBag.MethodId = id;
@@ -192,7 +166,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENTS_BY_METHOD, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Payments, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -213,7 +187,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_DETAILS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Payment, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -224,12 +198,20 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 var token = HttpContext.GetJwtToken();
-                await LoadReferenceDataForView(token);
+                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
+                var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
+                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
+
+                ViewBag.PaymentTypes = paymentTypes;
+                ViewBag.PaymentMethods = paymentMethods;
+                ViewBag.CreditCards = creditCards;
+                ViewBag.CreditCardPaymentMethod = paymentMethods.FirstOrDefault(pm => pm.Type == 2)?.Id;
+
                 return View();
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_PREPARING_FORM, ex.Message);
+                TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PreparingForm;
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -237,40 +219,35 @@ namespace FinanceSystem.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequirePermission("payments.create")]
-        public async Task<IActionResult> Create(CreatePaymentModel model, List<string> selectedRoles)
+        public async Task<IActionResult> Create(CreatePaymentModel model)
         {
-            var token = HttpContext.GetJwtToken();
+            if (!ModelState.IsValid)
+            {
+                await LoadFormDependencies();
+                return View(model);
+            }
 
             try
             {
-                if (string.IsNullOrEmpty(model.CreditCardId))
-                {
-                    var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(model.PaymentMethodId, token);
+                var token = HttpContext.GetJwtToken();
 
-                    if (paymentMethod != null && paymentMethod.Type == CREDIT_CARD_PAYMENT_TYPE)
-                    {
-                        ModelState.AddModelError("CreditCardId", ERROR_CREDIT_CARD_REQUIRED);
-                    }
-                    else
-                    {
-                        ModelState.Remove("CreditCardId");
-                    }
-                }
-
-                if (!ModelState.IsValid)
+                // Verificar se o método de pagamento é cartão de crédito e se foi selecionado um cartão
+                var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(model.PaymentMethodId, token);
+                if (paymentMethod != null && paymentMethod.Type == 2 && string.IsNullOrEmpty(model.CreditCardId))
                 {
-                    await LoadReferenceDataForView(token);
+                    ModelState.AddModelError("CreditCardId", ResourceFinanceWeb.Error_CreditCardRequired);
+                    await LoadFormDependencies();
                     return View(model);
                 }
 
                 var payment = await _paymentService.CreatePaymentAsync(model, token);
-                TempData["SuccessMessage"] = SUCCESS_CREATE_PAYMENT;
+                TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.Payment);
                 return RedirectToAction(nameof(Details), new { id = payment.Id });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, string.Format(ERROR_CREATING_PAYMENT, ex.Message));
-                await LoadReferenceDataForView(token);
+                ModelState.AddModelError(string.Empty, MessageHelper.GetCreationErrorMessage(EntityNames.Payment, ex));
+                await LoadFormDependencies();
                 return View(model);
             }
         }
@@ -295,15 +272,20 @@ namespace FinanceSystem.Web.Controllers
 
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
+                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
 
                 ViewBag.PaymentTypes = paymentTypes;
                 ViewBag.PaymentMethods = paymentMethods;
+                ViewBag.CreditCards = creditCards;
+                ViewBag.CreditCardPaymentMethod = paymentMethods.FirstOrDefault(pm => pm.Type == 2)?.Id;
 
                 var model = new UpdatePaymentModel
                 {
                     Description = payment.Description,
                     Amount = payment.Amount,
                     DueDate = payment.DueDate,
+                    PaymentDate = payment.PaymentDate,
+                    Status = payment.Status,
                     IsRecurring = payment.IsRecurring,
                     Notes = payment.Notes,
                     PaymentTypeId = payment.PaymentTypeId,
@@ -314,7 +296,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_EDIT, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Payment, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -331,13 +313,7 @@ namespace FinanceSystem.Web.Controllers
 
             if (!ModelState.IsValid)
             {
-                var token = HttpContext.GetJwtToken();
-                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
-                var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
-
-                ViewBag.PaymentTypes = paymentTypes;
-                ViewBag.PaymentMethods = paymentMethods;
-
+                await LoadFormDependencies();
                 return View(model);
             }
 
@@ -345,27 +321,13 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _paymentService.UpdatePaymentAsync(id, model, token);
-                TempData["SuccessMessage"] = SUCCESS_UPDATE_PAYMENT;
+                TempData["SuccessMessage"] = MessageHelper.GetUpdateSuccessMessage(EntityNames.Payment);
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, string.Format(ERROR_UPDATING_PAYMENT, ex.Message));
-
-                try
-                {
-                    var token = HttpContext.GetJwtToken();
-                    var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
-                    var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
-
-                    ViewBag.PaymentTypes = paymentTypes;
-                    ViewBag.PaymentMethods = paymentMethods;
-                }
-                catch
-                {
-                    // Se falhar ao carregar dados de referência, continua sem exibir as listas
-                }
-
+                ModelState.AddModelError(string.Empty, MessageHelper.GetUpdateErrorMessage(EntityNames.Payment, ex));
+                await LoadFormDependencies();
                 return View(model);
             }
         }
@@ -387,7 +349,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_DELETE, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Payment, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -406,12 +368,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _paymentService.DeletePaymentAsync(id, token);
-                TempData["SuccessMessage"] = SUCCESS_DELETE_PAYMENT;
+                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.Payment);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_PAYMENT, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.Payment, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -430,12 +392,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _paymentService.MarkAsPaidAsync(id, paymentDate ?? DateTime.Now, token);
-                TempData["SuccessMessage"] = SUCCESS_MARK_PAID;
+                TempData["SuccessMessage"] = MessageHelper.GetStatusChangeSuccessMessage(EntityNames.Payment, EntityStatus.Paid);
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_MARK_PAID, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetStatusChangeErrorMessage(EntityNames.Payment, EntityStatus.Paid, ex);
                 return RedirectToAction(nameof(Details), new { id });
             }
         }
@@ -454,12 +416,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _paymentService.MarkAsOverdueAsync(id, token);
-                TempData["SuccessMessage"] = SUCCESS_MARK_OVERDUE;
+                TempData["SuccessMessage"] = MessageHelper.GetStatusChangeSuccessMessage(EntityNames.Payment, EntityStatus.Overdue);
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_MARK_OVERDUE, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetStatusChangeErrorMessage(EntityNames.Payment, EntityStatus.Overdue, ex);
                 return RedirectToAction(nameof(Details), new { id });
             }
         }
@@ -478,20 +440,21 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _paymentService.CancelPaymentAsync(id, token);
-                TempData["SuccessMessage"] = SUCCESS_CANCEL_PAYMENT;
+                TempData["SuccessMessage"] = MessageHelper.GetCancelSuccessMessage(EntityNames.Payment);
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_CANCEL_PAYMENT, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetCancelErrorMessage(EntityNames.Payment, ex);
                 return RedirectToAction(nameof(Details), new { id });
             }
         }
 
-        private async Task LoadReferenceDataForView(string token)
+        private async Task LoadFormDependencies()
         {
             try
             {
+                var token = HttpContext.GetJwtToken();
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
                 var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
@@ -499,6 +462,7 @@ namespace FinanceSystem.Web.Controllers
                 ViewBag.PaymentTypes = paymentTypes;
                 ViewBag.PaymentMethods = paymentMethods;
                 ViewBag.CreditCards = creditCards;
+                ViewBag.CreditCardPaymentMethod = paymentMethods.FirstOrDefault(pm => pm.Type == 2)?.Id;
             }
             catch
             {

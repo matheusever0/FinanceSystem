@@ -15,6 +15,8 @@
 
     var monthLabels = monthlyData.Keys.ToList();
     var monthValues = monthlyData.Values.ToList();
+
+    var monthsArray = new[] { "JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ" };
 }
 
 <div class="container-fluid">
@@ -147,13 +149,14 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var month in monthlyData.OrderBy(m => Array.IndexOf(new[] { "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez" }, m.Key.Split('/')[0])))
+                                @foreach (var month in monthlyData.OrderBy(m => Array.IndexOf(monthsArray, m.Key.Split('/')[0].Trim().ToUpperInvariant())))
                                 {
+                                    var keyMonth = month.Key.Split('/')[0].Trim().Replace(".", "").ToUpperInvariant();
+                                    var monthIndex = Array.IndexOf(monthsArray, keyMonth) + 1;
                                     var percentage = totalAnnual > 0 ? (month.Value / totalAnnual * 100) : 0;
-                                    var monthIndex = Array.IndexOf(new[] { "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez" }, month.Key.Split('/')[0]) + 1;
 
                                     <tr>
-                                        <td>@month.Key</td>
+                                        <td>@month.Key.ToUpper()</td>
                                         <td class="text-end">@string.Format("{0:C2}", month.Value)</td>
                                         <td class="text-center">@string.Format("{0:0.0}%", percentage)</td>
                                         <td class="text-center">

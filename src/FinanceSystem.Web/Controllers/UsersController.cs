@@ -1,40 +1,24 @@
-﻿using FinanceSystem.Web.Extensions;
+﻿using FinanceSystem.Resources.Web;
+using FinanceSystem.Resources.Web.Enums;
+using FinanceSystem.Resources.Web.Helpers;
+using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Helpers;
 using FinanceSystem.Web.Models.User;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace FinanceSystem.Web.Controllers
 {
     [Authorize]
+    [RequirePermission("users.view")]
     public class UsersController : Controller
     {
         private readonly IUserService _userService;
         private readonly IRoleService _roleService;
         private readonly IPermissionService _permissionService;
-
-        private const string ERROR_LOADING_USERS = "Erro ao carregar usuários: {0}";
-        private const string ERROR_LOADING_USER_DETAILS = "Erro ao carregar detalhes do usuário: {0}";
-        private const string ERROR_PREPARING_FORM = "Erro ao preparar formulário: {0}";
-        private const string ERROR_CREATING_USER = "Erro ao criar usuário: {0}";
-        private const string ERROR_EDITING_USER = "Erro ao carregar usuário para edição: {0}";
-        private const string ERROR_UPDATING_USER = "Erro ao atualizar usuário: {0}";
-        private const string ERROR_DELETING_USER = "Erro ao excluir usuário: {0}";
-        private const string ERROR_LOADING_USER_DELETE = "Erro ao carregar usuário para exclusão: {0}";
-        private const string ERROR_PERMISSION_DENIED = "Você não tem permissão para editar outros usuários, apenas o seu.";
-
-        private const string SUCCESS_USER_CREATED = "Usuário criado com sucesso!";
-        private const string SUCCESS_USER_UPDATED = "Usuário atualizado com sucesso!";
-        private const string SUCCESS_USER_DELETED = "Usuário excluído com sucesso!";
-
-        private const string VALIDATION_SELECT_ROLE = "É necessário selecionar pelo menos um perfil.";
-        private const string VALIDATION_EMAIL_REQUIRED = "É necessário ter um email cadastrado.";
 
         public UsersController(
             IUserService userService,
@@ -46,7 +30,6 @@ namespace FinanceSystem.Web.Controllers
             _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         }
 
-        [RequirePermission("users.view")]
         public async Task<IActionResult> Index()
         {
             try
@@ -57,12 +40,11 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_USERS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.User, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
 
-        [RequirePermission("users.view")]
         public async Task<IActionResult> Details(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -75,11 +57,16 @@ namespace FinanceSystem.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var user = await _userService.GetUserByIdAsync(id, token);
 
-                return user == null ? NotFound("Usuário não encontrado") : View(user);
+                if (user == null)
+                {
+                    return NotFound("Usuário não encontrado");
+                }
+
+                return View(user);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_USER_DETAILS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.User, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -96,7 +83,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_PREPARING_FORM, ex.Message);
+                TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PreparingForm;
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -104,51 +91,37 @@ namespace FinanceSystem.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequirePermission("users.create")]
-        public async Task<IActionResult> Create(CreateUserModel model, List<string> selectedRoles)
+        public async Task<IActionResult> Create(CreateUserModel model)
         {
-            var token = HttpContext.GetJwtToken();
+            if (!ModelState.IsValid)
+            {
+                await LoadRolesForView();
+                return View(model);
+            }
+
+            if (model.Roles == null || !model.Roles.Any())
+            {
+                ModelState.AddModelError("Roles", ResourceFinanceWeb.Validation_SelectRole);
+                await LoadRolesForView();
+                return View(model);
+            }
 
             try
             {
-                if (selectedRoles == null || selectedRoles.Count == 0)
-                {
-                    ModelState.AddModelError("Roles", VALIDATION_SELECT_ROLE);
-                    var roles = await _roleService.GetAllRolesAsync(token);
-                    ViewBag.Roles = roles;
-                    return View(model);
-                }
-
-                model.Roles = selectedRoles;
-
-                if (!ModelState.IsValid)
-                {
-                    var roles = await _roleService.GetAllRolesAsync(token);
-                    ViewBag.Roles = roles;
-                    return View(model);
-                }
-
-                await _userService.CreateUserAsync(model, token);
-                TempData["SuccessMessage"] = SUCCESS_USER_CREATED;
-                return RedirectToAction(nameof(Index));
+                var token = HttpContext.GetJwtToken();
+                var user = await _userService.CreateUserAsync(model, token);
+                TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.User);
+                return RedirectToAction(nameof(Details), new { id = user.Id });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_CREATING_USER, ex.Message);
-
-                try
-                {
-                    var roles = await _roleService.GetAllRolesAsync(token);
-                    ViewBag.Roles = roles;
-                    return View(model);
-                }
-                catch
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                ModelState.AddModelError(string.Empty, MessageHelper.GetCreationErrorMessage(EntityNames.User, ex));
+                await LoadRolesForView();
+                return View(model);
             }
         }
 
-        [RequirePermission("users.edit, users.edit.unique")]
+        [RequirePermission("users.edit")]
         public async Task<IActionResult> Edit(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -159,7 +132,6 @@ namespace FinanceSystem.Web.Controllers
             try
             {
                 var token = HttpContext.GetJwtToken();
-                var currentUserId = HttpContext.GetCurrentUserId()!;
                 var user = await _userService.GetUserByIdAsync(id, token);
 
                 if (user == null)
@@ -167,20 +139,16 @@ namespace FinanceSystem.Web.Controllers
                     return NotFound("Usuário não encontrado");
                 }
 
-                var permissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId, token);
-                var canEditOnlyOwnUser = PermissionHelper.PodeEditarSomenteProprioUsuario(permissions);
+                var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userPermissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId, token);
 
-                if (canEditOnlyOwnUser && currentUserId != user.Id)
+                if (userPermissions.PodeEditarSomenteProprioUsuario() && id != currentUserId)
                 {
-                    TempData["ErrorMessage"] = ERROR_PERMISSION_DENIED;
+                    TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PermissionDenied;
                     return RedirectToAction(nameof(Index));
                 }
 
                 var roles = await _roleService.GetAllRolesAsync(token);
-                if (canEditOnlyOwnUser)
-                {
-                    roles = [.. roles.Where(r => r.Name != "Admin")];
-                }
                 ViewBag.Roles = roles;
 
                 var model = new UpdateUserModel
@@ -188,112 +156,63 @@ namespace FinanceSystem.Web.Controllers
                     Username = user.Username,
                     Email = user.Email,
                     IsActive = user.IsActive,
-                    Roles = user.Roles ?? []
+                    Roles = user.Roles
                 };
 
                 return View(model);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_EDITING_USER, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.User, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequirePermission("users.edit, users.edit.unique")]
-        public async Task<IActionResult> Edit(string id, UpdateUserModel model, List<string> selectedRoles)
+        [RequirePermission("users.edit")]
+        public async Task<IActionResult> Edit(string id, UpdateUserModel model)
         {
             if (string.IsNullOrEmpty(id))
             {
                 return BadRequest("ID do usuário não fornecido");
             }
 
-            var token = HttpContext.GetJwtToken();
+            if (!ModelState.IsValid)
+            {
+                await LoadRolesForView();
+                return View(model);
+            }
+
+            if (model.Roles == null || !model.Roles.Any())
+            {
+                ModelState.AddModelError("Roles", ResourceFinanceWeb.Validation_SelectRole);
+                await LoadRolesForView();
+                return View(model);
+            }
 
             try
             {
-                var currentUserId = HttpContext.GetCurrentUserId()!;
-                var currentUser = await _userService.GetUserByIdAsync(id, token);
+                var token = HttpContext.GetJwtToken();
 
-                if (currentUser == null)
+                var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userPermissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId, token);
+
+                if (userPermissions.PodeEditarSomenteProprioUsuario() && id != currentUserId)
                 {
-                    return NotFound("Usuário não encontrado");
-                }
-
-                var permissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId, token);
-                var canEditOnlyOwnUser = PermissionHelper.PodeEditarSomenteProprioUsuario(permissions);
-
-                if (canEditOnlyOwnUser && currentUserId != currentUser.Id)
-                {
-                    TempData["ErrorMessage"] = ERROR_PERMISSION_DENIED;
+                    TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PermissionDenied;
                     return RedirectToAction(nameof(Index));
-                }
-
-                if (string.IsNullOrEmpty(model.Email))
-                {
-                    ModelState.AddModelError("Email", VALIDATION_EMAIL_REQUIRED);
-                }
-
-                if (selectedRoles == null || selectedRoles.Count == 0)
-                {
-                    ModelState.AddModelError("Roles", VALIDATION_SELECT_ROLE);
-
-                    var rolesList = await _roleService.GetAllRolesAsync(token);
-                    if (canEditOnlyOwnUser)
-                    {
-                        rolesList = [.. rolesList.Where(r => r.Name != "Admin")];
-                    }
-                    ViewBag.Roles = rolesList;
-
-                    return View(model);
-                }
-
-                model.Roles = selectedRoles;
-
-                if (string.IsNullOrWhiteSpace(model.Password))
-                {
-                    ModelState.Remove("Password");
-                }
-
-                if (!ModelState.IsValid)
-                {
-                    var roles = await _roleService.GetAllRolesAsync(token);
-                    if (canEditOnlyOwnUser)
-                    {
-                        roles = [.. roles.Where(r => r.Name != "Admin")];
-                    }
-                    ViewBag.Roles = roles;
-
-                    return View(model);
                 }
 
                 await _userService.UpdateUserAsync(id, model, token);
-                TempData["SuccessMessage"] = SUCCESS_USER_UPDATED;
-                return RedirectToAction(nameof(Index));
+                TempData["SuccessMessage"] = MessageHelper.GetUpdateSuccessMessage(EntityNames.User);
+                return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_UPDATING_USER, ex.Message);
-
-                try
-                {
-                    var roles = await _roleService.GetAllRolesAsync(token);
-                    var canEditOnlyOwnUser = await CheckCanEditOnlyOwnUserAsync(token);
-
-                    if (canEditOnlyOwnUser)
-                    {
-                        roles = [.. roles.Where(r => r.Name != "Admin")];
-                    }
-
-                    ViewBag.Roles = roles;
-                    return View(model);
-                }
-                catch
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                ModelState.AddModelError(string.Empty, MessageHelper.GetUpdateErrorMessage(EntityNames.User, ex));
+                await LoadRolesForView();
+                return View(model);
             }
         }
 
@@ -315,9 +234,10 @@ namespace FinanceSystem.Web.Controllers
                     return NotFound("Usuário não encontrado");
                 }
 
-                if (id == HttpContext.GetCurrentUserId())
+                var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (id == currentUserId)
                 {
-                    TempData["ErrorMessage"] = "Não é possível excluir o próprio usuário";
+                    TempData["ErrorMessage"] = "Não é possível excluir seu próprio usuário.";
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -325,7 +245,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_USER_DELETE, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.User, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -342,29 +262,38 @@ namespace FinanceSystem.Web.Controllers
 
             try
             {
-                if (id == HttpContext.GetCurrentUserId())
+                var token = HttpContext.GetJwtToken();
+
+                var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (id == currentUserId)
                 {
-                    TempData["ErrorMessage"] = "Não é possível excluir o próprio usuário";
+                    TempData["ErrorMessage"] = "Não é possível excluir seu próprio usuário.";
                     return RedirectToAction(nameof(Index));
                 }
 
-                var token = HttpContext.GetJwtToken();
                 await _userService.DeleteUserAsync(id, token);
-                TempData["SuccessMessage"] = SUCCESS_USER_DELETED;
+                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.User);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_USER, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.User, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
 
-        private async Task<bool> CheckCanEditOnlyOwnUserAsync(string token)
+        private async Task LoadRolesForView()
         {
-            var currentUserId = HttpContext.GetCurrentUserId()!;
-            var permissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId, token);
-            return PermissionHelper.PodeEditarSomenteProprioUsuario(permissions);
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var roles = await _roleService.GetAllRolesAsync(token);
+                ViewBag.Roles = roles;
+            }
+            catch
+            {
+                ViewBag.Roles = new List<object>();
+            }
         }
     }
 }

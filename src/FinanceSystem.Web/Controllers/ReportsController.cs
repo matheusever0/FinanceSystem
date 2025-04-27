@@ -1,113 +1,198 @@
-﻿using FinanceSystem.Web.Extensions;
+﻿using FinanceSystem.Resources.Web.Enums;
+using FinanceSystem.Resources.Web.Helpers;
+using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
+using FinanceSystem.Web.Interfaces;
 using FinanceSystem.Web.Models.Generics;
+using FinanceSystem.Web.Models.Payment;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace FinanceSystem.Web.Controllers
 {
     [Authorize]
-    [RequirePermission("payments.view")]
+    [RequirePermission("reports.view")]
     public class ReportsController : Controller
     {
         private readonly IPaymentService _paymentService;
+        private readonly IIncomeService _incomeService;
         private readonly IPaymentTypeService _paymentTypeService;
-        private readonly IPaymentMethodService _paymentMethodService;
+        private readonly IIncomeTypeService _incomeTypeService;
         private readonly ICreditCardService _creditCardService;
+        private readonly IInvestmentService _investmentService;
 
-        private const string ERROR_GENERATING_MONTHLY_REPORT = "Erro ao gerar relatório mensal: {0}";
-        private const string ERROR_GENERATING_ANNUAL_REPORT = "Erro ao gerar relatório anual: {0}";
-        private const string ERROR_GENERATING_CREDIT_CARDS_REPORT = "Erro ao gerar relatório de cartões de crédito: {0}";
-        private const string ERROR_GENERATING_PRINT_REPORT = "Erro ao gerar relatório para impressão: {0}";
-
-        private const int STATUS_PAID = 2;
-        private const int STATUS_PENDING = 1;
-        private const int STATUS_OVERDUE = 3;
+        private const int STATUS_PAGO = 2;
+        private const int STATUS_RECEBIDO = 2;
 
         public ReportsController(
             IPaymentService paymentService,
+            IIncomeService incomeService,
             IPaymentTypeService paymentTypeService,
-            IPaymentMethodService paymentMethodService,
-            ICreditCardService creditCardService)
+            IIncomeTypeService incomeTypeService,
+            ICreditCardService creditCardService,
+            IInvestmentService investmentService)
         {
             _paymentService = paymentService ?? throw new ArgumentNullException(nameof(paymentService));
+            _incomeService = incomeService ?? throw new ArgumentNullException(nameof(incomeService));
             _paymentTypeService = paymentTypeService ?? throw new ArgumentNullException(nameof(paymentTypeService));
-            _paymentMethodService = paymentMethodService ?? throw new ArgumentNullException(nameof(paymentMethodService));
+            _incomeTypeService = incomeTypeService ?? throw new ArgumentNullException(nameof(incomeTypeService));
             _creditCardService = creditCardService ?? throw new ArgumentNullException(nameof(creditCardService));
+            _investmentService = investmentService ?? throw new ArgumentNullException(nameof(investmentService));
         }
 
-        public async Task<IActionResult> Monthly(int? month, int? year)
+        public IActionResult Index()
         {
+            return View();
+        }
+
+        public async Task<IActionResult> Monthly(int month, int year)
+        {
+            var currentDate = DateTime.Now;
+            if (month <= 0 || month > 12)
+            {
+                month = currentDate.Month;
+            }
+
+            if (year <= 0)
+            {
+                year = currentDate.Year;
+            }
+
             try
             {
-                month ??= DateTime.Now.Month;
-                year ??= DateTime.Now.Year;
-
                 var token = HttpContext.GetJwtToken();
 
-                var payments = await _paymentService.GetPaymentsByMonthAsync(month.Value, year.Value, token);
+                var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
+                var incomes = await _incomeService.GetIncomesByMonthAsync(month, year, token);
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
+                var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
 
+                ViewBag.Month = month;
+                ViewBag.Year = year;
+                ViewBag.MonthName = new DateTime(year, month, 1).ToString("MMMM");
+
+                ViewBag.Payments = payments;
+                ViewBag.Incomes = incomes;
+
+                decimal totalPayments = payments.Where(p => p.Status == STATUS_PAGO).Sum(p => p.Amount);
+                decimal totalIncomes = incomes.Where(i => i.Status == STATUS_RECEBIDO).Sum(i => i.Amount);
+                decimal balance = totalIncomes - totalPayments;
+
+                ViewBag.TotalPayments = totalPayments;
+                ViewBag.TotalIncomes = totalIncomes;
+                ViewBag.Balance = balance;
+
+                // Preparar dados para gráfico de pagamentos por tipo
                 var paymentsByType = payments
+                    .Where(p => p.Status == STATUS_PAGO)
                     .GroupBy(p => p.PaymentTypeId)
                     .Select(g => new PaymentByTypeDto
                     {
                         TypeId = g.Key,
-                        TypeName = paymentTypes.FirstOrDefault(t => t.Id == g.Key)?.Name ?? "Desconhecido",
+                        TypeName = paymentTypes.FirstOrDefault(pt => pt.Id == g.Key)?.Name ?? "Desconhecido",
                         TotalAmount = g.Sum(p => p.Amount)
                     })
-                    .OrderByDescending(g => g.TotalAmount)
+                    .OrderByDescending(p => p.TotalAmount)
                     .ToList();
 
-                var totalAmount = payments.Sum(p => p.Amount);
-                var paidAmount = payments.Where(p => p.Status == STATUS_PAID).Sum(p => p.Amount);
-                var pendingAmount = payments.Where(p => p.Status == STATUS_PENDING).Sum(p => p.Amount);
-                var overdueAmount = payments.Where(p => p.Status == STATUS_OVERDUE).Sum(p => p.Amount);
-
-                ViewBag.PaymentTypes = paymentTypes;
                 ViewBag.PaymentsByType = paymentsByType;
-                ViewBag.Month = month;
-                ViewBag.Year = year;
-                ViewBag.TotalAmount = totalAmount;
-                ViewBag.PaidAmount = paidAmount;
-                ViewBag.PendingAmount = pendingAmount;
-                ViewBag.OverdueAmount = overdueAmount;
+                ViewBag.PaymentsByTypeLabels = JsonSerializer.Serialize(paymentsByType.Select(p => p.TypeName));
+                ViewBag.PaymentsByTypeValues = JsonSerializer.Serialize(paymentsByType.Select(p => p.TotalAmount));
 
-                return View(payments);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = string.Format(ERROR_GENERATING_MONTHLY_REPORT, ex.Message);
-                return RedirectToAction("Index", "Home");
-            }
-        }
+                // Preparar dados para gráfico de receitas por tipo
+                var incomesByType = incomes
+                    .Where(i => i.Status == STATUS_RECEBIDO)
+                    .GroupBy(i => i.IncomeTypeId)
+                    .Select(g => new
+                    {
+                        TypeId = g.Key,
+                        TypeName = incomeTypes.FirstOrDefault(it => it.Id == g.Key)?.Name ?? "Desconhecido",
+                        TotalAmount = g.Sum(i => i.Amount)
+                    })
+                    .OrderByDescending(i => i.TotalAmount)
+                    .ToList();
 
-        public async Task<IActionResult> Annual(int? year)
-        {
-            try
-            {
-                year ??= DateTime.Now.Year;
-                var token = HttpContext.GetJwtToken();
-                var monthlyData = await GetMonthlyDataForYear(year.Value, token);
+                ViewBag.IncomesByTypeLabels = JsonSerializer.Serialize(incomesByType.Select(i => i.TypeName));
+                ViewBag.IncomesByTypeValues = JsonSerializer.Serialize(incomesByType.Select(i => i.TotalAmount));
 
-                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
-                var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
+                // Dados para gráfico de balanço
+                var months = Enumerable.Range(0, 6)
+                    .Select(i => currentDate.AddMonths(-i))
+                    .OrderBy(d => d.Year)
+                    .ThenBy(d => d.Month)
+                    .ToList();
 
-                ViewBag.MonthlyData = monthlyData;
-                ViewBag.Year = year;
-                ViewBag.PaymentTypes = paymentTypes;
-                ViewBag.PaymentMethods = paymentMethods;
-
-                var totalAnnual = monthlyData.Values.Sum();
-                ViewBag.TotalAnnual = totalAnnual;
-                ViewBag.AverageMonthly = totalAnnual / Math.Max(1, monthlyData.Count(m => m.Value > 0));
+                var monthlyData = await GetMonthlyComparisonDataAsync(token, months);
+                ViewBag.MonthlyLabels = JsonSerializer.Serialize(monthlyData.Select(m => m.Month));
+                ViewBag.MonthlyIncomeValues = JsonSerializer.Serialize(monthlyData.Select(m => m.IncomeAmount));
+                ViewBag.MonthlyPaymentValues = JsonSerializer.Serialize(monthlyData.Select(m => m.PaymentAmount));
+                ViewBag.MonthlyBalanceValues = JsonSerializer.Serialize(
+                    monthlyData.Select(m => m.IncomeAmount - m.PaymentAmount));
 
                 return View();
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_GENERATING_ANNUAL_REPORT, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetReportGenerationErrorMessage(ReportType.Monthly, ex);
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        public async Task<IActionResult> Annual(int year)
+        {
+            if (year <= 0)
+            {
+                year = DateTime.Now.Year;
+            }
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+
+                ViewBag.Year = year;
+
+                var monthlyData = new List<MonthlyComparisonData>();
+                decimal totalPayments = 0;
+                decimal totalIncomes = 0;
+
+                // Obter dados mensais
+                for (int month = 1; month <= 12; month++)
+                {
+                    var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
+                    var incomes = await _incomeService.GetIncomesByMonthAsync(month, year, token);
+
+                    var monthPayments = payments.Where(p => p.Status == STATUS_PAGO).Sum(p => p.Amount);
+                    var monthIncomes = incomes.Where(i => i.Status == STATUS_RECEBIDO).Sum(i => i.Amount);
+
+                    totalPayments += monthPayments;
+                    totalIncomes += monthIncomes;
+
+                    monthlyData.Add(new MonthlyComparisonData
+                    {
+                        Month = new DateTime(year, month, 1).ToString("MMM"),
+                        PaymentAmount = monthPayments,
+                        IncomeAmount = monthIncomes
+                    });
+                }
+
+                ViewBag.MonthlyData = monthlyData;
+                ViewBag.TotalPayments = totalPayments;
+                ViewBag.TotalIncomes = totalIncomes;
+                ViewBag.Balance = totalIncomes - totalPayments;
+
+                ViewBag.MonthlyLabels = JsonSerializer.Serialize(monthlyData.Select(m => m.Month));
+                ViewBag.MonthlyIncomeValues = JsonSerializer.Serialize(monthlyData.Select(m => m.IncomeAmount));
+                ViewBag.MonthlyPaymentValues = JsonSerializer.Serialize(monthlyData.Select(m => m.PaymentAmount));
+                ViewBag.MonthlyBalanceValues = JsonSerializer.Serialize(
+                    monthlyData.Select(m => m.IncomeAmount - m.PaymentAmount));
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = MessageHelper.GetReportGenerationErrorMessage(ReportType.Annual, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -118,130 +203,197 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
-                var cardData = await GetCreditCardData(creditCards, token);
 
-                ViewBag.CardData = cardData;
-                return View(creditCards);
+                ViewBag.CreditCards = creditCards;
+
+                var labels = creditCards.Select(c => c.Name).ToList();
+                var usedLimits = creditCards.Select(c => c.UsedLimit).ToList();
+                var availableLimits = creditCards.Select(c => c.AvailableLimit).ToList();
+
+                ViewBag.CreditCardLabels = JsonSerializer.Serialize(labels);
+                ViewBag.CreditCardUsedLimits = JsonSerializer.Serialize(usedLimits);
+                ViewBag.CreditCardAvailableLimits = JsonSerializer.Serialize(availableLimits);
+
+                return View();
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_GENERATING_CREDIT_CARDS_REPORT, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetReportGenerationErrorMessage(ReportType.CreditCards, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> PrintMonthly(int month, int year)
+        public async Task<IActionResult> Investments()
         {
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var investments = await _investmentService.GetAllInvestmentsAsync(token);
+
+                ViewBag.Investments = investments;
+                ViewBag.TotalInvested = investments.Sum(i => i.TotalInvested);
+                ViewBag.CurrentValue = investments.Sum(i => i.CurrentTotal);
+                ViewBag.GainLoss = investments.Sum(i => i.GainLossValue);
+
+                var investmentLabels = investments.Select(i => i.Name).ToList();
+                var investmentValues = investments.Select(i => i.CurrentTotal).ToList();
+
+                ViewBag.InvestmentLabels = JsonSerializer.Serialize(investmentLabels);
+                ViewBag.InvestmentValues = JsonSerializer.Serialize(investmentValues);
+
+                // Agrupar por tipo
+                var investmentsByType = investments
+                    .GroupBy(i => i.Type)
+                    .Select(g => new
+                    {
+                        Type = g.Key,
+                        TypeName = GetInvestmentTypeName(g.Key),
+                        TotalValue = g.Sum(i => i.CurrentTotal)
+                    })
+                    .OrderByDescending(i => i.TotalValue)
+                    .ToList();
+
+                ViewBag.InvestmentTypeLabels = JsonSerializer.Serialize(investmentsByType.Select(i => i.TypeName));
+                ViewBag.InvestmentTypeValues = JsonSerializer.Serialize(investmentsByType.Select(i => i.TotalValue));
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Erro ao gerar relatório de investimentos: " + ex.Message;
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        public async Task<IActionResult> Print(int month, int year)
+        {
+            var currentDate = DateTime.Now;
             if (month <= 0 || month > 12)
             {
-                return BadRequest("Mês inválido");
+                month = currentDate.Month;
             }
 
             if (year <= 0)
             {
-                return BadRequest("Ano inválido");
+                year = currentDate.Year;
             }
 
             try
             {
                 var token = HttpContext.GetJwtToken();
-                var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
 
-                var totalAmount = payments.Sum(p => p.Amount);
-                var paidAmount = payments.Where(p => p.Status == STATUS_PAID).Sum(p => p.Amount);
-                var pendingAmount = payments.Where(p => p.Status == STATUS_PENDING).Sum(p => p.Amount);
-                var overdueAmount = payments.Where(p => p.Status == STATUS_OVERDUE).Sum(p => p.Amount);
+                var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
+                var incomes = await _incomeService.GetIncomesByMonthAsync(month, year, token);
+                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
+                var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
+                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
 
                 ViewBag.Month = month;
                 ViewBag.Year = year;
-                ViewBag.TotalAmount = totalAmount;
-                ViewBag.PaidAmount = paidAmount;
-                ViewBag.PendingAmount = pendingAmount;
-                ViewBag.OverdueAmount = overdueAmount;
-                ViewBag.PrintMode = true;
+                ViewBag.MonthName = new DateTime(year, month, 1).ToString("MMMM");
+                ViewBag.DateGenerated = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
 
-                return View("PrintMonthly", payments);
+                ViewBag.Payments = payments;
+                ViewBag.Incomes = incomes;
+                ViewBag.CreditCards = creditCards;
+
+                // Totais
+                ViewBag.TotalPayments = payments.Where(p => p.Status == STATUS_PAGO).Sum(p => p.Amount);
+                ViewBag.TotalIncomes = incomes.Where(i => i.Status == STATUS_RECEBIDO).Sum(i => i.Amount);
+                ViewBag.TotalPendingPayments = payments.Where(p => p.Status == 1).Sum(p => p.Amount);
+                ViewBag.TotalPendingIncomes = incomes.Where(i => i.Status == 1).Sum(i => i.Amount);
+                ViewBag.Balance = ViewBag.TotalIncomes - ViewBag.TotalPayments;
+
+                // Pagamentos por tipo
+                var paymentsByType = payments
+                    .Where(p => p.Status == STATUS_PAGO)
+                    .GroupBy(p => p.PaymentTypeId)
+                    .Select(g => new
+                    {
+                        TypeId = g.Key,
+                        TypeName = paymentTypes.FirstOrDefault(pt => pt.Id == g.Key)?.Name ?? "Desconhecido",
+                        TotalAmount = g.Sum(p => p.Amount)
+                    })
+                    .OrderByDescending(p => p.TotalAmount)
+                    .ToList();
+
+                ViewBag.PaymentsByType = paymentsByType;
+
+                // Receitas por tipo
+                var incomesByType = incomes
+                    .Where(i => i.Status == STATUS_RECEBIDO)
+                    .GroupBy(i => i.IncomeTypeId)
+                    .Select(g => new
+                    {
+                        TypeId = g.Key,
+                        TypeName = incomeTypes.FirstOrDefault(it => it.Id == g.Key)?.Name ?? "Desconhecido",
+                        TotalAmount = g.Sum(i => i.Amount)
+                    })
+                    .OrderByDescending(i => i.TotalAmount)
+                    .ToList();
+
+                ViewBag.IncomesByType = incomesByType;
+
+                return View();
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_GENERATING_PRINT_REPORT, ex.Message);
-                return RedirectToAction("Monthly", new { month, year });
+                TempData["ErrorMessage"] = MessageHelper.GetReportGenerationErrorMessage(ReportType.Print, ex);
+                return RedirectToAction("Index", "Home");
             }
         }
 
-        private async Task<Dictionary<string, decimal>> GetMonthlyDataForYear(int year, string token)
+        private async Task<List<MonthlyComparisonData>> GetMonthlyComparisonDataAsync(string token, List<DateTime> months)
         {
-            var monthlyData = new Dictionary<string, decimal>();
+            var result = new List<MonthlyComparisonData>();
 
-            for (int month = 1; month <= 12; month++)
+            foreach (var date in months)
             {
-                var monthName = new DateTime(year, month, 1).ToString("MMM");
+                var month = date.Month;
+                var year = date.Year;
+                var monthName = date.ToString("MMM/yy");
+
                 try
                 {
                     var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
-                    monthlyData.Add(monthName, payments.Sum(p => p.Amount));
-                }
-                catch
-                {
-                    monthlyData.Add(monthName, 0);
-                }
-            }
+                    var incomes = await _incomeService.GetIncomesByMonthAsync(month, year, token);
 
-            return monthlyData;
-        }
+                    var monthPaymentTotal = payments.Where(p => p.Status == STATUS_PAGO).Sum(p => p.Amount);
+                    var monthIncomeTotal = incomes.Where(i => i.Status == STATUS_RECEBIDO).Sum(i => i.Amount);
 
-        private async Task<List<object>> GetCreditCardData(IEnumerable<object> creditCards, string token)
-        {
-            var cardData = new List<object>();
-
-            foreach (var card in creditCards)
-            {
-                try
-                {
-                    var paymentMethodId = GetPropertyValue(card, "PaymentMethodId")?.ToString();
-
-                    if (string.IsNullOrEmpty(paymentMethodId))
+                    result.Add(new MonthlyComparisonData
                     {
-                        continue;
-                    }
-
-                    var payments = await _paymentService.GetPaymentsByMethodAsync(paymentMethodId, token);
-                    var totalAmount = payments.Sum(p => p.Amount);
-                    var paidAmount = payments.Where(p => p.Status == STATUS_PAID).Sum(p => p.Amount);
-                    var pendingAmount = payments.Where(p => p.Status == STATUS_PENDING).Sum(p => p.Amount);
-
-                    var limit = Convert.ToDecimal(GetPropertyValue(card, "Limit"));
-                    var availableLimit = Convert.ToDecimal(GetPropertyValue(card, "AvailableLimit"));
-                    decimal usagePercentage = 0;
-
-                    if (limit > 0)
-                    {
-                        usagePercentage = (limit - availableLimit) / limit * 100;
-                    }
-
-                    cardData.Add(new
-                    {
-                        Card = card,
-                        Payments = payments,
-                        TotalAmount = totalAmount,
-                        PaidAmount = paidAmount,
-                        PendingAmount = pendingAmount,
-                        UsagePercentage = usagePercentage
+                        Month = monthName,
+                        PaymentAmount = monthPaymentTotal,
+                        IncomeAmount = monthIncomeTotal
                     });
                 }
                 catch
                 {
-                    // Se falhar ao processar um cartão específico, continua com os outros
+                    // Em caso de erro, adiciona valores zero
+                    result.Add(new MonthlyComparisonData
+                    {
+                        Month = monthName,
+                        PaymentAmount = 0,
+                        IncomeAmount = 0
+                    });
                 }
             }
 
-            return cardData;
+            return result;
         }
 
-        private static object? GetPropertyValue(object obj, string propertyName)
+        private string GetInvestmentTypeName(int type)
         {
-            return obj.GetType().GetProperty(propertyName)?.GetValue(obj, null);
+            return type switch
+            {
+                1 => "Ações",
+                2 => "Fundos Imobiliários",
+                3 => "ETFs",
+                4 => "Ações Estrangeiras",
+                5 => "Renda Fixa",
+                _ => "Outro"
+            };
         }
     }
 }

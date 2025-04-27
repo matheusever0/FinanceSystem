@@ -1,5 +1,5 @@
-﻿using FinanceSystem.Web.Filters;
-using FinanceSystem.Web.Middlewares;
+﻿using FinanceSystem.Web.Extensions;
+using FinanceSystem.Web.Filters;
 
 namespace FinanceSystem.Web.Configuration
 {

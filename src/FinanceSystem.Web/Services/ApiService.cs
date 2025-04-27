@@ -16,6 +16,14 @@ namespace FinanceSystem.Web.Services
         private readonly ILogger<ApiService> _logger;
         private readonly JsonSerializerOptions _jsonOptions;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private static readonly JwtSecurityTokenHandler TokenHandler = new();
+        private static readonly Dictionary<string, string> ClaimTypeMapping = new()
+            {
+                { "nameid", ClaimTypes.NameIdentifier },
+                { "unique_name", ClaimTypes.Name },
+                { "email", ClaimTypes.Email },
+                { "role", ClaimTypes.Role }
+            };
 
         public ApiService(
             IHttpClientFactory httpClientFactory,
@@ -137,26 +145,18 @@ namespace FinanceSystem.Web.Services
         {
             try
             {
-                var handler = new JwtSecurityTokenHandler();
-                if (!handler.CanReadToken(token))
+                if (!TokenHandler.CanReadToken(token))
                 {
                     _logger.LogError("Token JWT inválido");
                     return Task.FromResult<ClaimsPrincipal>(null);
                 }
 
-                var jwtToken = handler.ReadJwtToken(token);
+                var jwtToken = TokenHandler.ReadJwtToken(token);
                 var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
 
                 foreach (var claim in jwtToken.Claims)
                 {
-                    var claimType = claim.Type switch
-                    {
-                        "nameid" => ClaimTypes.NameIdentifier,
-                        "unique_name" => ClaimTypes.Name,
-                        "email" => ClaimTypes.Email,
-                        "role" => ClaimTypes.Role,
-                        _ => claim.Type
-                    };
+                    var claimType = ClaimTypeMapping.TryGetValue(claim.Type, out var mappedType) ? mappedType : claim.Type;
                     identity.AddClaim(new Claim(claimType, claim.Value));
                 }
 
@@ -168,5 +168,6 @@ namespace FinanceSystem.Web.Services
                 return Task.FromResult<ClaimsPrincipal>(null);
             }
         }
+
     }
 }

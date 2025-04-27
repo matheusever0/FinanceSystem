@@ -1,4 +1,6 @@
-﻿using FinanceSystem.Web.Extensions;
+﻿using FinanceSystem.Resources.Web.Enums;
+using FinanceSystem.Resources.Web.Helpers;
+using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
 using FinanceSystem.Web.Models;
 using FinanceSystem.Web.Services;
@@ -12,22 +14,6 @@ namespace FinanceSystem.Web.Controllers
     public class PaymentTypesController : Controller
     {
         private readonly IPaymentTypeService _paymentTypeService;
-
-        private const string ERROR_LOADING_PAYMENT_TYPES = "Erro ao carregar tipos de pagamento: {0}";
-        private const string ERROR_LOADING_SYSTEM_PAYMENT_TYPES = "Erro ao carregar tipos de pagamento do sistema: {0}";
-        private const string ERROR_LOADING_USER_PAYMENT_TYPES = "Erro ao carregar tipos de pagamento do usuário: {0}";
-        private const string ERROR_LOADING_PAYMENT_TYPE_DETAILS = "Erro ao carregar detalhes do tipo de pagamento: {0}";
-        private const string ERROR_CREATING_PAYMENT_TYPE = "Erro ao criar tipo de pagamento: {0}";
-        private const string ERROR_LOADING_PAYMENT_TYPE_EDIT = "Erro ao carregar tipo de pagamento para edição: {0}";
-        private const string ERROR_UPDATING_PAYMENT_TYPE = "Erro ao atualizar tipo de pagamento: {0}";
-        private const string ERROR_LOADING_PAYMENT_TYPE_DELETE = "Erro ao carregar tipo de pagamento para exclusão: {0}";
-        private const string ERROR_DELETING_PAYMENT_TYPE = "Erro ao excluir tipo de pagamento: {0}";
-        private const string ERROR_CANNOT_EDIT_SYSTEM_TYPE = "Não é possível editar tipos de pagamento do sistema";
-        private const string ERROR_CANNOT_DELETE_SYSTEM_TYPE = "Não é possível excluir tipos de pagamento do sistema";
-
-        private const string SUCCESS_CREATE_PAYMENT_TYPE = "Tipo de pagamento criado com sucesso!";
-        private const string SUCCESS_UPDATE_PAYMENT_TYPE = "Tipo de pagamento atualizado com sucesso!";
-        private const string SUCCESS_DELETE_PAYMENT_TYPE = "Tipo de pagamento excluído com sucesso!";
 
         public PaymentTypesController(IPaymentTypeService paymentTypeService)
         {
@@ -44,7 +30,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_TYPES, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.PaymentType, ex);
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -61,7 +47,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_SYSTEM_PAYMENT_TYPES, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.PaymentType, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -78,7 +64,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_USER_PAYMENT_TYPES, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.PaymentType, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -99,7 +85,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_TYPE_DETAILS, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.PaymentType, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -124,12 +110,12 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 var paymentType = await _paymentTypeService.CreatePaymentTypeAsync(model, token);
-                TempData["SuccessMessage"] = SUCCESS_CREATE_PAYMENT_TYPE;
+                TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.PaymentType);
                 return RedirectToAction(nameof(Details), new { id = paymentType.Id });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, string.Format(ERROR_CREATING_PAYMENT_TYPE, ex.Message));
+                ModelState.AddModelError(string.Empty, MessageHelper.GetCreationErrorMessage(EntityNames.PaymentType, ex));
                 return View(model);
             }
         }
@@ -154,7 +140,7 @@ namespace FinanceSystem.Web.Controllers
 
                 if (paymentType.IsSystem)
                 {
-                    TempData["ErrorMessage"] = ERROR_CANNOT_EDIT_SYSTEM_TYPE;
+                    TempData["ErrorMessage"] = MessageHelper.GetCannotEditSystemEntityMessage(EntityNames.PaymentType);
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
@@ -168,7 +154,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_TYPE_EDIT, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.PaymentType, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -200,17 +186,17 @@ namespace FinanceSystem.Web.Controllers
 
                 if (paymentType.IsSystem)
                 {
-                    TempData["ErrorMessage"] = ERROR_CANNOT_EDIT_SYSTEM_TYPE;
+                    TempData["ErrorMessage"] = MessageHelper.GetCannotEditSystemEntityMessage(EntityNames.PaymentType);
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
                 await _paymentTypeService.UpdatePaymentTypeAsync(id, model, token);
-                TempData["SuccessMessage"] = SUCCESS_UPDATE_PAYMENT_TYPE;
+                TempData["SuccessMessage"] = MessageHelper.GetUpdateSuccessMessage(EntityNames.PaymentType);
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, string.Format(ERROR_UPDATING_PAYMENT_TYPE, ex.Message));
+                ModelState.AddModelError(string.Empty, MessageHelper.GetUpdateErrorMessage(EntityNames.PaymentType, ex));
                 return View(model);
             }
         }
@@ -235,7 +221,7 @@ namespace FinanceSystem.Web.Controllers
 
                 if (paymentType.IsSystem)
                 {
-                    TempData["ErrorMessage"] = ERROR_CANNOT_DELETE_SYSTEM_TYPE;
+                    TempData["ErrorMessage"] = MessageHelper.GetCannotDeleteSystemEntityMessage(EntityNames.PaymentType);
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
@@ -243,7 +229,7 @@ namespace FinanceSystem.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_LOADING_PAYMENT_TYPE_DELETE, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.PaymentType, ex);
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -270,17 +256,17 @@ namespace FinanceSystem.Web.Controllers
 
                 if (paymentType.IsSystem)
                 {
-                    TempData["ErrorMessage"] = ERROR_CANNOT_DELETE_SYSTEM_TYPE;
+                    TempData["ErrorMessage"] = MessageHelper.GetCannotDeleteSystemEntityMessage(EntityNames.PaymentType);
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
                 await _paymentTypeService.DeletePaymentTypeAsync(id, token);
-                TempData["SuccessMessage"] = SUCCESS_DELETE_PAYMENT_TYPE;
+                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.PaymentType);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = string.Format(ERROR_DELETING_PAYMENT_TYPE, ex.Message);
+                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.PaymentType, ex);
                 return RedirectToAction(nameof(Index));
             }
         }

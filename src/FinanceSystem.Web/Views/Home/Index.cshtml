@@ -1,5 +1,6 @@
-﻿@{
-    ViewData["Title"] = "Dashboard";
+﻿@using FinanceSystem.Web.Models.Shared
+@{
+    ViewData["Title"] = "Inicio";
 }
 
 @section Styles {
@@ -7,30 +8,29 @@
 }
 
 <div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Dashboard Financeiro</h1>
+    <div class="d-flex justify-content-end mb-3">
         <a asp-controller="Reports" asp-action="Monthly" asp-route-month="@DateTime.Now.Month" asp-route-year="@DateTime.Now.Year" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
             <i class="fas fa-download fa-sm text-white-50"></i> Gerar Relatório
         </a>
     </div>
 
-    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new FinanceSystem.Web.Models.Shared.CollapseSectionModel
+    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new CollapseSectionModel
 {
     Id = "financial-summary",
     Title = "Resumo Financeiro",
     Url = Url.Action("GetFinancialSummary", "Home")!,
-    InitiallyExpanded = true
+    InitiallyExpanded = false
 })
 
-    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new FinanceSystem.Web.Models.Shared.CollapseSectionModel
+    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new CollapseSectionModel
 {
     Id = "quick-actions",
     Title = "Ações Rápidas",
     Url = Url.Action("GetQuickActions", "Home")!,
-    InitiallyExpanded = true
+    InitiallyExpanded = false
 })
 
-    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new FinanceSystem.Web.Models.Shared.CollapseSectionModel
+    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new CollapseSectionModel
 {
     Id = "monthly-chart",
     Title = "Receitas x Gastos Mensais",
@@ -38,7 +38,7 @@
     InitiallyExpanded = false
 })
 
-    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new FinanceSystem.Web.Models.Shared.CollapseSectionModel
+    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new CollapseSectionModel
 {
     Id = "pendings",
     Title = "Pendências",
@@ -46,7 +46,7 @@
     InitiallyExpanded = false
 })
 
-    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new FinanceSystem.Web.Models.Shared.CollapseSectionModel
+    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new CollapseSectionModel
 {
     Id = "investment-summary",
     Title = "Resumo de Investimentos",

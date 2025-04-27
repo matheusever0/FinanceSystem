@@ -38,7 +38,7 @@
             <div class="sidebar-menu-item">
                 <a asp-controller="Home" asp-action="Index" class="sidebar-menu-link @(controllerName == "Home" && actionName == "Index" ? "active" : "")">
                     <span class="sidebar-menu-icon"><i class="fas fa-home"></i></span>
-                    <span>Dashboard | Inicio</span>
+                    <span>Inicio</span>
                 </a>
             </div>
 
@@ -46,6 +46,7 @@
             <partial name="_Partials/_SidebarMenuPayments" />
             <partial name="_Partials/_SidebarMenuCreditCards" />
             <partial name="_Partials/_SidebarMenuInvestments" />
+            <partial name="_Partials/_SidebarMenuReports" />
 
         </div>
         <partial name="_Partials/_SidebarMenuAdmin" />
