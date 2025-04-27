@@ -100,20 +100,19 @@
                             {
                                 <tr>
                                     <td>
-                                        <div class="d-flex align-items-center">
-                                            @if (item.IsRecurring)
-                                            {
-                                                <span class="badge bg-info me-2" title="Pagamento Recorrente">
-                                                    <i class="fas fa-sync-alt"></i>
-                                                </span>
-                                            }
-                                            <div>
-                                                <div class="fw-medium">@item.Description</div>
-                                                <div class="small text-muted">
-                                                    @(item.Installments.Any() ? $"Parcelado ({item.Installments.Count}x)" : "Pagamento Único")
-                                                </div>
+                                        <a asp-action="Details" asp-route-id="@item.Id">
+                                            <div class="fw-medium">
+                                                @if (item.IsRecurring)
+                                                {
+                                                    <span class="badge bg-info me-2" title="Pagamento Recorrente">
+                                                        <i class="fas fa-sync-alt"></i>
+                                                    </span>
+                                                }@item.Description
                                             </div>
-                                        </div>
+                                            <div class="small text-muted">
+                                                @(item.Installments.Any() ? $"Parcelado ({item.Installments.Count}x)" : "Pagamento Único")
+                                            </div>
+                                        </a>
                                     </td>
                                     <td class="text-center">@item.GetFormattedDueDate()</td>
                                     <td class="text-end">@item.GetFormattedAmount()</td>

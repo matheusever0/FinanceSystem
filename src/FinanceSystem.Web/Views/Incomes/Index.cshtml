@@ -98,11 +98,14 @@
                         <tr>
                             <td>
                                 <a asp-action="Details" asp-route-id="@income.Id">
-                                    @income.Description
-                                    @if (income.IsRecurring)
-                                    {
-                                        <small class="text-muted ms-2"><i class="fas fa-sync-alt" title="Recorrente"></i></small>
-                                    }
+                                    <div class="fw-medium">
+                                        @if (income.IsRecurring)
+                                        {
+                                            <span class="badge bg-info me-2" title="Receita Recorrente">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </span>
+                                        }@income.Description
+                                    </div>
                                 </a>
                             </td>
                             <td class="text-end">@income.GetFormattedAmount()</td>
