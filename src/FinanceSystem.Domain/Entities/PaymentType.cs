@@ -10,6 +10,7 @@ public class PaymentType
     public User User { get; protected set; }
     public DateTime CreatedAt { get; protected set; }
     public ICollection<Payment> Payments { get; protected set; }
+    public bool IsFinancingType { get; protected set; }
 
     protected PaymentType()
     {
@@ -23,6 +24,31 @@ public class PaymentType
         Description = description;
         IsSystem = true;
         CreatedAt = DateTime.Now;
+        IsFinancingType = false;
+        Payments = [];
+    }
+
+    public PaymentType(string name, string description, bool isFinancingType)
+    {
+        Id = Guid.NewGuid();
+        Name = name;
+        Description = description;
+        IsSystem = false;
+        CreatedAt = DateTime.Now;
+        IsFinancingType = isFinancingType;
+        Payments = [];
+    }
+
+    public PaymentType(string name, string description, User user, bool isFinancingType)
+    {
+        Id = Guid.NewGuid();
+        Name = name;
+        Description = description;
+        IsSystem = false;
+        UserId = user.Id;
+        User = user;
+        CreatedAt = DateTime.Now;
+        IsFinancingType = isFinancingType;
         Payments = [];
     }
 
@@ -35,6 +61,7 @@ public class PaymentType
         UserId = user.Id;
         User = user;
         CreatedAt = DateTime.Now;
+        IsFinancingType = false;
         Payments = [];
     }
 

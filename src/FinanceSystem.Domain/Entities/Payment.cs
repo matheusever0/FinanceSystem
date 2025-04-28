@@ -24,6 +24,12 @@ namespace FinanceSystem.Domain.Entities
         public Guid PaymentMethodId { get; protected set; }
         public PaymentMethod PaymentMethod { get; protected set; }
 
+        public Guid? FinancingId { get; protected set; }
+        public Financing? Financing { get; protected set; }
+
+        public Guid? FinancingInstallmentId { get; protected set; }
+        public FinancingInstallment? FinancingInstallment { get; protected set; }
+
         public ICollection<PaymentInstallment> Installments { get; protected set; }
         protected Payment()
         {
@@ -61,10 +67,70 @@ namespace FinanceSystem.Domain.Entities
             Installments = [];
         }
 
+        public Payment(
+             string description,
+             decimal amount,
+             DateTime dueDate,
+             PaymentType paymentType,
+             PaymentMethod paymentMethod,
+             User user,
+             Financing financing,
+             FinancingInstallment? financingInstallment = null,
+             bool isRecurring = false,
+             string notes = null)
+        {
+            Id = Guid.NewGuid();
+            Description = description;
+            Amount = amount;
+            DueDate = dueDate;
+            Status = PaymentStatus.Pending;
+            IsRecurring = isRecurring;
+            Notes = notes;
+            CreatedAt = DateTime.Now;
+
+            PaymentTypeId = paymentType.Id;
+            PaymentType = paymentType;
+
+            PaymentMethodId = paymentMethod.Id;
+            PaymentMethod = paymentMethod;
+
+            UserId = user.Id;
+            User = user;
+
+            Installments = [];
+            FinancingId = financing.Id;
+            Financing = financing;
+
+            if (financingInstallment != null)
+            {
+                FinancingInstallmentId = financingInstallment.Id;
+                FinancingInstallment = financingInstallment;
+            }
+        }
+
         public void MarkAsPaid(DateTime paymentDate)
         {
             PaymentDate = paymentDate;
             Status = PaymentStatus.Paid;
+
+            // Se for um pagamento de financiamento
+            if (FinancingId.HasValue)
+            {
+                // Se for um pagamento de parcela
+                if (FinancingInstallmentId.HasValue && FinancingInstallment != null)
+                {
+                    FinancingInstallment.AddPayment(this);
+                }
+
+                // Atualizar o saldo devedor do financiamento
+                if (Financing != null)
+                {
+                    // Somente o valor da amortização reduz o saldo devedor
+                    decimal amortizationAmount = FinancingInstallment?.AmortizationAmount ?? Amount;
+                    Financing.UpdateRemainingDebt(amortizationAmount);
+                }
+            }
+
             UpdateUpdatedAt();
         }
 
