@@ -113,7 +113,7 @@ namespace FinanceSystem.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequirePermission("financings.create")]
-        public async Task<IActionResult> Create(CreateFinancingDto model)
+        public async Task<IActionResult> Create(CreateFinancingModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -147,7 +147,7 @@ namespace FinanceSystem.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequirePermission("financings.simulate")]
-        public async Task<IActionResult> Simulate(FinancingSimulationRequestDto model)
+        public async Task<IActionResult> Simulate(FinancingSimulationRequestModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -224,7 +224,7 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
-        [RequirePermission("financings.apply-correction")]
+        [RequirePermission("financings.apply.correction")]
         public async Task<IActionResult> ApplyCorrection(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -242,7 +242,7 @@ namespace FinanceSystem.Web.Controllers
                     return NotFound("Financiamento não encontrado");
                 }
 
-                var model = new ApplyCorrectionDto
+                var model = new ApplyCorrectionModel
                 {
                     FinancingId = id,
                     CorrectionDate = DateTime.Today
@@ -261,8 +261,8 @@ namespace FinanceSystem.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequirePermission("financings.apply-correction")]
-        public async Task<IActionResult> ApplyCorrection(ApplyCorrectionDto model)
+        [RequirePermission("financings.apply.correction")]
+        public async Task<IActionResult> ApplyCorrection(ApplyCorrectionModel model)
         {
             if (!ModelState.IsValid)
             {

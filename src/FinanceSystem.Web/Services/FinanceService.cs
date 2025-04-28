@@ -56,12 +56,12 @@ namespace FinanceSystem.Web.Services
             }
         }
 
-        public async Task<FinancingDetailDto> GetFinancingDetailsAsync(string id, string token)
+        public async Task<FinancingDetailModel> GetFinancingDetailsAsync(string id, string token)
         {
             try
             {
                 _logger.LogInformation("Obtendo detalhes do financiamento com ID: {FinancingId}", id);
-                return await _apiService.GetAsync<FinancingDetailDto>($"/api/financings/{id}/details", token);
+                return await _apiService.GetAsync<FinancingDetailModel>($"/api/financings/{id}/details", token);
             }
             catch (Exception ex)
             {
@@ -84,7 +84,7 @@ namespace FinanceSystem.Web.Services
             }
         }
 
-        public async Task<FinancingModel> CreateFinancingAsync(CreateFinancingDto model, string token)
+        public async Task<FinancingModel> CreateFinancingAsync(CreateFinancingModel model, string token)
         {
             try
             {
@@ -98,7 +98,7 @@ namespace FinanceSystem.Web.Services
             }
         }
 
-        public async Task<FinancingModel> UpdateFinancingAsync(string id, UpdateFinancingDto model, string token)
+        public async Task<FinancingModel> UpdateFinancingAsync(string id, UpdateFinancingModel model, string token)
         {
             try
             {
@@ -140,13 +140,13 @@ namespace FinanceSystem.Web.Services
             }
         }
 
-        public async Task<FinancingSimulationDto> SimulateFinancingAsync(FinancingSimulationRequestDto model, string token)
+        public async Task<FinancingSimulationModel> SimulateFinancingAsync(FinancingSimulationRequestModel model, string token)
         {
             try
             {
                 _logger.LogInformation("Simulando financiamento: {TotalAmount} em {TermMonths} meses",
                     model.TotalAmount, model.TermMonths);
-                return await _apiService.PostAsync<FinancingSimulationDto>("/api/financings/simulate", model, token);
+                return await _apiService.PostAsync<FinancingSimulationModel>("/api/financings/simulate", model, token);
             }
             catch (Exception ex)
             {
@@ -155,7 +155,7 @@ namespace FinanceSystem.Web.Services
             }
         }
 
-        public async Task<FinancingForecastDto> ForecastFinancingAsync(string financingId, int forecastMonths, string token)
+        public async Task<FinancingForecastModel> ForecastFinancingAsync(string financingId, int forecastMonths, string token)
         {
             try
             {
@@ -168,7 +168,7 @@ namespace FinanceSystem.Web.Services
                     ForecastMonths = forecastMonths
                 };
 
-                return await _apiService.PostAsync<FinancingForecastDto>("/api/financings/forecast", request, token);
+                return await _apiService.PostAsync<FinancingForecastModel>("/api/financings/forecast", request, token);
             }
             catch (Exception ex)
             {
@@ -177,7 +177,7 @@ namespace FinanceSystem.Web.Services
             }
         }
 
-        public async Task<bool> ApplyMonetaryCorrectionAsync(ApplyCorrectionDto model, string token)
+        public async Task<bool> ApplyMonetaryCorrectionAsync(ApplyCorrectionModel model, string token)
         {
             try
             {

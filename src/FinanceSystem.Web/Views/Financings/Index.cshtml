@@ -104,7 +104,7 @@
                                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            @if (item.Status == "Active" && await PermissionHelper.HasPermissionAsync(Context, "financings.apply-correction"))
+                                            @if (item.Status == "Active" && await PermissionHelper.HasPermissionAsync(Context, "financings.apply.correction"))
                                             {
                                                 <a asp-action="ApplyCorrection" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
                                                     <i class="fas fa-sync-alt"></i>

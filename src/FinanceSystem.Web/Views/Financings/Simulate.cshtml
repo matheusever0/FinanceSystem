@@ -1,11 +1,11 @@
-﻿@model FinancingSimulationRequestDto
+﻿@model FinancingSimulationRequestModel
 @using FinanceSystem.Web.Helpers
 @using FinanceSystem.Web.Models.Financing
 @{
     ViewData["Title"] = "Simulação de Financiamento";
     var correctionIndexes = ViewBag.CorrectionIndexes as IEnumerable<SelectListItem>;
     var financingTypes = ViewBag.FinancingTypes as IEnumerable<SelectListItem>;
-    var simulation = ViewBag.Simulation as FinancingSimulationDto;
+    var simulation = ViewBag.Simulation as FinancingSimulationModel;
 }
 
 <div class="container-fluid">
