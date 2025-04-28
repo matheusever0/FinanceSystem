@@ -47,7 +47,7 @@
                             </div>
                             <div class="mb-3">
                                 <h5 class="small font-weight-bold text-muted">Valor Total</h5>
-                                <p class="fw-bold">@Model.TotalAmount.ToString("C2")</p>
+                                <p class="fw-bold">@Model.GetFormattedTotalAmount()</p>
                             </div>
                             <div class="mb-3">
                                 <h5 class="small font-weight-bold text-muted">Taxa de Juros</h5>
@@ -305,6 +305,12 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script src="~/js/utils/helpers.js" asp-append-version="true"></script>
+    <script src="~/js/components/forms.js" asp-append-version="true"></script>
+    <script src="~/js/pages/financings.js" asp-append-version="true"></script>
+}
 
 @functions {
     string GetStatusBadgeClass(string status)

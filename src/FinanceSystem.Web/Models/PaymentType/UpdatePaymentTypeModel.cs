@@ -11,5 +11,6 @@ namespace FinanceSystem.Web.Models
         [StringLength(200, ErrorMessage = "A descrição deve ter no máximo 200 caracteres")]
         [Display(Name = "Descrição")]
         public required string Description { get; set; }
+        public bool IsFinancingType { get; set; }
     }
 }

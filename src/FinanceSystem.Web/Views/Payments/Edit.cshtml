@@ -54,13 +54,13 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label asp-for="PaymentTypeId" class="form-label"></label>
-                            <select asp-for="PaymentTypeId" class="form-select">
+                            <select asp-for="PaymentTypeId" class="form-select" id="PaymentTypeId">
                                 <option value="">Selecione o tipo de pagamento</option>
                                 @if (paymentTypes != null)
                                 {
                                     @foreach (var type in paymentTypes)
                                     {
-                                        <option value="@type.Id">@type.Name</option>
+                                        <option value="@type.Id" data-is-financing-type="@type.IsFinancingType.ToString().ToLower()">@type.Name</option>
                                     }
                                 }
                             </select>

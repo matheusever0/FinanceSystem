@@ -205,10 +205,12 @@ namespace FinanceSystem.Web.Controllers
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
                 var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
+                var financings = await _financingService.GetActiveFinancingsAsync(token);
 
                 ViewBag.PaymentTypes = paymentTypes;
                 ViewBag.PaymentMethods = paymentMethods;
                 ViewBag.CreditCards = creditCards;
+                ViewBag.Financings = financings;
                 ViewBag.CreditCardPaymentMethod = paymentMethods.FirstOrDefault(pm => pm.Type == 2)?.Id;
 
                 return View();
@@ -497,7 +499,7 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
-        private async Task LoadFormDependencies(bool includeFinancings = false)
+        private async Task LoadFormDependencies(bool includeFinancings = true)
         {
             try
             {
@@ -505,18 +507,13 @@ namespace FinanceSystem.Web.Controllers
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
                 var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
+                var financings = await _financingService.GetActiveFinancingsAsync(token);
 
                 ViewBag.PaymentTypes = paymentTypes;
                 ViewBag.PaymentMethods = paymentMethods;
                 ViewBag.CreditCards = creditCards;
+                ViewBag.Financings = financings;
                 ViewBag.CreditCardPaymentMethod = paymentMethods.FirstOrDefault(pm => pm.Type == 2)?.Id;
-
-                if (includeFinancings)
-                {
-                    var financings = await _financingService.GetActiveFinancingsAsync(token);
-                    ViewBag.Financings = financings;
-                    ViewBag.IsFinancingPayment = true;
-                }
             }
             catch
             {

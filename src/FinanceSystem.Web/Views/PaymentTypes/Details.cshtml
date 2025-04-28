@@ -42,6 +42,10 @@
                                 <p>@Model.Name</p>
                             </div>
                             <div class="mb-3">
+                                <h5 class="small font-weight-bold text-muted">Tipo de Financiamento</h5>
+                                <p>@(Model.IsFinancingType ? "Sim" : "Não")</p>
+                            </div>
+                            <div class="mb-3">
                                 <h5 class="small font-weight-bold text-muted">Descrição</h5>
                                 <p>@(string.IsNullOrEmpty(Model.Description) ? "-" : Model.Description)</p>
                             </div>

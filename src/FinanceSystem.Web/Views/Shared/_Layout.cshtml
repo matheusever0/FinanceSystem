@@ -47,32 +47,7 @@
             <partial name="_Partials/_SidebarMenuCreditCards" />
             <partial name="_Partials/_SidebarMenuInvestments" />
             <partial name="_Partials/_SidebarMenuReports" />
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseFinancings"
-                   aria-expanded="false" aria-controls="collapseFinancings">
-                    <i class="fas fa-calculator fa-fw"></i>
-                    <span>Financiamentos</span>
-                    <i class="fas fa-angle-right float-end"></i>
-                </a>
-                <div id="collapseFinancings" class="collapse" aria-labelledby="headingFinancings"
-                     data-bs-parent="#accordionSidebar">
-                    <div class="bg-nav-dark py-2 collapse-inner rounded">
-                        <a class="collapse-item" asp-controller="Financings" asp-action="Index">
-                            <i class="fas fa-list fa-fw"></i> Todos
-                        </a>
-                        <a class="collapse-item" asp-controller="Financings" asp-action="Active">
-                            <i class="fas fa-check-circle fa-fw"></i> Ativos
-                        </a>
-                        <a class="collapse-item" asp-controller="Financings" asp-action="Simulate">
-                            <i class="fas fa-calculator fa-fw"></i> Simular
-                        </a>
-                        <a class="collapse-item" asp-controller="Financings" asp-action="Create">
-                            <i class="fas fa-plus fa-fw"></i> Novo
-                        </a>
-                    </div>
-                </div>
-            </li>
-
+            <partial name="_Partials/_SidebarMenuFinancings" />
         </div>
         <partial name="_Partials/_SidebarMenuAdmin" />
     </div>
