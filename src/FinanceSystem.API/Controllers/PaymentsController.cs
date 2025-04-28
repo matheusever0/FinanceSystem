@@ -1,6 +1,8 @@
 ﻿using FinanceSystem.API.Extensions;
+using FinanceSystem.Application.DTOs.Financing;
 using FinanceSystem.Application.DTOs.Payment;
 using FinanceSystem.Application.Interfaces;
+using FinanceSystem.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -222,6 +224,44 @@ namespace FinanceSystem.API.Controllers
 
                 var payment = await _paymentService.CancelAsync(id);
                 return Ok(payment);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("financing-options")]
+        public async Task<ActionResult<IEnumerable<FinancingDto>>> GetFinancingOptions()
+        {
+            var userId = HttpContext.GetCurrentUserId();
+            var financingService = HttpContext.RequestServices.GetRequiredService<IFinancingService>();
+            var financings = await financingService.GetActiveFinancingsByUserIdAsync(userId);
+            return Ok(financings);
+        }
+
+        // Adicionar um endpoint para listar parcelas pendentes de um financiamento
+        [HttpGet("financing/{financingId}/installments")]
+        public async Task<ActionResult<IEnumerable<FinancingInstallmentDto>>> GetFinancingInstallments(Guid financingId)
+        {
+            var userId = HttpContext.GetCurrentUserId();
+            var financingService = HttpContext.RequestServices.GetRequiredService<IFinancingService>();
+
+            try
+            {
+                var financing = await financingService.GetByIdAsync(financingId);
+                if (financing.UserId != userId)
+                    return Forbid();
+
+                var installmentService = HttpContext.RequestServices.GetRequiredService<IFinancingInstallmentService>();
+                var installments = await installmentService.GetByFinancingIdAsync(financingId);
+
+                // Filtrar apenas parcelas pendentes ou parcialmente pagas
+                var pendingInstallments = installments.Where(i =>
+                    i.Status == FinancingInstallmentStatus.Pending ||
+                    i.Status == FinancingInstallmentStatus.PartiallyPaid).ToList();
+
+                return Ok(pendingInstallments);
             }
             catch (KeyNotFoundException ex)
             {

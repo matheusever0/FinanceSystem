@@ -32,5 +32,7 @@ namespace FinanceSystem.Application.DTOs.Payment
         public int NumberOfInstallments { get; set; } = 1;
 
         public Guid? CreditCardId { get; set; }
+        public Guid? FinancingId { get; set; }
+        public Guid? FinancingInstallmentId { get; set; }
     }
 }

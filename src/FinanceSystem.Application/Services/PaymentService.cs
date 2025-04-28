@@ -88,16 +88,76 @@ namespace FinanceSystem.Application.Services
                 await _unitOfWork.CreditCards.UpdateAsync(creditCard);
             }
 
-            var payment = new Payment(
-                createPaymentDto.Description,
-                createPaymentDto.Amount,
-                createPaymentDto.DueDate,
-                paymentType,
-                paymentMethod,
-                user,
-                createPaymentDto.IsRecurring,
-                createPaymentDto.Notes
-            );
+            Payment? payment = null;
+
+            if (paymentType.IsFinancingType)
+            {
+                // Verificar se foi fornecido um financiamento
+                if (!createPaymentDto.FinancingId.HasValue)
+                    throw new InvalidOperationException("É necessário informar um financiamento para este tipo de pagamento");
+
+                // Buscar o financiamento
+                var financing = await _unitOfWork.Financings.GetByIdAsync(createPaymentDto.FinancingId.Value);
+                if (financing == null)
+                    throw new KeyNotFoundException("Financiamento não encontrado");
+
+                if (financing.UserId != userId)
+                    throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
+
+                // Se informou uma parcela específica
+                if (createPaymentDto.FinancingInstallmentId.HasValue)
+                {
+                    var installment = await _unitOfWork.FinancingInstallments.GetByIdAsync(createPaymentDto.FinancingInstallmentId.Value);
+                    if (installment == null)
+                        throw new KeyNotFoundException("Parcela de financiamento não encontrada");
+
+                    if (installment.FinancingId != financing.Id)
+                        throw new InvalidOperationException("A parcela não pertence ao financiamento informado");
+
+                    // Criar um pagamento vinculado ao financiamento e parcela
+                    payment = new Payment(
+                        createPaymentDto.Description,
+                        createPaymentDto.Amount,
+                        createPaymentDto.DueDate,
+                        paymentType,
+                        paymentMethod,
+                        user,
+                        financing,
+                        installment,
+                        createPaymentDto.IsRecurring,
+                        createPaymentDto.Notes
+                    );
+                }
+                else
+                {
+                    // Criar um pagamento vinculado apenas ao financiamento
+                    payment = new Payment(
+                        createPaymentDto.Description,
+                        createPaymentDto.Amount,
+                        createPaymentDto.DueDate,
+                        paymentType,
+                        paymentMethod,
+                        user,
+                        financing,
+                        null,  // Sem parcela específica
+                        createPaymentDto.IsRecurring,
+                        createPaymentDto.Notes
+                    );
+                }
+            }
+            else
+            {
+                payment = new Payment(
+                        createPaymentDto.Description,
+                        createPaymentDto.Amount,
+                        createPaymentDto.DueDate,
+                        paymentType,
+                        paymentMethod,
+                        user,
+                        createPaymentDto.IsRecurring,
+                        createPaymentDto.Notes
+                    );
+             }
 
             if (createPaymentDto.PaymentDate.HasValue)
             {
