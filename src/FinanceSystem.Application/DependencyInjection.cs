@@ -26,6 +26,10 @@ namespace FinanceSystem.Application
             services.AddScoped<IInvestmentService, InvestmentService>();
             services.AddScoped<IInvestmentTransactionService, InvestmentTransactionService>();
             services.AddScoped<IStockPriceService, StockPriceService>();
+            services.AddScoped<IFinancingService, FinancingService>();
+            services.AddScoped<IFinancingInstallmentService, FinancingInstallmentService>();
+            services.AddScoped<IFinancingCorrectionService, FinancingCorrectionService>();
+            services.AddScoped<ICorrectionIndexService, CorrectionIndexService>();
 
             return services;
         }

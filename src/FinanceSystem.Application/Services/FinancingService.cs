@@ -1,0 +1,421 @@
+﻿using AutoMapper;
+using FinanceSystem.Application.DTOs.Financing;
+using FinanceSystem.Application.Interfaces;
+using FinanceSystem.Domain.Entities;
+using FinanceSystem.Domain.Enums;
+using FinanceSystem.Domain.Interfaces.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace FinanceSystem.Application.Services
+{
+    public class FinancingService : IFinancingService
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+
+        public FinancingService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }
+
+        public async Task<FinancingDto> GetByIdAsync(Guid id)
+        {
+            var financing = await _unitOfWork.Financings.GetByIdAsync(id);
+            return financing == null
+                ? throw new KeyNotFoundException("Financiamento não encontrado")
+                : _mapper.Map<FinancingDto>(financing);
+        }
+
+        public async Task<FinancingDetailDto> GetDetailsByIdAsync(Guid id)
+        {
+            var financing = await _unitOfWork.Financings.GetFinancingWithDetailsAsync(id);
+            if (financing == null)
+                throw new KeyNotFoundException("Financiamento não encontrado");
+
+            var dto = _mapper.Map<FinancingDetailDto>(financing);
+
+            // Calcular métricas adicionais
+            var installments = financing.Installments.ToList();
+            var paidInstallments = installments.Where(i => i.Status == FinancingInstallmentStatus.Paid).ToList();
+            var pendingInstallments = installments.Where(i => i.Status == FinancingInstallmentStatus.Pending
+                || i.Status == FinancingInstallmentStatus.PartiallyPaid).ToList();
+
+            dto.InstallmentsPaid = paidInstallments.Count;
+            dto.InstallmentsRemaining = pendingInstallments.Count;
+
+            dto.TotalPaid = paidInstallments.Sum(i => i.PaidAmount);
+            dto.TotalRemaining = pendingInstallments.Sum(i => i.RemainingAmount);
+
+            dto.TotalInterestPaid = paidInstallments.Sum(i => i.InterestAmount);
+            dto.TotalInterestRemaining = pendingInstallments.Sum(i => i.InterestAmount);
+
+            dto.TotalAmortizationPaid = paidInstallments.Sum(i => i.AmortizationAmount);
+
+            dto.ProgressPercentage = financing.TotalAmount > 0
+                ? (dto.TotalAmortizationPaid / financing.TotalAmount) * 100
+                : 0;
+
+            dto.AverageInstallmentAmount = installments.Count > 0
+                ? installments.Average(i => i.TotalAmount)
+                : 0;
+
+            dto.MonthlyAveragePayment = paidInstallments.Count > 0
+                ? paidInstallments.Sum(i => i.PaidAmount) / paidInstallments.Count
+                : 0;
+
+            dto.EstimatedTotalCost = dto.TotalPaid + dto.TotalRemaining;
+
+            return dto;
+        }
+
+        public async Task<IEnumerable<FinancingDto>> GetAllByUserIdAsync(Guid userId)
+        {
+            var financings = await _unitOfWork.Financings.GetFinancingsByUserIdAsync(userId);
+            return _mapper.Map<IEnumerable<FinancingDto>>(financings);
+        }
+
+        public async Task<IEnumerable<FinancingDto>> GetActiveFinancingsByUserIdAsync(Guid userId)
+        {
+            var financings = await _unitOfWork.Financings.GetActiveFinancingsByUserIdAsync(userId);
+            return _mapper.Map<IEnumerable<FinancingDto>>(financings);
+        }
+
+        public async Task<IEnumerable<FinancingDto>> GetFinancingsByStatusAsync(Guid userId, FinancingStatus status)
+        {
+            var financings = await _unitOfWork.Financings.GetFinancingsByStatusAsync(userId, status);
+            return _mapper.Map<IEnumerable<FinancingDto>>(financings);
+        }
+
+        public async Task<decimal> GetTotalRemainingDebtByUserIdAsync(Guid userId)
+        {
+            return await _unitOfWork.Financings.GetTotalRemainingDebtByUserIdAsync(userId);
+        }
+
+        public async Task<FinancingDto> CreateAsync(CreateFinancingDto createFinancingDto, Guid userId)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId) ??
+                throw new KeyNotFoundException("Usuário não encontrado");
+
+            var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(createFinancingDto.PaymentTypeId) ??
+                throw new KeyNotFoundException("Tipo de pagamento não encontrado");
+
+            if (!paymentType.IsFinancingType)
+                throw new InvalidOperationException("O tipo de pagamento não é válido para financiamentos");
+
+            var financing = new Financing(
+                createFinancingDto.Description,
+                createFinancingDto.TotalAmount,
+                createFinancingDto.InterestRate,
+                createFinancingDto.TermMonths,
+                createFinancingDto.StartDate,
+                createFinancingDto.Type,
+                createFinancingDto.CorrectionIndex,
+                user,
+                createFinancingDto.Notes);
+
+            await _unitOfWork.Financings.AddAsync(financing);
+            await _unitOfWork.CompleteAsync();
+
+            return _mapper.Map<FinancingDto>(financing);
+        }
+
+        public async Task<FinancingDto> UpdateAsync(Guid id, UpdateFinancingDto updateFinancingDto)
+        {
+            var financing = await _unitOfWork.Financings.GetByIdAsync(id) ??
+                throw new KeyNotFoundException("Financiamento não encontrado");
+
+            if (financing.Status != FinancingStatus.Active)
+                throw new InvalidOperationException("Não é possível atualizar um financiamento que não está ativo");
+
+            if (!string.IsNullOrEmpty(updateFinancingDto.Description))
+                financing.UpdateDescription(updateFinancingDto.Description);
+
+            if (!string.IsNullOrEmpty(updateFinancingDto.Notes))
+                financing.UpdateNotes(updateFinancingDto.Notes);
+
+            await _unitOfWork.Financings.UpdateAsync(financing);
+            await _unitOfWork.CompleteAsync();
+
+            return _mapper.Map<FinancingDto>(financing);
+        }
+
+        public async Task CompleteAsync(Guid id)
+        {
+            var financing = await _unitOfWork.Financings.GetByIdAsync(id) ??
+                throw new KeyNotFoundException("Financiamento não encontrado");
+
+            if (financing.Status != FinancingStatus.Active)
+                throw new InvalidOperationException("Não é possível completar um financiamento que não está ativo");
+
+            financing.Complete();
+
+            await _unitOfWork.Financings.UpdateAsync(financing);
+            await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task CancelAsync(Guid id)
+        {
+            var financing = await _unitOfWork.Financings.GetByIdAsync(id) ??
+                throw new KeyNotFoundException("Financiamento não encontrado");
+
+            if (financing.Status != FinancingStatus.Active)
+                throw new InvalidOperationException("Não é possível cancelar um financiamento que não está ativo");
+
+            financing.Cancel();
+
+            await _unitOfWork.Financings.UpdateAsync(financing);
+            await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task<FinancingSimulationDto> SimulateAsync(FinancingSimulationRequestDto simulationRequest)
+        {
+            var result = new FinancingSimulationDto
+            {
+                TotalAmount = simulationRequest.TotalAmount,
+                InterestRate = simulationRequest.InterestRate,
+                TermMonths = simulationRequest.TermMonths,
+                Type = simulationRequest.Type
+            };
+
+            decimal monthlyRate = simulationRequest.InterestRate / 12 / 100;
+
+            if (simulationRequest.Type == FinancingType.PRICE)
+            {
+                // Fórmula PRICE
+                decimal factor = monthlyRate * (decimal)Math.Pow((double)(1 + monthlyRate), simulationRequest.TermMonths) /
+                                ((decimal)Math.Pow((double)(1 + monthlyRate), simulationRequest.TermMonths) - 1);
+
+                decimal installmentAmount = simulationRequest.TotalAmount * factor;
+                result.FirstInstallmentAmount = installmentAmount;
+                result.LastInstallmentAmount = installmentAmount;
+
+                decimal currentDebt = simulationRequest.TotalAmount;
+                decimal totalInterest = 0;
+
+                for (int i = 1; i <= simulationRequest.TermMonths; i++)
+                {
+                    decimal interest = currentDebt * monthlyRate;
+                    decimal amortization = installmentAmount - interest;
+
+                    totalInterest += interest;
+
+                    var installment = new FinancingInstallmentSimulationDto
+                    {
+                        Number = i,
+                        TotalAmount = installmentAmount,
+                        InterestAmount = interest,
+                        AmortizationAmount = amortization,
+                        RemainingDebt = currentDebt - amortization,
+                        DueDate = simulationRequest.StartDate.AddMonths(i)
+                    };
+
+                    result.Installments.Add(installment);
+
+                    currentDebt -= amortization;
+                }
+
+                result.TotalInterest = totalInterest;
+                result.TotalCost = simulationRequest.TotalAmount + totalInterest;
+            }
+            else // SAC
+            {
+                decimal constantAmortization = simulationRequest.TotalAmount / simulationRequest.TermMonths;
+                decimal currentDebt = simulationRequest.TotalAmount;
+                decimal totalInterest = 0;
+
+                for (int i = 1; i <= simulationRequest.TermMonths; i++)
+                {
+                    decimal interest = currentDebt * monthlyRate;
+                    decimal installmentAmount = constantAmortization + interest;
+
+                    if (i == 1)
+                        result.FirstInstallmentAmount = installmentAmount;
+                    if (i == simulationRequest.TermMonths)
+                        result.LastInstallmentAmount = installmentAmount;
+
+                    totalInterest += interest;
+
+                    var installment = new FinancingInstallmentSimulationDto
+                    {
+                        Number = i,
+                        TotalAmount = installmentAmount,
+                        InterestAmount = interest,
+                        AmortizationAmount = constantAmortization,
+                        RemainingDebt = currentDebt - constantAmortization,
+                        DueDate = simulationRequest.StartDate.AddMonths(i)
+                    };
+
+                    result.Installments.Add(installment);
+
+                    currentDebt -= constantAmortization;
+                }
+
+                result.TotalInterest = totalInterest;
+                result.TotalCost = simulationRequest.TotalAmount + totalInterest;
+                result.MonthlyDecreaseAmount = monthlyRate * constantAmortization;
+            }
+
+            // Limitar a no máximo 12 parcelas para visualização
+            if (result.Installments.Count > 12)
+            {
+                var firstInstallments = result.Installments.Take(3).ToList();
+                var middleInstallments = result.Installments
+                    .Skip(simulationRequest.TermMonths / 2 - 2)
+                    .Take(4)
+                    .ToList();
+                var lastInstallments = result.Installments
+                    .Skip(simulationRequest.TermMonths - 5)
+                    .Take(5)
+                    .ToList();
+
+                result.Installments = firstInstallments.Concat(middleInstallments).Concat(lastInstallments).ToList();
+            }
+
+            await Task.CompletedTask; // Para manter o método assíncrono
+            return result;
+        }
+
+        public async Task<FinancingForecastDto> ForecastAsync(FinancingForecastRequestDto forecastRequest)
+        {
+            var financing = await _unitOfWork.Financings.GetFinancingWithDetailsAsync(forecastRequest.FinancingId) ??
+                throw new KeyNotFoundException("Financiamento não encontrado");
+
+            if (financing.Status != FinancingStatus.Active)
+                throw new InvalidOperationException("Não é possível fazer previsões para um financiamento que não está ativo");
+
+            var result = new FinancingForecastDto
+            {
+                FinancingId = financing.Id,
+                FinancingDescription = financing.Description,
+                CurrentDebt = financing.RemainingDebt,
+                BaseInterestRate = financing.InterestRate,
+                CorrectionIndex = financing.CorrectionIndex
+            };
+
+            // Pegar as parcelas pendentes
+            var pendingInstallments = financing.Installments
+                .Where(i => i.Status == FinancingInstallmentStatus.Pending)
+                .OrderBy(i => i.InstallmentNumber)
+                .Take(forecastRequest.ForecastMonths)
+                .ToList();
+
+            if (!pendingInstallments.Any())
+                throw new InvalidOperationException("Não há parcelas pendentes para este financiamento");
+
+            // Cenário Otimista
+            var optimisticScenario = CreateForecastScenario(
+                "Otimista",
+                forecastRequest.OptimisticScenarioIndex,
+                pendingInstallments,
+                financing.RemainingDebt,
+                financing.InterestRate);
+
+            // Cenário Realista
+            var realisticScenario = CreateForecastScenario(
+                "Realista",
+                forecastRequest.RealisticScenarioIndex,
+                pendingInstallments,
+                financing.RemainingDebt,
+                financing.InterestRate);
+
+            // Cenário Pessimista
+            var pessimisticScenario = CreateForecastScenario(
+                "Pessimista",
+                forecastRequest.PessimisticScenarioIndex,
+                pendingInstallments,
+                financing.RemainingDebt,
+                financing.InterestRate);
+
+            result.Scenarios.Add(optimisticScenario);
+            result.Scenarios.Add(realisticScenario);
+            result.Scenarios.Add(pessimisticScenario);
+
+            return result;
+        }
+
+        private FinancingForecastScenarioDto CreateForecastScenario(
+            string name,
+            decimal indexValue,
+            List<FinancingInstallment> originalInstallments,
+            decimal currentDebt,
+            decimal interestRate)
+        {
+            var scenario = new FinancingForecastScenarioDto
+            {
+                Name = name,
+                ProjectedIndexValue = indexValue
+            };
+
+            decimal monthlyRate = interestRate / 12 / 100;
+            decimal projectedDebt = currentDebt;
+            decimal totalCost = 0;
+
+            for (int i = 0; i < originalInstallments.Count; i++)
+            {
+                var originalInstallment = originalInstallments[i];
+
+                // Aplicar correção monetária ao saldo devedor após cada mês
+                if (i > 0)
+                {
+                    projectedDebt *= (1 + indexValue);
+                }
+
+                var forecastInstallment = new FinancingForecastInstallmentDto
+                {
+                    Number = originalInstallment.InstallmentNumber,
+                    DueDate = originalInstallment.DueDate,
+                    OriginalAmount = originalInstallment.TotalAmount
+                };
+
+                // Recalcular parcela com base no tipo de financiamento
+                if (originalInstallment.AmortizationAmount > 0) // SAC
+                {
+                    decimal amortization = originalInstallment.AmortizationAmount;
+                    decimal interest = projectedDebt * monthlyRate;
+                    decimal totalAmount = amortization + interest;
+
+                    forecastInstallment.ProjectedAmount = totalAmount;
+                    projectedDebt -= amortization;
+                }
+                else // PRICE
+                {
+                    // Para PRICE, precisamos recalcular todas as parcelas restantes
+                    int remainingMonths = originalInstallments.Count - i;
+                    decimal factor = monthlyRate * (decimal)Math.Pow((double)(1 + monthlyRate), remainingMonths) /
+                                   ((decimal)Math.Pow((double)(1 + monthlyRate), remainingMonths) - 1);
+
+                    decimal installmentAmount = projectedDebt * factor;
+                    decimal interest = projectedDebt * monthlyRate;
+                    decimal amortization = installmentAmount - interest;
+
+                    forecastInstallment.ProjectedAmount = installmentAmount;
+                    projectedDebt -= amortization;
+                }
+
+                forecastInstallment.Difference = forecastInstallment.ProjectedAmount - forecastInstallment.OriginalAmount;
+                forecastInstallment.DifferencePercentage = forecastInstallment.OriginalAmount > 0
+                    ? (forecastInstallment.Difference / forecastInstallment.OriginalAmount) * 100
+                    : 0;
+
+                totalCost += forecastInstallment.ProjectedAmount;
+
+                scenario.Installments.Add(forecastInstallment);
+            }
+
+            scenario.ProjectedFinalDebt = projectedDebt;
+            scenario.ProjectedTotalCost = totalCost;
+            scenario.DifferenceFromCurrent = projectedDebt - currentDebt;
+            scenario.DifferencePercentage = currentDebt > 0
+                ? (scenario.DifferenceFromCurrent / currentDebt) * 100
+                : 0;
+
+            return scenario;
+        }
+    }
+}

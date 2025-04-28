@@ -2,7 +2,7 @@
 {
     public enum FinancingType
     {
-        Price = 1, 
-        Sac = 2    
+        PRICE = 1, 
+        SAC = 2    
     }
 }

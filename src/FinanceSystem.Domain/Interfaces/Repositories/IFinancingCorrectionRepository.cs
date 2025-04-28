@@ -6,5 +6,6 @@ namespace FinanceSystem.Domain.Interfaces.Repositories
     {
         Task<IEnumerable<FinancingCorrection>> GetCorrectionsByFinancingIdAsync(Guid financingId);
         Task<IEnumerable<FinancingCorrection>> GetCorrectionsByDateRangeAsync(Guid financingId, DateTime startDate, DateTime endDate);
+        Task<decimal> GetTotalCorrectionImpactAsync(Guid financingId);
     }
 }

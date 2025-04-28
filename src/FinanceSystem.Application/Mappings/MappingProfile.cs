@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FinanceSystem.Application.DTOs.CreditCard;
+using FinanceSystem.Application.DTOs.Financing;
 using FinanceSystem.Application.DTOs.Income;
 using FinanceSystem.Application.DTOs.IncomeInstallment;
 using FinanceSystem.Application.DTOs.IncomeType;
@@ -57,6 +58,36 @@ namespace FinanceSystem.Application.Mappings
 
             CreateMap<InvestmentTransaction, InvestmentTransactionDto>()
                 .ForMember(dest => dest.TypeDescription, opt => opt.MapFrom(src => src.Type.ToString()));
+
+            CreateMap<Financing, FinancingDto>()
+                .ForMember(dest => dest.TotalPaid, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalRemaining, opt => opt.Ignore())
+                .ForMember(dest => dest.ProgressPercentage, opt => opt.Ignore())
+                .ForMember(dest => dest.InstallmentsPaid, opt => opt.Ignore())
+                .ForMember(dest => dest.InstallmentsRemaining, opt => opt.Ignore());
+
+            CreateMap<Financing, FinancingDetailDto>()
+                .ForMember(dest => dest.TotalPaid, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalRemaining, opt => opt.Ignore())
+                .ForMember(dest => dest.ProgressPercentage, opt => opt.Ignore())
+                .ForMember(dest => dest.InstallmentsPaid, opt => opt.Ignore())
+                .ForMember(dest => dest.InstallmentsRemaining, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalInterestPaid, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalInterestRemaining, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalAmortizationPaid, opt => opt.Ignore())
+                .ForMember(dest => dest.AverageInstallmentAmount, opt => opt.Ignore())
+                .ForMember(dest => dest.MonthlyAveragePayment, opt => opt.Ignore())
+                .ForMember(dest => dest.EstimatedTotalCost, opt => opt.Ignore())
+                .ForMember(dest => dest.Installments, opt => opt.MapFrom(src => src.Installments))
+                .ForMember(dest => dest.Corrections, opt => opt.MapFrom(src => src.Corrections))
+                .ForMember(dest => dest.Payments, opt => opt.MapFrom(src => src.Payments));
+
+            CreateMap<FinancingInstallment, FinancingInstallmentDto>();
+            CreateMap<FinancingInstallment, FinancingInstallmentDetailDto>()
+                .ForMember(dest => dest.FinancingDescription, opt => opt.Ignore())
+                .ForMember(dest => dest.Payments, opt => opt.Ignore());
+
+            CreateMap<FinancingCorrection, FinancingCorrectionDto>();
         }
     }
 }
