@@ -3,6 +3,7 @@ using FinanceSystem.Resources.Web.Enums;
 using FinanceSystem.Resources.Web.Helpers;
 using FinanceSystem.Web.Extensions;
 using FinanceSystem.Web.Filters;
+using FinanceSystem.Web.Interfaces;
 using FinanceSystem.Web.Models.Payment;
 using FinanceSystem.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -18,17 +19,20 @@ namespace FinanceSystem.Web.Controllers
         private readonly IPaymentTypeService _paymentTypeService;
         private readonly IPaymentMethodService _paymentMethodService;
         private readonly ICreditCardService _creditCardService;
+        private readonly IFinancingService _financingService;
 
         public PaymentsController(
             IPaymentService paymentService,
             IPaymentTypeService paymentTypeService,
             IPaymentMethodService paymentMethodService,
-            ICreditCardService creditCardService)
+            ICreditCardService creditCardService,
+            IFinancingService financingService)
         {
             _paymentService = paymentService ?? throw new ArgumentNullException(nameof(paymentService));
             _paymentTypeService = paymentTypeService ?? throw new ArgumentNullException(nameof(paymentTypeService));
             _paymentMethodService = paymentMethodService ?? throw new ArgumentNullException(nameof(paymentMethodService));
             _creditCardService = creditCardService ?? throw new ArgumentNullException(nameof(creditCardService));
+            _financingService = financingService ?? throw new ArgumentNullException(nameof(financingService));
         }
 
         public async Task<IActionResult> Index()
@@ -231,6 +235,15 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
 
+                // Verificar se o tipo de pagamento é de financiamento
+                var paymentType = await _paymentTypeService.GetPaymentTypeByIdAsync(model.PaymentTypeId, token);
+                if (paymentType != null && paymentType.IsFinancingType && string.IsNullOrEmpty(model.FinancingId))
+                {
+                    ModelState.AddModelError("FinancingId", "Um financiamento deve ser selecionado para este tipo de pagamento.");
+                    await LoadFormDependencies();
+                    return View(model);
+                }
+
                 // Verificar se o método de pagamento é cartão de crédito e se foi selecionado um cartão
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(model.PaymentMethodId, token);
                 if (paymentMethod != null && paymentMethod.Type == 2 && string.IsNullOrEmpty(model.CreditCardId))
@@ -249,6 +262,40 @@ namespace FinanceSystem.Web.Controllers
                 ModelState.AddModelError(string.Empty, MessageHelper.GetCreationErrorMessage(EntityNames.Payment, ex));
                 await LoadFormDependencies();
                 return View(model);
+            }
+        }
+
+        [RequirePermission("payments.create")]
+        public async Task<IActionResult> CreateWithFinancing()
+        {
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
+
+                // Filtrar tipos de pagamento que são marcados como tipo de financiamento
+                var financingPaymentTypes = paymentTypes.Where(pt => pt.IsFinancingType).ToList();
+
+                if (!financingPaymentTypes.Any())
+                {
+                    TempData["WarningMessage"] = "Não há tipos de pagamento configurados para financiamento.";
+                    return RedirectToAction(nameof(Create));
+                }
+
+                var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
+                var financings = await _financingService.GetActiveFinancingsAsync(token);
+
+                ViewBag.PaymentTypes = financingPaymentTypes;
+                ViewBag.PaymentMethods = paymentMethods;
+                ViewBag.Financings = financings;
+                ViewBag.IsFinancingPayment = true;
+
+                return View("Create");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Payment, ex);
+                return RedirectToAction(nameof(Index));
             }
         }
 
@@ -450,7 +497,7 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
-        private async Task LoadFormDependencies()
+        private async Task LoadFormDependencies(bool includeFinancings = false)
         {
             try
             {
@@ -463,12 +510,20 @@ namespace FinanceSystem.Web.Controllers
                 ViewBag.PaymentMethods = paymentMethods;
                 ViewBag.CreditCards = creditCards;
                 ViewBag.CreditCardPaymentMethod = paymentMethods.FirstOrDefault(pm => pm.Type == 2)?.Id;
+
+                if (includeFinancings)
+                {
+                    var financings = await _financingService.GetActiveFinancingsAsync(token);
+                    ViewBag.Financings = financings;
+                    ViewBag.IsFinancingPayment = true;
+                }
             }
             catch
             {
                 ViewBag.PaymentTypes = new List<object>();
                 ViewBag.PaymentMethods = new List<object>();
                 ViewBag.CreditCards = new List<object>();
+                ViewBag.Financings = new List<object>();
             }
         }
     }

@@ -24,6 +24,7 @@ namespace FinanceSystem.Resources.Web.Enums
         Investment,
         Transaction,
         Report,
-        Dashboard
+        Dashboard,
+        Financing
     }
 }

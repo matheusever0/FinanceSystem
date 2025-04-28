@@ -21,6 +21,7 @@ namespace FinanceSystem.Web.Configuration
             services.AddScoped<IIncomeTypeService, IncomeTypeService>();
             services.AddScoped<IInvestmentService, InvestmentService>();
             services.AddScoped<IInvestmentTransactionService, InvestmentTransactionService>();
+            services.AddScoped<IFinancingService, FinancingService>();
 
             return services;
         }

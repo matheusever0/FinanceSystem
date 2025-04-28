@@ -44,5 +44,11 @@ namespace FinanceSystem.Web.Models.Payment
 
         [Display(Name = "Cartão de Crédito")]
         public required string CreditCardId { get; set; }
+
+        [Display(Name = "Financiamento")]
+        public string? FinancingId { get; set; }
+
+        [Display(Name = "Parcela de Financiamento")]
+        public string? FinancingInstallmentId { get; set; }
     }
 }

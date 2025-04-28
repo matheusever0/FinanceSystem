@@ -75,6 +75,31 @@
                                     </select>
                                     <span asp-validation-for="PaymentTypeId" class="text-danger"></span>
                                 </div>
+                                @if (ViewBag.IsFinancingPayment == true || (ViewBag.Financings != null && Model?.FinancingId != null))
+                                {
+                                    <div class="mb-3">
+                                        <label asp-for="FinancingId" class="form-label">Financiamento</label>
+                                        <select asp-for="FinancingId" class="form-select" id="financingSelect">
+                                            <option value="">Selecione o financiamento</option>
+                                            @if (ViewBag.Financings != null)
+                                            {
+                                                @foreach (var financing in ViewBag.Financings)
+                                                {
+                                                    <option value="@financing.Id">@financing.Description - @financing.GetFormattedAmount()</option>
+                                                }
+                                            }
+                                        </select>
+                                        <span asp-validation-for="FinancingId" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="mb-3" id="financingInstallmentSection" style="display:none;">
+                                        <label asp-for="FinancingInstallmentId" class="form-label">Parcela</label>
+                                        <select asp-for="FinancingInstallmentId" class="form-select" id="installmentSelect">
+                                            <option value="">Carregando parcelas...</option>
+                                        </select>
+                                        <span asp-validation-for="FinancingInstallmentId" class="text-danger"></span>
+                                    </div>
+                                }
 
                                 <div class="mb-3">
                                     <label asp-for="PaymentMethodId" class="form-label"></label>
@@ -172,4 +197,67 @@
     <script src="~/js/utils/helpers.js" asp-append-version="true"></script>
     <script src="~/js/components/financial.js" asp-append-version="true"></script>
     <script src="~/js/pages/financial-item.js" asp-append-version="true"></script>
+
+    <script>
+        // Manipular a seleção de financiamento
+        $(document).ready(function() {
+            const financingSelect = $('#financingSelect');
+            const installmentSection = $('#financingInstallmentSection');
+            const installmentSelect = $('#installmentSelect');
+
+            // Configurar evento de mudança para o select de financiamento
+            if (financingSelect.length > 0) {
+                financingSelect.on('change', function() {
+                    const financingId = $(this).val();
+
+                    if (financingId) {
+                        // Mostrar seção de parcelas e carregar as parcelas
+                        installmentSection.show();
+                        loadFinancingInstallments(financingId);
+                    } else {
+                        // Esconder seção de parcelas se nenhum financiamento for selecionado
+                        installmentSection.hide();
+                        installmentSelect.empty().append('<option value="">Selecione um financiamento primeiro</option>');
+                    }
+                });
+
+                // Carregar parcelas se um financiamento já estiver selecionado
+                if (financingSelect.val()) {
+                    installmentSection.show();
+                    loadFinancingInstallments(financingSelect.val());
+                }
+            }
+
+            // Função para carregar parcelas de um financiamento
+            function loadFinancingInstallments(financingId) {
+                installmentSelect.empty().append('<option value="">Carregando parcelas...</option>');
+
+                $.ajax({
+                    url: `/api/financings/${financingId}/installments`,
+                    method: 'GET',
+                    success: function(data) {
+                        installmentSelect.empty();
+                        installmentSelect.append('<option value="">Selecione uma parcela</option>');
+
+                        // Adicionar apenas parcelas pendentes
+                        const pendingInstallments = data.filter(i => i.status === 1); // 1 = Pendente
+
+                        if (pendingInstallments.length > 0) {
+                            pendingInstallments.forEach(function(item) {
+                                const dueDate = new Date(item.dueDate).toLocaleDateString('pt-BR');
+                                const optionText = `Parcela ${item.installmentNumber} - R$ ${item.amount.toFixed(2)} - Venc: ${dueDate}`;
+                                installmentSelect.append(`<option value="${item.id}">${optionText}</option>`);
+                            });
+                        } else {
+                            installmentSelect.append('<option value="" disabled>Não há parcelas pendentes</option>');
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Erro ao carregar parcelas:', error);
+                        installmentSelect.empty().append('<option value="">Erro ao carregar parcelas</option>');
+                    }
+                });
+            }
+        });
+    </script>
 }

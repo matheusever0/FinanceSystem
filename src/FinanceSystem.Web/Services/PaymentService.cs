@@ -1,4 +1,5 @@
 ﻿using FinanceSystem.Web.Interfaces;
+using FinanceSystem.Web.Models.Financing;
 using FinanceSystem.Web.Models.Payment;
 
 namespace FinanceSystem.Web.Services
@@ -259,6 +260,36 @@ namespace FinanceSystem.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao cancelar parcela: {InstallmentId}", installmentId);
+                throw;
+            }
+        }
+
+        // Adicionar ao PaymentService.cs
+        public async Task<IEnumerable<FinancingModel>> GetAvailableFinancingsAsync(string token)
+        {
+            try
+            {
+                _logger.LogInformation("Obtendo financiamentos disponíveis para pagamento");
+                return await _apiService.GetAsync<IEnumerable<FinancingModel>>("/api/payments/financing-options", token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter financiamentos disponíveis");
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<FinancingInstallmentModel>> GetFinancingInstallmentsAsync(string financingId, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Obtendo parcelas do financiamento {FinancingId}", financingId);
+                return await _apiService.GetAsync<IEnumerable<FinancingInstallmentModel>>(
+                    $"/api/payments/financing/{financingId}/installments", token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter parcelas do financiamento {FinancingId}", financingId);
                 throw;
             }
         }

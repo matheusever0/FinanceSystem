@@ -383,3 +383,80 @@ function initializeInstallmentActions() {
         });
     });
 }
+
+/**
+* Inicializa formulário financeiro (pagamento ou financiamento)
+*/
+function initializeFinancingForm() {
+    const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
+    if (!form) return;
+
+    // Inicializa campos comuns
+    initializeMoneyMask('.money');
+
+    // Configura validação
+    setupFormValidation(form, validateFinancingForm);
+}
+
+/**
+ * Validação de formulário de financiamento
+ */
+function validateFinancingForm(event) {
+    let isValid = true;
+    const form = event.target;
+
+    // Validar campos comuns
+    const totalAmount = form.querySelector('#TotalAmount');
+    if (totalAmount) {
+        let rawValue = totalAmount.value;
+        if (typeof rawValue === 'string') {
+            rawValue = rawValue.replace(/\./g, '').replace(',', '.');
+        }
+
+        const parsed = parseFloat(rawValue);
+
+        if (isNaN(parsed) || parsed <= 0) {
+            isValid = false;
+            showFieldError(totalAmount, 'Informe um valor válido');
+        } else {
+            // Atualiza o valor no campo antes de enviar
+            totalAmount.value = parsed.toString();
+        }
+    }
+
+    // Validar taxa de juros
+    const interestRate = form.querySelector('#InterestRate');
+    if (interestRate) {
+        const rate = parseFloat(interestRate.value);
+        if (isNaN(rate) || rate < 0 || rate > 100) {
+            isValid = false;
+            showFieldError(interestRate, 'A taxa de juros deve estar entre 0 e 100%');
+        }
+    }
+
+    // Validar prazo
+    const termMonths = form.querySelector('#TermMonths');
+    if (termMonths) {
+        const term = parseInt(termMonths.value);
+        if (isNaN(term) || term <= 0) {
+            isValid = false;
+            showFieldError(termMonths, 'O prazo deve ser maior que zero');
+        }
+    }
+
+    // Validar tipo de financiamento
+    const type = form.querySelector('#Type');
+    if (type && !type.value) {
+        isValid = false;
+        showFieldError(type, 'Selecione o tipo de financiamento');
+    }
+
+    // Validar índice de correção
+    const correctionIndex = form.querySelector('#CorrectionIndex');
+    if (correctionIndex && !correctionIndex.value) {
+        isValid = false;
+        showFieldError(correctionIndex, 'Selecione o índice de correção');
+    }
+
+    return isValid;
+}
