@@ -211,13 +211,12 @@ namespace FinanceSystem.Web.Controllers
                 ViewBag.PaymentMethods = paymentMethods;
                 ViewBag.CreditCards = creditCards;
                 ViewBag.Financings = financings;
-                ViewBag.CreditCardPaymentMethod = paymentMethods.FirstOrDefault(pm => pm.Type == 2)?.Id;
 
                 return View();
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PreparingForm;
+                TempData["ErrorMessage"] = "Erro ao preparar o formulário.";
                 return RedirectToAction(nameof(Index));
             }
         }

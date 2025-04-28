@@ -14,8 +14,13 @@ function initializePaymentForm() {
     if (!form) return;
 
     // Inicializa campos comuns
-    initializeMoneyMask('.money-input');
-    initializeRecurringToggle(form);
+    if (typeof initializeMoneyMask === 'function') {
+        initializeMoneyMask('.money-input');
+    }
+
+    if (typeof initializeRecurringToggle === 'function') {
+        initializeRecurringToggle(form);
+    }
 
     // Inicializa tipos de pagamento
     initializePaymentTypeSelect();
@@ -24,7 +29,9 @@ function initializePaymentForm() {
     initializePaymentMethodSelect();
 
     // Configura validação
-    setupFormValidation(form, validatePaymentForm);
+    if (typeof setupFormValidation === 'function') {
+        setupFormValidation(form, validatePaymentForm);
+    }
 }
 
 /**
@@ -85,18 +92,18 @@ function initializePaymentMethodSelect() {
     if (!paymentMethodSelect) return;
 
     paymentMethodSelect.addEventListener('change', function () {
-        togglePaymentMethodFields(
-            this.value,
-            this.options[this.selectedIndex].getAttribute('data-type')
-        );
+        const selectedOption = this.options[this.selectedIndex];
+        const methodType = selectedOption ? selectedOption.getAttribute('data-type') : null;
+
+        togglePaymentMethodFields(this.value, methodType);
     });
 
     // Inicializa com o valor atual
     if (paymentMethodSelect.value) {
-        togglePaymentMethodFields(
-            paymentMethodSelect.value,
-            paymentMethodSelect.options[paymentMethodSelect.selectedIndex].getAttribute('data-type')
-        );
+        const selectedOption = paymentMethodSelect.options[paymentMethodSelect.selectedIndex];
+        const methodType = selectedOption ? selectedOption.getAttribute('data-type') : null;
+
+        togglePaymentMethodFields(paymentMethodSelect.value, methodType);
     }
 }
 
@@ -107,25 +114,23 @@ function initializePaymentMethodSelect() {
  */
 function togglePaymentMethodFields(methodId, methodType) {
     const creditCardSection = document.getElementById('creditCardSection');
-    const bankAccountSection = document.getElementById('bankAccountSection');
 
-    // Esconde todos os campos específicos
-    if (creditCardSection) creditCardSection.style.display = 'none';
-    if (bankAccountSection) bankAccountSection.style.display = 'none';
+    // Esconde a seção de cartão de crédito por padrão
+    if (creditCardSection) {
+        creditCardSection.style.display = 'none';
+    }
 
-    // Mostra campos específicos conforme o tipo
-    if (methodType === '2' && creditCardSection) { // Cartão de crédito
+    // Mostra a seção de cartão de crédito se o tipo for 2
+    if (methodType === '2' && creditCardSection) {
         creditCardSection.style.display = 'block';
 
         // Torna o campo obrigatório
         const creditCardSelect = document.getElementById('CreditCardId');
-        if (creditCardSelect) creditCardSelect.required = true;
-    } else if (methodType === '4' && bankAccountSection) { // Transferência bancária
-        bankAccountSection.style.display = 'block';
-    }
-
-    // Se não for cartão de crédito, limpa e remove obrigatoriedade
-    if (methodType !== '2' && creditCardSection) {
+        if (creditCardSelect) {
+            creditCardSelect.required = true;
+        }
+    } else if (creditCardSection) {
+        // Remove a obrigatoriedade se não for cartão de crédito
         const creditCardSelect = document.getElementById('CreditCardId');
         if (creditCardSelect) {
             creditCardSelect.required = false;
@@ -195,7 +200,8 @@ function validatePaymentForm(event) {
     const creditCardSelect = form.querySelector('#CreditCardId');
 
     if (paymentMethodSelect && creditCardSelect) {
-        const methodType = paymentMethodSelect.options[paymentMethodSelect.selectedIndex].getAttribute('data-type');
+        const selectedOption = paymentMethodSelect.options[paymentMethodSelect.selectedIndex];
+        const methodType = selectedOption ? selectedOption.getAttribute('data-type') : null;
 
         if (methodType === '2' && creditCardSelect.value === '') {
             isValid = false;
@@ -208,8 +214,8 @@ function validatePaymentForm(event) {
     const financingSelect = form.querySelector('#FinancingId');
 
     if (paymentTypeSelect && financingSelect) {
-        const typeOption = document.querySelector(`#PaymentTypeId option[value="${paymentTypeSelect.value}"]`);
-        const isFinancingType = typeOption && typeOption.getAttribute('data-is-financing-type') === 'true';
+        const selectedOption = paymentTypeSelect.options[paymentTypeSelect.selectedIndex];
+        const isFinancingType = selectedOption && selectedOption.getAttribute('data-is-financing-type') === 'true';
 
         if (isFinancingType && financingSelect.value === '') {
             isValid = false;
