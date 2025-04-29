@@ -59,7 +59,28 @@ FinanceSystem.Modules.Tables = (function () {
             order: [[1, 'desc']], // Ordena por data de vencimento decrescente
             columnDefs: [
                 { orderable: false, targets: -1 } // Desabilita ordenação na coluna de ações
-            ]
+            ],
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel me-1"></i> Excel',
+                    className: 'btn btn-sm btn-success'
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+                    className: 'btn btn-sm btn-danger'
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print me-1"></i> Imprimir',
+                    className: 'btn btn-sm btn-primary'
+                }
+            ],
+            dom: '<"dtTop"<"dtFilters"f><"dtInfo"l>><"dtScroll"t><"dtBottom"<"dtPagination"p>><"dtButtons"B>',
+            drawCallback: function () {
+                stylePaymentRows();
+            }
         });
 
         // Tabela de usuários
@@ -69,10 +90,32 @@ FinanceSystem.Modules.Tables = (function () {
             },
             responsive: true,
             pageLength: 10,
-            order: [[0, 'asc']], // Ordena por nome
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+            order: [[1, 'desc']], // Ordena por data de vencimento decrescente
             columnDefs: [
                 { orderable: false, targets: -1 } // Desabilita ordenação na coluna de ações
-            ]
+            ],
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel me-1"></i> Excel',
+                    className: 'btn btn-sm btn-success'
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+                    className: 'btn btn-sm btn-danger'
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print me-1"></i> Imprimir',
+                    className: 'btn btn-sm btn-primary'
+                }
+            ],
+            dom: '<"dtTop"<"dtFilters"f><"dtInfo"l>><"dtScroll"t><"dtBottom"<"dtPagination"p>><"dtButtons"B>',
+            drawCallback: function () {
+                stylePaymentRows();
+            }
         });
 
         // Tabela de cartões de crédito
@@ -82,7 +125,32 @@ FinanceSystem.Modules.Tables = (function () {
             },
             responsive: true,
             pageLength: 10,
-            order: [[0, 'asc']] // Ordena por nome
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+            order: [[1, 'desc']], // Ordena por data de vencimento decrescente
+            columnDefs: [
+                { orderable: false, targets: -1 } // Desabilita ordenação na coluna de ações
+            ],
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel me-1"></i> Excel',
+                    className: 'btn btn-sm btn-success'
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+                    className: 'btn btn-sm btn-danger'
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print me-1"></i> Imprimir',
+                    className: 'btn btn-sm btn-primary'
+                }
+            ],
+            dom: '<"dtTop"<"dtFilters"f><"dtInfo"l>><"dtScroll"t><"dtBottom"<"dtPagination"p>><"dtButtons"B>',
+            drawCallback: function () {
+                stylePaymentRows();
+            }
         });
 
         // Tabela de investimentos
@@ -92,7 +160,32 @@ FinanceSystem.Modules.Tables = (function () {
             },
             responsive: true,
             pageLength: 10,
-            order: [[8, 'desc']] // Ordena pela coluna de rentabilidade
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+            order: [[1, 'desc']], // Ordena por data de vencimento decrescente
+            columnDefs: [
+                { orderable: false, targets: -1 } // Desabilita ordenação na coluna de ações
+            ],
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel me-1"></i> Excel',
+                    className: 'btn btn-sm btn-success'
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+                    className: 'btn btn-sm btn-danger'
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print me-1"></i> Imprimir',
+                    className: 'btn btn-sm btn-primary'
+                }
+            ],
+            dom: '<"dtTop"<"dtFilters"f><"dtInfo"l>><"dtScroll"t><"dtBottom"<"dtPagination"p>><"dtButtons"B>',
+            drawCallback: function () {
+                stylePaymentRows();
+            }
         });
     }
 

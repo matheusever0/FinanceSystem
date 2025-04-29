@@ -425,7 +425,7 @@ FinanceSystem.Pages.Payments = (function () {
     function initializePaymentDataTable() {
         // Verifica se DataTables está disponível
         if (typeof $.fn.DataTable !== 'undefined') {
-            $('.table-payments').DataTable({
+            $('#table-payments').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
                 },
@@ -438,9 +438,29 @@ FinanceSystem.Pages.Payments = (function () {
                 ]
             });
         } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
-            // Usa o módulo Tables se DataTables não estiver disponível
-            //FinanceSystem.Modules.Tables.initializeTableSort();
+            FinanceSystem.Modules.Tables.initializeTableSort();
+        } else {
+            basicTableSort();
         }
+    }
+
+    /**
+     * Implementa ordenação básica para tabelas
+     */
+    function basicTableSort() {
+        const table = document.getElementById('investments-table');
+        if (!table) return;
+
+        const headers = table.querySelectorAll('th');
+
+        headers.forEach((header, index) => {
+            if (index !== headers.length - 1) { // Skip actions column
+                header.style.cursor = 'pointer';
+                header.addEventListener('click', () => {
+                    sortTable(table, index);
+                });
+            }
+        });
     }
 
     /**

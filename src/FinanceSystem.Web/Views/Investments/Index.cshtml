@@ -35,14 +35,26 @@
         </div>
         <div class="card-body collapse show" id="collapseFilters">
             <div class="row">
-                <div class="col-md-6 mb-3">
-                    <div class="d-flex gap-2">
-                        <a asp-action="Index" class="btn btn-outline-primary"><i class="fas fa-list"></i> Todos</a>
-                        <a asp-action="ByType" asp-route-type="1" class="btn btn-outline-primary"><i class="fas fa-landmark"></i> Ações</a>
-                        <a asp-action="ByType" asp-route-type="2" class="btn btn-outline-primary"><i class="fas fa-building"></i> Fundos Imobiliários</a>
-                        <a asp-action="ByType" asp-route-type="3" class="btn btn-outline-primary"><i class="fas fa-money-check-dollar"></i> ETFs</a>
-                        <a asp-action="ByType" asp-route-type="4" class="btn btn-outline-primary"><i class="fas fa-money-bill-trend-up"></i> Ações Estrangeiras</a>
-                        <a asp-action="ByType" asp-route-type="5" class="btn btn-outline-primary"><i class="fas fa-money-bill"> </i> Renda Fixa</a>
+                <div class="col-12 mb-3">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a asp-action="Index" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-list"></i> Todos
+                        </a>
+                        <a asp-action="ByType" asp-route-type="1" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-landmark"></i> Ações
+                        </a>
+                        <a asp-action="ByType" asp-route-type="2" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-building"></i> Fundos Imobiliários
+                        </a>
+                        <a asp-action="ByType" asp-route-type="3" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-money-check-dollar"></i> ETFs
+                        </a>
+                        <a asp-action="ByType" asp-route-type="4" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-money-bill-trend-up"></i> Ações Estrangeiras
+                        </a>
+                        <a asp-action="ByType" asp-route-type="5" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-money-bill"></i> Renda Fixa
+                        </a>
                     </div>
                 </div>
             </div>

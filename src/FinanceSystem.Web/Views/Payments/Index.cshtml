@@ -40,29 +40,29 @@
         <div class="card-body collapse show" id="collapseFilters">
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <div class="d-flex gap-2">
-                        <a asp-action="Index" class="btn btn-outline-primary @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewBag.Title == null ? "active" : "")">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a asp-action="Index" class="btn btn-outline-primary btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewBag.Title == null ? "active" : "")">
                             <i class="fas fa-list"></i> Todos
                         </a>
-                        <a asp-action="Pending" class="btn btn-outline-warning @(ViewContext.RouteData.Values["action"].ToString() == "Pending" ? "active" : "")">
+                        <a asp-action="Pending" class="btn btn-outline-warning btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "Pending" ? "active" : "")">
                             <i class="fas fa-clock"></i> Pendentes
                         </a>
-                        <a asp-action="Overdue" class="btn btn-outline-danger @(ViewContext.RouteData.Values["action"].ToString() == "Overdue" ? "active" : "")">
+                        <a asp-action="Overdue" class="btn btn-outline-danger btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "Overdue" ? "active" : "")">
                             <i class="fas fa-exclamation-triangle"></i> Vencidos
                         </a>
                     </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <div class="d-flex align-items-center justify-content-md-end gap-2">
+                    <div class="d-flex flex-wrap justify-content-md-end gap-2">
                         <div class="btn-group">
-                            <a asp-action="ByMonth" asp-route-month="@previousMonth" asp-route-year="@previousYear" class="btn btn-outline-secondary">
+                            <a asp-action="ByMonth" asp-route-month="@previousMonth" asp-route-year="@previousYear" class="btn btn-outline-secondary btn-sm">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
                             <a asp-action="ByMonth" asp-route-month="@DateTime.Now.Month" asp-route-year="@DateTime.Now.Year"
-                               class="btn btn-outline-primary @(ViewContext.RouteData.Values["action"].ToString() == "ByMonth" && currentMonth == DateTime.Now.Month && currentYear == DateTime.Now.Year ? "active" : "")">
+                               class="btn btn-outline-primary btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "ByMonth" && currentMonth == DateTime.Now.Month && currentYear == DateTime.Now.Year ? "active" : "")">
                                 Mês Atual
                             </a>
-                            <a asp-action="ByMonth" asp-route-month="@nextMonth" asp-route-year="@nextYear" class="btn btn-outline-secondary">
+                            <a asp-action="ByMonth" asp-route-month="@nextMonth" asp-route-year="@nextYear" class="btn btn-outline-secondary btn-sm">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </div>
@@ -81,15 +81,18 @@
     else
     {
         <div class="card shadow mb-4">
-            <div class="card-body p-0">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Seus Pagamentos</h6>
+            </div>
+            <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0 table-payments">
+                    <table class="table table-bordered table-hover" id="table-payments">
                         <thead class="bg-light">
                             <tr>
                                 <th>Descrição</th>
-                                <th class="text-center">Vencimento</th>
-                                <th class="text-center">Valor</th>
-                                <th class="text-center">Status</th>
+                                <th class="text-center dt-date">Vencimento</th>
+                                <th class="text-end dt-money">Valor</th>
+                                <th class="text-center dt-status">Status</th>
                                 <th>Tipo</th>
                                 <th>Método</th>
                                 <th class="text-center">Ações</th>
