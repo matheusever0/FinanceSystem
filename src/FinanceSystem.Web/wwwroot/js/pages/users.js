@@ -13,22 +13,11 @@ FinanceSystem.Pages.Users = (function () {
      * Inicializa a página de usuários
      */
     function initialize() {
-        // Determina qual view está ativa
-        const isFormView = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
-        const isListView = document.querySelector('.table-users');
-        const isDetailsView = document.querySelector('.user-details-container');
 
-        if (isFormView) {
-            initializeUserForm();
-        }
+        initializeUserForm();
+        initializeUsersList();
+        initializeUserDetails();
 
-        if (isListView) {
-            initializeUsersList();
-        }
-
-        if (isDetailsView) {
-            initializeUserDetails();
-        }
     }
 
     /**
@@ -36,7 +25,6 @@ FinanceSystem.Pages.Users = (function () {
      */
     function initializeUserForm() {
         const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
-        if (!form) return;
 
         // Inicializa gerenciador de perfis
         initializeRoleManager();
@@ -55,7 +43,6 @@ FinanceSystem.Pages.Users = (function () {
         const addRoleBtn = document.getElementById('addRoleBtn');
         if (!addRoleBtn) return;
 
-        // Adicionar novo perfil
         addRoleBtn.addEventListener('click', function () {
             const roleSelector = document.getElementById('roleSelector');
             const selectedRole = roleSelector.value;
@@ -72,32 +59,35 @@ FinanceSystem.Pages.Users = (function () {
             });
 
             if (!isDuplicate) {
-                // Adicionar o novo perfil
                 const container = document.getElementById('selectedRolesContainer');
                 const newRoleBadge = document.createElement('div');
                 newRoleBadge.className = 'badge bg-primary p-2 me-2 mb-2 role-badge';
 
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'selectedRoles';
-                hiddenInput.value = selectedRole;
+                const hiddenInputVisual = document.createElement('input');
+                hiddenInputVisual.type = 'hidden';
+                hiddenInputVisual.name = 'selectedRoles';
+                hiddenInputVisual.value = selectedRole;
+
+                const hiddenInputReal = document.createElement('input');
+                hiddenInputReal.type = 'hidden';
+                hiddenInputReal.name = 'Roles';
+                hiddenInputReal.value = selectedRole;
 
                 const removeLink = document.createElement('a');
                 removeLink.href = '#';
                 removeLink.className = 'ms-1 text-white remove-role';
                 removeLink.innerHTML = '<i class="fas fa-times"></i>';
 
-                newRoleBadge.appendChild(hiddenInput);
+                newRoleBadge.appendChild(hiddenInputVisual);
+                newRoleBadge.appendChild(hiddenInputReal);
                 newRoleBadge.appendChild(document.createTextNode(selectedRole));
                 newRoleBadge.appendChild(removeLink);
 
                 container.appendChild(newRoleBadge);
                 roleSelector.value = '';
 
-                // Atualizar o seletor de perfis
                 updateRoleSelector();
 
-                // Esconder mensagem de erro se existir
                 const errorMessage = document.getElementById('roles-error-message');
                 if (errorMessage) {
                     errorMessage.style.display = 'none';
@@ -600,6 +590,7 @@ FinanceSystem.Pages.Users = (function () {
         initializeUsersList: initializeUsersList,
         initializeUserDetails: initializeUserDetails,
         updateRoleSelector: updateRoleSelector,
-        initializeStatusToggle: initializeStatusToggle
+        initializeStatusToggle: initializeStatusToggle,
+        initializeRoleManager: initializeRoleManager
     };
 })();
