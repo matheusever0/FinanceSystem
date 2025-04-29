@@ -311,22 +311,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Inicializar botões de marcar parcela como recebida
-            const markReceivedButtons = document.querySelectorAll('.mark-received-installment');
-            markReceivedButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const installmentId = this.getAttribute('data-installment-id');
-                    document.getElementById('installmentId').value = installmentId;
-                });
-            });
-        });
-    </script>
-
-    <script src="~/js/utils/helpers.js" asp-append-version="true"></script>
-    <script src="~/js/components/financial.js" asp-append-version="true"></script>
-    <script src="~/js/pages/financial-item.js" asp-append-version="true"></script>
-}

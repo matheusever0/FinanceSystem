@@ -707,6 +707,16 @@ FinanceSystem.Modules.Financial = (function () {
         });
     }
 
+    function clickButtonReceived() {
+        const markReceivedButtons = document.querySelectorAll('.mark-received-installment');
+        markReceivedButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const installmentId = this.getAttribute('data-installment-id');
+                document.getElementById('installmentId').value = installmentId;
+            });
+        });
+    }
+
     // API pública do módulo
     return {
         initialize: initialize,
@@ -730,6 +740,7 @@ FinanceSystem.Modules.Financial = (function () {
         updateLimitsDisplay: updateLimitsDisplay,
         calculateNextDates: calculateNextDates,
         filterFinancialTable: filterFinancialTable,
-        filterTableByText: filterTableByText
+        filterTableByText: filterTableByText,
+        clickButtonReceived: clickButtonReceived
     };
 })();

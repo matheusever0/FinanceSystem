@@ -35,19 +35,19 @@ namespace FinanceSystem.Web.Models.Financing
         public DateTime? EndDate { get; set; }
 
         [Display(Name = "Tipo")]
-        public string Type { get; set; }
+        public int Type { get; set; }
 
         [Display(Name = "Tipo")]
         public string TypeDescription { get; set; }
 
         [Display(Name = "Status")]
-        public string Status { get; set; }
+        public int Status { get; set; }
 
         [Display(Name = "Status")]
         public string StatusDescription { get; set; }
 
         [Display(Name = "Índice de Correção")]
-        public string CorrectionIndex { get; set; }
+        public int CorrectionIndex { get; set; }
 
         [Display(Name = "Índice de Correção")]
         public string CorrectionIndexDescription { get; set; }
@@ -138,11 +138,11 @@ namespace FinanceSystem.Web.Models.Financing
 
         [Required(ErrorMessage = "O tipo de financiamento é obrigatório")]
         [Display(Name = "Tipo")]
-        public string Type { get; set; } = "PRICE";
+        public int Type { get; set; }
 
         [Required(ErrorMessage = "O índice de correção é obrigatório")]
         [Display(Name = "Índice de Correção")]
-        public string CorrectionIndex { get; set; } = "FIXED";
+        public int CorrectionIndex { get; set; }
 
         [StringLength(500, ErrorMessage = "As observações devem ter no máximo 500 caracteres")]
         [Display(Name = "Observações")]
@@ -197,7 +197,7 @@ namespace FinanceSystem.Web.Models.Financing
         public DateTime? PaymentDate { get; set; }
 
         [Display(Name = "Status")]
-        public string Status { get; set; }
+        public int Status { get; set; }
 
         [Display(Name = "Status")]
         public string StatusDescription { get; set; }

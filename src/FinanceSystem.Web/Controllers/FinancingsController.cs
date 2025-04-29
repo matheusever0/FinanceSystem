@@ -384,11 +384,11 @@ namespace FinanceSystem.Web.Controllers
         {
             return new List<SelectListItem>
             {
-                new SelectListItem { Value = "FIXED", Text = "Fixo (sem correção)" },
-                new SelectListItem { Value = "IPCA", Text = "IPCA" },
-                new SelectListItem { Value = "SELIC", Text = "SELIC" },
-                new SelectListItem { Value = "TR", Text = "TR" },
-                new SelectListItem { Value = "IGPM", Text = "IGPM" }
+                new SelectListItem { Value = "5", Text = "Fixo (sem correção)" },
+                new SelectListItem { Value = "1", Text = "IPCA" },
+                new SelectListItem { Value = "3", Text = "SELIC" },
+                new SelectListItem { Value = "2", Text = "TR" },
+                new SelectListItem { Value = "4", Text = "IGPM" }
             };
         }
 
@@ -396,8 +396,8 @@ namespace FinanceSystem.Web.Controllers
         {
             return new List<SelectListItem>
             {
-                new SelectListItem { Value = "PRICE", Text = "Price (Prestações fixas)" },
-                new SelectListItem { Value = "SAC", Text = "SAC (Amortizações iguais)" }
+                new SelectListItem { Value = "1", Text = "Price (Prestações fixas)" },
+                new SelectListItem { Value = "2", Text = "SAC (Amortizações iguais)" }
             };
         }
 

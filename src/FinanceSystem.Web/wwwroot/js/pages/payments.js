@@ -439,7 +439,7 @@ FinanceSystem.Pages.Payments = (function () {
             });
         } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
             // Usa o módulo Tables se DataTables não estiver disponível
-            FinanceSystem.Modules.Tables.initializeTableSort();
+            //FinanceSystem.Modules.Tables.initializeTableSort();
         }
     }
 
@@ -643,12 +643,29 @@ FinanceSystem.Pages.Payments = (function () {
         });
     }
 
+    function initializeCollapseFilter(){
+        const collapseFilters = document.getElementById('collapseFilters');
+        const filterBtn = document.querySelector('[data-bs-toggle="collapse"]');
+
+        filterBtn.addEventListener('click', function () {
+            const icon = this.querySelector('i');
+            if (collapseFilters.classList.contains('show')) {
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-right');
+            } else {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-down');
+            }
+        });
+    }
+
     // API pública do módulo
     return {
         initialize: initialize,
         initializePaymentForm: initializePaymentForm,
         initializePaymentList: initializePaymentList,
         initializePaymentDetails: initializePaymentDetails,
-        initializePaymentFilters: initializePaymentFilters
+        initializePaymentFilters: initializePaymentFilters,
+        initializeCollapseFilter: initializeCollapseFilter
     };
 })();

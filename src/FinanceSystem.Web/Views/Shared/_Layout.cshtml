@@ -74,9 +74,29 @@
     <!-- Scripts -->
     <script src="~/lib/jquery/jquery.min.js" asp-append-version="true"></script>
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/menu.js" asp-append-version="true"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Scripts principais -->
+    <script src="~/js/core/core.js" defer></script>
+    <script src="~/js/core/ui.js" defer></script>
+    <script src="~/js/core/validation.js" defer></script>
+
+    <!-- Módulos reutilizáveis -->
+    <script src="~/js/modules/forms.js" defer></script>
+    <script src="~/js/modules/tables.js" defer></script>
+    <script src="~/js/modules/charts.js" defer></script>
+    <script src="~/js/modules/financial.js" defer></script>
+
+    <script src="~/js/pages/dashboard.js" asp-append-version="true" defer></script>
+    <script src="~/js/pages/creditcards.js" asp-append-version="true" defer></script>
+    <script src="~/js/pages/financings.js" asp-append-version="true" defer></script>
+    <script src="~/js/pages/investments.js" asp-append-version="true" defer></script>
+    <script src="~/js/pages/payments.js" asp-append-version="true" defer></script>
+    <script src="~/js/pages/users.js" asp-append-version="true" defer></script>
+
+    <!-- Inicialização global -->
+    <script src="~/js/app.js" asp-append-version="true" defer></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

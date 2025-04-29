@@ -207,25 +207,3 @@
         </div>
     }
 </div>
-
-@section Scripts {
-    <script src="~/js/utils/helpers.js" asp-append-version="true"></script>
-    <script src="~/js/components/forms.js" asp-append-version="true"></script>
-    <script src="~/js/pages/financings.js" asp-append-version="true"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Inicializa o formato monetário
-            initializeMoneyMask('.money');
-
-            // Funcionalidade de impressão
-            const printBtn = document.getElementById('printResultsBtn');
-            if (printBtn) {
-                printBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    window.print();
-                });
-            }
-        });
-    </script>
-}

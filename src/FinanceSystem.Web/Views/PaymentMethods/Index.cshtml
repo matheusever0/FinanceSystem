@@ -137,26 +137,6 @@
     }
 </div>
 
-@section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const collapseFilters = document.getElementById('collapseFilters');
-            const filterBtn = document.querySelector('[data-bs-toggle="collapse"]');
-
-            filterBtn.addEventListener('click', function() {
-                const icon = this.querySelector('i');
-                if (collapseFilters.classList.contains('show')) {
-                    icon.classList.remove('fa-chevron-down');
-                    icon.classList.add('fa-chevron-right');
-                } else {
-                    icon.classList.remove('fa-chevron-right');
-                    icon.classList.add('fa-chevron-down');
-                }
-            });
-        });
-    </script>
-}
-
 @functions {
     string GetPaymentMethodTypeDescription(int type)
     {

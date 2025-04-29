@@ -12,7 +12,7 @@
             <a asp-action="Index" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-1"></i> Voltar
             </a>
-            @if (Model.Status == "Active")
+            @if (Model.Status == 1)
             {
                 @if (await PermissionHelper.HasPermissionAsync(Context, "financings.forecast"))
                 {
@@ -136,7 +136,7 @@
                     <h6 class="m-0 font-weight-bold text-primary">Ações</h6>
                 </div>
                 <div class="card-body">
-                    @if (Model.Status == "Active")
+                    @if (Model.Status == 1)
                     {
                         @if (await PermissionHelper.HasPermissionAsync(Context, "financings.edit"))
                         {
@@ -306,20 +306,14 @@
     }
 </div>
 
-@section Scripts {
-    <script src="~/js/utils/helpers.js" asp-append-version="true"></script>
-    <script src="~/js/components/forms.js" asp-append-version="true"></script>
-    <script src="~/js/pages/financings.js" asp-append-version="true"></script>
-}
-
 @functions {
-    string GetStatusBadgeClass(string status)
+    string GetStatusBadgeClass(int status)
     {
         return status switch
         {
-            "Active" => "bg-success",
-            "Completed" => "bg-info",
-            "Cancelled" => "bg-secondary",
+            1 => "bg-success",
+            2 => "bg-info",
+            3 => "bg-secondary",
             _ => "bg-primary"
         };
     }
@@ -332,15 +326,15 @@
         return "bg-danger";
     }
 
-    string GetInstallmentStatusBadgeClass(string status)
+    string GetInstallmentStatusBadgeClass(int status)
     {
         return status switch
         {
-            "Pending" => "bg-warning",
-            "Paid" => "bg-success",
-            "PartiallyPaid" => "bg-info",
-            "Overdue" => "bg-danger",
-            "Adjusted" => "bg-secondary",
+            1 => "bg-warning",
+            2 => "bg-success",
+            3 => "bg-info",
+            4 => "bg-danger",
+            5 => "bg-secondary",
             _ => "bg-primary"
         };
     }

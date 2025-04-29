@@ -104,13 +104,13 @@
                                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            @if (item.Status == "Active" && await PermissionHelper.HasPermissionAsync(Context, "financings.apply.correction"))
+                                            @if (item.Status == 1 && await PermissionHelper.HasPermissionAsync(Context, "financings.apply.correction"))
                                             {
                                                 <a asp-action="ApplyCorrection" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
                                                     <i class="fas fa-sync-alt"></i>
                                                 </a>
                                             }
-                                            @if (item.Status == "Active" && await PermissionHelper.HasPermissionAsync(Context, "financings.forecast"))
+                                            @if (item.Status == 1 && await PermissionHelper.HasPermissionAsync(Context, "financings.forecast"))
                                             {
                                                 <a asp-action="Forecast" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
                                                     <i class="fas fa-chart-line"></i>
@@ -129,13 +129,13 @@
 </div>
 
 @functions {
-    string GetStatusBadgeClass(string status)
+    string GetStatusBadgeClass(int status)
     {
         return status switch
         {
-            "Active" => "bg-success",
-            "Completed" => "bg-info",
-            "Cancelled" => "bg-secondary",
+            1 => "bg-success",
+            2 => "bg-info",
+            3 => "bg-secondary",
             _ => "bg-primary"
         };
     }
