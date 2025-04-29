@@ -93,7 +93,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var income in Model)
+                    @foreach (var income in Model.OrderBy(e => e.DueDate))
                     {
                         <tr>
                             <td>

@@ -36,7 +36,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var permission in allPermissions!)
+                            @foreach (var permission in allPermissions!.OrderBy(e => e.SystemName))
                             {
                                     <tr>
                                         <td>
