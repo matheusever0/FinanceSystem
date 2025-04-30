@@ -13,7 +13,6 @@ using System.Security.Claims;
 namespace FinanceSystem.Web.Controllers
 {
     [Authorize]
-    [RequirePermission("users.view")]
     public class UsersController : Controller
     {
         private readonly IUserService _userService;
@@ -29,7 +28,7 @@ namespace FinanceSystem.Web.Controllers
             _roleService = roleService ?? throw new ArgumentNullException(nameof(roleService));
             _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         }
-
+        [RequirePermission("users.view")]
         public async Task<IActionResult> Index()
         {
             try
@@ -44,7 +43,7 @@ namespace FinanceSystem.Web.Controllers
                 return RedirectToAction("Index", "Home");
             }
         }
-
+        [RequirePermission("users.view")]
         public async Task<IActionResult> Details(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -121,7 +120,7 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
-        [RequirePermission("users.edit")]
+        [RequirePermission("users.edit, users.edit.unique")]
         public async Task<IActionResult> Edit(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -170,7 +169,7 @@ namespace FinanceSystem.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequirePermission("users.edit")]
+        [RequirePermission("users.edit, users.edit.unique")]
         public async Task<IActionResult> Edit(string id, UpdateUserModel model)
         {
             if (string.IsNullOrEmpty(id))

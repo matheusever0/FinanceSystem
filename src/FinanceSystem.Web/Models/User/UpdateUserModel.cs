@@ -12,7 +12,8 @@ namespace FinanceSystem.Web.Models.User
         [Display(Name = "E-mail")]
         public string? Email { get; set; }
 
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "A senha deve ter no mínimo 6 caracteres")]
+        [MinLength(8, ErrorMessage = "A senha deve ter pelo menos 8 caracteres.")]
+        [RegularExpression(@"^(?=.*[!@#$%^&*(),.?""{}|<>]).+$", ErrorMessage = "A senha deve conter pelo menos um caractere especial.")]
         [DataType(DataType.Password)]
         [Display(Name = "Senha")]
         public string? Password { get; set; }

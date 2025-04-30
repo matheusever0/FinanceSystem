@@ -40,26 +40,36 @@ FinanceSystem.Pages.Users = (function () {
      * Inicializa o gerenciador de perfis (roles)
      */
     function initializeRoleManager() {
+        const container = document.querySelector('.card-body[data-is-read-only]');
+        if (!container) return;
+
+        const isReadOnly = container.getAttribute('data-is-read-only') === 'true';
+
         const addRoleBtn = document.getElementById('addRoleBtn');
-        if (!addRoleBtn) return;
+        const roleSelector = document.getElementById('roleSelector');
+
+        if (!addRoleBtn || !roleSelector) return;
+
+        if (isReadOnly) {
+            addRoleBtn.setAttribute('disabled', 'true');
+            roleSelector.setAttribute('disabled', 'true');
+
+            // Oculta os botões de remover perfil
+            document.querySelectorAll('.remove-role').forEach(el => {
+                el.style.display = 'none';
+            });
+
+            return;
+        }
 
         addRoleBtn.addEventListener('click', function () {
-            const roleSelector = document.getElementById('roleSelector');
             const selectedRole = roleSelector.value;
             if (!selectedRole) return;
 
-            // Verificar se o perfil já está selecionado
             const selectedInputs = document.querySelectorAll("#selectedRolesContainer input[name='selectedRoles']");
-            let isDuplicate = false;
-
-            selectedInputs.forEach(function (input) {
-                if (input.value === selectedRole) {
-                    isDuplicate = true;
-                }
-            });
+            const isDuplicate = Array.from(selectedInputs).some(input => input.value === selectedRole);
 
             if (!isDuplicate) {
-                const container = document.getElementById('selectedRolesContainer');
                 const newRoleBadge = document.createElement('div');
                 newRoleBadge.className = 'badge bg-primary p-2 me-2 mb-2 role-badge';
 
@@ -83,6 +93,7 @@ FinanceSystem.Pages.Users = (function () {
                 newRoleBadge.appendChild(document.createTextNode(selectedRole));
                 newRoleBadge.appendChild(removeLink);
 
+                const container = document.getElementById('selectedRolesContainer');
                 container.appendChild(newRoleBadge);
                 roleSelector.value = '';
 
@@ -95,21 +106,27 @@ FinanceSystem.Pages.Users = (function () {
             }
         });
 
-        // Remover perfil (delegação de eventos)
         document.addEventListener('click', function (e) {
             if (e.target.closest('.remove-role')) {
                 e.preventDefault();
                 const badge = e.target.closest('.role-badge');
                 if (badge) {
                     badge.remove();
-
-                    // Atualizar o seletor de perfis após remover
                     updateRoleSelector();
                 }
             }
         });
 
-        // Inicializa lista de perfis
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const input = document.getElementById('passwordInput');
+            const icon = document.getElementById('eyeIcon');
+            const isPassword = input.type === 'password';
+
+            input.type = isPassword ? 'text' : 'password';
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+
         updateRoleSelector();
     }
 
