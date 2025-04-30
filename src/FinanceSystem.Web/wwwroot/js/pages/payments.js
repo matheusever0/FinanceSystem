@@ -46,6 +46,7 @@ FinanceSystem.Pages.Payments = (function () {
 
         // Inicializa campos comuns usando módulos existentes
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
+            console.log('mask aqui');
             FinanceSystem.Modules.Financial.initializeMoneyMask('#Amount');
             FinanceSystem.Modules.Financial.initializeRecurringToggle(form);
         } else {

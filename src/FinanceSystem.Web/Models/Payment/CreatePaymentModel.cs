@@ -43,7 +43,7 @@ namespace FinanceSystem.Web.Models.Payment
         public int NumberOfInstallments { get; set; } = 1;
 
         [Display(Name = "Cartão de Crédito")]
-        public required string CreditCardId { get; set; }
+        public string? CreditCardId { get; set; }
 
         [Display(Name = "Financiamento")]
         public string? FinancingId { get; set; }

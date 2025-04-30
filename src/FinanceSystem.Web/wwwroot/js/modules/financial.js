@@ -21,7 +21,12 @@ FinanceSystem.Modules.Financial = (function () {
      * @param {string} selector - Seletor do campo
      */
     function initializeMoneyMask(selector) {
+
+        console.log('mask aqui')
+
         const moneyInput = document.querySelector(selector);
+
+        console.log(moneyInput)
         if (!moneyInput) return;
 
         if (typeof $.fn.mask !== 'undefined') {
