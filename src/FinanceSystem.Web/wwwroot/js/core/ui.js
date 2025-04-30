@@ -13,14 +13,15 @@ FinanceSystem.UI = (function () {
      */
     function initialize() {
         initializeSidebar();
+        setupMobileBackdrop();
         initializeAlerts();
         initializeDropdowns();
         initializeTooltips();
     }
 
     /**
-     * Inicializa a funcionalidade do sidebar
-     */
+ * Inicializa a funcionalidade do sidebar
+ */
     function initializeSidebar() {
         const menuToggle = document.getElementById('menu-toggle');
         const sidebar = document.getElementById('sidebar');
@@ -29,25 +30,45 @@ FinanceSystem.UI = (function () {
 
         if (menuToggle && sidebar) {
             menuToggle.addEventListener('click', function () {
-                sidebar.classList.toggle('collapsed');
-                if (topbar) topbar.classList.toggle('expanded');
-                if (mainContent) mainContent.classList.toggle('expanded');
+                // Comportamento diferente em dispositivos móveis e desktop
+                if (window.innerWidth < 992) {
+                    // Em dispositivos móveis, mostra/esconde o sidebar
+                    sidebar.classList.toggle('show');
+                } else {
+                    // Em desktop, colapsa/expande o sidebar
+                    sidebar.classList.toggle('collapsed');
+                    if (topbar) topbar.classList.toggle('expanded');
+                    if (mainContent) mainContent.classList.toggle('expanded');
 
-                // Salvar estado no localStorage
-                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                    // Salvar estado no localStorage apenas para desktop
+                    localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                }
             });
 
-            // Restaurar estado do sidebar do localStorage
-            const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            if (sidebarCollapsed) {
-                sidebar.classList.add('collapsed');
-                if (topbar) topbar.classList.add('expanded');
-                if (mainContent) mainContent.classList.add('expanded');
+            // Restaurar estado do sidebar do localStorage (apenas em desktop)
+            if (window.innerWidth >= 992) {
+                const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (sidebarCollapsed) {
+                    sidebar.classList.add('collapsed');
+                    if (topbar) topbar.classList.add('expanded');
+                    if (mainContent) mainContent.classList.add('expanded');
+                }
             }
+
+            // Manipular cliques fora do sidebar para fechá-lo em dispositivos móveis
+            document.addEventListener('click', function (e) {
+                if (window.innerWidth < 992 &&
+                    sidebar.classList.contains('show') &&
+                    !sidebar.contains(e.target) &&
+                    !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('show');
+                }
+            });
 
             // Adicionar evento para expansão em telas pequenas
             const handleResize = function () {
                 if (window.innerWidth < 992) {
+                    sidebar.classList.remove('show'); // Esconde em resize
                     sidebar.classList.add('collapsed');
                     if (topbar) topbar.classList.add('expanded');
                     if (mainContent) mainContent.classList.add('expanded');
@@ -71,15 +92,60 @@ FinanceSystem.UI = (function () {
      */
     function initializeSubmenus() {
         const submenus = document.querySelectorAll('.sidebar-menu-link[data-bs-toggle="collapse"]');
+
         if (submenus.length > 0) {
             submenus.forEach(function (menuItem) {
-                menuItem.addEventListener('click', function () {
-                    const icon = this.querySelector('.fa-angle-down, .fa-angle-right');
-                    if (icon) {
-                        icon.classList.toggle('fa-angle-down');
-                        icon.classList.toggle('fa-angle-right');
+                // Verificar se o Bootstrap está disponível
+                if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
+                    // Usar o Bootstrap para gerenciar collapses
+                    const targetId = menuItem.getAttribute('data-bs-target') ||
+                        menuItem.getAttribute('href');
+
+                    if (targetId) {
+                        const collapseElement = document.querySelector(targetId);
+                        if (collapseElement) {
+                            // Criar instância do Collapse
+                            const bsCollapse = new bootstrap.Collapse(collapseElement, {
+                                toggle: false
+                            });
+
+                            // Adicionar evento de clique
+                            menuItem.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                bsCollapse.toggle();
+
+                                // Alternar ícone
+                                const icon = this.querySelector('.fa-angle-down, .fa-angle-right');
+                                if (icon) {
+                                    icon.classList.toggle('fa-angle-down');
+                                    icon.classList.toggle('fa-angle-right');
+                                }
+                            });
+                        }
                     }
-                });
+                } else {
+                    // Implementação manual para quando o Bootstrap não estiver disponível
+                    menuItem.addEventListener('click', function (e) {
+                        e.preventDefault();
+
+                        const targetId = this.getAttribute('data-bs-target') ||
+                            this.getAttribute('href');
+
+                        if (targetId) {
+                            const targetElement = document.querySelector(targetId);
+                            if (targetElement) {
+                                targetElement.classList.toggle('show');
+
+                                // Alternar ícone
+                                const icon = this.querySelector('.fa-angle-down, .fa-angle-right');
+                                if (icon) {
+                                    icon.classList.toggle('fa-angle-down');
+                                    icon.classList.toggle('fa-angle-right');
+                                }
+                            }
+                        }
+                    });
+                }
             });
         }
     }
@@ -287,6 +353,24 @@ FinanceSystem.UI = (function () {
         } else {
             element.classList.toggle('show');
         }
+    }
+
+    function setupMobileBackdrop() {
+        const sidebar = document.getElementById('sidebar');
+        if (!sidebar) return;
+
+        // Criar backdrop se não existir
+        let backdrop = document.querySelector('.sidebar-backdrop');
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.className = 'sidebar-backdrop';
+            document.body.appendChild(backdrop);
+        }
+
+        // Adicionar evento de clique no backdrop para fechar o sidebar
+        backdrop.addEventListener('click', function () {
+            sidebar.classList.remove('show');
+        });
     }
 
     // API pública do módulo

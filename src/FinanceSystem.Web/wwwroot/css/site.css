@@ -328,3 +328,69 @@ h1, h2, h3, h4, h5, h6 {
         width: 100%;
     }
 }
+
+/* Adicione ou substitua estas regras no seu arquivo sidebar.css */
+
+/* Mobile specific styles */
+@media (max-width: 991.98px) {
+    .sidebar {
+        left: -250px; /* Começa fora da tela */
+        width: 250px !important; /* Força largura total no mobile */
+        transition: left 0.3s ease;
+        z-index: 1050; /* Z-index maior que o topbar para sobrepor */
+    }
+
+        .sidebar.show {
+            left: 0; /* Mostrar sidebar no mobile */
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Anular estilos collapsed no mobile */
+        .sidebar.collapsed {
+            width: 250px !important; /* Forçar largura */
+        }
+
+            .sidebar.collapsed .sidebar-brand span,
+            .sidebar.collapsed .sidebar-header,
+            .sidebar.collapsed .sidebar-menu-header,
+            .sidebar.collapsed .sidebar-menu-item span:not(.sidebar-menu-icon) {
+                display: block !important;
+            }
+
+            .sidebar.collapsed .sidebar-menu-link {
+                justify-content: flex-start !important;
+                padding: 0.75rem 1.5rem !important;
+            }
+
+            .sidebar.collapsed .sidebar-menu-icon {
+                margin-right: 0.75rem !important;
+                width: 20px !important;
+            }
+
+        /* Corrigir problema com collapses no mobile */
+        .sidebar .collapse:not(.show) {
+            display: none !important;
+        }
+
+        .sidebar .collapse.show {
+            display: block !important;
+        }
+}
+
+/* Sobreposição para o resto da tela quando o menu mobile está aberto */
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1040;
+}
+
+@media (max-width: 991.98px) {
+    .sidebar.show + .sidebar-backdrop {
+        display: block;
+    }
+}
