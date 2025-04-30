@@ -189,3 +189,94 @@ body.login-page {
         font-size: 1rem;
     }
 }
+
+/* Estilos de animação do botão de login */
+.btn-login.loading {
+    background-color: #169e6c;
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+    .btn-login.loading .btn-text {
+        visibility: hidden;
+    }
+
+.btn-login .spinner {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.btn-login.loading .spinner {
+    display: inline-block;
+}
+
+.btn-login .spinner:before {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Efeito de pulso */
+.pulse-container {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.btn-login.loading .pulse-container {
+    display: flex;
+}
+
+.pulse-bubble {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: white;
+    margin: 0 3px;
+}
+
+.pulse-bubble-1 {
+    animation: pulse 0.4s ease 0s infinite alternate;
+}
+
+.pulse-bubble-2 {
+    animation: pulse 0.4s ease 0.2s infinite alternate;
+}
+
+.pulse-bubble-3 {
+    animation: pulse 0.4s ease 0.4s infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    to {
+        opacity: 0.6;
+        transform: scale(0.8);
+    }
+}

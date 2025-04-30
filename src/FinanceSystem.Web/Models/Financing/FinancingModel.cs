@@ -307,7 +307,7 @@ namespace FinanceSystem.Web.Models.Financing
 
         [Required(ErrorMessage = "O tipo de financiamento é obrigatório")]
         [Display(Name = "Tipo")]
-        public string Type { get; set; } = "PRICE";
+        public int Type { get; set; }
 
         [Required(ErrorMessage = "A data de início é obrigatória")]
         [Display(Name = "Data de Início")]
@@ -323,7 +323,7 @@ namespace FinanceSystem.Web.Models.Financing
         public decimal TotalAmount { get; set; }
         public decimal InterestRate { get; set; }
         public int TermMonths { get; set; }
-        public string Type { get; set; }
+        public int Type { get; set; }
         public string TypeDescription { get; set; }
         public decimal FirstInstallmentAmount { get; set; }
         public decimal LastInstallmentAmount { get; set; }

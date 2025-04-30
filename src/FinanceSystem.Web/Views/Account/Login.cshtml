@@ -41,8 +41,13 @@
                 </div>
 
                 <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-login">
-                        <i class="fas fa-sign-in-alt me-2"></i>Entrar
+                    <button type="submit" class="btn btn-login" id="login-button">
+                        <span class="btn-text"><i class="fas fa-sign-in-alt me-2"></i>Entrar</span>
+                        <div class="pulse-container">
+                            <div class="pulse-bubble pulse-bubble-1"></div>
+                            <div class="pulse-bubble pulse-bubble-2"></div>
+                            <div class="pulse-bubble pulse-bubble-3"></div>
+                        </div>
                     </button>
                 </div>
                 @if (ViewData.ModelState["CustomError"]?.Errors.Count > 0)
@@ -59,3 +64,33 @@
     </div>
 </body>
 </html>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.querySelector('form.login-form');
+        const loginButton = document.getElementById('login-button');
+
+        if (loginForm && loginButton) {
+            // Adiciona ID ao formulário se ainda não tiver
+            if (!loginForm.id) {
+                loginForm.id = 'login-form';
+            }
+
+            loginForm.addEventListener('submit', function(e) {
+                // Verifica se os campos obrigatórios estão preenchidos
+                const username = document.getElementById('Username').value;
+                const password = document.getElementById('Password').value;
+
+                if (username && password) {
+                    // Desabilita o botão e ativa o estado de loading
+                    loginButton.disabled = true;
+                    loginButton.classList.add('loading');
+                }
+            });
+        }
+    });
+</script>
+
+
+
+
