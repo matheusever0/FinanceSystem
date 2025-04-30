@@ -147,7 +147,8 @@ namespace FinanceSystem.Web.Controllers
                 var model = new UpdatePaymentTypeModel
                 {
                     Name = paymentType.Name,
-                    Description = paymentType.Description
+                    Description = paymentType.Description,
+                    IsFinancingType = paymentType.IsFinancingType
                 };
 
                 return View(model);
