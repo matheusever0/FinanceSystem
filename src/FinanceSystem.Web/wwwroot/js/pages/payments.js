@@ -14,7 +14,7 @@ FinanceSystem.Pages.Payments = (function () {
      */
     function initialize() {
         // Determina qual view está ativa
-        const isFormView = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
+        const isFormView = document.querySelector('form[data-page="payment"]');
         const isListView = document.querySelector('.table-payments');
         const isDetailsView = document.querySelector('.payment-details-container');
 
@@ -41,7 +41,7 @@ FinanceSystem.Pages.Payments = (function () {
      * Inicializa formulário de pagamento
      */
     function initializePaymentForm() {
-        const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
+        const form = document.querySelector('form[data-page="payment"]');
         if (!form) return;
 
         // Inicializa campos comuns usando módulos existentes
@@ -114,12 +114,14 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    /**
-     * Inicializa seletor de método de pagamento
-     */
     function initializePaymentMethodSelect() {
-        const paymentMethodSelect = document.getElementById('PaymentMethodId');
-        if (!paymentMethodSelect) return;
+        // Check for both possible IDs
+        const paymentMethodSelect = document.getElementById('PaymentMethodId') ||
+            document.getElementById('paymentMethodSelect');
+
+        if (!paymentMethodSelect) {
+            return;
+        }
 
         paymentMethodSelect.addEventListener('change', function () {
             const selectedOption = this.options[this.selectedIndex];
@@ -128,43 +130,43 @@ FinanceSystem.Pages.Payments = (function () {
             togglePaymentMethodFields(this.value, methodType);
         });
 
-        // Inicializa com o valor atual
+        // Initialize with current value
         if (paymentMethodSelect.value) {
             const selectedOption = paymentMethodSelect.options[paymentMethodSelect.selectedIndex];
             const methodType = selectedOption ? selectedOption.getAttribute('data-type') : null;
 
             togglePaymentMethodFields(paymentMethodSelect.value, methodType);
+        } else {
         }
     }
 
-    /**
-     * Alterna a visibilidade dos campos conforme o método de pagamento
-     * @param {string} methodId - ID do método de pagamento
-     * @param {string} methodType - Tipo do método de pagamento
-     */
     function togglePaymentMethodFields(methodId, methodType) {
+
         const creditCardSection = document.getElementById('creditCardSection');
         const bankAccountSection = document.getElementById('bankAccountSection');
 
-        // Esconde todas as seções específicas por padrão
+        // Hide all specific sections by default
         if (creditCardSection) creditCardSection.style.display = 'none';
         if (bankAccountSection) bankAccountSection.style.display = 'none';
 
-        // Mostra seções específicas conforme o tipo do método
-        if (methodType === '2' && creditCardSection) { // Cartão de crédito
+        // Convert methodType to string if needed
+        const methodTypeStr = String(methodType);
+
+        // Show specific sections based on method type
+        if (methodTypeStr === '2' && creditCardSection) { // Credit card
             creditCardSection.style.display = 'block';
 
-            // Torna o campo obrigatório
+            // Make the field required
             const creditCardSelect = document.getElementById('CreditCardId');
             if (creditCardSelect) {
                 creditCardSelect.required = true;
             }
-        } else if (methodType === '4' && bankAccountSection) { // Transferência bancária
+        } else if (methodTypeStr === '4' && bankAccountSection) { // Bank transfer
             bankAccountSection.style.display = 'block';
         }
 
-        // Remove a obrigatoriedade se não for cartão de crédito
-        if (methodType !== '2') {
+        // Remove requirement if not credit card
+        if (methodTypeStr !== '2') {
             const creditCardSelect = document.getElementById('CreditCardId');
             if (creditCardSelect) {
                 creditCardSelect.required = false;
