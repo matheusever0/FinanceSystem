@@ -5,11 +5,21 @@
     --primary-light: #8b9dc3;
     --primary-dark: #2c3e50;
     --secondary-color: #f8f9fa;
+    /* RGB Values for colors (for rgba usage) */
+    --primary-color-rgb: 59, 89, 152;
+    --primary-light-rgb: 139, 157, 195;
+    --primary-dark-rgb: 44, 62, 80;
+    --secondary-color-rgb: 248, 249, 250;
     /* Cores de estado */
     --success-color: #1cc88a;
     --warning-color: #f6c23e;
     --danger-color: #e74a3b;
     --info-color: #36b9cc;
+    /* RGB Values for status colors */
+    --success-color-rgb: 28, 200, 138;
+    --warning-color-rgb: 246, 194, 62;
+    --danger-color-rgb: 231, 74, 59;
+    --info-color-rgb: 54, 185, 204;
     /* Cores de texto */
     --text-color: #333333;
     --text-light: #6c757d;

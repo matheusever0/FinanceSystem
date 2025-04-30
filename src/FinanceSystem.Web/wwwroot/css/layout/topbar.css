@@ -5,19 +5,20 @@
     right: 0;
     left: var(--sidebar-width);
     height: var(--topbar-height);
-    background-color: var(--bg-light);
+    background-color: white;
     transition: all 0.3s ease;
     z-index: var(--z-index-sticky);
     box-shadow: var(--shadow-sm);
     display: flex;
     align-items: center;
     padding: 0 1rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
-/* When sidebar is collapsed on desktop */
-.topbar.expanded {
-    left: var(--sidebar-collapsed-width);
-}
+    /* When sidebar is collapsed on desktop */
+    .topbar.expanded {
+        left: var(--sidebar-collapsed-width);
+    }
 
 /* Add this to your existing topbar.css */
 @media (max-width: 991.98px) {
@@ -35,9 +36,9 @@
     transition: color 0.3s ease;
 }
 
-.menu-toggle:hover {
-    color: var(--primary-dark);
-}
+    .menu-toggle:hover {
+        color: var(--success-color);
+    }
 
 /* Título da página */
 .page-title {

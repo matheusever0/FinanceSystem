@@ -11,17 +11,18 @@
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
     margin-bottom: 1.5rem;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.3s ease;
 }
 
     .card:hover {
         box-shadow: var(--shadow);
+        transform: translateY(-2px);
     }
 
 .card-header {
     padding: 0.75rem 1.25rem;
     margin-bottom: 0;
-    background-color: rgba(0, 0, 0, 0.03);
+    background-color: rgba(var(--primary-color-rgb), 0.03);
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -31,7 +32,7 @@
 
 .card-footer {
     padding: 0.75rem 1.25rem;
-    background-color: rgba(0, 0, 0, 0.03);
+    background-color: rgba(var(--primary-color-rgb), 0.03);
     border-top: 1px solid var(--border-color);
 }
 

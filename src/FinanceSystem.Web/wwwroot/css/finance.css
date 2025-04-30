@@ -30,6 +30,7 @@
     display: inline-flex;
     align-items: stretch;
     justify-content: center;
+    transition: all 0.2s ease;
 }
 
     .btn-icon-split .icon {
@@ -46,20 +47,26 @@
         text-align: center;
     }
 
+    .btn-icon-split:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
 /* Cartões de crédito */
 .credit-card {
     border-radius: 1rem;
     overflow: hidden;
-    background: linear-gradient(45deg, #3a3a3a, #505050);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     color: white;
     position: relative;
     height: 200px;
     transition: all 0.3s ease;
+    box-shadow: var(--shadow);
 }
 
     .credit-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+        box-shadow: var(--shadow-lg);
     }
 
     .credit-card .brand {
@@ -78,6 +85,7 @@
         position: absolute;
         top: 5rem;
         left: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
     .credit-card .number {
@@ -126,13 +134,25 @@
     position: relative;
     height: 20rem;
     width: 100%;
+    transition: all 0.3s ease;
 }
+
+    .chart-area:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-sm);
+    }
 
 .chart-pie {
     position: relative;
     height: 15rem;
     width: 100%;
+    transition: all 0.3s ease;
 }
+
+    .chart-pie:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-sm);
+    }
 
 /* Status de pagamentos */
 .payment-status {
@@ -142,6 +162,7 @@
     border-radius: 0.25rem;
     font-weight: 600;
     font-size: 0.75rem;
+    transition: all 0.2s ease;
 }
 
     .payment-status i {
@@ -149,23 +170,28 @@
     }
 
     .payment-status.pending {
-        background-color: #fff3cd;
-        color: #856404;
+        background-color: rgba(var(--warning-color-rgb), 0.2);
+        color: var(--warning-color);
     }
 
     .payment-status.paid {
-        background-color: #d4edda;
-        color: #155724;
+        background-color: rgba(var(--success-color-rgb), 0.2);
+        color: var(--success-color);
     }
 
     .payment-status.overdue {
-        background-color: #f8d7da;
-        color: #721c24;
+        background-color: rgba(var(--danger-color-rgb), 0.2);
+        color: var(--danger-color);
     }
 
     .payment-status.cancelled {
-        background-color: #e2e3e5;
-        color: #383d41;
+        background-color: rgba(var(--secondary-color-rgb), 0.2);
+        color: var(--text-muted);
+    }
+
+    .payment-status:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
 /* Submenu */
@@ -173,22 +199,27 @@
     padding: 0.5rem 1rem;
     margin: 0 0.5rem;
     display: block;
-    color: #b7b9cc;
+    color: rgba(255, 255, 255, 0.8);
     font-size: 0.85rem;
     border-radius: 0.35rem;
     white-space: nowrap;
+    transition: all 0.2s ease;
+    border-left: 2px solid transparent;
 }
 
     .collapse-item:hover {
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: rgba(255, 255, 255, 0.08);
         color: white;
         text-decoration: none;
+        border-left: 2px solid var(--success-color);
+        transform: translateX(3px);
     }
 
     .collapse-item.active {
         color: white;
         font-weight: 700;
         background-color: rgba(255, 255, 255, 0.1);
+        border-left: 2px solid var(--success-color);
     }
 
 /* Barras de progresso */
@@ -252,7 +283,13 @@
 /* Cartões para relatórios */
 .card-report {
     margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
 }
+
+    .card-report:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow);
+    }
 
     .card-report .card-header {
         background-color: var(--primary-color);
@@ -270,7 +307,12 @@
     display: flex;
     flex-direction: column;
     margin-bottom: 1rem;
+    transition: all 0.2s ease;
 }
+
+    .financial-data:hover {
+        transform: translateY(-2px);
+    }
 
     .financial-data .label {
         font-size: 0.75rem;
@@ -294,7 +336,15 @@
     display: flex;
     align-items: center;
     margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s ease;
 }
+
+    .finance-category:hover {
+        background-color: rgba(var(--primary-color-rgb), 0.05);
+        transform: translateX(3px);
+    }
 
     .finance-category .icon {
         width: 32px;
@@ -305,6 +355,7 @@
         justify-content: center;
         margin-right: 0.75rem;
         color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .finance-category .name {
@@ -322,7 +373,13 @@
     border-radius: 0.5rem;
     padding: 1rem;
     margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
 }
+
+    .report-filters:hover {
+        box-shadow: var(--shadow);
+    }
 
 .date-navigator {
     display: flex;
@@ -340,6 +397,15 @@
         display: flex;
         gap: 0.5rem;
     }
+
+        .date-navigator .date-controls .btn {
+            transition: all 0.2s ease;
+        }
+
+            .date-navigator .date-controls .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
 
 /* Estilos de impressão dos relatórios */
 @media print {
