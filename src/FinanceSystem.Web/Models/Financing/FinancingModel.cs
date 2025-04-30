@@ -426,7 +426,7 @@ namespace FinanceSystem.Web.Models.Financing
         public string FinancingDescription { get; set; }
         public decimal CurrentDebt { get; set; }
         public decimal BaseInterestRate { get; set; }
-        public string CorrectionIndex { get; set; }
+        public int CorrectionIndex { get; set; }
         public string CorrectionIndexDescription { get; set; }
         public List<FinancingForecastScenarioModel> Scenarios { get; set; } = new List<FinancingForecastScenarioModel>();
 

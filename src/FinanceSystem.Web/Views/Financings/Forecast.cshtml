@@ -1,0 +1,197 @@
+﻿@model string
+@using FinanceSystem.Web.Models.Financing
+@{
+    ViewData["Title"] = "Previsão de Financiamento";
+    var financing = ViewBag.Financing as FinancingModel;
+    var forecast = ViewBag.Forecast as FinancingForecastModel;
+    var forecastMonths = ViewBag.ForecastMonths ?? ViewBag.DefaultMonths ?? 12;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between mb-3">
+        <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+        <a asp-action="Details" asp-route-id="@Model" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Voltar
+        </a>
+    </div>
+
+    @if (financing != null)
+    {
+        <div class="row mb-4">
+            <div class="col-lg-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">Informações do Financiamento</h6>
+                        <span class="badge bg-primary">@financing.TypeDescription</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h5 class="small font-weight-bold text-muted">Descrição</h5>
+                            <p>@financing.Description</p>
+                        </div>
+                        <div class="mb-3">
+                            <h5 class="small font-weight-bold text-muted">Valor Total</h5>
+                            <p class="fw-bold">@financing.GetFormattedTotalAmount()</p>
+                        </div>
+                        <div class="mb-3">
+                            <h5 class="small font-weight-bold text-muted">Dívida Restante</h5>
+                            <p class="text-danger fw-bold">@financing.GetFormattedRemainingDebt()</p>
+                        </div>
+                        <div class="mb-3">
+                            <h5 class="small font-weight-bold text-muted">Índice de Correção</h5>
+                            <p>@financing.CorrectionIndexDescription</p>
+                        </div>
+                        <div class="mb-3">
+                            <h5 class="small font-weight-bold text-muted">Taxa de Juros</h5>
+                            <p>@financing.InterestRate.ToString("F2")% ao mês</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Gerar Previsão</h6>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="Forecast" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@financing.Id" />
+
+                            <div class="mb-3">
+                                <label for="forecastMonths" class="form-label">Meses de Previsão</label>
+                                <input type="number" id="forecastMonths" name="forecastMonths" class="form-control" value="@forecastMonths" min="1" max="120" />
+                                <small class="form-text text-muted">Informe o número de meses para a previsão (entre 1 e 120)</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-chart-line me-1"></i> Gerar Previsão
+                                </button>
+                                <a asp-action="Details" asp-route-id="@Model" class="btn btn-secondary">Cancelar</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (forecast != null)
+        {
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Resultados da Previsão</h6>
+                    <div>
+                        <a href="#" class="btn btn-sm btn-primary" id="printResultsBtn">
+                            <i class="fas fa-print me-1"></i> Imprimir
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-primary text-white mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Dívida Atual</h5>
+                                    <h4 class="card-text">@forecast.GetFormattedCurrentDebt()</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-info text-white mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Taxa Base de Juros</h5>
+                                    <h4 class="card-text">@forecast.GetFormattedBaseInterestRate()</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @foreach (var scenario in forecast.Scenarios)
+                    {
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Cenário: @scenario.Name</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <h6 class="small font-weight-bold text-muted">Índice Projetado</h6>
+                                            <p class="font-weight-bold">@scenario.GetFormattedProjectedIndexValue()</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <h6 class="small font-weight-bold text-muted">Dívida Final Projetada</h6>
+                                            <p class="font-weight-bold text-danger">@scenario.GetFormattedProjectedFinalDebt()</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <h6 class="small font-weight-bold text-muted">Diferença da Atual</h6>
+                                            <p class="font-weight-bold">@scenario.GetFormattedDifferenceFromCurrent()</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <h6 class="small font-weight-bold text-muted">Diferença Percentual</h6>
+                                            <p class="font-weight-bold">@scenario.GetFormattedDifferencePercentage()</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h6 class="mb-3">Parcelas Projetadas</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-sm">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th>Parcela</th>
+                                                <th class="text-center">Data</th>
+                                                <th class="text-center">Valor Original</th>
+                                                <th class="text-center">Valor Projetado</th>
+                                                <th class="text-center">Diferença</th>
+                                                <th class="text-center">Diferença %</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var installment in scenario.Installments)
+                                            {
+                                                <tr>
+                                                    <td>@installment.Number</td>
+                                                    <td class="text-center">@installment.GetFormattedDueDate()</td>
+                                                    <td class="text-end">@installment.GetFormattedOriginalAmount()</td>
+                                                    <td class="text-end">@installment.GetFormattedProjectedAmount()</td>
+                                                    <td class="text-end">@installment.GetFormattedDifference()</td>
+                                                    <td class="text-center">@installment.GetFormattedDifferencePercentage()</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle me-2"></i> Financiamento não encontrado.
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Inicializa botão de impressão
+            $('#printResultsBtn').on('click', function (e) {
+                e.preventDefault();
+                window.print();
+            });
+        });
+    </script>
+}
