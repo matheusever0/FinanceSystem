@@ -189,28 +189,5 @@ namespace FinanceSystem.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
-        [HttpPost("{id}/recalculate")]
-        public async Task<ActionResult> RecalculateInstallments(Guid id)
-        {
-            try
-            {
-                var existingFinancing = await _financingService.GetByIdAsync(id);
-
-                if (existingFinancing.UserId != HttpContext.GetCurrentUserId())
-                    return Forbid();
-
-                await _financingService.RecalculateRemainingInstallmentsAsync(id);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
     }
 }

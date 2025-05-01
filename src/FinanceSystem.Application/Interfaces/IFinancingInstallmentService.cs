@@ -10,7 +10,5 @@ namespace FinanceSystem.Application.Interfaces
         Task<IEnumerable<FinancingInstallmentDto>> GetByDueDateAsync(Guid userId, DateTime startDate, DateTime endDate);
         Task<IEnumerable<FinancingInstallmentDto>> GetPendingAsync(Guid userId);
         Task<IEnumerable<FinancingInstallmentDto>> GetOverdueAsync(Guid userId);
-        Task<FinancingInstallmentDto> ProcessPaymentAsync(FinancingInstallmentPaymentDto paymentDto);
-        Task<FinancingInstallmentDto> MarkAsOverdueAsync(Guid id);
     }
 }

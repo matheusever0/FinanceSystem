@@ -101,53 +101,5 @@ namespace FinanceSystem.API.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
-
-        [HttpPost("payment")]
-        public async Task<ActionResult<FinancingInstallmentDto>> ProcessPayment(FinancingInstallmentPaymentDto paymentDto)
-        {
-            try
-            {
-                var installment = await _installmentService.GetByIdAsync(paymentDto.InstallmentId);
-                var financing = await _financingService.GetByIdAsync(installment.FinancingId);
-
-                if (financing.UserId != HttpContext.GetCurrentUserId())
-                    return Forbid();
-
-                var updatedInstallment = await _installmentService.ProcessPaymentAsync(paymentDto);
-                return Ok(updatedInstallment);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpPost("{id}/overdue")]
-        public async Task<ActionResult<FinancingInstallmentDto>> MarkAsOverdue(Guid id)
-        {
-            try
-            {
-                var installment = await _installmentService.GetByIdAsync(id);
-                var financing = await _financingService.GetByIdAsync(installment.FinancingId);
-
-                if (financing.UserId != HttpContext.GetCurrentUserId())
-                    return Forbid();
-
-                var updatedInstallment = await _installmentService.MarkAsOverdueAsync(id);
-                return Ok(updatedInstallment);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
     }
 }
