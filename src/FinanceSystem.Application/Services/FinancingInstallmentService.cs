@@ -5,6 +5,7 @@ using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Entities;
 using FinanceSystem.Domain.Enums;
 using FinanceSystem.Domain.Interfaces.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FinanceSystem.Application.Services
 {
@@ -12,11 +13,16 @@ namespace FinanceSystem.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IServiceProvider _serviceProvider;
 
-        public FinancingInstallmentService(IUnitOfWork unitOfWork, IMapper mapper)
+        public FinancingInstallmentService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            IServiceProvider serviceProvider)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<FinancingInstallmentDto> GetByIdAsync(Guid id)
@@ -87,18 +93,18 @@ namespace FinanceSystem.Application.Services
             if (paymentMethod == null)
                 throw new KeyNotFoundException("Método de pagamento não encontrado");
 
-            // Encontrar um tipo de pagamento adequado para financiamentos
+            // Find a payment type suitable for financing
             var paymentType = (await _unitOfWork.PaymentTypes.GetAllSystemTypesAsync())
                 .FirstOrDefault(pt => pt.IsFinancingType);
 
             if (paymentType == null)
                 throw new InvalidOperationException("Nenhum tipo de pagamento para financiamentos encontrado");
 
-            // Verificar se o valor do pagamento é válido
+            // Check if payment amount is valid
             if (paymentDto.Amount <= 0 || paymentDto.Amount > installment.RemainingAmount)
                 throw new InvalidOperationException($"Valor de pagamento inválido. O valor deve estar entre 0 e {installment.RemainingAmount}");
 
-            // Criar o pagamento
+            // Create payment
             var payment = new Payment(
                 $"Parcela {installment.InstallmentNumber} - {financing.Description}",
                 paymentDto.Amount,
@@ -112,10 +118,43 @@ namespace FinanceSystem.Application.Services
                 paymentDto.Notes ?? $"Pagamento de parcela do financiamento {financing.Description}"
             );
 
-            // Salvar o pagamento
+            // Save payment
             await _unitOfWork.Payments.AddAsync(payment);
 
-            // Marcar como pago ou parcialmente pago
+            // For early payments of future installments, prioritize amortization
+            bool isFutureInstallment = installment.DueDate > DateTime.Now.AddDays(15); // Consider 15 days buffer
+            decimal amortizationAmount;
+
+            if (isFutureInstallment)
+            {
+                // Calculate how much of the payment goes to interest vs amortization
+                // For early payments, prioritize amortization by reducing the interest portion
+                decimal interestPortion = 0;
+
+                // If payment is less than interest, some interest must be paid
+                if (paymentDto.Amount <= installment.InterestAmount)
+                {
+                    interestPortion = paymentDto.Amount;
+                    amortizationAmount = 0;
+                }
+                else
+                {
+                    // Only pay minimal interest, allocate rest to principal
+                    interestPortion = Math.Min(installment.InterestAmount * 0.1m, paymentDto.Amount * 0.1m);
+                    amortizationAmount = paymentDto.Amount - interestPortion;
+                }
+            }
+            else
+            {
+                // For current installments, apply standard calculation
+                // Calculate the proportion of the installment being paid
+                decimal paymentRatio = paymentDto.Amount / installment.TotalAmount;
+
+                // Calculate proportional amortization
+                amortizationAmount = installment.AmortizationAmount * paymentRatio;
+            }
+
+            // Mark installment based on payment amount
             if (paymentDto.Amount >= installment.RemainingAmount)
             {
                 installment.MarkAsPaid(paymentDto.PaymentDate, payment.Amount);
@@ -125,14 +164,23 @@ namespace FinanceSystem.Application.Services
                 installment.MarkAsPartiallyPaid(paymentDto.Amount, paymentDto.PaymentDate);
             }
 
-            // Atualizar o saldo devedor do financiamento
-            decimal amortizationAmount = (paymentDto.Amount / installment.TotalAmount) * installment.AmortizationAmount;
+            // Update financing's remaining debt by using the calculated amortization
             financing.UpdateRemainingDebt(amortizationAmount);
 
-            // Atualizar os registros
+            // Update records
             await _unitOfWork.FinancingInstallments.UpdateAsync(installment);
             await _unitOfWork.Financings.UpdateAsync(financing);
             await _unitOfWork.CompleteAsync();
+
+            // Recalculate installments if the payment is significant
+            bool isSignificantPayment = amortizationAmount > (financing.RemainingDebt * 0.1m);
+
+            if (isSignificantPayment && isFutureInstallment)
+            {
+                // Use IFinancingService via dependency injection
+                var financingService = _serviceProvider.GetRequiredService<IFinancingService>();
+                await financingService.RecalculateRemainingInstallmentsAsync(financing.Id);
+            }
 
             return _mapper.Map<FinancingInstallmentDto>(installment);
         }

@@ -5,6 +5,8 @@ using FinanceSystem.Domain.Entities;
 using FinanceSystem.Domain.Enums;
 using FinanceSystem.Domain.Interfaces.Services;
 using FinanceSystem.Resources;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace FinanceSystem.Application.Services
 {
@@ -12,11 +14,16 @@ namespace FinanceSystem.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IServiceProvider _serviceProvider;
 
-        public PaymentService(IUnitOfWork unitOfWork, IMapper mapper)
+        public PaymentService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            IServiceProvider serviceProvider)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<PaymentDto> GetByIdAsync(Guid id)
@@ -273,11 +280,86 @@ namespace FinanceSystem.Application.Services
         public async Task<PaymentDto> CancelAsync(Guid id)
         {
             var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
+
+            // Check if payment is linked to a financing
+            if (payment.FinancingId.HasValue)
+            {
+                var financing = await _unitOfWork.Financings.GetByIdAsync(payment.FinancingId.Value);
+                if (financing != null && financing.Status == Domain.Enums.FinancingStatus.Active)
+                {
+                    decimal amortizationAmount = 0;
+
+                    // If payment is linked to a specific installment
+                    if (payment.FinancingInstallmentId.HasValue)
+                    {
+                        var installment = await _unitOfWork.FinancingInstallments.GetByIdAsync(payment.FinancingInstallmentId.Value);
+                        if (installment != null)
+                        {
+                            // Calculate proportion of amortization to restore
+                            decimal proportionPaid = payment.Amount / installment.TotalAmount;
+                            amortizationAmount = proportionPaid * installment.AmortizationAmount;
+
+                            // Update installment status and amounts
+                            await RevertPaymentFromInstallment(installment, payment);
+                        }
+                    }
+                    else
+                    {
+                        // For payments not linked to specific installments (extra payments)
+                        // Consider the full amount as amortization
+                        amortizationAmount = payment.Amount;
+                    }
+
+                    // Increase the remaining debt by the amortization amount
+                    financing.RestoreRemainingDebt(amortizationAmount);
+                    await _unitOfWork.Financings.UpdateAsync(financing);
+
+                    // Recalculate future installments
+                    var financingService = _serviceProvider.GetRequiredService<IFinancingService>();
+                    await financingService.RecalculateRemainingInstallmentsAsync(financing.Id);
+                }
+            }
+
             payment.Cancel();
             await _unitOfWork.Payments.UpdateAsync(payment);
             await _unitOfWork.CompleteAsync();
 
             return _mapper.Map<PaymentDto>(payment);
+        }
+
+        private async Task RevertPaymentFromInstallment(FinancingInstallment installment, Payment payment)
+        {
+            // Remove the payment amount from paid amount
+            decimal newPaidAmount = installment.PaidAmount - payment.Amount;
+
+            // Recalculate remaining amount
+            decimal newRemainingAmount = installment.TotalAmount - newPaidAmount;
+
+            // Determine new status based on payment amounts
+            FinancingInstallmentStatus newStatus;
+            if (newPaidAmount <= 0)
+            {
+                newPaidAmount = 0;
+                newRemainingAmount = installment.TotalAmount;
+                newStatus = FinancingInstallmentStatus.Pending;
+
+                if (installment.DueDate < DateTime.Now)
+                {
+                    newStatus = FinancingInstallmentStatus.Overdue;
+                }
+            }
+            else if (newRemainingAmount > 0)
+            {
+                newStatus = FinancingInstallmentStatus.PartiallyPaid;
+            }
+            else
+            {
+                newStatus = FinancingInstallmentStatus.Paid;
+            }
+
+            // Update installment
+            installment.RevertPayment(newPaidAmount, newRemainingAmount, newStatus);
+            await _unitOfWork.FinancingInstallments.UpdateAsync(installment);
         }
     }
 }

@@ -11,12 +11,9 @@ namespace FinanceSystem.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        configuration.GetConnectionString("DefaultConnection"),
-        b => b.MigrationsAssembly("FinanceSystem.Infrastructure")
-    )
-);
+            services.AddDbContext<ApplicationDbContext>
+                (options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
+                    b => b.MigrationsAssembly("FinanceSystem.Infrastructure")));
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IAuthService, AuthService>();
@@ -25,6 +22,7 @@ namespace FinanceSystem.Infrastructure
             services.AddScoped<IRecurrenceService, RecurrenceService>();
             services.AddHostedService<RecurrenceProcessorService>();
             services.AddHostedService<DatabaseInitializer>();
+            services.AddHostedService<FinancingRecalculationService>();
 
             services.AddHttpClient();
 

@@ -256,5 +256,19 @@ namespace FinanceSystem.Domain.Entities
 
             UpdatedAt = DateTime.Now;
         }
+
+        public void RestoreRemainingDebt(decimal amount)
+        {
+            RemainingDebt += amount;
+
+            // If financing was completed but now has debt again, reactivate it
+            if (Status == FinancingStatus.Completed && RemainingDebt > 0)
+            {
+                Status = FinancingStatus.Active;
+                EndDate = null;
+            }
+
+            UpdatedAt = DateTime.Now;
+        }
     }
 }

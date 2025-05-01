@@ -113,5 +113,19 @@ namespace FinanceSystem.Domain.Entities
                 MarkAsPartiallyPaid(payment.Amount, payment.PaymentDate ?? DateTime.Now);
             }
         }
+
+        public void RevertPayment(decimal newPaidAmount, decimal newRemainingAmount, FinancingInstallmentStatus newStatus)
+        {
+            PaidAmount = newPaidAmount;
+            RemainingAmount = newRemainingAmount;
+            Status = newStatus;
+
+            if (newPaidAmount <= 0)
+            {
+                PaymentDate = null;
+            }
+
+            UpdatedAt = DateTime.Now;
+        }
     }
 }

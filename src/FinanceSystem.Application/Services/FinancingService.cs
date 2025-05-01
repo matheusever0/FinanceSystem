@@ -38,9 +38,9 @@ namespace FinanceSystem.Application.Services
 
             // Calcular métricas adicionais
             var installments = financing.Installments.ToList();
-            var paidInstallments = installments.Where(i => i.Status == FinancingInstallmentStatus.Paid).ToList();
-            var pendingInstallments = installments.Where(i => i.Status == FinancingInstallmentStatus.Pending
+            var paidInstallments = installments.Where(i => i.Status == FinancingInstallmentStatus.Paid 
                 || i.Status == FinancingInstallmentStatus.PartiallyPaid).ToList();
+            var pendingInstallments = installments.Where(i => i.Status == FinancingInstallmentStatus.Pending).ToList();
 
             dto.InstallmentsPaid = paidInstallments.Count;
             dto.InstallmentsRemaining = pendingInstallments.Count;
@@ -275,6 +275,22 @@ namespace FinanceSystem.Application.Services
 
             await Task.CompletedTask; // Para manter o método assíncrono
             return result;
+        }
+
+        public async Task RecalculateRemainingInstallmentsAsync(Guid financingId)
+        {
+            var financing = await _unitOfWork.Financings.GetFinancingWithDetailsAsync(financingId);
+            if (financing == null)
+                throw new KeyNotFoundException("Financiamento não encontrado");
+
+            if (financing.Status != FinancingStatus.Active)
+                throw new InvalidOperationException("Apenas financiamentos ativos podem ser recalculados");
+
+            // Recalculate installments based on remaining debt
+            financing.RecalculateRemainingInstallments(DateTime.Now);
+
+            await _unitOfWork.Financings.UpdateAsync(financing);
+            await _unitOfWork.CompleteAsync();
         }
     }
 }
