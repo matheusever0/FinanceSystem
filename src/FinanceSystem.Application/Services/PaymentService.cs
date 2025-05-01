@@ -169,6 +169,13 @@ namespace FinanceSystem.Application.Services
             if (createPaymentDto.PaymentDate.HasValue)
             {
                 payment.MarkAsPaid(createPaymentDto.PaymentDate.Value);
+
+                if (payment.FinancingId.HasValue)
+                {
+                    // Após marcar como pago, recalcular as parcelas restantes
+                    var financingService = _serviceProvider.GetRequiredService<IFinancingService>();
+                    await financingService.RecalculateRemainingInstallmentsAsync(payment.FinancingId.Value);
+                }
             }
 
             if (createPaymentDto.NumberOfInstallments > 1)
@@ -259,9 +266,19 @@ namespace FinanceSystem.Application.Services
 
         public async Task<PaymentDto> MarkAsPaidAsync(Guid id, DateTime paymentDate)
         {
-            var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
+            var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id) ??
+                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
+
             payment.MarkAsPaid(paymentDate);
             await _unitOfWork.Payments.UpdateAsync(payment);
+
+            if (payment.FinancingId.HasValue)
+            {
+                var financingService = _serviceProvider.GetRequiredService<IFinancingService>();
+
+                await financingService.RecalculateRemainingInstallmentsAsync(payment.FinancingId.Value);
+            }
+
             await _unitOfWork.CompleteAsync();
 
             return _mapper.Map<PaymentDto>(payment);
@@ -279,42 +296,43 @@ namespace FinanceSystem.Application.Services
 
         public async Task<PaymentDto> CancelAsync(Guid id)
         {
-            var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
+            var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id) ??
+                throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound);
 
-            // Check if payment is linked to a financing
-            if (payment.FinancingId.HasValue)
+            // Se o pagamento estiver associado a um financiamento e estiver no status Pago
+            if (payment.FinancingId.HasValue && payment.Status == PaymentStatus.Paid)
             {
                 var financing = await _unitOfWork.Financings.GetByIdAsync(payment.FinancingId.Value);
-                if (financing != null && financing.Status == Domain.Enums.FinancingStatus.Active)
+                if (financing != null && financing.Status == FinancingStatus.Active)
                 {
                     decimal amortizationAmount = 0;
 
-                    // If payment is linked to a specific installment
+                    // Se o pagamento estiver vinculado a uma parcela específica
                     if (payment.FinancingInstallmentId.HasValue)
                     {
                         var installment = await _unitOfWork.FinancingInstallments.GetByIdAsync(payment.FinancingInstallmentId.Value);
                         if (installment != null)
                         {
-                            // Calculate proportion of amortization to restore
+                            // Calcular proporção da amortização a ser restaurada
                             decimal proportionPaid = payment.Amount / installment.TotalAmount;
                             amortizationAmount = proportionPaid * installment.AmortizationAmount;
 
-                            // Update installment status and amounts
+                            // Atualizar status e valores da parcela
                             await RevertPaymentFromInstallment(installment, payment);
                         }
                     }
                     else
                     {
-                        // For payments not linked to specific installments (extra payments)
-                        // Consider the full amount as amortization
+                        // Para pagamentos não vinculados a parcelas específicas (pagamentos extras)
+                        // Considerar o valor total como amortização
                         amortizationAmount = payment.Amount;
                     }
 
-                    // Increase the remaining debt by the amortization amount
+                    // Aumentar a dívida restante pelo valor da amortização
                     financing.RestoreRemainingDebt(amortizationAmount);
                     await _unitOfWork.Financings.UpdateAsync(financing);
 
-                    // Recalculate future installments
+                    // Recalcular parcelas futuras
                     var financingService = _serviceProvider.GetRequiredService<IFinancingService>();
                     await financingService.RecalculateRemainingInstallmentsAsync(financing.Id);
                 }
@@ -327,15 +345,16 @@ namespace FinanceSystem.Application.Services
             return _mapper.Map<PaymentDto>(payment);
         }
 
+        // Método auxiliar para reverter os efeitos de um pagamento em uma parcela
         private async Task RevertPaymentFromInstallment(FinancingInstallment installment, Payment payment)
         {
-            // Remove the payment amount from paid amount
+            // Remover o valor do pagamento do valor pago
             decimal newPaidAmount = installment.PaidAmount - payment.Amount;
 
-            // Recalculate remaining amount
+            // Recalcular o valor restante
             decimal newRemainingAmount = installment.TotalAmount - newPaidAmount;
 
-            // Determine new status based on payment amounts
+            // Determinar o novo status com base nos valores de pagamento
             FinancingInstallmentStatus newStatus;
             if (newPaidAmount <= 0)
             {
@@ -357,7 +376,7 @@ namespace FinanceSystem.Application.Services
                 newStatus = FinancingInstallmentStatus.Paid;
             }
 
-            // Update installment
+            // Atualizar parcela
             installment.RevertPayment(newPaidAmount, newRemainingAmount, newStatus);
             await _unitOfWork.FinancingInstallments.UpdateAsync(installment);
         }
