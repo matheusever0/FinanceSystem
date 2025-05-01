@@ -106,77 +106,56 @@ namespace FinanceSystem.Domain.Entities
             RemainingDebt *= (1 + indexValue);
 
             // Ajustar parcelas futuras
-            RecalculateRemainingInstallments(correctionDate);
+            RecalculateRemainingInstallments();
 
             LastCorrectionDate = correctionDate;
             UpdatedAt = DateTime.Now;
         }
 
-        public void RecalculateRemainingInstallments(DateTime referenceDate)
+        public void RecalculateRemainingInstallments()
         {
-            // Identificar parcelas futuras não pagas
-            var futureInstallments = Installments
-                .Where(i => i.DueDate > referenceDate && i.Status == FinancingInstallmentStatus.Pending)
+            // Encontrar a última parcela paga
+            var lastPaidInstallment = Installments
+                .Where(i => i.Status == FinancingInstallmentStatus.Paid)
+                .OrderByDescending(i => i.InstallmentNumber)
+                .FirstOrDefault();
+
+            // Se não houver parcela paga, não há o que recalcular
+            if (lastPaidInstallment == null)
+                return;
+
+            // Usar a data do pagamento da última parcela paga como referência
+            DateTime referenceDate = lastPaidInstallment.PaymentDate ?? DateTime.Now;
+
+            // Identificar parcelas futuras não pagas (incluindo parcelas antigas não pagas)
+            var pendingInstallments = Installments
+                .Where(i => i.Status == FinancingInstallmentStatus.Pending)
                 .OrderBy(i => i.InstallmentNumber)
                 .ToList();
 
-            if (!futureInstallments.Any())
+            if (!pendingInstallments.Any())
                 return;
 
-            if (Type == FinancingType.PRICE)
+            // Aqui, em vez de recalcular com base na fórmula de amortização,
+            // usamos o valor da última parcela paga
+            decimal lastPaidAmount = lastPaidInstallment.PaidAmount;
+
+            // Ajuste das parcelas pendentes
+            foreach (var installment in pendingInstallments)
             {
-                RecalculatePRICEInstallments(futureInstallments);
-            }
-            else // SAC
-            {
-                RecalculateSACInstallments(futureInstallments);
-            }
-        }
+                // Usar o mesmo valor total da última parcela paga
+                decimal totalAmount = lastPaidAmount;
 
-        private void RecalculatePRICEInstallments(List<FinancingInstallment> installments)
-        {
-            int remainingMonths = installments.Count;
-            decimal monthlyRate = InterestRate / 12 / 100; // Taxa mensal em formato decimal
+                // Manter a proporção entre juros e amortização da parcela original
+                decimal totalOriginal = installment.TotalAmount;
+                decimal interestProportion = installment.InterestAmount / totalOriginal;
+                decimal amortizationProportion = installment.AmortizationAmount / totalOriginal;
 
-            // Fórmula PRICE: PMT = VP × [i × (1 + i)^n] / [(1 + i)^n - 1]
-            decimal factor = monthlyRate * (decimal)Math.Pow((double)(1 + monthlyRate), remainingMonths) /
-                             ((decimal)Math.Pow((double)(1 + monthlyRate), remainingMonths) - 1);
+                decimal newInterestAmount = totalAmount * interestProportion;
+                decimal newAmortizationAmount = totalAmount * amortizationProportion;
 
-            decimal installmentAmount = RemainingDebt * factor;
-
-            decimal currentDebt = RemainingDebt;
-
-            foreach (var installment in installments)
-            {
-                decimal interest = currentDebt * monthlyRate;
-                decimal amortization = installmentAmount - interest;
-
-                installment.UpdateValues(installmentAmount, interest, amortization);
-                installment.MarkAsAdjusted();
-
-                currentDebt -= amortization;
-            }
-        }
-
-        private void RecalculateSACInstallments(List<FinancingInstallment> installments)
-        {
-            int remainingMonths = installments.Count;
-            decimal monthlyRate = InterestRate / 12 / 100; // Taxa mensal em formato decimal
-
-            // No SAC, a amortização é constante
-            decimal constantAmortization = RemainingDebt / remainingMonths;
-
-            decimal currentDebt = RemainingDebt;
-
-            foreach (var installment in installments)
-            {
-                decimal interest = currentDebt * monthlyRate;
-                decimal totalAmount = constantAmortization + interest;
-
-                installment.UpdateValues(totalAmount, interest, constantAmortization);
-                installment.MarkAsAdjusted();
-
-                currentDebt -= constantAmortization;
+                // Atualizar valores da parcela
+                installment.UpdateValues(totalAmount, newInterestAmount, newAmortizationAmount);
             }
         }
 
@@ -276,7 +255,7 @@ namespace FinanceSystem.Domain.Entities
             if (isAmortization)
             {
                 // For amortization payments, we need to recalculate all future installments
-                RecalculateRemainingInstallments(DateTime.Now);
+                RecalculateRemainingInstallments();
             }
             else
             {

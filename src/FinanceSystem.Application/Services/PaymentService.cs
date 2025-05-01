@@ -166,9 +166,13 @@ namespace FinanceSystem.Application.Services
                     );
              }
 
+            await _unitOfWork.Payments.AddAsync(payment);
+
             if (createPaymentDto.PaymentDate.HasValue)
             {
                 payment.MarkAsPaid(createPaymentDto.PaymentDate.Value);
+
+                await _unitOfWork.CompleteAsync();
 
                 if (payment.FinancingId.HasValue)
                 {
@@ -183,10 +187,9 @@ namespace FinanceSystem.Application.Services
                 payment.AddInstallments(createPaymentDto.NumberOfInstallments);
             }
 
-            await _unitOfWork.Payments.AddAsync(payment);
             await _unitOfWork.CompleteAsync();
-
-            return _mapper.Map<PaymentDto>(payment);
+            var savedPayment = await _unitOfWork.Payments.GetByIdAsync(payment.Id);
+            return _mapper.Map<PaymentDto>(savedPayment);
         }
 
         public async Task<PaymentDto> UpdateAsync(Guid id, UpdatePaymentDto updatePaymentDto)

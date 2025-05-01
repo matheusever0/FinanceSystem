@@ -245,6 +245,27 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
+        [HttpGet]
+        [RequirePermission("financings.view")]
+        public async Task<IActionResult> GetInstallmentsByPending(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("ID do financiamento não fornecido");
+            }
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var installments = await _financingService.GetFinancingInstallmentsAsync(id, token);
+                return Json(installments.Where(e => e.Status == 1));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Erro ao obter parcelas: " + ex.Message);
+            }
+        }
+
         private List<SelectListItem> GetCorrectionIndexes()
         {
             return new List<SelectListItem>

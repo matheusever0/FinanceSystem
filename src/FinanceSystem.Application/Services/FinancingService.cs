@@ -287,7 +287,7 @@ namespace FinanceSystem.Application.Services
                 throw new InvalidOperationException("Apenas financiamentos ativos podem ser recalculados");
 
             // Recalculate installments based on remaining debt
-            financing.RecalculateRemainingInstallments(DateTime.Now);
+            financing.RecalculateRemainingInstallments();
 
             await _unitOfWork.Financings.UpdateAsync(financing);
             await _unitOfWork.CompleteAsync();

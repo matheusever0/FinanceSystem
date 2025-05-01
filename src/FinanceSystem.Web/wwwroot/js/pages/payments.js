@@ -767,7 +767,7 @@ FinanceSystem.Pages.Payments = (function () {
                 installmentSection.style.display = 'block';
 
                 $.ajax({
-                    url: '/Financings/GetInstallments',
+                    url: '/Financings/GetInstallmentsByPending',
                     type: 'GET',
                     data: { Id: financingId },
                     beforeSend: function () {
@@ -790,6 +790,9 @@ FinanceSystem.Pages.Payments = (function () {
                                 const option = document.createElement('option');
                                 option.value = installment.id;
                                 option.textContent = `Parcela ${installment.installmentNumber} - Venc: ${installment.dueDate} - ${formatCurrency(installment.totalAmount)}`;
+                                option.setAttribute('data-due-date', installment.dueDate);
+                                option.setAttribute('data-payment-date', installment.dueDate);
+                                option.setAttribute('data-installment-number', installment.installmentNumber);
                                 installmentSelect.appendChild(option);
                             });
                         } else {
@@ -816,6 +819,21 @@ FinanceSystem.Pages.Payments = (function () {
                 // Esconder seção de parcelas
                 installmentSection.style.display = 'none';
             }
+
+            installmentSelect.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+
+                if (!selectedOption || !selectedOption.value) return;
+
+                const dueDateRaw = selectedOption.getAttribute('data-due-date'); 
+                const installmentNumberRaw = selectedOption.getAttribute('data-installment-number'); 
+                const dueDate = dueDateRaw ? dueDateRaw.split('T')[0] : '';
+                const installmentNumber = installmentNumberRaw ? installmentNumberRaw.split('T')[0] : '';
+
+                document.getElementById('DueDate').value = dueDate;
+                document.getElementById('PaymentDate').value = dueDate;
+                document.getElementById('Notes').value = 'Pagamento de Parcela: ' + installmentNumber;
+            });
         });
     }
 

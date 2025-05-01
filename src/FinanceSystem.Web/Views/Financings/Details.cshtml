@@ -101,11 +101,11 @@
                                 <div class="progress">
                                     <div class="progress-bar @GetProgressBarClass(Model.ProgressPercentage)"
                                          role="progressbar"
-                                         style="width: @(Model.ProgressPercentage * 100)%"
-                                         aria-valuenow="@(Model.ProgressPercentage * 100)"
+                                         style="width: @(Model.ProgressPercentage)%"
+                                         aria-valuenow="@(Model.ProgressPercentage)"
                                          aria-valuemin="0"
                                          aria-valuemax="100">
-                                        @((Model.ProgressPercentage * 100).ToString("F0"))%
+                                        @((Model.ProgressPercentage).ToString("F0"))%
                                     </div>
                                 </div>
                             </div>
@@ -244,7 +244,7 @@
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover" id="investments-table">
+                    <table class="table table-bordered table-hover">
                         <thead class="bg-light">
                             <tr>
                                 <th>Descrição</th>
