@@ -59,7 +59,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover table-payments" id="table-payments">
+                    <table class="table table-bordered table-hover">
                         <thead class="bg-light">
                             <tr>
                                 <th>Descrição</th>
@@ -99,6 +99,13 @@
                                                  aria-valuemax="100">
                                                 @((item.ProgressPercentage * 100).ToString("F0"))%
                                             </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>

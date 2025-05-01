@@ -207,7 +207,7 @@
                                     <td class="text-end">@installment.TotalAmount.ToString("C2")</td>
                                     <td class="text-end">@installment.PaidAmount.ToString("C2")</td>
                                     <td class="text-center">
-                                        @if (installment.Status == 2)
+                                        @if (installment.Status is 2 or 3)
                                         {
                                             <span class="@(installment.PercentageDifference < 0 ? "text-success" : "text-warning")">
                                                 @installment.GetFormattedDifference()
@@ -244,7 +244,7 @@
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-bordered table-hover" id="investments-table">
                         <thead class="bg-light">
                             <tr>
                                 <th>Descrição</th>

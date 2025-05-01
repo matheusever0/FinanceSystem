@@ -22,7 +22,6 @@ namespace FinanceSystem.Infrastructure
             services.AddScoped<IRecurrenceService, RecurrenceService>();
             services.AddHostedService<RecurrenceProcessorService>();
             services.AddHostedService<DatabaseInitializer>();
-            services.AddHostedService<FinancingRecalculationService>();
 
             services.AddHttpClient();
 
