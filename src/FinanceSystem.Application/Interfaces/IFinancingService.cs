@@ -16,6 +16,5 @@ namespace FinanceSystem.Application.Interfaces
         Task CompleteAsync(Guid id);
         Task CancelAsync(Guid id);
         Task<FinancingSimulationDto> SimulateAsync(FinancingSimulationRequestDto simulationRequest);
-        Task<FinancingForecastDto> ForecastAsync(FinancingForecastRequestDto forecastRequest);
     }
 }

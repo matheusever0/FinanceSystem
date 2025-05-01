@@ -154,27 +154,5 @@ namespace FinanceSystem.Web.Services
                 throw;
             }
         }
-
-        public async Task<FinancingForecastModel> ForecastFinancingAsync(string financingId, int forecastMonths, string token)
-        {
-            try
-            {
-                _logger.LogInformation("Gerando previsão para financiamento: {FinancingId} para {Months} meses",
-                    financingId, forecastMonths);
-
-                var request = new
-                {
-                    FinancingId = financingId,
-                    ForecastMonths = forecastMonths
-                };
-
-                return await _apiService.PostAsync<FinancingForecastModel>("/api/financings/forecast", request, token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao gerar previsão para financiamento: {FinancingId}", financingId);
-                throw;
-            }
-        }
     }
 }

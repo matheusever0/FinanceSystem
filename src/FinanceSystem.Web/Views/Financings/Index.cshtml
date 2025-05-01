@@ -101,19 +101,6 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            @if (item.Status == 1 && await PermissionHelper.HasPermissionAsync(Context, "financings.forecast"))
-                                            {
-                                                <a asp-action="Forecast" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-chart-line"></i>
-                                                </a>
-                                            }
-                                        </div>
-                                    </td>
                                 </tr>
                             }
                         </tbody>

@@ -189,28 +189,5 @@ namespace FinanceSystem.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
-        [HttpPost("forecast")]
-        public async Task<ActionResult<FinancingForecastDto>> Forecast(FinancingForecastRequestDto forecastRequest)
-        {
-            try
-            {
-                var existingFinancing = await _financingService.GetByIdAsync(forecastRequest.FinancingId);
-
-                if (existingFinancing.UserId != HttpContext.GetCurrentUserId())
-                    return Forbid();
-
-                var forecast = await _financingService.ForecastAsync(forecastRequest);
-                return Ok(forecast);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
     }
 }
