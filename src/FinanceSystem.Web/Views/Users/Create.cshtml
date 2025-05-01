@@ -5,7 +5,6 @@
 @{
     ViewData["Title"] = "Criar Usuário";
     var roles = ViewBag.Roles as IEnumerable<RoleModel>;
-    var isAdmin = User.IsInRole("Admin");
 }
 
 <div class="card">
@@ -27,10 +26,14 @@
 
             <div class="mb-3">
                 <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" />
+                <div class="input-group">
+                    <input asp-for="Password" class="form-control" type="password" id="passwordInput" />
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                        <i class="fas fa-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
-
             <div class="mb-3">
                 <label asp-for="Roles" class="form-label">Perfis <span class="text-danger">*</span></label>
                 <div class="card">
@@ -38,9 +41,9 @@
                         <div class="mb-2">
                             <select id="roleSelector" class="form-select">
                                 <option value="" selected disabled>Selecione um perfil para adicionar...</option>
-                                @foreach (var role in roles.Select(e => e.Name))
+                                @foreach (var role in roles)
                                 {
-                                    <option value="@role">@role</option>
+                                    <option value="@role.Name">@role.Name</option>
                                 }
                             </select>
                             <button type="button" id="addRoleBtn" class="btn btn-sm btn-primary mt-2">
@@ -55,6 +58,7 @@
                                 {
                                     <div class="badge bg-primary p-2 me-2 mb-2 role-badge">
                                         <input type="hidden" name="selectedRoles" value="@roleName" />
+                                        <input type="hidden" name="Roles" value="@roleName" />
                                         @roleName
                                         <a href="#" class="ms-1 text-white remove-role"><i class="fas fa-times"></i></a>
                                     </div>

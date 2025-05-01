@@ -45,7 +45,7 @@ namespace FinanceSystem.Application.Services
 
             var passwordHash = _authService.HashPassword(createUserDto.Password);
 
-            var user = new User(createUserDto.Username, createUserDto.Email, passwordHash);
+            var user = new User(createUserDto.Username.ToLower(), createUserDto.Email.ToLower(), passwordHash);
 
             if (createUserDto.Roles != null && createUserDto.Roles.Count != 0)
             {

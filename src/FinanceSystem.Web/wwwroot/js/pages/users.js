@@ -41,9 +41,8 @@ FinanceSystem.Pages.Users = (function () {
      */
     function initializeRoleManager() {
         const container = document.querySelector('.card-body[data-is-read-only]');
-        if (!container) return;
 
-        const isReadOnly = container.getAttribute('data-is-read-only') === 'true';
+        const isReadOnly = container?.getAttribute('data-is-read-only') === 'true';
 
         const addRoleBtn = document.getElementById('addRoleBtn');
         const roleSelector = document.getElementById('roleSelector');
