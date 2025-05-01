@@ -270,5 +270,19 @@ namespace FinanceSystem.Domain.Entities
 
             UpdatedAt = DateTime.Now;
         }
+
+        public void RecalculateAfterPayment(decimal amountPaid, bool isAmortization = false)
+        {
+            if (isAmortization)
+            {
+                // For amortization payments, we need to recalculate all future installments
+                RecalculateRemainingInstallments(DateTime.Now);
+            }
+            else
+            {
+                // For regular payments, we just update the remaining debt
+                UpdatedAt = DateTime.Now;
+            }
+        }
     }
 }

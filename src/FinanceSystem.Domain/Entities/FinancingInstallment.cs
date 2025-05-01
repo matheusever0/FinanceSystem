@@ -62,28 +62,12 @@ namespace FinanceSystem.Domain.Entities
             UpdatedAt = DateTime.Now;
         }
 
-        public void MarkAsPaid(DateTime paymentDate, decimal amountPaid)
+        public void MarkAsPaid(DateTime paymentDate, decimal? amount)
         {
             PaymentDate = paymentDate;
             Status = FinancingInstallmentStatus.Paid;
-            PaidAmount = amountPaid;
+            PaidAmount = amount ?? TotalAmount;
             RemainingAmount = 0;
-
-            UpdatedAt = DateTime.Now;
-        }
-
-        public void MarkAsPartiallyPaid(decimal amount, DateTime paymentDate)
-        {
-            if (amount <= 0 || amount >= RemainingAmount)
-                throw new InvalidOperationException("Invalid amount for partial payment");
-
-            PaidAmount += amount;
-            RemainingAmount -= amount;
-
-            Status = FinancingInstallmentStatus.PartiallyPaid;
-
-            if (PaymentDate == null || paymentDate > PaymentDate)
-                PaymentDate = paymentDate;
 
             UpdatedAt = DateTime.Now;
         }
@@ -100,17 +84,43 @@ namespace FinanceSystem.Domain.Entities
             UpdatedAt = DateTime.Now;
         }
 
-        public void AddPayment(Payment payment)
+        public void AddPayment(Payment payment, bool isAmortization = false)
         {
             Payments.Add(payment);
 
-            if (payment.Amount >= RemainingAmount)
+            decimal amountToApply = payment.Amount;
+
+            if (isAmortization)
             {
-                MarkAsPaid(payment.PaymentDate ?? DateTime.Now, payment.Amount);
+                // For amortization, we reduce only the principal amount
+                // Calculate what portion of this payment goes to principal vs interest
+                decimal principalPortion = (amountToApply / TotalAmount) * AmortizationAmount;
+                PaidAmount += amountToApply;
+
+                // Signal to the financing that this much principal was paid
+                Financing.UpdateRemainingDebt(principalPortion);
+
+                // Reduce remaining amount
+                RemainingAmount = TotalAmount - PaidAmount;
             }
             else
             {
-                MarkAsPartiallyPaid(payment.Amount, payment.PaymentDate ?? DateTime.Now);
+                // Regular payment
+                PaidAmount += amountToApply;
+                RemainingAmount -= amountToApply;
+            }
+
+            // Update status based on remaining amount
+            if (RemainingAmount <= 0)
+            {
+                MarkAsPaid(payment.PaymentDate ?? DateTime.Now, amountToApply);
+            }
+            else
+            {
+                Status = FinancingInstallmentStatus.PartiallyPaid;
+                if (PaymentDate == null || payment.PaymentDate > PaymentDate)
+                    PaymentDate = payment.PaymentDate;
+                UpdatedAt = DateTime.Now;
             }
         }
 
