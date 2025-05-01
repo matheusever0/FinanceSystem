@@ -5,7 +5,6 @@ namespace FinanceSystem.Application.DTOs.Financing
     public class FinancingDetailDto : FinancingDto
     {
         public List<FinancingInstallmentDto> Installments { get; set; } = [];
-        public List<FinancingCorrectionDto> Corrections { get; set; } = [];
         public List<PaymentDto> Payments { get; set; } = [];
 
         public decimal TotalInterestPaid { get; set; }

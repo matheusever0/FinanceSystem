@@ -16,7 +16,6 @@ namespace FinanceSystem.Infrastructure.Repositories
         {
             return await _dbSet
                 .Include(f => f.Installments)
-                .Include(f => f.Corrections)
                 .Include(f => f.Payments)
                 .FirstOrDefaultAsync(f => f.Id == id);
         }
@@ -65,7 +64,6 @@ namespace FinanceSystem.Infrastructure.Repositories
             return await _dbSet
                 .Where(f => f.UserId == userId && (f.UpdatedAt >= startDate || f.CreatedAt >= startDate))
                 .Include(f => f.Installments)
-                .Include(f => f.Corrections)
                 .OrderByDescending(f => f.UpdatedAt ?? f.CreatedAt)
                 .ToListAsync();
         }

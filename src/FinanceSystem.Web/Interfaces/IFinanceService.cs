@@ -15,6 +15,5 @@ namespace FinanceSystem.Web.Interfaces
         Task<bool> CompleteFinancingAsync(string id, string token);
         Task<FinancingSimulationModel> SimulateFinancingAsync(FinancingSimulationRequestModel model, string token);
         Task<FinancingForecastModel> ForecastFinancingAsync(string financingId, int forecastMonths, string token);
-        Task<bool> ApplyMonetaryCorrectionAsync(ApplyCorrectionModel model, string token);
     }
 }

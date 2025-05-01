@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FinanceSystem.Application.DTOs.Financing
+﻿namespace FinanceSystem.Application.DTOs.Financing
 {
     public class FinancingForecastScenarioDto
     {

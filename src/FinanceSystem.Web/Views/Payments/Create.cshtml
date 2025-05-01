@@ -90,6 +90,14 @@
                                     <span asp-validation-for="FinancingId" class="text-danger"></span>
                                     <div class="form-text">Se não houver financiamentos disponíveis, você precisa <a href="/Financings/Create" target="_blank">criar um financiamento</a> primeiro.</div>
                                 </div>
+                                <div class="mb-3" id="financingInstallmentSection" style="display:none;">
+                                    <label asp-for="FinancingInstallmentId" class="form-label">Parcela do Financiamento</label>
+                                    <select asp-for="FinancingInstallmentId" class="form-select">
+                                        <option value="">Selecione a parcela</option>
+                                    </select>
+                                    <span asp-validation-for="FinancingInstallmentId" class="text-danger"></span>
+                                    <div class="form-text">Selecione qual parcela do financiamento está sendo paga.</div>
+                                </div>
 
                                 <div class="mb-3">
                                     <label asp-for="PaymentMethodId" class="form-label"></label>

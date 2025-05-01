@@ -46,7 +46,6 @@ FinanceSystem.Pages.Payments = (function () {
 
         // Inicializa campos comuns usando módulos existentes
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
-            console.log('mask aqui');
             FinanceSystem.Modules.Financial.initializeMoneyMask('#Amount');
             FinanceSystem.Modules.Financial.initializeRecurringToggle(form);
         } else {
@@ -61,8 +60,27 @@ FinanceSystem.Pages.Payments = (function () {
         // Inicializa seletor de método de pagamento
         initializePaymentMethodSelect();
 
+        // Inicializa seletor de financiamento
+        initializeFinancingSelect();
+
         // Configura validação do formulário
         setupFormValidation(form);
+
+        // Verificar se já existe um financiamento selecionado (para pré-seleção)
+        const financingSelect = document.getElementById('FinancingId');
+        if (financingSelect && financingSelect.value) {
+            // Exibir a seção de financiamento
+            const financingSection = document.getElementById('financingSection');
+            if (financingSection) {
+                financingSection.style.display = 'block';
+            }
+
+            // Exibir a seção de parcelas
+            const installmentSection = document.getElementById('financingInstallmentSection');
+            if (installmentSection) {
+                installmentSection.style.display = 'block';
+            }
+        }
     }
 
     /**
@@ -88,6 +106,8 @@ FinanceSystem.Pages.Payments = (function () {
      */
     function toggleFinancingSection(typeId) {
         const financingSection = document.getElementById('financingSection');
+        const installmentSection = document.getElementById('financingInstallmentSection');
+
         if (!financingSection) return;
 
         // Verifica se o tipo de pagamento é relacionado a financiamento
@@ -102,15 +122,31 @@ FinanceSystem.Pages.Payments = (function () {
             const financingSelect = document.getElementById('FinancingId');
             if (financingSelect) {
                 financingSelect.required = true;
+
+                // Se já houver um financiamento selecionado, exibe a seção de parcelas
+                if (financingSelect.value && installmentSection) {
+                    installmentSection.style.display = 'block';
+                } else if (installmentSection) {
+                    installmentSection.style.display = 'none';
+                }
             }
         } else {
             financingSection.style.display = 'none';
+            if (installmentSection) {
+                installmentSection.style.display = 'none';
+            }
 
             // Remove a obrigatoriedade se não for tipo de financiamento
             const financingSelect = document.getElementById('FinancingId');
             if (financingSelect) {
                 financingSelect.required = false;
                 financingSelect.value = '';
+            }
+
+            // Limpa o campo de parcela
+            const installmentSelect = document.getElementById('FinancingInstallmentId');
+            if (installmentSelect) {
+                installmentSelect.value = '';
             }
         }
     }
@@ -680,6 +716,115 @@ FinanceSystem.Pages.Payments = (function () {
                 icon.classList.add('fa-chevron-down');
             }
         });
+    }
+
+    function initializeFinancingSelect() {
+        const financingSelect = document.getElementById('FinancingId');
+        if (!financingSelect) return;
+
+        financingSelect.addEventListener('change', function () {
+            const financingId = this.value;
+            if (financingId) {
+                // Mostrar a seção de parcelas
+                const installmentSection = document.getElementById('financingInstallmentSection');
+                if (installmentSection) {
+                    installmentSection.style.display = 'block';
+                    // Carregar as parcelas do financiamento selecionado
+                    loadFinancingInstallments(financingId);
+                }
+            } else {
+                // Esconder a seção de parcelas se nenhum financiamento for selecionado
+                const installmentSection = document.getElementById('financingInstallmentSection');
+                if (installmentSection) {
+                    installmentSection.style.display = 'none';
+                    // Limpar as opções
+                    const installmentSelect = document.getElementById('FinancingInstallmentId');
+                    if (installmentSelect) {
+                        installmentSelect.innerHTML = '<option value="">Selecione a parcela</option>';
+                    }
+                }
+            }
+        });
+    }
+
+    // Adicionar esta função ao módulo
+    function initializeFinancingSelect() {
+        const financingSelect = document.getElementById('FinancingId');
+        if (!financingSelect) return;
+
+        financingSelect.addEventListener('change', function () {
+            const financingId = this.value;
+            const installmentSection = document.getElementById('financingInstallmentSection');
+            const installmentSelect = document.getElementById('FinancingInstallmentId');
+
+            if (!installmentSection || !installmentSelect) return;
+
+            // Limpar seleção atual
+            installmentSelect.innerHTML = '<option value="">Selecione a parcela</option>';
+
+            if (financingId) {
+                // Mostrar seção de parcelas
+                installmentSection.style.display = 'block';
+
+                $.ajax({
+                    url: '/Financings/GetInstallments',
+                    type: 'GET',
+                    data: { Id: financingId },
+                    beforeSend: function () {
+                        const loadingOption = document.createElement('option');
+                        loadingOption.textContent = "Carregando parcelas...";
+                        loadingOption.disabled = true;
+                        loadingOption.id = "loading-option";
+                        installmentSelect.appendChild(loadingOption);
+                    },
+                    success: function (data) {
+                        // Remover opção de carregamento
+                        const loadingOption = document.getElementById('loading-option');
+                        if (loadingOption) {
+                            installmentSelect.removeChild(loadingOption);
+                        }
+
+                        if (data && data.length > 0) {
+                            // Adicionar parcelas
+                            data.forEach(function (installment) {
+                                const option = document.createElement('option');
+                                option.value = installment.id;
+                                option.textContent = `Parcela ${installment.installmentNumber} - Venc: ${installment.dueDate} - ${formatCurrency(installment.totalAmount)}`;
+                                installmentSelect.appendChild(option);
+                            });
+                        } else {
+                            const emptyOption = document.createElement('option');
+                            emptyOption.textContent = "Nenhuma parcela pendente disponível";
+                            emptyOption.disabled = true;
+                            installmentSelect.appendChild(emptyOption);
+                        }
+                    },
+                    error: function () {
+                        // Remover opção de carregamento
+                        const loadingOption = document.getElementById('loading-option');
+                        if (loadingOption) {
+                            installmentSelect.removeChild(loadingOption);
+                        }
+
+                        const errorOption = document.createElement('option');
+                        errorOption.textContent = "Erro ao carregar parcelas";
+                        errorOption.disabled = true;
+                        installmentSelect.appendChild(errorOption);
+                    }
+                });
+            } else {
+                // Esconder seção de parcelas
+                installmentSection.style.display = 'none';
+            }
+        });
+    }
+
+    // Função auxiliar para formatação de moeda
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(value);
     }
 
     // API pública do módulo

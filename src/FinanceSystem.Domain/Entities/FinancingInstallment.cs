@@ -1,5 +1,4 @@
 ﻿using FinanceSystem.Domain.Enums;
-using System;
 
 namespace FinanceSystem.Domain.Entities
 {

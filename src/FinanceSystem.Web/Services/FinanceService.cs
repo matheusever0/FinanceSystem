@@ -176,21 +176,5 @@ namespace FinanceSystem.Web.Services
                 throw;
             }
         }
-
-        public async Task<bool> ApplyMonetaryCorrectionAsync(ApplyCorrectionModel model, string token)
-        {
-            try
-            {
-                _logger.LogInformation("Aplicando correção monetária ao financiamento: {FinancingId}",
-                    model.FinancingId);
-                return await _apiService.PostAsync<bool>("/api/financing-corrections/apply", model, token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao aplicar correção monetária ao financiamento: {FinancingId}",
-                    model.FinancingId);
-                throw;
-            }
-        }
     }
 }

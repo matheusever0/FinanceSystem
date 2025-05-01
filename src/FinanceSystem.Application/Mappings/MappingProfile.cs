@@ -79,15 +79,12 @@ namespace FinanceSystem.Application.Mappings
                 .ForMember(dest => dest.MonthlyAveragePayment, opt => opt.Ignore())
                 .ForMember(dest => dest.EstimatedTotalCost, opt => opt.Ignore())
                 .ForMember(dest => dest.Installments, opt => opt.MapFrom(src => src.Installments))
-                .ForMember(dest => dest.Corrections, opt => opt.MapFrom(src => src.Corrections))
                 .ForMember(dest => dest.Payments, opt => opt.MapFrom(src => src.Payments));
 
             CreateMap<FinancingInstallment, FinancingInstallmentDto>();
             CreateMap<FinancingInstallment, FinancingInstallmentDetailDto>()
                 .ForMember(dest => dest.FinancingDescription, opt => opt.Ignore())
                 .ForMember(dest => dest.Payments, opt => opt.Ignore());
-
-            CreateMap<FinancingCorrection, FinancingCorrectionDto>();
         }
     }
 }

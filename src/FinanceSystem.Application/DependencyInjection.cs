@@ -28,8 +28,6 @@ namespace FinanceSystem.Application
             services.AddScoped<IStockPriceService, StockPriceService>();
             services.AddScoped<IFinancingService, FinancingService>();
             services.AddScoped<IFinancingInstallmentService, FinancingInstallmentService>();
-            services.AddScoped<IFinancingCorrectionService, FinancingCorrectionService>();
-            services.AddScoped<ICorrectionIndexService, CorrectionIndexService>();
 
             return services;
         }

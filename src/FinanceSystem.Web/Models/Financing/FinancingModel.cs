@@ -1,6 +1,4 @@
 ﻿using FinanceSystem.Web.Models.Payment;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace FinanceSystem.Web.Models.Financing
@@ -226,63 +224,6 @@ namespace FinanceSystem.Web.Models.Financing
         {
             return PaymentDate?.ToString("dd/MM/yyyy") ?? "-";
         }
-    }
-
-    /// <summary>
-    /// Model para aplicar correção monetária
-    /// </summary>
-    public class ApplyCorrectionModel
-    {
-        [Required(ErrorMessage = "O ID do financiamento é obrigatório")]
-        public string FinancingId { get; set; }
-
-        [Required(ErrorMessage = "O valor do índice é obrigatório")]
-        [Range(0.0001, 100, ErrorMessage = "O valor do índice deve estar entre 0.0001 e 100")]
-        [Display(Name = "Valor do Índice (%)")]
-        public decimal IndexValue { get; set; }
-
-        [Required(ErrorMessage = "A data de correção é obrigatória")]
-        [Display(Name = "Data da Correção")]
-        [DataType(DataType.Date)]
-        public DateTime CorrectionDate { get; set; } = DateTime.Today;
-
-        [Display(Name = "Observações")]
-        [StringLength(200, ErrorMessage = "As observações devem ter no máximo 200 caracteres")]
-        public string Notes { get; set; }
-    }
-
-    /// <summary>
-    /// Model de correção monetária
-    /// </summary>
-    public class FinancingCorrectionModel
-    {
-        public string Id { get; set; }
-
-        [Display(Name = "Valor do Índice")]
-        [DisplayFormat(DataFormatString = "{0:P2}")]
-        public decimal IndexValue { get; set; }
-
-        [Display(Name = "Data da Correção")]
-        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
-        public DateTime CorrectionDate { get; set; }
-
-        [Display(Name = "Dívida Anterior")]
-        [DisplayFormat(DataFormatString = "{0:C2}")]
-        public decimal PreviousDebt { get; set; }
-
-        [Display(Name = "Nova Dívida")]
-        [DisplayFormat(DataFormatString = "{0:C2}")]
-        public decimal NewDebt { get; set; }
-
-        [Display(Name = "Diferença")]
-        [DisplayFormat(DataFormatString = "{0:C2}")]
-        public decimal DifferenceAmount { get; set; }
-
-        [Display(Name = "Diferença Percentual")]
-        [DisplayFormat(DataFormatString = "{0:P2}")]
-        public decimal DifferencePercentage { get; set; }
-
-        public string FinancingId { get; set; }
     }
 
     /// <summary>
@@ -552,9 +493,6 @@ namespace FinanceSystem.Web.Models.Financing
     {
         [Display(Name = "Parcelas")]
         public List<FinancingInstallmentModel> Installments { get; set; } = [];
-
-        [Display(Name = "Correções")]
-        public List<FinancingCorrectionModel> Corrections { get; set; } = [];
 
         [Display(Name = "Pagamentos")]
         public List<PaymentModel> Payments { get; set; } = [];

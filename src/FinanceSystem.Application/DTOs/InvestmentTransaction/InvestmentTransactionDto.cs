@@ -1,5 +1,4 @@
-﻿using FinanceSystem.Application.DTOs.Investment;
-using FinanceSystem.Domain.Enums;
+﻿using FinanceSystem.Domain.Enums;
 
 namespace FinanceSystem.Application.DTOs.InvestmentTransaction
 {

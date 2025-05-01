@@ -27,7 +27,6 @@ namespace FinanceSystem.Infrastructure.Data
         public DbSet<InvestmentTransaction> InvestmentTransactions { get; set; }
         public DbSet<Financing> Financings { get; set; }
         public DbSet<FinancingInstallment> FinancingInstallments { get; set; }
-        public DbSet<FinancingCorrection> FinancingCorrections { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -93,10 +92,6 @@ namespace FinanceSystem.Infrastructure.Data
                .HasDefaultValueSql("NEWSEQUENTIALID()");
 
             modelBuilder.Entity<FinancingInstallment>()
-               .Property(e => e.Id)
-               .HasDefaultValueSql("NEWSEQUENTIALID()");
-
-            modelBuilder.Entity<FinancingCorrection>()
                .Property(e => e.Id)
                .HasDefaultValueSql("NEWSEQUENTIALID()");
 
@@ -230,12 +225,6 @@ namespace FinanceSystem.Infrastructure.Data
                 .HasMany(f => f.Installments)
                 .WithOne(i => i.Financing)
                 .HasForeignKey(i => i.FinancingId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Financing>()
-                .HasMany(f => f.Corrections)
-                .WithOne(c => c.Financing)
-                .HasForeignKey(c => c.FinancingId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Financing>()

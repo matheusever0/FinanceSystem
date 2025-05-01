@@ -264,46 +264,6 @@
             </div>
         </div>
     }
-
-    <!-- Correções -->
-    @if (Model.Corrections != null && Model.Corrections.Any())
-    {
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">Correções Monetárias</h6>
-                <span class="badge bg-primary">@Model.Corrections.Count() correções</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="text-center">Data</th>
-                                <th class="text-center">Índice</th>
-                                <th class="text-center">Valor Anterior</th>
-                                <th class="text-center">Novo Valor</th>
-                                <th class="text-center">Diferença</th>
-                                <th class="text-center">Variação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var correction in Model.Corrections.OrderByDescending(c => c.CorrectionDate))
-                            {
-                                <tr>
-                                    <td class="text-center">@correction.CorrectionDate.ToString("dd/MM/yyyy")</td>
-                                    <td class="text-center">@correction.IndexValue.ToString("F4")</td>
-                                    <td class="text-end">@correction.PreviousDebt.ToString("C2")</td>
-                                    <td class="text-end">@correction.NewDebt.ToString("C2")</td>
-                                    <td class="text-end">@correction.DifferenceAmount.ToString("C2")</td>
-                                    <td class="text-center">@(correction.DifferencePercentage.ToString("F2"))%</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    }
 </div>
 
 @functions {

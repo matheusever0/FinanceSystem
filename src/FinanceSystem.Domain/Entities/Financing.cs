@@ -25,13 +25,11 @@ namespace FinanceSystem.Domain.Entities
         public DateTime LastCorrectionDate { get; protected set; }
 
         public ICollection<FinancingInstallment> Installments { get; protected set; }
-        public ICollection<FinancingCorrection> Corrections { get; protected set; }
         public ICollection<Payment> Payments { get; protected set; }
 
         protected Financing()
         {
             Installments = new List<FinancingInstallment>();
-            Corrections = new List<FinancingCorrection>();
             Payments = new List<Payment>();
         }
 
@@ -65,7 +63,6 @@ namespace FinanceSystem.Domain.Entities
             LastCorrectionDate = startDate;
 
             Installments = new List<FinancingInstallment>();
-            Corrections = new List<FinancingCorrection>();
             Payments = new List<Payment>();
 
             CalculateInstallments();
@@ -107,10 +104,6 @@ namespace FinanceSystem.Domain.Entities
 
             // Aplicar correção ao saldo devedor
             RemainingDebt *= (1 + indexValue);
-
-            // Registrar a correção
-            var correction = new FinancingCorrection(this, indexValue, correctionDate);
-            Corrections.Add(correction);
 
             // Ajustar parcelas futuras
             RecalculateRemainingInstallments(correctionDate);

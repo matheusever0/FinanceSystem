@@ -23,7 +23,6 @@ namespace FinanceSystem.Infrastructure
         private IInvestmentTransactionRepository? _investmentTransactionRepository;
         private IFinancingRepository? _financingRepository;
         private IFinancingInstallmentRepository? _financingInstallmentRepository;
-        private IFinancingCorrectionRepository? _financingCorrectionRepository;
 
         private bool _disposed = false;
 
@@ -60,8 +59,6 @@ namespace FinanceSystem.Infrastructure
         public IFinancingRepository Financings => _financingRepository ??= new FinancingRepository(_context);
 
         public IFinancingInstallmentRepository FinancingInstallments => _financingInstallmentRepository ??= new FinancingInstallmentRepository(_context);
-
-        public IFinancingCorrectionRepository FinancingCorrections => _financingCorrectionRepository ??= new FinancingCorrectionRepository(_context);
 
         public async Task<int> CompleteAsync()
         {

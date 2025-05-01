@@ -19,7 +19,6 @@ namespace FinanceSystem.Domain.Interfaces.Services
         IInvestmentTransactionRepository InvestmentTransactions { get; }
         IFinancingRepository Financings { get; }
         IFinancingInstallmentRepository FinancingInstallments { get; }
-        IFinancingCorrectionRepository FinancingCorrections { get; }
         Task<int> CompleteAsync();
     }
 }

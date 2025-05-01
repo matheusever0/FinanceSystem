@@ -1,6 +1,4 @@
-﻿using FinanceSystem.Application.DTOs.Payment;
-using FinanceSystem.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using FinanceSystem.Domain.Enums;
 
 namespace FinanceSystem.Application.DTOs.Financing
 {
