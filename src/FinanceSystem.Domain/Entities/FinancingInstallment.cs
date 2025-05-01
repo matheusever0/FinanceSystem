@@ -62,11 +62,11 @@ namespace FinanceSystem.Domain.Entities
             UpdatedAt = DateTime.Now;
         }
 
-        public void MarkAsPaid(DateTime paymentDate)
+        public void MarkAsPaid(DateTime paymentDate, decimal amountPaid)
         {
             PaymentDate = paymentDate;
             Status = FinancingInstallmentStatus.Paid;
-            PaidAmount = TotalAmount;
+            PaidAmount = amountPaid;
             RemainingAmount = 0;
 
             UpdatedAt = DateTime.Now;
@@ -106,7 +106,7 @@ namespace FinanceSystem.Domain.Entities
 
             if (payment.Amount >= RemainingAmount)
             {
-                MarkAsPaid(payment.PaymentDate ?? DateTime.Now);
+                MarkAsPaid(payment.PaymentDate ?? DateTime.Now, payment.Amount);
             }
             else
             {

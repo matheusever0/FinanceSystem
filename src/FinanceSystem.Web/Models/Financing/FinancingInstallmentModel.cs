@@ -59,5 +59,46 @@ namespace FinanceSystem.Web.Models.Financing
         {
             return PaymentDate?.ToString("dd/MM/yyyy") ?? "-";
         }
+
+        [Display(Name = "Diferença Percentual")]
+        [DisplayFormat(DataFormatString = "{0:P2}")]
+        public decimal PercentageDifference
+        {
+            get
+            {
+                // Se o valor pago for zero, retorna zero para evitar divisão por zero
+                if (PaidAmount == 0 || TotalAmount == 0)
+                    return 0;
+
+                // Calcula a diferença percentual
+                return (PaidAmount - TotalAmount) / TotalAmount;
+            }
+        }
+
+        // Propriedade para indicar se houve economia ou aumento
+        [Display(Name = "Tipo de Diferença")]
+        public string DifferenceType
+        {
+            get
+            {
+                if (PercentageDifference == 0)
+                    return "Sem alteração";
+                else if (PercentageDifference < 0)
+                    return "Economia";
+                else
+                    return "Correção";
+            }
+        }
+
+        // Método para exibir o texto formatado
+        public string GetFormattedDifference()
+        {
+            if (PercentageDifference == 0)
+                return "Sem alteração no valor";
+            else if (PercentageDifference < 0)
+                return $"Economia de {Math.Abs(PercentageDifference):P2}";
+            else
+                return $"Correção de {PercentageDifference:P2}";
+        }
     }
 }

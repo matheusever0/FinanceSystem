@@ -190,6 +190,8 @@
                             <tr>
                                 <th>Parcela</th>
                                 <th class="text-center">Valor Total</th>
+                                <th class="text-center">Valor Pago</th>
+                                <th class="text-center">Diff</th>
                                 <th class="text-center">Juros</th>
                                 <th class="text-center">Amortização</th>
                                 <th class="text-center">Vencimento</th>
@@ -203,6 +205,19 @@
                                 <tr>
                                     <td>@installment.InstallmentNumber</td>
                                     <td class="text-end">@installment.TotalAmount.ToString("C2")</td>
+                                    <td class="text-end">@installment.PaidAmount.ToString("C2")</td>
+                                    <td class="text-center">
+                                        @if (installment.Status == 2)
+                                        {
+                                            <span class="@(installment.PercentageDifference < 0 ? "text-success" : "text-warning")">
+                                                @installment.GetFormattedDifference()
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </td>
                                     <td class="text-end">@installment.InterestAmount.ToString("C2")</td>
                                     <td class="text-end">@installment.AmortizationAmount.ToString("C2")</td>
                                     <td class="text-center">@installment.DueDate.ToString("dd/MM/yyyy")</td>

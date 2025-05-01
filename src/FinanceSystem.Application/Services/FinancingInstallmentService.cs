@@ -118,7 +118,7 @@ namespace FinanceSystem.Application.Services
             // Marcar como pago ou parcialmente pago
             if (paymentDto.Amount >= installment.RemainingAmount)
             {
-                installment.MarkAsPaid(paymentDto.PaymentDate);
+                installment.MarkAsPaid(paymentDto.PaymentDate, payment.Amount);
             }
             else
             {
