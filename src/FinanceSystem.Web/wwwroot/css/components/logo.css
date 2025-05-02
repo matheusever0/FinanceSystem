@@ -1,25 +1,48 @@
-﻿/* Estilos para a logo do FinanceSystem */
+﻿/* Estilos para a logo do Equilibrium+ */
 
-/* Estilos do logo no sidebar */
-.sidebar-logo-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0.5rem;
-    max-width: 100%;
-    max-height: 60px;
+/* Logo normal */
+/* Logo normal */
+.sidebar-logo-container img {
+    width: 100%;
+    max-width: 150px;
+    height: auto;
 }
 
+/* Logo quando a sidebar estiver expandida */
+.sidebar:not(.collapsed) .sidebar-logo-container img {
+    width: 100px;
+    height: auto;
+}
+
+/* Logo quando a sidebar estiver colapsada */
+.sidebar.collapsed .sidebar-logo-container {
+    margin-right: 0;
+    justify-content: center; /* Garantir que a logo fique centralizada também quando colapsada */
+}
+
+/* Responsividade para telas menores (exemplo: abaixo de 768px) */
+@media (max-width: 768px) {
+    .sidebar-logo-container img {
+        width: 80%;
+        max-width: 120px;
+    }
+}
+
+/* Responsividade para telas muito pequenas (exemplo: abaixo de 480px) */
+@media (max-width: 480px) {
+    .sidebar-logo-container img {
+        width: 70%;
+        max-width: 100px;
+    }
+}
+
+/* Garantir centralização para a logo no estado normal */
 .sidebar-brand {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center; /* Centraliza a logo na versão normal também */
     padding: 1rem;
     transition: all 0.3s ease;
-}
-
-.sidebar.collapsed .sidebar-logo-container {
-    margin-right: 0;
 }
 
 /* Estilos do logo na página de login */
@@ -78,7 +101,7 @@
     }
 
     body::before {
-        content: "FinanceSystem by SeveroTech";
+        content: "Equilibrium+ by SeveroTech";
         font-size: 14pt;
         font-weight: bold;
         color: #3b5998;

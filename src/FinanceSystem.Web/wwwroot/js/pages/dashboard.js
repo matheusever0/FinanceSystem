@@ -57,6 +57,7 @@ FinanceSystem.Pages.Dashboard = (function () {
     function initializeDashboardCharts() {
         // Gráfico de gastos mensais com comparação de receitas
         initializeMonthlyComparisonChart();
+        initializeMonthlyAnnualComparisonChart();
 
         // Outros gráficos
         initializePaymentTypesChart();
@@ -163,6 +164,141 @@ FinanceSystem.Pages.Dashboard = (function () {
                         backgroundColor: 'rgba(231, 74, 59, 0.8)', // Vermelho para despesas
                         borderColor: 'rgba(231, 74, 59, 1)',
                         borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 10,
+                        right: 25,
+                        top: 25,
+                        bottom: 0
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            callback: function (value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR');
+                            }
+                        },
+                        grid: {
+                            color: "rgb(234, 236, 244)",
+                            drawBorder: false,
+                            borderDash: [2],
+                            zeroLineBorderDash: [2]
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.dataset.label}: R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function initializeMonthlyAnnualComparisonChart() {
+        const chartCanvas = document.getElementById('monthlyExpensesAnnualChart');
+        if (!chartCanvas) return;
+
+        try {
+            const labels = JSON.parse(chartCanvas.getAttribute('data-labels'));
+            const incomeValues = JSON.parse(chartCanvas.getAttribute('data-income-values'));
+            const paymentValues = JSON.parse(chartCanvas.getAttribute('data-payment-values'));
+            const balanceValues = JSON.parse(chartCanvas.getAttribute('data-balance-values'));
+
+            const datasets = [
+                {
+                    label: 'Receitas',
+                    data: incomeValues,
+                    backgroundColor: 'rgba(28, 200, 138, 0.8)',
+                    borderColor: 'rgba(28, 200, 138, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Despesas',
+                    data: paymentValues,
+                    backgroundColor: 'rgba(231, 74, 59, 0.8)',
+                    borderColor: 'rgba(231, 74, 59, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Saldo',
+                    data: balanceValues,
+                    type: 'line',
+                    borderColor: 'rgba(54, 185, 204, 1)',
+                    backgroundColor: 'rgba(54, 185, 204, 0.2)',
+                    tension: 0.4,
+                    borderWidth: 2,
+                    fill: false,
+                    yAxisID: 'y'
+                }
+            ];
+
+            if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
+                FinanceSystem.Modules.Charts.createGroupedBarChart('monthlyExpensesAnnualChart', labels, datasets, {
+                    responsive: true,
+                    maintainAspectRatio: false
+                });
+            } else {
+                createMonthlyAnnualChartFallback(chartCanvas, labels, incomeValues, paymentValues, balanceValues);
+            }
+        } catch (error) {
+            console.error('Erro ao inicializar gráfico de comparação mensal:', error);
+        }
+    }
+
+    function createMonthlyAnnualChartFallback(canvas, labels, incomeValues, paymentValues, balanceValues) {
+        if (typeof Chart === 'undefined') return;
+
+        new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Receitas',
+                        data: incomeValues,
+                        backgroundColor: 'rgba(28, 200, 138, 0.8)',
+                        borderColor: 'rgba(28, 200, 138, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Despesas',
+                        data: paymentValues,
+                        backgroundColor: 'rgba(231, 74, 59, 0.8)',
+                        borderColor: 'rgba(231, 74, 59, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Saldo',
+                        data: balanceValues,
+                        type: 'line',
+                        borderColor: 'rgba(54, 185, 204, 1)',
+                        backgroundColor: 'rgba(54, 185, 204, 0.2)',
+                        tension: 0.4,
+                        borderWidth: 2,
+                        fill: false,
+                        yAxisID: 'y'
                     }
                 ]
             },
@@ -932,6 +1068,7 @@ FinanceSystem.Pages.Dashboard = (function () {
         initializeReportCharts: initializeReportCharts,
         initializeIncomeTypesPieChart: initializeIncomeTypesPieChart,
         initializeIncomeStatusPieChart: initializeIncomeStatusPieChart,
-        initializeMonthlyReportComparisonChart: initializeMonthlyReportComparisonChart
+        initializeMonthlyReportComparisonChart: initializeMonthlyReportComparisonChart,
+        initializeMonthlyAnnualComparisonChart: initializeMonthlyAnnualComparisonChart
     };
 })();

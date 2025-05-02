@@ -133,34 +133,41 @@ namespace FinanceSystem.Web.Controllers
                 year ??= DateTime.Now.Year;
                 var token = HttpContext.GetJwtToken();
 
-                // Dados de pagamentos
-                var paymentMonthlyData = await GetMonthlyPaymentDataForYear(year.Value, token);
+                // Get payment data
+                var monthlyPaymentsData = await GetMonthlyPaymentsDataForYear(year.Value, token);
+
+                // Get income data (new)
+                var monthlyIncomesData = await GetMonthlyIncomesDataForYear(year.Value, token);
+
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
-
-                // Dados de receitas
-                var incomeMonthlyData = await GetMonthlyIncomeDataForYear(year.Value, token);
                 var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
 
-                // Dados totais
-                var totalAnnualPayments = paymentMonthlyData.Values.Sum();
-                var totalAnnualIncomes = incomeMonthlyData.Values.Sum();
+                // Payment totals
+                var totalAnnualPayments = monthlyPaymentsData.Values.Sum();
+                var averageMonthlyPayments = totalAnnualPayments / Math.Max(1, monthlyPaymentsData.Count(m => m.Value > 0));
 
-                // Consolidar os dados para a view
-                ViewBag.PaymentMonthlyData = paymentMonthlyData;
-                ViewBag.IncomeMonthlyData = incomeMonthlyData;
+                // Income totals (new)
+                var totalAnnualIncomes = monthlyIncomesData.Values.Sum();
+                var averageMonthlyIncomes = totalAnnualIncomes / Math.Max(1, monthlyIncomesData.Count(m => m.Value > 0));
+
+                // Balance (new)
+                var monthlyBalanceData = GetMonthlyBalanceData(monthlyIncomesData, monthlyPaymentsData);
+                var totalAnnualBalance = totalAnnualIncomes - totalAnnualPayments;
+
+                ViewBag.MonthlyPaymentsData = monthlyPaymentsData;
+                ViewBag.MonthlyIncomesData = monthlyIncomesData;
+                ViewBag.MonthlyBalanceData = monthlyBalanceData;
                 ViewBag.Year = year;
                 ViewBag.PaymentTypes = paymentTypes;
                 ViewBag.PaymentMethods = paymentMethods;
                 ViewBag.IncomeTypes = incomeTypes;
 
                 ViewBag.TotalAnnualPayments = totalAnnualPayments;
-                ViewBag.AverageMonthlyPayments = totalAnnualPayments / Math.Max(1, paymentMonthlyData.Count(m => m.Value > 0));
-
+                ViewBag.AverageMonthlyPayments = averageMonthlyPayments;
                 ViewBag.TotalAnnualIncomes = totalAnnualIncomes;
-                ViewBag.AverageMonthlyIncomes = totalAnnualIncomes / Math.Max(1, incomeMonthlyData.Count(m => m.Value > 0));
-
-                ViewBag.AnnualBalance = totalAnnualIncomes - totalAnnualPayments;
+                ViewBag.AverageMonthlyIncomes = averageMonthlyIncomes;
+                ViewBag.TotalAnnualBalance = totalAnnualBalance;
 
                 return View();
             }
@@ -226,7 +233,7 @@ namespace FinanceSystem.Web.Controllers
             }
         }
 
-        private async Task<Dictionary<string, decimal>> GetMonthlyPaymentDataForYear(int year, string token)
+        private async Task<Dictionary<string, decimal>> GetMonthlyIncomesDataForYear(int year, string token)
         {
             var monthlyData = new Dictionary<string, decimal>();
 
@@ -235,8 +242,8 @@ namespace FinanceSystem.Web.Controllers
                 var monthName = new DateTime(year, month, 1).ToString("MMM");
                 try
                 {
-                    var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
-                    monthlyData.Add(monthName, payments.Sum(p => p.Amount));
+                    var incomes = await _incomeService.GetIncomesByMonthAsync(month, year, token);
+                    monthlyData.Add(monthName, incomes.Sum(p => p.Amount));
                 }
                 catch
                 {
@@ -247,7 +254,23 @@ namespace FinanceSystem.Web.Controllers
             return monthlyData;
         }
 
-        private async Task<Dictionary<string, decimal>> GetMonthlyIncomeDataForYear(int year, string token)
+        private Dictionary<string, decimal> GetMonthlyBalanceData(
+            Dictionary<string, decimal> incomeData,
+            Dictionary<string, decimal> paymentData)
+        {
+            var balanceData = new Dictionary<string, decimal>();
+
+            foreach (var month in incomeData.Keys)
+            {
+                var income = incomeData.GetValueOrDefault(month, 0);
+                var payment = paymentData.GetValueOrDefault(month, 0);
+                balanceData[month] = income - payment;
+            }
+
+            return balanceData;
+        }
+
+        private async Task<Dictionary<string, decimal>> GetMonthlyPaymentsDataForYear(int year, string token)
         {
             var monthlyData = new Dictionary<string, decimal>();
 
@@ -256,8 +279,8 @@ namespace FinanceSystem.Web.Controllers
                 var monthName = new DateTime(year, month, 1).ToString("MMM");
                 try
                 {
-                    var incomes = await _incomeService.GetIncomesByMonthAsync(month, year, token);
-                    monthlyData.Add(monthName, incomes.Sum(i => i.Amount));
+                    var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
+                    monthlyData.Add(monthName, payments.Sum(p => p.Amount));
                 }
                 catch
                 {

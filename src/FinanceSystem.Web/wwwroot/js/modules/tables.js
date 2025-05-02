@@ -36,9 +36,6 @@ FinanceSystem.Modules.Tables = (function () {
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]]
             });
-
-            // DataTables com configurações personalizadas
-            initializeCustomDataTables();
         } else {
             // Implementação básica de ordenação se DataTables não estiver disponível
             implementBasicTableSorting();
@@ -50,6 +47,7 @@ FinanceSystem.Modules.Tables = (function () {
      */
     function initializeReportTables() {
         // Inicializar tabela de pagamentos de relatório
+
         var paymentsTable = $('#payments-table');
         if (paymentsTable.length > 0 && !$.fn.DataTable.isDataTable('#payments-table')) {
             paymentsTable.DataTable({
@@ -57,9 +55,9 @@ FinanceSystem.Modules.Tables = (function () {
                     url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
                 },
                 responsive: true,
-                pageLength: 10,
-                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                dom: '<"top"fl>rt<"bottom"ip>',
+                pageLength: 20,
+                lengthMenu: [[20, 40, 60, 80, 100, -1], [20, 40, 60, 80, 100, "Todos"]],
+                dom: '<"top"Bfl>rt<"bottom"ip>',
                 buttons: [
                     {
                         extend: 'excel',
@@ -88,9 +86,9 @@ FinanceSystem.Modules.Tables = (function () {
                     url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
                 },
                 responsive: true,
-                pageLength: 10,
-                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                dom: '<"top"fl>rt<"bottom"ip>',
+                pageLength: 20,
+                lengthMenu: [[20, 40, 60, 80, 100, -1], [20, 40, 60, 80, 100, "Todos"]],
+                dom: '<"top"Bfl>rt<"bottom"ip>',
                 buttons: [
                     {
                         extend: 'excel',
@@ -110,151 +108,6 @@ FinanceSystem.Modules.Tables = (function () {
                 ]
             });
         }
-    }
-
-    /**
-     * Inicializa DataTables com configurações específicas
-     */
-    function initializeCustomDataTables() {
-        // Tabela de pagamentos
-        $('.datatable-payments').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-            },
-            responsive: true,
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-            order: [[1, 'desc']], // Ordena por data de vencimento decrescente
-            columnDefs: [
-                { orderable: false, targets: -1 } // Desabilita ordenação na coluna de ações
-            ],
-            buttons: [
-                {
-                    extend: 'excel',
-                    text: '<i class="fas fa-file-excel me-1"></i> Excel',
-                    className: 'btn btn-sm btn-success'
-                },
-                {
-                    extend: 'pdf',
-                    text: '<i class="fas fa-file-pdf me-1"></i> PDF',
-                    className: 'btn btn-sm btn-danger'
-                },
-                {
-                    extend: 'print',
-                    text: '<i class="fas fa-print me-1"></i> Imprimir',
-                    className: 'btn btn-sm btn-primary'
-                }
-            ],
-            dom: '<"dtTop"<"dtFilters"f><"dtInfo"l>><"dtScroll"t><"dtBottom"<"dtPagination"p>><"dtButtons"B>',
-            drawCallback: function () {
-                stylePaymentRows();
-            }
-        });
-
-        // Tabela de usuários
-        $('.datatable-users').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-            },
-            responsive: true,
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-            order: [[1, 'desc']], // Ordena por data de vencimento decrescente
-            columnDefs: [
-                { orderable: false, targets: -1 } // Desabilita ordenação na coluna de ações
-            ],
-            buttons: [
-                {
-                    extend: 'excel',
-                    text: '<i class="fas fa-file-excel me-1"></i> Excel',
-                    className: 'btn btn-sm btn-success'
-                },
-                {
-                    extend: 'pdf',
-                    text: '<i class="fas fa-file-pdf me-1"></i> PDF',
-                    className: 'btn btn-sm btn-danger'
-                },
-                {
-                    extend: 'print',
-                    text: '<i class="fas fa-print me-1"></i> Imprimir',
-                    className: 'btn btn-sm btn-primary'
-                }
-            ],
-            dom: '<"dtTop"<"dtFilters"f><"dtInfo"l>><"dtScroll"t><"dtBottom"<"dtPagination"p>><"dtButtons"B>',
-            drawCallback: function () {
-                stylePaymentRows();
-            }
-        });
-
-        // Tabela de cartões de crédito
-        $('.datatable-creditcards').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-            },
-            responsive: true,
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-            order: [[1, 'desc']], // Ordena por data de vencimento decrescente
-            columnDefs: [
-                { orderable: false, targets: -1 } // Desabilita ordenação na coluna de ações
-            ],
-            buttons: [
-                {
-                    extend: 'excel',
-                    text: '<i class="fas fa-file-excel me-1"></i> Excel',
-                    className: 'btn btn-sm btn-success'
-                },
-                {
-                    extend: 'pdf',
-                    text: '<i class="fas fa-file-pdf me-1"></i> PDF',
-                    className: 'btn btn-sm btn-danger'
-                },
-                {
-                    extend: 'print',
-                    text: '<i class="fas fa-print me-1"></i> Imprimir',
-                    className: 'btn btn-sm btn-primary'
-                }
-            ],
-            dom: '<"dtTop"<"dtFilters"f><"dtInfo"l>><"dtScroll"t><"dtBottom"<"dtPagination"p>><"dtButtons"B>',
-            drawCallback: function () {
-                stylePaymentRows();
-            }
-        });
-
-        // Tabela de investimentos
-        $('.datatable-investments').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-            },
-            responsive: true,
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-            order: [[1, 'desc']], // Ordena por data de vencimento decrescente
-            columnDefs: [
-                { orderable: false, targets: -1 } // Desabilita ordenação na coluna de ações
-            ],
-            buttons: [
-                {
-                    extend: 'excel',
-                    text: '<i class="fas fa-file-excel me-1"></i> Excel',
-                    className: 'btn btn-sm btn-success'
-                },
-                {
-                    extend: 'pdf',
-                    text: '<i class="fas fa-file-pdf me-1"></i> PDF',
-                    className: 'btn btn-sm btn-danger'
-                },
-                {
-                    extend: 'print',
-                    text: '<i class="fas fa-print me-1"></i> Imprimir',
-                    className: 'btn btn-sm btn-primary'
-                }
-            ],
-            dom: '<"dtTop"<"dtFilters"f><"dtInfo"l>><"dtScroll"t><"dtBottom"<"dtPagination"p>><"dtButtons"B>',
-            drawCallback: function () {
-                stylePaymentRows();
-            }
-        });
     }
 
     /**

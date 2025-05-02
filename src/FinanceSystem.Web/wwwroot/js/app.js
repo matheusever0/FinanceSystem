@@ -58,6 +58,10 @@ function initializePageModules() {
         if (FinanceSystem.Pages.Users && typeof FinanceSystem.Pages.Users.initialize === 'function') {
             FinanceSystem.Pages.Users.initialize();
         }
+
+        if (FinanceSystem.Modules.Tables && typeof FinanceSystem.Modules.Tables.initialize === 'function') {
+            FinanceSystem.Modules.Tables.initialize();
+        }
     }
 }
 

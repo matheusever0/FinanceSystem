@@ -183,9 +183,9 @@
                 <h6 class="m-0 font-weight-bold text-primary">Parcelas</h6>
                 <span class="badge bg-primary">@Model.Installments.Count() parcelas</span>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-bordered table-hover" id="payments-table">
                         <thead class="bg-light">
                             <tr>
                                 <th>Parcela</th>
@@ -244,9 +244,9 @@
                 <h6 class="m-0 font-weight-bold text-primary">Pagamentos</h6>
                 <span class="badge bg-primary">@Model.Payments.Count() pagamentos</span>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
+                    <table class="table table-bordered table-hover" id="incomes-table">
                         <thead class="bg-light">
                             <tr>
                                 <th>Descrição</th>
