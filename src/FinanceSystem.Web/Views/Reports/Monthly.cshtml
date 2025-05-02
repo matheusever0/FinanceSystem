@@ -2,6 +2,7 @@
 @using FinanceSystem.Web.Models
 @using FinanceSystem.Web.Models.Generics
 @using FinanceSystem.Web.Models.Payment
+@using FinanceSystem.Web.Models.Income
 @model IEnumerable<PaymentModel>
 @{
     var currentMonth = ViewBag.Month;
@@ -18,22 +19,41 @@
     var pendingAmount = ViewBag.PendingAmount;
     var overdueAmount = ViewBag.OverdueAmount;
 
+    // Dados de receitas
+    var totalIncomeAmount = ViewBag.TotalIncomeAmount;
+    var receivedIncomeAmount = ViewBag.ReceivedIncomeAmount;
+    var pendingIncomeAmount = ViewBag.PendingIncomeAmount;
+    var overdueIncomeAmount = ViewBag.OverdueIncomeAmount;
+
     var paymentsByType = ViewBag.PaymentsByType as List<PaymentByTypeDto> ?? new List<PaymentByTypeDto>();
+    var incomesByType = ViewBag.IncomesByType as List<PaymentByTypeDto> ?? new List<PaymentByTypeDto>();
 
     var jsonOptions = new JsonSerializerOptions
-    {Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping};
+            { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
     var typeLabels = JsonSerializer.Serialize(paymentsByType.Select(p => p.TypeName).ToList(), jsonOptions);
     var typeValues = JsonSerializer.Serialize(paymentsByType.Select(p => p.TotalAmount).ToList(), jsonOptions);
 
-    var amountValues = JsonSerializer.Serialize(new[] { paidAmount, pendingAmount, overdueAmount, "0.0m" }, jsonOptions);
-    var typeValues2 = JsonSerializer.Serialize(new[] { "Pago", "Pendente", "Vencido", "Cancelado" }, jsonOptions);
+    var incomeTypeLabels = JsonSerializer.Serialize(incomesByType.Select(p => p.TypeName).ToList(), jsonOptions);
+    var incomeTypeValues = JsonSerializer.Serialize(incomesByType.Select(p => p.TotalAmount).ToList(), jsonOptions);
+
+    var statusLabels = JsonSerializer.Serialize(new[] { "Pago", "Pendente", "Vencido", "Cancelado" }, jsonOptions);
+    var statusValues = JsonSerializer.Serialize(new[] { paidAmount, pendingAmount, overdueAmount, 0.0m }, jsonOptions);
+
+    var incomeStatusLabels = JsonSerializer.Serialize(new[] { "Recebido", "Pendente", "Vencido", "Cancelado" }, jsonOptions);
+    var incomeStatusValues = JsonSerializer.Serialize(new[] { receivedIncomeAmount, pendingIncomeAmount, overdueIncomeAmount, 0.0m }, jsonOptions);
+
+    // Dados para o gráfico de comparação
+    var monthlyComparisonLabels = JsonSerializer.Serialize(new[] { "Receitas", "Despesas" }, jsonOptions);
+    var monthlyComparisonIncomeValues = JsonSerializer.Serialize(new decimal[] { totalIncomeAmount }, jsonOptions);
+    var monthlyComparisonExpenseValues = JsonSerializer.Serialize(new decimal[] { totalAmount }, jsonOptions);
 
     ViewData["Title"] = "Relatório Mensal: " + @monthName.ToUpper() + "/" + @currentYear;
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/pages/payments.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/pages/income.css" asp-append-version="true">
 }
 
 <div class="container-fluid">
@@ -102,8 +122,65 @@
         </div>
     </div>
 
-    <!-- Cards de Resumo -->
-    <div class="row">
+    <!-- Cards de Resumo para Comparação -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Comparativo de Receitas x Despesas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="chart-pie pt-4 pb-2">
+                                <canvas id="monthlyComparisonChart"
+                                        data-labels='@Html.Raw(monthlyComparisonLabels)'
+                                        data-income-values='@Html.Raw(monthlyComparisonIncomeValues)'
+                                        data-payment-values='@Html.Raw(monthlyComparisonExpenseValues)'>
+                                </canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Categoria</th>
+                                            <th class="text-end">Valor</th>
+                                            <th class="text-end">Saldo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="table-success">
+                                            <td>Receitas</td>
+                                            <td class="text-end">@string.Format("{0:C2}", totalIncomeAmount)</td>
+                                            <td class="text-end"></td>
+                                        </tr>
+                                        <tr class="table-danger">
+                                            <td>Despesas</td>
+                                            <td class="text-end">@string.Format("{0:C2}", totalAmount)</td>
+                                            <td class="text-end"></td>
+                                        </tr>
+                                        <tr class="fw-bold @(totalIncomeAmount > totalAmount ? "table-success" : "table-danger")">
+                                            <td>Saldo</td>
+                                            <td class="text-end"></td>
+                                            <td class="text-end">@string.Format("{0:C2}", totalIncomeAmount - totalAmount)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Resumo de Despesas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-2">Resumo de Despesas</h5>
+        </div>
         <!-- Total -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
@@ -111,7 +188,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total do Mês
+                                Total de Despesas
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", totalAmount)</div>
                         </div>
@@ -181,13 +258,95 @@
         </div>
     </div>
 
-    <!-- Gráficos -->
+    <!-- Cards de Resumo de Receitas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-2">Resumo de Receitas</h5>
+        </div>
+        <!-- Total -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total de Receitas
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", totalIncomeAmount)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recebido -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Total Recebido
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", receivedIncomeAmount)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pendente -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pendente de Recebimento
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", pendingIncomeAmount)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vencido -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Vencido Sem Recebimento
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", overdueIncomeAmount)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos de Despesas -->
     <div class="row">
         <!-- Gráfico de Pagamentos por Tipo -->
         <div class="col-lg-6 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Pagamentos por Tipo</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Despesas por Tipo</h6>
                 </div>
                 <div class="card-body">
                     <div class="chart-pie pt-4 pb-2">
@@ -208,7 +367,7 @@
             </div>
         </div>
 
-        <!-- Gráfico de Status -->
+        <!-- Gráfico de Status de Pagamentos -->
         <div class="col-lg-6 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
@@ -217,12 +376,72 @@
                 <div class="card-body">
                     <div class="chart-pie pt-4 pb-2">
                         <canvas id="paymentStatusPieChart"
-                                data-labels='@Html.Raw(typeValues2)'
-                                data-values='@Html.Raw(amountValues)'></canvas>
+                                data-labels='@Html.Raw(statusLabels)'
+                                data-values='@Html.Raw(statusValues)'>
+                        </canvas>
                     </div>
                     <div class="mt-4 text-center small">
                         <span class="me-2">
                             <i class="fas fa-circle text-success"></i> Pago
+                        </span>
+                        <span class="me-2">
+                            <i class="fas fa-circle text-warning"></i> Pendente
+                        </span>
+                        <span class="me-2">
+                            <i class="fas fa-circle text-danger"></i> Vencido
+                        </span>
+                        <span class="me-2">
+                            <i class="fas fa-circle text-secondary"></i> Cancelado
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos de Receitas -->
+    <div class="row">
+        <!-- Gráfico de Receitas por Tipo -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">Receitas por Tipo</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="incomeTypesPieChart"
+                                data-labels='@Html.Raw(incomeTypeLabels)'
+                                data-values='@Html.Raw(incomeTypeValues)'>
+                        </canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        @foreach (var incomeType in incomesByType.Take(5))
+                        {
+                            <span class="me-2">
+                                <i class="fas fa-circle" style="color: @GetRandomColor();"></i> @incomeType.TypeName
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Status de Receitas -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">Status de Receitas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="incomeStatusPieChart"
+                                data-labels='@Html.Raw(incomeStatusLabels)'
+                                data-values='@Html.Raw(incomeStatusValues)'>
+                        </canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="me-2">
+                            <i class="fas fa-circle text-success"></i> Recebido
                         </span>
                         <span class="me-2">
                             <i class="fas fa-circle text-warning"></i> Pendente
@@ -258,7 +477,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <table class="table table-bordered table-hover" id="payments-table">
                     <thead>
                         <tr>
                             <th>Descrição</th>
@@ -294,13 +513,67 @@
             </div>
         </div>
     </div>
+
+    <!-- Tabela de Receitas -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-success">Receitas de @monthName/@currentYear</h6>
+            <div class="dropdown no-arrow">
+                <a class="dropdown-toggle" href="#" role="button" id="dropdownIncomeMenuLink"
+                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                     aria-labelledby="dropdownIncomeMenuLink">
+                    <div class="dropdown-header">Opções:</div>
+                    <a class="dropdown-item" href="#" id="exportIncomeCSV">Exportar para CSV</a>
+                    <a class="dropdown-item" href="#" onclick="window.print()">Imprimir Tabela</a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="incomes-table">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Vencimento</th>
+                            <th>Status</th>
+                            <th>Tipo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var income in ViewBag.Incomes as IEnumerable<IncomeModel>)
+                        {
+                            <tr>
+                                <td>@income.Description</td>
+                                <td class="text-end">@income.GetFormattedAmount()</td>
+                                <td class="text-center">@income.GetFormattedDueDate()</td>
+                                <td class="text-center">
+                                    <span class="badge @income.StatusBadgeClass">@income.StatusDescription</span>
+                                </td>
+                                <td>@income.IncomeTypeName</td>
+                                <td class="text-center">
+                                    <a href="@Url.Action("Details", "Incomes", new { id = income.Id })" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 @functions {
     string GetRandomColor()
     {
         var rand = new Random();
-        var colors = new[] { "#4e73df", "#1cc88a", "#36b9cc", "#f6c23e", "#e74a3b", "#858796" };
+        var colors = new[] { "#4e73df", "#1cc88a", "#36b9cc", "#f6c23e", "#e74a3b", "#858796", "#5cb85c", "#d9534f", "#5bc0de", "#f0ad4e" };
         return colors[rand.Next(colors.Length)];
     }
 }

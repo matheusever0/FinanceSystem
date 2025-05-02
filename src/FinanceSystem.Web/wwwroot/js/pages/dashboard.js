@@ -17,6 +17,13 @@ FinanceSystem.Pages.Dashboard = (function () {
         initializeDashboardStats();
         setupDashboardFilters();
         initializeCollapseSections();
+
+        // Inicializar gráficos de relatórios se estiver na página de relatórios
+        if (document.getElementById('monthlyComparisonChart') ||
+            document.getElementById('incomeTypesPieChart') ||
+            document.getElementById('incomeStatusPieChart')) {
+            initializeReportCharts();
+        }
     }
 
     /**
@@ -30,6 +37,22 @@ FinanceSystem.Pages.Dashboard = (function () {
         initializePaymentTypesChart();
         initializePaymentStatusChart();
         initializeCreditCardChart();
+    }
+
+    /**
+     * Inicializa gráficos da página de relatórios
+     */
+    function initializeReportCharts() {
+        // Gráfico de comparação mensal (receitas x despesas)
+        initializeMonthlyReportComparisonChart();
+
+        // Gráficos de receitas
+        initializeIncomeTypesPieChart();
+        initializeIncomeStatusPieChart();
+
+        // Gráficos de pagamentos já estão sendo inicializados
+        initializePaymentTypesChart();
+        initializePaymentStatusChart();
     }
 
     /**
@@ -672,12 +695,229 @@ FinanceSystem.Pages.Dashboard = (function () {
             });
     }
 
+    /**
+ * Inicializa o gráfico de comparação mensal (receitas x despesas) para relatórios
+ */
+    function initializeMonthlyReportComparisonChart() {
+        const chartCanvas = document.getElementById('monthlyComparisonChart');
+        if (!chartCanvas) return;
+
+        try {
+            // Obter dados do elemento canvas
+            const labels = JSON.parse(chartCanvas.getAttribute('data-labels') || '[]');
+            const incomeValues = JSON.parse(chartCanvas.getAttribute('data-income-values') || '[]');
+            const expenseValues = JSON.parse(chartCanvas.getAttribute('data-payment-values') || '[]');
+
+            // Preparar conjuntos de dados para o gráfico
+            const datasets = [
+                {
+                    label: 'Receitas',
+                    data: incomeValues,
+                    color: 'rgba(28, 200, 138, 0.8)', // Verde para receitas
+                    backgroundColor: 'rgba(28, 200, 138, 0.8)'
+                },
+                {
+                    label: 'Despesas',
+                    data: expenseValues,
+                    color: 'rgba(231, 74, 59, 0.8)', // Vermelho para despesas
+                    backgroundColor: 'rgba(231, 74, 59, 0.8)'
+                }
+            ];
+
+            // Criar gráfico de barras agrupadas usando o módulo Charts
+            if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
+                FinanceSystem.Modules.Charts.createGroupedBarChart('monthlyComparisonChart', labels, datasets, {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            left: 10,
+                            right: 25,
+                            top: 25,
+                            bottom: 0
+                        }
+                    }
+                });
+            } else {
+                // Fallback para Chart.js direto se o módulo não estiver disponível
+                createComparisonChartFallback(chartCanvas, labels, incomeValues, expenseValues);
+            }
+        } catch (error) {
+            console.error('Erro ao inicializar gráfico de comparação mensal:', error);
+        }
+    }
+
+    /**
+     * Cria o gráfico de comparação como fallback
+     */
+    function createComparisonChartFallback(canvas, labels, incomeValues, expenseValues) {
+        if (typeof Chart === 'undefined') return;
+
+        new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Receitas',
+                        data: incomeValues,
+                        backgroundColor: 'rgba(28, 200, 138, 0.8)', // Verde para receitas
+                        borderColor: 'rgba(28, 200, 138, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Despesas',
+                        data: expenseValues,
+                        backgroundColor: 'rgba(231, 74, 59, 0.8)', // Vermelho para despesas
+                        borderColor: 'rgba(231, 74, 59, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 10,
+                        right: 25,
+                        top: 25,
+                        bottom: 0
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            callback: function (value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR');
+                            }
+                        },
+                        grid: {
+                            color: "rgb(234, 236, 244)",
+                            drawBorder: false,
+                            borderDash: [2],
+                            zeroLineBorderDash: [2]
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.dataset.label}: R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Inicializa o gráfico de tipos de receita
+     */
+    function initializeIncomeTypesPieChart() {
+        const chartCanvas = document.getElementById('incomeTypesPieChart');
+        if (!chartCanvas) return;
+
+        try {
+            // Obter dados do elemento canvas
+            const labelsRaw = chartCanvas.getAttribute('data-labels');
+            const valuesRaw = chartCanvas.getAttribute('data-values');
+
+            if (!labelsRaw || !valuesRaw) return;
+
+            // Parsear os dados JSON
+            const labels = JSON.parse(labelsRaw);
+            const values = JSON.parse(valuesRaw);
+
+            // Cores personalizadas para receitas - tons de verde
+            const backgroundColors = [
+                'rgba(28, 200, 138, 0.8)',
+                'rgba(40, 167, 69, 0.8)',
+                'rgba(32, 201, 151, 0.8)',
+                'rgba(0, 172, 105, 0.8)',
+                'rgba(0, 184, 148, 0.8)',
+                'rgba(0, 148, 50, 0.8)',
+                'rgba(40, 167, 69, 0.8)'
+            ];
+
+            // Criar gráfico de pizza usando o módulo Charts
+            if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
+                FinanceSystem.Modules.Charts.createPieChart('incomeTypesPieChart', labels, values, {
+                    cutout: '70%',
+                    colors: backgroundColors
+                });
+            } else {
+                // Fallback para Chart.js direto se o módulo não estiver disponível
+                createPieChartFallback(chartCanvas, labels, values, backgroundColors);
+            }
+        } catch (error) {
+            console.error('Erro ao inicializar gráfico de tipos de receita:', error);
+        }
+    }
+
+    /**
+     * Inicializa o gráfico de status das receitas
+     */
+    function initializeIncomeStatusPieChart() {
+        const chartCanvas = document.getElementById('incomeStatusPieChart');
+        if (!chartCanvas) return;
+
+        try {
+            // Obter dados do elemento canvas
+            const labelsRaw = chartCanvas.getAttribute('data-labels');
+            const valuesRaw = chartCanvas.getAttribute('data-values');
+
+            if (!labelsRaw || !valuesRaw) return;
+
+            // Parsear os dados JSON
+            const labels = JSON.parse(labelsRaw);
+            const values = JSON.parse(valuesRaw);
+
+            // Cores para cada status
+            const backgroundColors = [
+                'rgba(28, 200, 138, 0.8)',   // Recebido - Verde
+                'rgba(246, 194, 62, 0.8)',   // Pendente - Amarelo
+                'rgba(231, 74, 59, 0.8)',    // Vencido - Vermelho
+                'rgba(133, 135, 150, 0.8)'   // Cancelado - Cinza
+            ];
+
+            // Criar gráfico de pizza usando o módulo Charts
+            if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
+                FinanceSystem.Modules.Charts.createPieChart('incomeStatusPieChart', labels, values, {
+                    cutout: '70%',
+                    colors: backgroundColors
+                });
+            } else {
+                // Fallback para Chart.js direto se o módulo não estiver disponível
+                createPieChartFallback(chartCanvas, labels, values, backgroundColors);
+            }
+        } catch (error) {
+            console.error('Erro ao inicializar gráfico de status de receitas:', error);
+        }
+    }
+
     // API pública do módulo
     return {
         initialize: initialize,
         initializeDashboardCharts: initializeDashboardCharts,
         initializeDashboardStats: initializeDashboardStats,
         updateDashboardCharts: updateDashboardCharts,
-        filterDashboardData: filterDashboardData
+        filterDashboardData: filterDashboardData,
+        initializeReportCharts: initializeReportCharts,
+        initializeIncomeTypesPieChart: initializeIncomeTypesPieChart,
+        initializeIncomeStatusPieChart: initializeIncomeStatusPieChart,
+        initializeMonthlyReportComparisonChart: initializeMonthlyReportComparisonChart
     };
 })();

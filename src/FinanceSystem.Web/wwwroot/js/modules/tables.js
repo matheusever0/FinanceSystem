@@ -18,6 +18,7 @@ FinanceSystem.Modules.Tables = (function () {
         initializeTableExport();
         initializeTableActions();
         initializeTableSort();
+        initializeReportTables();
     }
 
     /**
@@ -41,6 +42,73 @@ FinanceSystem.Modules.Tables = (function () {
         } else {
             // Implementação básica de ordenação se DataTables não estiver disponível
             implementBasicTableSorting();
+        }
+    }
+
+    /**
+     * Inicializa tabelas específicas dos relatórios
+     */
+    function initializeReportTables() {
+        // Inicializar tabela de pagamentos de relatório
+        var paymentsTable = $('#payments-table');
+        if (paymentsTable.length > 0 && !$.fn.DataTable.isDataTable('#payments-table')) {
+            paymentsTable.DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+                },
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                dom: '<"top"fl>rt<"bottom"ip>',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        text: '<i class="fas fa-file-excel me-1"></i> Excel',
+                        className: 'btn btn-sm btn-success'
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+                        className: 'btn btn-sm btn-danger'
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print me-1"></i> Imprimir',
+                        className: 'btn btn-sm btn-primary'
+                    }
+                ]
+            });
+        }
+
+        // Inicializar tabela de receitas de relatório
+        var incomesTable = $('#incomes-table');
+        if (incomesTable.length > 0 && !$.fn.DataTable.isDataTable('#incomes-table')) {
+            incomesTable.DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+                },
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                dom: '<"top"fl>rt<"bottom"ip>',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        text: '<i class="fas fa-file-excel me-1"></i> Excel',
+                        className: 'btn btn-sm btn-success'
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+                        className: 'btn btn-sm btn-danger'
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print me-1"></i> Imprimir',
+                        className: 'btn btn-sm btn-primary'
+                    }
+                ]
+            });
         }
     }
 
