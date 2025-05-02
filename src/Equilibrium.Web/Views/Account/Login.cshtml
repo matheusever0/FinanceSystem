@@ -1,0 +1,96 @@
+﻿@using Equilibrium.Web.Models.Login
+@model LoginModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Equilibrium+</title>
+    <link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" asp-append-version="true">
+    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" asp-append-version="true">
+    <link href="~/css/base/variables.css" rel="stylesheet" asp-append-version="true">
+    <link href="~/css/pages/login.css" rel="stylesheet" asp-append-version="true">
+    <link rel="icon" type="image/svg+xml" href="~/images/favicon.svg" asp-append-version="true">
+    <link rel="icon" type="image/png" sizes="32x32" href="~/images/favicon-32x32.png" asp-append-version="true">
+    <link rel="icon" type="image/png" sizes="16x16" href="~/images/favicon-16x16.png" asp-append-version="true">
+    <link rel="apple-touch-icon" sizes="180x180" href="~/images/apple-touch-icon.png" asp-append-version="true">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <img src="~/images/login-logo.png" alt="Equilibrium+ Logo" />
+            </div>
+            <form asp-action="Login" asp-controller="Account" method="post" class="login-form">
+                @Html.AntiForgeryToken()
+                <div class="form-floating mb-3">
+                    <input asp-for="Username" name="Username" id="Username" class="form-control" placeholder="Nome de usuário" />
+                    <label for="Username">Nome de usuário</label>
+                    <span asp-validation-for="Username" class="text-danger"></span>
+                </div>
+
+                <div class="form-floating mb-4">
+                    <input asp-for="Password" name="Password" id="Password" class="form-control" type="password" placeholder="Senha" />
+                    <label for="Password">Senha</label>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-login" id="login-button">
+                        <span class="btn-text"><i class="fas fa-sign-in-alt me-2"></i>Entrar</span>
+                        <div class="pulse-container">
+                            <div class="pulse-bubble pulse-bubble-1"></div>
+                            <div class="pulse-bubble pulse-bubble-2"></div>
+                            <div class="pulse-bubble pulse-bubble-3"></div>
+                        </div>
+                    </button>
+                </div>
+                @if (ViewData.ModelState["CustomError"]?.Errors.Count > 0)
+                {
+                    <div class="alert alert-danger p-2 small mb-2 text-center mt-3">
+                        @ViewData.ModelState["CustomError"]?.Errors.FirstOrDefault()?.ErrorMessage?.Trim('"')
+                    </div>
+                }
+            </form>
+        </div>
+        <div class="login-footer">
+            <small>&copy; 2025 Equilibrium+ | SeveroTech - Todos os direitos reservados</small>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.querySelector('form.login-form');
+        const loginButton = document.getElementById('login-button');
+
+        if (loginForm && loginButton) {
+            // Adiciona ID ao formulário se ainda não tiver
+            if (!loginForm.id) {
+                loginForm.id = 'login-form';
+            }
+
+            loginForm.addEventListener('submit', function(e) {
+                // Verifica se os campos obrigatórios estão preenchidos
+                const username = document.getElementById('Username').value;
+                const password = document.getElementById('Password').value;
+
+                if (username && password) {
+                    // Desabilita o botão e ativa o estado de loading
+                    loginButton.disabled = true;
+                    loginButton.classList.add('loading');
+                }
+            });
+        }
+    });
+</script>
+
+
+
+

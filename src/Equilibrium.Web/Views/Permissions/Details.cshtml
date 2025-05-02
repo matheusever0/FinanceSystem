@@ -1,0 +1,28 @@
+﻿@using Equilibrium.Web.Models.Permission
+@model PermissionModel
+
+@{
+    ViewData["Title"] = "Detalhes da Permissão";
+}
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Nome</dt>
+            <dd class="col-sm-9">@Model.Name</dd>
+
+            <dt class="col-sm-3">Nome do Sistema</dt>
+            <dd class="col-sm-9"><code>@Model.SystemName</code></dd>
+
+            <dt class="col-sm-3">Descrição</dt>
+            <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.Description) ? "-" : Model.Description)</dd>
+
+            <dt class="col-sm-3">Data de Criação</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+        </dl>
+
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+            <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+        </div>
+    </div>
+</div>

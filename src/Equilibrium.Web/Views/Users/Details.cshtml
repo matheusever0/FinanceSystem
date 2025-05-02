@@ -1,0 +1,44 @@
+﻿@using Equilibrium.Web.Models.User
+@model UserModel
+
+@{
+    ViewData["Title"] = "Detalhes do Usuário";
+}
+
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Nome de Usuário</dt>
+            <dd class="col-sm-9">@Model.Username</dd>
+
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3">Status</dt>
+            <dd class="col-sm-9">
+                @if (Model.IsActive)
+                {
+                    <span class="badge bg-success">Ativo</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">Inativo</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Perfis</dt>
+            <dd class="col-sm-9">@string.Join(", ", Model.Roles)</dd>
+
+            <dt class="col-sm-3">Data de Criação</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+
+            <dt class="col-sm-3">Último Login</dt>
+            <dd class="col-sm-9">@(Model.LastLogin.HasValue ? Model.LastLogin.Value.ToString("dd/MM/yyyy HH:mm") : "Nunca")</dd>
+        </dl>
+
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+            <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,15 @@
+﻿@using Equilibrium.Web.Helpers
+@{
+    var controllerName = ViewContext.RouteData.Values["Controller"]?.ToString();
+}
+
+
+@if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "creditcards.view"))
+{
+    <div class="sidebar-menu-item">
+        <a asp-controller="CreditCards" asp-action="Index" class="sidebar-menu-link @(controllerName == "CreditCards" ? "active" : "")">
+            <span class="sidebar-menu-icon"><i class="fas fa-credit-card"></i></span>
+            <span>Cartões de Crédito</span>
+        </a>
+    </div>
+}

@@ -1,0 +1,190 @@
+﻿@using Equilibrium.Web.Models.CreditCard
+@using Equilibrium.Web.Models.Payment
+@using Equilibrium.Web.Models.PaymentMethod
+@model CreatePaymentModel
+@{
+    ViewData["Title"] = "Novo Pagamento";
+    var paymentTypes = ViewBag.PaymentTypes as IEnumerable<Equilibrium.Web.Models.PaymentTypeModel>;
+    var paymentMethods = ViewBag.PaymentMethods as IEnumerable<PaymentMethodModel>;
+    var creditCards = ViewBag.CreditCards as IEnumerable<CreditCardModel>;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/payment.css" asp-append-version="true">
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-end mb-3">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Voltar
+        </a>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informações do Pagamento</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post" id="payment-form" data-page="payment">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Description" class="form-label"></label>
+                                    <input asp-for="Description" class="form-control" />
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Amount" class="form-label"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input asp-for="Amount" class="form-control" type="text" step="0.01" min="0.01" />
+                                    </div>
+                                    <span asp-validation-for="Amount" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="DueDate" class="form-label"></label>
+                                    <input asp-for="DueDate" class="form-control" type="date" />
+                                    <span asp-validation-for="DueDate" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="PaymentDate" class="form-label"></label>
+                                    <input asp-for="PaymentDate" class="form-control" type="date" />
+                                    <span asp-validation-for="PaymentDate" class="text-danger"></span>
+                                    <div class="form-text">Se preenchido, o pagamento será marcado como pago nesta data.</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="PaymentTypeId" class="form-label"></label>
+                                    <select asp-for="PaymentTypeId" class="form-select" id="PaymentTypeId">
+                                        <option value="">Selecione o tipo de pagamento</option>
+                                        @if (paymentTypes != null)
+                                        {
+                                            @foreach (var type in paymentTypes)
+                                            {
+                                                <option value="@type.Id" data-is-financing-type="@type.IsFinancingType.ToString().ToLower()">@type.Name</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="PaymentTypeId" class="text-danger"></span>
+                                </div>
+                                <div class="mb-3" id="financingSection" style="display:none;">
+                                    <label asp-for="FinancingId" class="form-label">Financiamento</label>
+                                    <select asp-for="FinancingId" class="form-select">
+                                        <option value="">Selecione o financiamento</option>
+                                        @if (ViewBag.Financings != null)
+                                        {
+                                            @foreach (var financing in ViewBag.Financings)
+                                            {
+                                                <option value="@financing.Id">@financing.Description - @financing.GetFormattedTotalAmount()</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="FinancingId" class="text-danger"></span>
+                                    <div class="form-text">Se não houver financiamentos disponíveis, você precisa <a href="/Financings/Create" target="_blank">criar um financiamento</a> primeiro.</div>
+                                </div>
+                                <div class="mb-3" id="financingInstallmentSection" style="display:none;">
+                                    <label asp-for="FinancingInstallmentId" class="form-label">Parcela do Financiamento</label>
+                                    <select asp-for="FinancingInstallmentId" class="form-select">
+                                        <option value="">Selecione a parcela</option>
+                                    </select>
+                                    <span asp-validation-for="FinancingInstallmentId" class="text-danger"></span>
+                                    <div class="form-text">Selecione qual parcela do financiamento está sendo paga.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="PaymentMethodId" class="form-label"></label>
+                                    <select asp-for="PaymentMethodId" class="form-select" id="paymentMethodSelect">
+                                        <option value="">Selecione o método de pagamento</option>
+                                        @if (paymentMethods != null)
+                                        {
+                                            @foreach (var method in paymentMethods)
+                                            {
+                                                <option value="@method.Id" data-type="@method.Type">@method.Name</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="PaymentMethodId" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3" id="creditCardSection" style="display:none;">
+                                    <label asp-for="CreditCardId" class="form-label"></label>
+                                    <select asp-for="CreditCardId" class="form-select">
+                                        <option value="">Selecione o cartão de crédito</option>
+                                        @if (creditCards != null)
+                                        {
+                                            @foreach (var card in creditCards)
+                                            {
+                                                <option value="@card.Id">@card.Name - @card.CardBrand (*@card.LastFourDigits)</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="CreditCardId" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="NumberOfInstallments" class="form-label"></label>
+                                    <input asp-for="NumberOfInstallments" class="form-control" type="number" min="1" max="48" value="1" disabled />
+                                    <span asp-validation-for="NumberOfInstallments" class="text-danger"></span>
+                                    <div class="form-text">Número de parcelas (1 para pagamento único).</div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="IsRecurring" class="form-label"></label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input asp-for="IsRecurring" class="form-check-input isRecurringSwitch" type="checkbox" id="isRecurringSwitch" />
+                                        <label class="form-check-label" for="isRecurringSwitch" id="isRecurringLabel">Marque se este pagamento é recorrente (mensal).</label>
+                                    </div>
+                                    <span asp-validation-for="IsRecurring" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label"></label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Salvar
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informações</h6>
+                </div>
+                <div class="card-body">
+                    <p>Preencha os dados do seu pagamento:</p>
+                    <ul>
+                        <li><strong>Descrição:</strong> Um nome ou identificação para seu pagamento.</li>
+                        <li><strong>Valor:</strong> O valor do pagamento.</li>
+                        <li><strong>Data de Vencimento:</strong> A data em que você espera receber.</li>
+                        <li><strong>Data de Pagamento:</strong> Caso já tenha recebido, informe a data.</li>
+                        <li><strong>Tipo de Pagamento:</strong> Categorize seu pagamento.</li>
+                        <li><strong>Metodo de Pagamento:</strong> Qual o metodo do seu pagamento.</li>
+                        <li><strong>Recorrente:</strong> Marque se este pagamento se repete regularmente.</li>
+                        <li><strong>Número de Parcelas:</strong> Se o pagamento é parcelado, informe quantas parcelas.</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Os pagamentos parcelados terão o valor dividido em parcelas iguais, com vencimentos mensais a partir da data informada. <b>No momento não é possivel parcelar.</b>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

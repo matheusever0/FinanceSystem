@@ -1,0 +1,42 @@
+﻿@using Equilibrium.Web.Helpers
+@{
+    var controllerName = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var actionName = ViewContext.RouteData.Values["Action"]?.ToString();
+}
+
+<div class="sidebar-menu-item">
+    <a href="#" class="sidebar-menu-link @(controllerName == "Financings" ? "active" : "")"
+       data-bs-toggle="collapse" data-bs-target="#collapseFinancings"
+       aria-expanded="@(controllerName == "Financings" ? "true" : "false")"
+       aria-controls="collapseFinancings">
+        <span class="sidebar-menu-icon"><i class="fas fa-calculator"></i></span>
+        <span>Financiamentos</span>
+        <i class="fas fa-angle-down ms-auto"></i>
+    </a>
+    <div id="collapseFinancings" class="collapse @(controllerName == "Financings" ? "show" : "")">
+        <div class="bg-dark py-2">
+            @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "financings.view"))
+            {
+                <a asp-controller="Financings" asp-action="Index" class="sidebar-menu-link @(controllerName == "Financings" && actionName == "Index" ? "active" : "")">
+                    <span class="sidebar-menu-icon ps-2"><i class="fas fa-list"></i></span>
+                    <span>Todos</span>
+                </a>
+                <a asp-controller="Financings" asp-action="Active" class="sidebar-menu-link @(controllerName == "Financings" && actionName == "Active" ? "active" : "")">
+                    <span class="sidebar-menu-icon ps-2"><i class="fas fa-check-circle"></i></span>
+                    <span>Ativos</span>
+                </a>
+                <a asp-controller="Financings" asp-action="Simulate" class="sidebar-menu-link @(controllerName == "Financings" && actionName == "Simulate" ? "active" : "")">
+                    <span class="sidebar-menu-icon ps-2"><i class="fas fa-calculator"></i></span>
+                    <span>Simular</span>
+                </a>
+                @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "financings.create"))
+                {
+                    <a asp-controller="Financings" asp-action="Create" class="sidebar-menu-link @(controllerName == "Financings" && actionName == "Create" ? "active" : "")">
+                        <span class="sidebar-menu-icon ps-2"><i class="fas fa-plus-circle"></i></span>
+                        <span>Novo Financiamento</span>
+                    </a>
+                }
+            }
+        </div>
+    </div>
+</div>

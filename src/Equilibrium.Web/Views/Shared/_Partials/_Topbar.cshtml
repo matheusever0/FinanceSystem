@@ -1,0 +1,40 @@
+﻿@using Equilibrium.Web.Helpers
+@using System.Security.Claims
+@{
+    var username = User?.Identity?.Name?.ToUpper() ?? "não autenticado";
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+}
+  
+<!-- Topbar -->
+<div class="topbar" id="topbar">
+    <div class="menu-toggle" id="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+    <div class="page-title">@ViewData["Title"]</div>
+    <div>
+        <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="d-none d-md-inline-block me-2">@username</span>
+            <i class="fas fa-user-circle fs-5"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+                <div class="dropdown-item-text">
+                    <div class="fw-bold">@username</div>
+                </div>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item" href="@Url.Action("Edit", "Users", new { id = userId })">
+                    <i class="fas fa-user-edit fa-sm fa-fw me-2 text-gray-400"></i> Editar Usuário
+                </a>
+            </li>
+            <li>
+                <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" style="display: none;"></form>
+                <a class="dropdown-item" href="javascript:document.getElementById('logoutForm').submit();">
+                    <i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i> Sair
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

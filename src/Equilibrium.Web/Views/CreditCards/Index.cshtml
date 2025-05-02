@@ -1,0 +1,106 @@
+﻿@model IEnumerable<CreditCardModel>
+@using Equilibrium.Web.Helpers
+@using Equilibrium.Web.Models.CreditCard
+@{
+    ViewData["Title"] = "Cartões de Crédito";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/creditcards.css" asp-append-version="true">
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-end mb-3">
+
+        @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.create"))
+        {
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Novo Cartão de Crédito
+            </a>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> Nenhum cartão de crédito cadastrado.
+            @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.create"))
+            {
+                <a asp-action="Create" class="alert-link">Clique aqui para adicionar seu primeiro cartão.</a>
+                
+           }
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var card in Model)
+            {
+                var usedPercentage = (card.Limit - card.AvailableLimit) / card.Limit * 100;
+                var colorClass = usedPercentage > 75 ? "danger" : (usedPercentage > 50 ? "warning" : "success");
+
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card shadow h-100 border-left-primary">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary">@card.Name</h6>
+                            <span class="badge bg-primary">@card.CardBrand</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center mb-3">
+                                <div class="col">
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">Terminado em @card.LastFourDigits</div>
+                                    <div class="text-xs text-muted mt-1">Fecha dia @card.ClosingDay / Vence dia @card.DueDay</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-credit-card fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="small">Limite Utilizado</div>
+                                    <div class="small font-weight-bold">@string.Format("{0:0}%", usedPercentage)</div>
+                                </div>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-@colorClass" role="progressbar" style="width: @string.Format("{0:0}%", usedPercentage)"
+                                         aria-valuenow="@string.Format("{0:0}", usedPercentage)" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <div class="small text-muted">Limite Total</div>
+                                    <div class="font-weight-bold">@card.GetFormattedLimit()</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="small text-muted">Disponível</div>
+                                    <div class="font-weight-bold">@card.GetFormattedAvailableLimit()</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-center mt-3">
+                                <div class="btn-group">
+                                    <a asp-action="Details" asp-route-id="@card.Id" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye me-1"></i> Detalhes
+                                    </a>
+                                    @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.edit"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@card.Id" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit me-1"></i> Editar
+                                        </a>
+                                    }
+                                    @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.delete"))
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@card.Id" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash me-1"></i> Excluir
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

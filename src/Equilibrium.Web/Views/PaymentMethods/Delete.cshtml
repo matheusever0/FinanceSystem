@@ -1,0 +1,95 @@
+﻿@using Equilibrium.Web.Models.PaymentMethod
+@model PaymentMethodModel
+@{
+    ViewData["Title"] = "Excluir Método de Pagamento";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-end mb-3">
+        <h1 class="h3 mb-0 text-gray-800">Excluir Método de Pagamento</h1>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Voltar
+        </a>
+    </div>
+
+    <div class="alert alert-danger mb-4">
+        <h4 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i> Confirmação de Exclusão</h4>
+        <p>Tem certeza de que deseja excluir este método de pagamento?</p>
+        <hr>
+        <p class="mb-0">Esta ação não pode ser desfeita. Note que só é possível excluir um método de pagamento que não esteja em uso.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Detalhes do Método de Pagamento</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="small font-weight-bold text-muted">Nome</h6>
+                        <p>@Model.Name</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="small font-weight-bold text-muted">Tipo</h6>
+                        <p>@GetPaymentMethodTypeDescription(Model.Type)</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="small font-weight-bold text-muted">Descrição</h6>
+                        <p>@(string.IsNullOrEmpty(Model.Description) ? "-" : Model.Description)</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="small font-weight-bold text-muted">Data de Criação</h6>
+                        <p>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Confirmar Exclusão</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Delete" method="post">
+                        @Html.AntiForgeryToken()
+                        <p>Ao confirmar esta operação, você está excluindo permanentemente este método de pagamento.</p>
+                        <p>Importante: Se este método de pagamento estiver em uso por algum pagamento existente, a exclusão não será permitida.</p>
+
+                        @if (Model.Type == 2 && Model.CreditCards.Any())                         {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Este método de pagamento possui @Model.CreditCards.Count cartões de crédito associados que também serão excluídos.
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-1"></i> Confirmar Exclusão
+                            </button>
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetPaymentMethodTypeDescription(int type)
+    {
+        return type switch
+        {
+            1 => "Dinheiro",
+            2 => "Cartão de Crédito",
+            3 => "Cartão de Débito",
+            4 => "Transferência Bancária",
+            5 => "Carteira Digital",
+            6 => "Cheque",
+            7 => "Outro",
+            _ => "Desconhecido"
+        };
+    }
+}

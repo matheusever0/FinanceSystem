@@ -1,0 +1,57 @@
+﻿@using Equilibrium.Web.Helpers
+
+@{
+    var controllerName = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var actionName = ViewContext.RouteData.Values["Action"]?.ToString();
+}
+
+<div class="sidebar-menu-item">
+    <a href="#" class="sidebar-menu-link @(controllerName == "Payments" || controllerName == "PaymentTypes" ? "active" : "")"
+       data-bs-toggle="collapse" data-bs-target="#collapsePayments"
+       aria-expanded="@(controllerName == "Payments" || controllerName == "PaymentTypes" ? "true" : "false")"
+       aria-controls="collapsePayments">
+        <span class="sidebar-menu-icon"><i class="fas fa-money-bill-wave"></i></span>
+        <span>Pagamentos</span>
+        <i class="fas fa-angle-down ms-auto"></i>
+    </a>
+    <div id="collapsePayments" class="collapse @(controllerName == "Payments" || controllerName == "PaymentTypes" ? "show" : "")">
+        <div class="bg-dark py-2">
+            @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "payments.view"))
+            {
+                    <a asp-controller="Payments" asp-action="Index" class="sidebar-menu-link @(controllerName == "Payments" && actionName == "Index" ? "active" : "")">
+                        <span class="sidebar-menu-icon ps-2"><i class="fas fa-list"></i></span>
+                        <span>Todos Pagamentos</span>
+                    </a>
+                    <a asp-controller="Payments" asp-action="Pending" class="sidebar-menu-link @(controllerName == "Payments" && actionName == "Pending" ? "active" : "")">
+                        <span class="sidebar-menu-icon ps-2"><i class="fas fa-clock"></i></span>
+                        <span>Pendentes</span>
+                    </a>
+                    <a asp-controller="Payments" asp-action="Overdue" class="sidebar-menu-link @(controllerName == "Payments" && actionName == "Overdue" ? "active" : "")">
+                        <span class="sidebar-menu-icon ps-2"><i class="fas fa-exclamation-circle"></i></span>
+                        <span>Vencidos</span>
+                    </a>
+            }
+            @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "paymenttypes.view"))
+            {
+                <a asp-controller="PaymentTypes" asp-action="Index" class="sidebar-menu-link @(controllerName == "PaymentTypes" ? "active" : "")">
+                    <span class="sidebar-menu-icon ps-2"><i class="fas fa-tags"></i></span>
+                    <span>Tipos de Pagamento</span>
+                </a>
+            }
+            @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "paymentmethods.view"))
+            {
+                <a asp-controller="PaymentMethods" asp-action="Index" class="sidebar-menu-link @(controllerName == "PaymentMethods" ? "active" : "")">
+                    <span class="sidebar-menu-icon ps-2"><i class="fas fa-wallet"></i></span>
+                    <span>Métodos de Pagamento</span>
+                </a>
+            }
+            @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "payments.create"))
+            {
+                    <a asp-controller="Payments" asp-action="Create" class="sidebar-menu-link @(controllerName == "Payments" && actionName == "Create" ? "active" : "")">
+                        <span class="sidebar-menu-icon ps-2"><i class="fas fa-plus-circle"></i></span>
+                        <span>Novo Pagamento</span>
+                    </a>
+            }
+        </div>
+    </div>
+</div>

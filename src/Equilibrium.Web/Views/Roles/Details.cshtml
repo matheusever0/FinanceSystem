@@ -1,0 +1,69 @@
+﻿@using Equilibrium.Web.Models.Permission
+@using Equilibrium.Web.Models.Role
+@model RoleModel
+
+@{
+    ViewData["Title"] = "Detalhes do Perfil";
+    var permissions = ViewBag.Permissions as IEnumerable<PermissionModel>;
+}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Nome</dt>
+            <dd class="col-sm-9">@Model.Name</dd>
+
+            <dt class="col-sm-3">Descrição</dt>
+            <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.Description) ? "-" : Model.Description)</dd>
+
+            <dt class="col-sm-3">Data de Criação</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+        </dl>
+
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+            <a asp-action="ManagePermissions" asp-route-id="@Model.Id" class="btn btn-success">Gerenciar Permissões</a>
+            <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Permissões</h5>
+    </div>
+    <div class="card-body">
+        @if (permissions != null && permissions.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Nome do Sistema</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var permission in permissions)
+                        {
+                            <tr>
+                                <td>@permission.Name</td>
+                                <td><code>@permission.SystemName</code></td>
+                                <td>@(string.IsNullOrEmpty(permission.Description) ? "-" : permission.Description)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Este perfil não possui permissões atribuídas.
+                <a asp-action="ManagePermissions" asp-route-id="@Model.Id" class="alert-link">Clique aqui</a> para gerenciar permissões.
+            </div>
+        }
+    </div>
+</div>
