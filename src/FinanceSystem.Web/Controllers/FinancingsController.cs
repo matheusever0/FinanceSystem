@@ -33,6 +33,7 @@ namespace FinanceSystem.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 var financings = await _financingService.GetAllFinancingsAsync(token);
+
                 return View(financings);
             }
             catch (Exception ex)

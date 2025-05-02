@@ -7,6 +7,7 @@ namespace FinanceSystem.Application.DTOs.Financing
         public Guid Id { get; set; }
         public int InstallmentNumber { get; set; }
         public decimal TotalAmount { get; set; }
+        public decimal TotalCorrection { get; set; }
         public decimal InterestAmount { get; set; }
         public decimal AmortizationAmount { get; set; }
         public DateTime DueDate { get; set; }

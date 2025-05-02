@@ -51,7 +51,7 @@
                             </div>
                             <div class="mb-3">
                                 <h5 class="small font-weight-bold text-muted">Taxa de Juros</h5>
-                                <p>@Model.InterestRate.ToString("F2")% ao mês</p>
+                                <p>@Model.InterestRate.ToString("F2")% ao ano</p>
                             </div>
                             <div class="mb-3">
                                 <h5 class="small font-weight-bold text-muted">Prazo</h5>
@@ -194,6 +194,7 @@
                                 <th class="text-center">Diff</th>
                                 <th class="text-center">Juros</th>
                                 <th class="text-center">Amortização</th>
+                                <th class="text-center">Valor Correção</th>
                                 <th class="text-center">Vencimento</th>
                                 <th class="text-center">Pagamento</th>
                                 <th class="text-center">Status</th>
@@ -220,6 +221,7 @@
                                     </td>
                                     <td class="text-end">@installment.InterestAmount.ToString("C2")</td>
                                     <td class="text-end">@installment.AmortizationAmount.ToString("C2")</td>
+                                    <td class="text-end">@installment.GetFormattedTotalCorrection()</td>
                                     <td class="text-center">@installment.DueDate.ToString("dd/MM/yyyy")</td>
                                     <td class="text-center">@(installment.PaymentDate?.ToString("dd/MM/yyyy") ?? "-")</td>
                                     <td class="text-center">

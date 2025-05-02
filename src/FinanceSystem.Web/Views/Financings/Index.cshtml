@@ -68,7 +68,6 @@
                                 <th class="text-center">Prazo</th>
                                 <th class="text-center">Início</th>
                                 <th class="text-center">Status</th>
-                                <th class="text-center">Progresso</th>
                                 <th class="text-center">Ações</th>
                             </tr>
                         </thead>
@@ -88,18 +87,6 @@
                                     <td class="text-center">@item.StartDate.ToString("dd/MM/yyyy")</td>
                                     <td class="text-center">
                                         <span class="badge @GetStatusBadgeClass(item.Status)">@item.StatusDescription</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="progress">
-                                            <div class="progress-bar @GetProgressBarClass(item.ProgressPercentage)"
-                                                 role="progressbar"
-                                                 style="width: @(item.ProgressPercentage * 100)%"
-                                                 aria-valuenow="@(item.ProgressPercentage * 100)"
-                                                 aria-valuemin="0"
-                                                 aria-valuemax="100">
-                                                @((item.ProgressPercentage * 100).ToString("F0"))%
-                                            </div>
-                                        </div>
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group">

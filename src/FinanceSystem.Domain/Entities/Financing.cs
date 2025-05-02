@@ -6,14 +6,14 @@ namespace FinanceSystem.Domain.Entities
     {
         public Guid Id { get; protected set; }
         public string Description { get; protected set; }
-        public decimal TotalAmount { get; protected set; }  // Valor total financiado
-        public decimal InterestRate { get; protected set; } // Taxa de juros anual
-        public int TermMonths { get; protected set; }       // Prazo em meses
-        public DateTime StartDate { get; protected set; }   // Data de início
-        public DateTime? EndDate { get; protected set; }    // Data de término (calculada ou efetiva)
-        public FinancingType Type { get; protected set; }   // Tipo de sistema de amortização
+        public decimal TotalAmount { get; protected set; }
+        public decimal InterestRate { get; protected set; }
+        public int TermMonths { get; protected set; }
+        public DateTime StartDate { get; protected set; }
+        public DateTime? EndDate { get; protected set; }
+        public FinancingType Type { get; protected set; }
         public FinancingStatus Status { get; protected set; }
-        public CorrectionIndexType CorrectionIndex { get; protected set; } // Índice de correção
+        public CorrectionIndexType CorrectionIndex { get; protected set; }
         public string Notes { get; protected set; }
         public DateTime CreatedAt { get; protected set; }
         public DateTime? UpdatedAt { get; protected set; }
@@ -21,7 +21,7 @@ namespace FinanceSystem.Domain.Entities
         public Guid UserId { get; protected set; }
         public User User { get; protected set; }
 
-        public decimal RemainingDebt { get; protected set; } // Saldo devedor atual
+        public decimal RemainingDebt { get; protected set; }
         public DateTime LastCorrectionDate { get; protected set; }
 
         public ICollection<FinancingInstallment> Installments { get; protected set; }
@@ -106,28 +106,22 @@ namespace FinanceSystem.Domain.Entities
             RemainingDebt *= (1 + indexValue);
 
             // Ajustar parcelas futuras
-            RecalculateRemainingInstallments();
+            RecalculateRemainingInstallments(correctionDate);
 
             LastCorrectionDate = correctionDate;
             UpdatedAt = DateTime.Now;
         }
 
-        public void RecalculateRemainingInstallments()
+        public void RecalculateRemainingInstallments(DateTime ultimaDataPagaDaFrente, bool cancelling = false)
         {
-            // Encontrar a última parcela paga
             var lastPaidInstallment = Installments
-                .Where(i => i.Status == FinancingInstallmentStatus.Paid)
+                .Where(i => cancelling ? i.DueDate == ultimaDataPagaDaFrente : i.PaymentDate == ultimaDataPagaDaFrente)
                 .OrderByDescending(i => i.InstallmentNumber)
                 .FirstOrDefault();
 
-            // Se não houver parcela paga, não há o que recalcular
             if (lastPaidInstallment == null)
                 return;
 
-            // Usar a data do pagamento da última parcela paga como referência
-            DateTime referenceDate = lastPaidInstallment.PaymentDate ?? DateTime.Now;
-
-            // Identificar parcelas futuras não pagas (incluindo parcelas antigas não pagas)
             var pendingInstallments = Installments
                 .Where(i => i.Status == FinancingInstallmentStatus.Pending)
                 .OrderBy(i => i.InstallmentNumber)
@@ -136,32 +130,17 @@ namespace FinanceSystem.Domain.Entities
             if (!pendingInstallments.Any())
                 return;
 
-            // Aqui, em vez de recalcular com base na fórmula de amortização,
-            // usamos o valor da última parcela paga
-            decimal lastPaidAmount = lastPaidInstallment.PaidAmount;
+            decimal lastPaidAmount = cancelling ? lastPaidInstallment.TotalAmount : lastPaidInstallment.PaidAmount;
 
-            // Ajuste das parcelas pendentes
             foreach (var installment in pendingInstallments)
             {
-                // Usar o mesmo valor total da última parcela paga
-                decimal totalAmount = lastPaidAmount;
-
-                // Manter a proporção entre juros e amortização da parcela original
-                decimal totalOriginal = installment.TotalAmount;
-                decimal interestProportion = installment.InterestAmount / totalOriginal;
-                decimal amortizationProportion = installment.AmortizationAmount / totalOriginal;
-
-                decimal newInterestAmount = totalAmount * interestProportion;
-                decimal newAmortizationAmount = totalAmount * amortizationProportion;
-
-                // Atualizar valores da parcela
-                installment.UpdateValues(totalAmount, newInterestAmount, newAmortizationAmount);
+                installment.UpdateValues(lastPaidAmount);
             }
         }
 
         private void CalculateInstallments()
         {
-            decimal monthlyRate = InterestRate / 12 / 100; // Taxa mensal em formato decimal
+            decimal monthlyRate = InterestRate / 12 / 100;
 
             if (Type == FinancingType.PRICE)
             {
@@ -220,7 +199,6 @@ namespace FinanceSystem.Domain.Entities
                 }
             }
 
-            // Calcular data de término
             EndDate = StartDate.AddMonths(TermMonths);
         }
 
@@ -240,7 +218,6 @@ namespace FinanceSystem.Domain.Entities
         {
             RemainingDebt += amount;
 
-            // If financing was completed but now has debt again, reactivate it
             if (Status == FinancingStatus.Completed && RemainingDebt > 0)
             {
                 Status = FinancingStatus.Active;
@@ -248,20 +225,6 @@ namespace FinanceSystem.Domain.Entities
             }
 
             UpdatedAt = DateTime.Now;
-        }
-
-        public void RecalculateAfterPayment(decimal amountPaid, bool isAmortization = false)
-        {
-            if (isAmortization)
-            {
-                // For amortization payments, we need to recalculate all future installments
-                RecalculateRemainingInstallments();
-            }
-            else
-            {
-                // For regular payments, we just update the remaining debt
-                UpdatedAt = DateTime.Now;
-            }
         }
     }
 }

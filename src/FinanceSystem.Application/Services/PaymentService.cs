@@ -178,7 +178,7 @@ namespace FinanceSystem.Application.Services
                 {
                     // Após marcar como pago, recalcular as parcelas restantes
                     var financingService = _serviceProvider.GetRequiredService<IFinancingService>();
-                    await financingService.RecalculateRemainingInstallmentsAsync(payment.FinancingId.Value);
+                    await financingService.RecalculateRemainingInstallmentsAsync(payment.FinancingId.Value, payment.DueDate);
                 }
             }
 
@@ -279,7 +279,7 @@ namespace FinanceSystem.Application.Services
             {
                 var financingService = _serviceProvider.GetRequiredService<IFinancingService>();
 
-                await financingService.RecalculateRemainingInstallmentsAsync(payment.FinancingId.Value);
+                await financingService.RecalculateRemainingInstallmentsAsync(payment.FinancingId.Value, payment.DueDate);
             }
 
             await _unitOfWork.CompleteAsync();
@@ -316,9 +316,8 @@ namespace FinanceSystem.Application.Services
                         var installment = await _unitOfWork.FinancingInstallments.GetByIdAsync(payment.FinancingInstallmentId.Value);
                         if (installment != null)
                         {
-                            // Calcular proporção da amortização a ser restaurada
-                            decimal proportionPaid = payment.Amount / installment.TotalAmount;
-                            amortizationAmount = proportionPaid * installment.AmortizationAmount;
+
+                            amortizationAmount = installment.AmortizationAmount;
 
                             // Atualizar status e valores da parcela
                             await RevertPaymentFromInstallment(installment, payment);
@@ -337,7 +336,7 @@ namespace FinanceSystem.Application.Services
 
                     // Recalcular parcelas futuras
                     var financingService = _serviceProvider.GetRequiredService<IFinancingService>();
-                    await financingService.RecalculateRemainingInstallmentsAsync(financing.Id);
+                    await financingService.RecalculateRemainingInstallmentsAsync(financing.Id, payment.DueDate, true);
                 }
             }
 
@@ -364,11 +363,6 @@ namespace FinanceSystem.Application.Services
                 newPaidAmount = 0;
                 newRemainingAmount = installment.TotalAmount;
                 newStatus = FinancingInstallmentStatus.Pending;
-
-                if (installment.DueDate < DateTime.Now)
-                {
-                    newStatus = FinancingInstallmentStatus.Overdue;
-                }
             }
             else if (newRemainingAmount > 0)
             {

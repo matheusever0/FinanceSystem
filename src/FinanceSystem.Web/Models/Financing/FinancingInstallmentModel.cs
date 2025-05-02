@@ -13,6 +13,10 @@ namespace FinanceSystem.Web.Models.Financing
         [DisplayFormat(DataFormatString = "{0:C2}")]
         public decimal TotalAmount { get; set; }
 
+        [Display(Name = "Valor Correção")]
+        [DisplayFormat(DataFormatString = "{0:C2}")]
+        public decimal? TotalCorrection { get; set; }
+
         [Display(Name = "Juros")]
         [DisplayFormat(DataFormatString = "{0:C2}")]
         public decimal InterestAmount { get; set; }
@@ -50,6 +54,11 @@ namespace FinanceSystem.Web.Models.Financing
             return string.Format("{0:C2}", TotalAmount);
         }
 
+        public string GetFormattedTotalCorrection()
+        {
+            return string.Format("{0:C2}", TotalCorrection);
+        }
+
         public string GetFormattedDueDate()
         {
             return DueDate.ToString("dd/MM/yyyy");
@@ -66,16 +75,12 @@ namespace FinanceSystem.Web.Models.Financing
         {
             get
             {
-                // Se o valor pago for zero, retorna zero para evitar divisão por zero
                 if (PaidAmount == 0 || TotalAmount == 0)
                     return 0;
 
-                // Calcula a diferença percentual
                 return (PaidAmount - TotalAmount) / TotalAmount;
             }
         }
-
-        // Propriedade para indicar se houve economia ou aumento
         [Display(Name = "Tipo de Diferença")]
         public string DifferenceType
         {
@@ -89,8 +94,6 @@ namespace FinanceSystem.Web.Models.Financing
                     return "Correção";
             }
         }
-
-        // Método para exibir o texto formatado
         public string GetFormattedDifference()
         {
             if (PercentageDifference == 0)

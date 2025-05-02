@@ -1,0 +1,125 @@
+﻿@{
+    ViewData["Title"] = "Exportar/Importar Pagamentos";
+}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Exportar/Importar Pagamentos</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">Exportar Modelo</h6>
+                        </div>
+                        <div class="card-body">
+                            <p>Baixe o modelo de CSV para criar pagamentos em lote:</p>
+                            <a asp-action="DownloadTemplate" asp-controller="Payments" class="btn btn-primary">
+                                <i class="fas fa-download me-1"></i> Baixar Modelo CSV
+                            </a>
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    O arquivo CSV deve conter as colunas necessárias para a criação de pagamentos.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">Importar Pagamentos</h6>
+                        </div>
+                        <div class="card-body">
+                            <p>Importe seu arquivo CSV para criar pagamentos em lote:</p>
+                            <form asp-action="ImportFromCSV" asp-controller="Payments" method="post" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <input type="file" class="form-control" name="csvFile" id="csvFile" accept=".csv" required>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="validateOnly" name="validateOnly">
+                                    <label class="form-check-label" for="validateOnly">
+                                        Apenas validar (não criar pagamentos)
+                                    </label>
+                                </div>
+                                <button class="btn btn-success" type="submit">
+                                    <i class="fas fa-upload me-1"></i> Importar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">Instruções</h6>
+                        </div>
+                        <div class="card-body">
+                            <h5>Como usar o modelo CSV:</h5>
+                            <p>O arquivo CSV deve conter as seguintes colunas:</p>
+                            <ul>
+                                <li><strong>Descricao:</strong> Nome do pagamento (obrigatório)</li>
+                                <li><strong>Valor:</strong> Valor do pagamento (obrigatório, formato: 1234,56)</li>
+                                <li><strong>DataVencimento:</strong> Data de vencimento (obrigatório, formato: DD/MM/AAAA)</li>
+                                <li><strong>DataPagamento:</strong> Data do pagamento, se já pago (opcional, formato: DD/MM/AAAA)</li>
+                                <li><strong>TipoPagamentoId:</strong> ID do tipo de pagamento (obrigatório)</li>
+                                <li><strong>MetodoPagamentoId:</strong> ID do método de pagamento (obrigatório)</li>
+                                <li><strong>Recorrente:</strong> Se o pagamento é recorrente (opcional, valores: Sim/Não)</li>
+                                <li><strong>Parcelas:</strong> Número de parcelas (opcional, padrão: 1)</li>
+                                <li><strong>CartaoCreditoId:</strong> ID do cartão de crédito (obrigatório para pagamentos com cartão)</li>
+                                <li><strong>FinanciamentoId:</strong> ID do financiamento (obrigatório para pagamentos de financiamento)</li>
+                                <li><strong>ParcelaFinanciamentoId:</strong> ID da parcela do financiamento (obrigatório quando FinanciamentoId está preenchido)</li>
+                                <li><strong>Observacoes:</strong> Comentários adicionais (opcional)</li>
+                            </ul>
+
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Dica:</strong> Você pode exportar listas de referência usando os links abaixo:
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2 mt-3">
+                                <a asp-action="ExportPaymentTypes" asp-controller="Payments" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-file-export me-1"></i> Exportar Tipos de Pagamento
+                                </a>
+                                <a asp-action="ExportPaymentMethods" asp-controller="Payments" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-file-export me-1"></i> Exportar Métodos de Pagamento
+                                </a>
+                                <a asp-action="ExportCreditCards" asp-controller="Payments" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-file-export me-1"></i> Exportar Cartões de Crédito
+                                </a>
+                                <a asp-action="ExportFinancings" asp-controller="Payments" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-file-export me-1"></i> Exportar Financiamentos
+                                </a>
+                                <a asp-action="ExportFinancingInstallments" asp-controller="Payments" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-file-export me-1"></i> Exportar Parcelas de Financiamentos
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Validate CSV file extension
+            document.getElementById('csvFile').addEventListener('change', function() {
+                const fileInput = this;
+                const file = fileInput.files[0];
+
+                if (file && !file.name.toLowerCase().endsWith('.csv')) {
+                    alert('Por favor, selecione um arquivo CSV válido.');
+                    fileInput.value = '';
+                }
+            });
+        });
+    </script>
+}

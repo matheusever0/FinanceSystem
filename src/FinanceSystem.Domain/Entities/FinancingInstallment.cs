@@ -6,14 +6,15 @@ namespace FinanceSystem.Domain.Entities
     {
         public Guid Id { get; protected set; }
         public int InstallmentNumber { get; protected set; }
-        public decimal TotalAmount { get; protected set; }      // Valor total da parcela
-        public decimal InterestAmount { get; protected set; }   // Valor de juros
-        public decimal AmortizationAmount { get; protected set; } // Valor de amortização
-        public DateTime DueDate { get; protected set; }         // Data de vencimento
-        public DateTime? PaymentDate { get; protected set; }    // Data de pagamento
+        public decimal TotalAmount { get; protected set; }
+        public decimal? TotalCorrection { get; protected set; } 
+        public decimal InterestAmount { get; protected set; }
+        public decimal AmortizationAmount { get; protected set; } 
+        public DateTime DueDate { get; protected set; }  
+        public DateTime? PaymentDate { get; protected set; }  
         public FinancingInstallmentStatus Status { get; protected set; }
-        public decimal PaidAmount { get; protected set; }       // Valor pago
-        public decimal RemainingAmount { get; protected set; }  // Valor restante
+        public decimal PaidAmount { get; protected set; } 
+        public decimal RemainingAmount { get; protected set; }
         public DateTime CreatedAt { get; protected set; }
         public DateTime? UpdatedAt { get; protected set; }
 
@@ -52,13 +53,11 @@ namespace FinanceSystem.Domain.Entities
             Payments = new List<Payment>();
         }
 
-        public void UpdateValues(decimal totalAmount, decimal interestAmount, decimal amortizationAmount)
+        public void UpdateValues(decimal totalAmount)
         {
             TotalAmount = totalAmount;
-            InterestAmount = interestAmount;
-            AmortizationAmount = amortizationAmount;
             RemainingAmount = totalAmount - PaidAmount;
-
+            TotalCorrection = 0;
             UpdatedAt = DateTime.Now;
         }
 
@@ -92,25 +91,19 @@ namespace FinanceSystem.Domain.Entities
 
             if (isAmortization)
             {
-                // For amortization, we reduce only the principal amount
-                // Calculate what portion of this payment goes to principal vs interest
                 decimal principalPortion = (amountToApply / TotalAmount) * AmortizationAmount;
                 PaidAmount += amountToApply;
 
-                // Signal to the financing that this much principal was paid
                 Financing.UpdateRemainingDebt(principalPortion);
 
-                // Reduce remaining amount
                 RemainingAmount = TotalAmount - PaidAmount;
             }
             else
             {
-                // Regular payment
                 PaidAmount += amountToApply;
                 RemainingAmount -= amountToApply;
             }
 
-            // Update status based on remaining amount
             if (RemainingAmount <= 0)
             {
                 MarkAsPaid(payment.PaymentDate ?? DateTime.Now, amountToApply);
@@ -122,6 +115,8 @@ namespace FinanceSystem.Domain.Entities
                     PaymentDate = payment.PaymentDate;
                 UpdatedAt = DateTime.Now;
             }
+
+            TotalCorrection = PaidAmount - (InterestAmount + AmortizationAmount);
         }
 
         public void RevertPayment(decimal newPaidAmount, decimal newRemainingAmount, FinancingInstallmentStatus newStatus)
@@ -129,6 +124,7 @@ namespace FinanceSystem.Domain.Entities
             PaidAmount = newPaidAmount;
             RemainingAmount = newRemainingAmount;
             Status = newStatus;
+            TotalCorrection = 0 - (InterestAmount + AmortizationAmount);
 
             if (newPaidAmount <= 0)
             {

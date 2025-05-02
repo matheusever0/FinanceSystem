@@ -4,6 +4,7 @@ using FinanceSystem.Application.Interfaces;
 using FinanceSystem.Domain.Entities;
 using FinanceSystem.Domain.Enums;
 using FinanceSystem.Domain.Interfaces.Services;
+using Microsoft.VisualBasic;
 
 namespace FinanceSystem.Application.Services
 {
@@ -38,7 +39,7 @@ namespace FinanceSystem.Application.Services
 
             // Calcular métricas adicionais
             var installments = financing.Installments.ToList();
-            var paidInstallments = installments.Where(i => i.Status == FinancingInstallmentStatus.Paid 
+            var paidInstallments = installments.Where(i => i.Status == FinancingInstallmentStatus.Paid
                 || i.Status == FinancingInstallmentStatus.PartiallyPaid).ToList();
             var pendingInstallments = installments.Where(i => i.Status == FinancingInstallmentStatus.Pending).ToList();
 
@@ -73,7 +74,7 @@ namespace FinanceSystem.Application.Services
         public async Task<IEnumerable<FinancingDto>> GetAllByUserIdAsync(Guid userId)
         {
             var financings = await _unitOfWork.Financings.GetFinancingsByUserIdAsync(userId);
-            return _mapper.Map<IEnumerable<FinancingDto>>(financings);
+            return _mapper.Map<IEnumerable<FinancingDto>>(financings); ;
         }
 
         public async Task<IEnumerable<FinancingDto>> GetActiveFinancingsByUserIdAsync(Guid userId)
@@ -277,7 +278,7 @@ namespace FinanceSystem.Application.Services
             return result;
         }
 
-        public async Task RecalculateRemainingInstallmentsAsync(Guid financingId)
+        public async Task RecalculateRemainingInstallmentsAsync(Guid financingId, DateTime dueDate, bool cancelling = false)
         {
             var financing = await _unitOfWork.Financings.GetFinancingWithDetailsAsync(financingId);
             if (financing == null)
@@ -287,7 +288,7 @@ namespace FinanceSystem.Application.Services
                 throw new InvalidOperationException("Apenas financiamentos ativos podem ser recalculados");
 
             // Recalculate installments based on remaining debt
-            financing.RecalculateRemainingInstallments();
+            financing.RecalculateRemainingInstallments(dueDate, cancelling);
 
             await _unitOfWork.Financings.UpdateAsync(financing);
             await _unitOfWork.CompleteAsync();
