@@ -8,7 +8,7 @@ namespace FinanceSystem.Web.Models.Income
         [Required(ErrorMessage = "A descrição é obrigatória")]
         [StringLength(100, MinimumLength = 3, ErrorMessage = "A descrição deve ter entre 3 e 100 caracteres")]
         [Display(Name = "Descrição")]
-        public required string Description { get; set; }
+        public string Description { get; set; }
 
         [Required(ErrorMessage = "O valor é obrigatório")]
         [Range(0.01, double.MaxValue, ErrorMessage = "O valor deve ser maior que zero")]
@@ -29,11 +29,11 @@ namespace FinanceSystem.Web.Models.Income
 
         [Display(Name = "Observações")]
         [StringLength(500, ErrorMessage = "As observações devem ter no máximo 500 caracteres")]
-        public required string Notes { get; set; }
+        public string Notes { get; set; }
 
         [Required(ErrorMessage = "O tipo de receita é obrigatório")]
         [Display(Name = "Tipo de Receita")]
-        public required string IncomeTypeId { get; set; }
+        public string IncomeTypeId { get; set; }
 
         [Range(1, 48, ErrorMessage = "O número de parcelas deve estar entre 1 e 48")]
         [Display(Name = "Número de Parcelas")]

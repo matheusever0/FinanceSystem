@@ -306,7 +306,7 @@ FinanceSystem.UI = (function () {
      * @param {string} containerId - ID do elemento onde o alerta será inserido
      * @param {number} timeout - Tempo em ms para o alerta desaparecer (0 para não desaparecer)
      */
-    function showAlert(message, type = 'info', containerId = 'alert-container', timeout = 5000) {
+    function showAlert(message, type = 'info', containerId = 'alert-container', timeout = 15000) {
         const container = document.getElementById(containerId);
         if (!container) return;
 

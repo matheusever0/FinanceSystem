@@ -3,10 +3,7 @@
 @{
     var controllerName = ViewContext.RouteData.Values["Controller"]?.ToString();
     var actionName = ViewContext.RouteData.Values["Action"]?.ToString();
-    var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
-    var username = User?.Identity?.Name?.ToUpper() ?? "não autenticado";
-    var token = Context.Session.GetString("JWToken") ?? "token ausente";
-    var userId = User?.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+    
 }
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -61,7 +58,7 @@
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                <i class="fas fa-check-circle me-2"></i>@Html.Raw(TempData["SuccessMessage"])
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }
@@ -69,7 +66,7 @@
         @if (TempData["ErrorMessage"] != null)
         {
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                <i class="fas fa-exclamation-circle me-2"></i>@Html.Raw(TempData["ErrorMessage"])
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }

@@ -80,8 +80,6 @@ namespace FinanceSystem.Web.Controllers
                         ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
                     });
 
-                TempData["SuccessMessage"] = ResourceFinanceWeb.Success_Login;
-
                 return RedirectToLocal(returnUrl);
             }
             catch (Exception ex)

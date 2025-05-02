@@ -5,26 +5,20 @@
 
 // Espera o DOM estar completamente carregado antes de inicializar
 document.addEventListener('DOMContentLoaded', function () {
-    console.log("DOM carregado, inicializando FinanceSystem...");
 
     // Garantir que os namespaces existam
     if (typeof FinanceSystem === 'undefined') {
-        console.error("Namespace FinanceSystem não encontrado!");
         return;
     }
 
     // Inicializa os componentes de interface do usuário
     if (FinanceSystem.UI && typeof FinanceSystem.UI.initialize === 'function') {
         FinanceSystem.UI.initialize();
-    } else {
-        console.warn("FinanceSystem.UI não encontrado ou não possui método initialize");
     }
 
     // Inicializa funcionalidades principais
     if (FinanceSystem.Core && typeof FinanceSystem.Core.initialize === 'function') {
         FinanceSystem.Core.initialize();
-    } else {
-        console.warn("FinanceSystem.Core não encontrado ou não possui método initialize");
     }
 
     // Inicializa módulos específicos de validação
@@ -64,8 +58,6 @@ function initializePageModules() {
         if (FinanceSystem.Pages.Users && typeof FinanceSystem.Pages.Users.initialize === 'function') {
             FinanceSystem.Pages.Users.initialize();
         }
-    } else {
-        console.warn("Namespace FinanceSystem.Pages não encontrado!");
     }
 }
 

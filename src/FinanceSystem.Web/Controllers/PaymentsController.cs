@@ -642,7 +642,7 @@ namespace FinanceSystem.Web.Controllers
                     }
                     else
                     {
-                        TempData["WarningMessage"] = $"{successCount} pagamentos importados com sucesso, mas {errorCount} apresentaram erros: {string.Join("<br>", errors)}";
+                        TempData["ErrorMessage"] = $"{successCount} pagamentos importados com sucesso, mas {errorCount} apresentaram erros: {string.Join("<br>", errors)}";
                     }
                 }
 

@@ -60,7 +60,6 @@ namespace FinanceSystem.Web.Services
         private async Task<string> HandleResponse(HttpResponseMessage response)
         {
             var content = await response.Content.ReadAsStringAsync();
-
             _logger.LogInformation("Resposta completa: {Content}", content);
 
             if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -69,12 +68,41 @@ namespace FinanceSystem.Web.Services
                 var errorMessage = string.IsNullOrEmpty(content) ? "Sessão expirada ou inválida" : content;
                 throw new UnauthorizedAccessException(errorMessage);
             }
+
             if (!response.IsSuccessStatusCode)
             {
-                var errorMessage = string.IsNullOrEmpty(content) ? "Erro desconhecido na API" : content;
-                throw new Exception(errorMessage);
+                try
+                {
+                    var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(content, _jsonOptions);
+                    if (errorResponse?.Errors != null)
+                    {
+                        var allMessages = errorResponse.Errors
+                            .SelectMany(kvp => kvp.Value.Select(msg => $"{kvp.Key}: {msg}"))
+                            .ToList();
+
+                        var formattedMessage = string.Join("\n", allMessages);
+                        throw new Exception($"Erros de validação:\n{formattedMessage}");
+                    }
+                }
+                catch (JsonException)
+                {
+                    // ignora, segue com erro genérico
+                }
+
+                var fallbackMessage = string.IsNullOrEmpty(content) ? "Erro desconhecido na API" : content;
+                throw new Exception(fallbackMessage);
             }
+
             return content;
+        }
+
+        public class ApiErrorResponse
+        {
+            public string Type { get; set; }
+            public string Title { get; set; }
+            public int Status { get; set; }
+            public Dictionary<string, string[]> Errors { get; set; }
+            public string TraceId { get; set; }
         }
 
         public async Task<bool> VerifyTokenAsync(string token)

@@ -2,7 +2,8 @@
 @using System.Security.Claims
 @{
     var username = User?.Identity?.Name?.ToUpper() ?? "não autenticado";
-    var userId = User?.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
 }
   
 <!-- Topbar -->
