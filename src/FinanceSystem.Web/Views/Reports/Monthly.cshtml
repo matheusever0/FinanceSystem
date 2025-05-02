@@ -355,14 +355,6 @@
                                 data-values='@Html.Raw(typeValues)'>
                         </canvas>
                     </div>
-                    <div class="mt-4 text-center small">
-                        @foreach (var paymentType in paymentsByType.Take(5))
-                        {
-                            <span class="me-2">
-                                <i class="fas fa-circle" style="color: @GetRandomColor();"></i> @paymentType.TypeName
-                            </span>
-                        }
-                    </div>
                 </div>
             </div>
         </div>
@@ -379,20 +371,6 @@
                                 data-labels='@Html.Raw(statusLabels)'
                                 data-values='@Html.Raw(statusValues)'>
                         </canvas>
-                    </div>
-                    <div class="mt-4 text-center small">
-                        <span class="me-2">
-                            <i class="fas fa-circle text-success"></i> Pago
-                        </span>
-                        <span class="me-2">
-                            <i class="fas fa-circle text-warning"></i> Pendente
-                        </span>
-                        <span class="me-2">
-                            <i class="fas fa-circle text-danger"></i> Vencido
-                        </span>
-                        <span class="me-2">
-                            <i class="fas fa-circle text-secondary"></i> Cancelado
-                        </span>
                     </div>
                 </div>
             </div>
@@ -414,14 +392,6 @@
                                 data-values='@Html.Raw(incomeTypeValues)'>
                         </canvas>
                     </div>
-                    <div class="mt-4 text-center small">
-                        @foreach (var incomeType in incomesByType.Take(5))
-                        {
-                            <span class="me-2">
-                                <i class="fas fa-circle" style="color: @GetRandomColor();"></i> @incomeType.TypeName
-                            </span>
-                        }
-                    </div>
                 </div>
             </div>
         </div>
@@ -438,20 +408,6 @@
                                 data-labels='@Html.Raw(incomeStatusLabels)'
                                 data-values='@Html.Raw(incomeStatusValues)'>
                         </canvas>
-                    </div>
-                    <div class="mt-4 text-center small">
-                        <span class="me-2">
-                            <i class="fas fa-circle text-success"></i> Recebido
-                        </span>
-                        <span class="me-2">
-                            <i class="fas fa-circle text-warning"></i> Pendente
-                        </span>
-                        <span class="me-2">
-                            <i class="fas fa-circle text-danger"></i> Vencido
-                        </span>
-                        <span class="me-2">
-                            <i class="fas fa-circle text-secondary"></i> Cancelado
-                        </span>
                     </div>
                 </div>
             </div>

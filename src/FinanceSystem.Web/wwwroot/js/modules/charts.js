@@ -1,6 +1,7 @@
 ﻿/**
  * Finance System - Charts Module
  * Funções reutilizáveis para criação e manipulação de gráficos
+ * With chart registry for better chart instance management
  */
 
 // Namespace global para o sistema
@@ -9,6 +10,9 @@ FinanceSystem.Modules = FinanceSystem.Modules || {};
 
 // Módulo Charts
 FinanceSystem.Modules.Charts = (function () {
+    // Registry to store chart instances
+    const chartRegistry = {};
+
     // Cores padrão para gráficos
     const defaultColors = [
         'rgba(78, 115, 223, 0.8)',   // Azul
@@ -65,6 +69,66 @@ FinanceSystem.Modules.Charts = (function () {
     }
 
     /**
+     * Register a chart instance in the registry
+     * @param {string} chartId - ID of the chart element
+     * @param {Chart} chartInstance - Chart.js instance
+     * @returns {Chart} - The registered chart instance
+     */
+    function registerChart(chartId, chartInstance) {
+        chartRegistry[chartId] = chartInstance;
+        return chartInstance;
+    }
+
+    /**
+     * Get a chart instance from the registry
+     * @param {string} chartId - ID of the chart element
+     * @returns {Chart|null} - Chart instance or null if not found
+     */
+    function getChart(chartId) {
+        return chartRegistry[chartId] || null;
+    }
+
+    /**
+     * Destroy a chart instance and remove it from the registry
+     * @param {string} chartId - ID of the chart element
+     * @returns {boolean} - True if chart was destroyed, false if not found
+     */
+    function destroyChart(chartId) {
+        if (chartRegistry[chartId]) {
+            chartRegistry[chartId].destroy();
+            delete chartRegistry[chartId];
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Safely destroy a chart instance using Chart.js API
+     * Works with both Chart.js v2 and v3+
+     * @param {string} chartId - ID of the chart element
+     */
+    function destroyChartSafely(chartId) {
+        // First try from our registry
+        if (destroyChart(chartId)) return;
+
+        // If not in registry, try Chart.js methods
+        const chartElement = document.getElementById(chartId);
+        if (!chartElement) return;
+
+        // For Chart.js v3+
+        if (typeof Chart.getChart === 'function') {
+            const chartInstance = Chart.getChart(chartElement);
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+        }
+        // For Chart.js v2
+        else if (chartElement.chart) {
+            chartElement.chart.destroy();
+        }
+    }
+
+    /**
      * Inicializa um gráfico com a configuração fornecida
      * @param {string} chartId - ID do elemento canvas
      * @param {Object} config - Configuração para o gráfico
@@ -74,7 +138,14 @@ FinanceSystem.Modules.Charts = (function () {
         const chartElement = document.getElementById(chartId);
         if (!chartElement || typeof Chart === 'undefined') return null;
 
-        return new Chart(chartElement, config);
+        // Destroy any existing chart on this canvas
+        destroyChartSafely(chartId);
+
+        // Create new chart instance
+        const chart = new Chart(chartElement, config);
+
+        // Register chart in our registry
+        return registerChart(chartId, chart);
     }
 
     /**
@@ -388,7 +459,7 @@ FinanceSystem.Modules.Charts = (function () {
      * @returns {Chart|null} - Instância do gráfico ou null
      */
     function createPieChart(chartId, labels, data, options = {}) {
-        const colors = generateColors(data.length);
+        const colors = options.colors || generateColors(data.length);
 
         const defaultOptions = {
             responsive: true,
@@ -847,6 +918,16 @@ FinanceSystem.Modules.Charts = (function () {
         return html;
     }
 
+    /**
+     * Clean up all charts - useful when navigating away from a page
+     */
+    function cleanupAllCharts() {
+        // Destroy all charts in the registry
+        Object.keys(chartRegistry).forEach(chartId => {
+            destroyChart(chartId);
+        });
+    }
+
     // API pública do módulo
     return {
         initialize: initialize,
@@ -864,6 +945,10 @@ FinanceSystem.Modules.Charts = (function () {
         convertChartToTable: convertChartToTable,
         generateColors: generateColors,
         adjustColor: adjustColor,
-        adjustOpacity: adjustOpacity
+        adjustOpacity: adjustOpacity,
+        getChart: getChart,
+        destroyChart: destroyChart,
+        destroyChartSafely: destroyChartSafely,
+        cleanupAllCharts: cleanupAllCharts
     };
 })();

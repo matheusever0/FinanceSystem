@@ -27,6 +27,31 @@ FinanceSystem.Pages.Dashboard = (function () {
     }
 
     /**
+     * Clean up all dashboard charts
+     */
+    function cleanupDashboardCharts() {
+        // Use our chart registry if available
+        if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
+            const charts = FinanceSystem.Modules.Charts;
+            if (typeof charts.destroyChartSafely === 'function') {
+                charts.destroyChartSafely('monthlyExpensesChart');
+                charts.destroyChartSafely('paymentTypesPieChart');
+                charts.destroyChartSafely('paymentStatusPieChart');
+                // Any other charts you have
+            } else if (typeof charts.cleanupAllCharts === 'function') {
+                // Alternative: clean up all charts at once
+                charts.cleanupAllCharts();
+            }
+        }
+
+        // Reset instance variables
+        monthlyExpensesChart = null;
+        paymentTypesPieChart = null;
+        paymentStatusPieChart = null;
+    }
+
+
+    /**
      * Inicializa gráficos do dashboard
      */
     function initializeDashboardCharts() {
@@ -841,22 +866,10 @@ FinanceSystem.Pages.Dashboard = (function () {
             const labels = JSON.parse(labelsRaw);
             const values = JSON.parse(valuesRaw);
 
-            // Cores personalizadas para receitas - tons de verde
-            const backgroundColors = [
-                'rgba(28, 200, 138, 0.8)',
-                'rgba(40, 167, 69, 0.8)',
-                'rgba(32, 201, 151, 0.8)',
-                'rgba(0, 172, 105, 0.8)',
-                'rgba(0, 184, 148, 0.8)',
-                'rgba(0, 148, 50, 0.8)',
-                'rgba(40, 167, 69, 0.8)'
-            ];
-
             // Criar gráfico de pizza usando o módulo Charts
             if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
                 FinanceSystem.Modules.Charts.createPieChart('incomeTypesPieChart', labels, values, {
-                    cutout: '70%',
-                    colors: backgroundColors
+                    cutout: '70%'
                 });
             } else {
                 // Fallback para Chart.js direto se o módulo não estiver disponível
@@ -915,6 +928,7 @@ FinanceSystem.Pages.Dashboard = (function () {
         initializeDashboardStats: initializeDashboardStats,
         updateDashboardCharts: updateDashboardCharts,
         filterDashboardData: filterDashboardData,
+        cleanupDashboardCharts: cleanupDashboardCharts,
         initializeReportCharts: initializeReportCharts,
         initializeIncomeTypesPieChart: initializeIncomeTypesPieChart,
         initializeIncomeStatusPieChart: initializeIncomeStatusPieChart,
