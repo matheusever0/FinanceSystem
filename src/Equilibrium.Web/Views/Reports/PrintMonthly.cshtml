@@ -5,436 +5,221 @@
 @using Equilibrium.Web.Models.Income
 @model IEnumerable<PaymentModel>
 @{
+    Layout = "_PrintLayout";
+
     var currentMonth = ViewBag.Month;
     var currentYear = ViewBag.Year;
 
     var monthName = new DateTime(currentYear, currentMonth, 1).ToString("MMMM");
-
-    // Payment data
     var totalAmount = ViewBag.TotalAmount;
     var paidAmount = ViewBag.PaidAmount;
     var pendingAmount = ViewBag.PendingAmount;
     var overdueAmount = ViewBag.OverdueAmount;
 
-    // Income data
+    // Dados de receitas
+    var incomes = ViewBag.Incomes as IEnumerable<IncomeModel> ?? Enumerable.Empty<IncomeModel>();
     var totalIncomeAmount = ViewBag.TotalIncomeAmount;
     var receivedIncomeAmount = ViewBag.ReceivedIncomeAmount;
     var pendingIncomeAmount = ViewBag.PendingIncomeAmount;
     var overdueIncomeAmount = ViewBag.OverdueIncomeAmount;
 
-    // Balance
-    var balance = ViewBag.Balance ?? (totalIncomeAmount - totalAmount);
+    // Saldo
+    var balance = ViewBag.Balance;
 
-    ViewData["Title"] = "Relatório Mensal: " + monthName.ToUpper() + "/" + currentYear;
-    Layout = null; // Use no layout to have full control
+    ViewData["Title"] = $"Relatório Mensal: {monthName.ToUpper()}/{currentYear}";
 }
 
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Equilibrium+</title>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/pages/payment.css" asp-append-version="true">
-    <link rel="stylesheet" href="~/css/pages/income.css" asp-append-version="true">
-    <link rel="stylesheet" href="~/css/components/tables.css" asp-append-version="true">
-    <link rel="stylesheet" href="~/css/components/cards.css" asp-append-version="true">
-    <link rel="stylesheet" href="~/css/components/buttons.css" asp-append-version="true">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<div class="report-container">
+    <!-- Cabeçalho do Relatório -->
+    <h3 class="text-center mb-3">Resumo Financeiro de @monthName.ToUpper()/@currentYear</h3>
 
-    <style>
-        /* Print-specific styles */
-        @@media print {
-            .d-print-none, .sidebar, .topbar, footer, .no-print {
-                display: none !important;
-            }
-
-            body {
-                background-color: white !important;
-                margin: 0;
-                padding: 15px;
-                font-size: 12pt;
-            }
-
-            .container-fluid {
-                width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-
-            .card {
-                border: 1px solid #ddd !important;
-                box-shadow: none !important;
-                margin-bottom: 15px !important;
-                page-break-inside: avoid;
-            }
-
-            .table {
-                width: 100% !important;
-                margin-bottom: 15px !important;
-            }
-
-                .table th, .table td {
-                    border: 1px solid #ddd !important;
-                }
-
-            h2, h3, h4, h5, h6 {
-                page-break-after: avoid;
-            }
-
-            table, figure {
-                page-break-inside: avoid;
-            }
-
-            .badge {
-                border: 1px solid #ddd;
-            }
-        }
-
-        /* Styles for the print preview */
-        .report-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .print-container {
-            max-width: 1140px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .print-actions {
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        /* Remove default margins and paddings for cleaner print */
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: white;
-        }
-    </style>
-</head>
-<body>
-    <div class="print-container">
-        <div class="report-header">
-            <h2>Relatório Financeiro - @monthName.ToUpper()/@currentYear</h2>
-            <p>Gerado em @DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")</p>
+    <!-- Resumo Comparativo -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="m-0">Comparativo Mensal</h4>
         </div>
-
-        <!-- Comparativo de Receitas x Despesas -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card shadow">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Comparativo de Receitas x Despesas</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Categoria</th>
-                                        <th class="text-end">Valor</th>
-                                        <th class="text-end">Saldo</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="table-success">
-                                        <td>Receitas</td>
-                                        <td class="text-end">@string.Format("{0:C2}", totalIncomeAmount)</td>
-                                        <td class="text-end"></td>
-                                    </tr>
-                                    <tr class="table-danger">
-                                        <td>Despesas</td>
-                                        <td class="text-end">@string.Format("{0:C2}", totalAmount)</td>
-                                        <td class="text-end"></td>
-                                    </tr>
-                                    <tr class="fw-bold @(balance > 0 ? "table-success" : "table-danger")">
-                                        <td>Saldo</td>
-                                        <td class="text-end"></td>
-                                        <td class="text-end">@string.Format("{0:C2}", balance)</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Cards de Resumo de Despesas -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <h5 class="mb-2">Resumo de Despesas</h5>
-            </div>
-            <!-- Total -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-primary shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Total de Despesas
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", totalAmount)</div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pago -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-success shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                    Total Pago
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", paidAmount)</div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pendente -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-warning shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                    Total Pendente
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", pendingAmount)</div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-clock fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Vencido -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-danger shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                    Total Vencido
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", overdueAmount)</div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Cards de Resumo de Receitas -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <h5 class="mb-2">Resumo de Receitas</h5>
-            </div>
-            <!-- Total -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-success shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                    Total de Receitas
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", totalIncomeAmount)</div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recebido -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-info shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                    Total Recebido
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", receivedIncomeAmount)</div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pendente -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-warning shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                    Pendente de Recebimento
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", pendingIncomeAmount)</div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-clock fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Vencido -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-danger shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                    Vencido Sem Recebimento
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", overdueIncomeAmount)</div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabela de Pagamentos -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Pagamentos de @monthName/@currentYear</h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Descrição</th>
-                                <th class="text-end">Valor</th>
-                                <th class="text-center">Vencimento</th>
-                                <th class="text-center">Status</th>
-                                <th>Tipo</th>
-                                <th>Método</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var payment in Model)
-                            {
-                                <tr>
-                                    <td>@payment.Description</td>
-                                    <td class="text-end">@payment.GetFormattedAmount()</td>
-                                    <td class="text-center">@payment.GetFormattedDueDate()</td>
-                                    <td class="text-center">
-                                        <span class="badge @payment.StatusBadgeClass">@payment.StatusDescription</span>
-                                    </td>
-                                    <td>@payment.PaymentTypeName</td>
-                                    <td>@payment.PaymentMethodName</td>
-                                </tr>
-                            }
-                        </tbody>
-                        <tfoot>
-                            <tr class="fw-bold">
-                                <td>Total</td>
-                                <td class="text-end">@string.Format("{0:C2}", totalAmount)</td>
-                                <td colspan="4"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabela de Receitas -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-success">Receitas de @monthName/@currentYear</h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Descrição</th>
-                                <th class="text-end">Valor</th>
-                                <th class="text-center">Vencimento</th>
-                                <th class="text-center">Status</th>
-                                <th>Tipo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var income in ViewBag.Incomes as IEnumerable<IncomeModel>)
-                            {
-                                <tr>
-                                    <td>@income.Description</td>
-                                    <td class="text-end">@income.GetFormattedAmount()</td>
-                                    <td class="text-center">@income.GetFormattedDueDate()</td>
-                                    <td class="text-center">
-                                        <span class="badge @income.StatusBadgeClass">@income.StatusDescription</span>
-                                    </td>
-                                    <td>@income.IncomeTypeName</td>
-                                </tr>
-                            }
-                        </tbody>
-                        <tfoot>
-                            <tr class="fw-bold">
-                                <td>Total</td>
-                                <td class="text-end">@string.Format("{0:C2}", totalIncomeAmount)</td>
-                                <td colspan="3"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="print-actions d-print-none">
-            <button onclick="window.print()" class="btn btn-primary">
-                <i class="fas fa-print me-1"></i> Imprimir
-            </button>
-            <a href="@Url.Action("Monthly", new { month = currentMonth, year = currentYear })" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Voltar
-            </a>
+        <div class="card-body">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Categoria</th>
+                        <th class="text-end">Valor</th>
+                        <th class="text-end">Saldo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Receitas</strong></td>
+                        <td class="text-end">@string.Format("{0:C2}", totalIncomeAmount)</td>
+                        <td class="text-end"></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Despesas</strong></td>
+                        <td class="text-end">@string.Format("{0:C2}", totalAmount)</td>
+                        <td class="text-end"></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Saldo</strong></td>
+                        <td class="text-end"></td>
+                        <td class="text-end"><strong>@string.Format("{0:C2}", balance)</strong></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <script>
-        // Auto-print when page loads using vanilla JavaScript
-        window.addEventListener('load', function() {
-            // Small delay to ensure everything is loaded
-            setTimeout(function() {
-                window.print();
-            }, 800);
-        });
-    </script>
-</body>
-</html>
+    <!-- Resumo de Despesas -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="m-0">Resumo de Despesas</h4>
+        </div>
+        <div class="card-body">
+            <div class="finance-summary">
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Total de Despesas</div>
+                        <div class="summary-value">@string.Format("{0:C2}", totalAmount)</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Total Pago</div>
+                        <div class="summary-value">@string.Format("{0:C2}", paidAmount)</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Total Pendente</div>
+                        <div class="summary-value">@string.Format("{0:C2}", pendingAmount)</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Total Vencido</div>
+                        <div class="summary-value">@string.Format("{0:C2}", overdueAmount)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumo de Receitas -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="m-0">Resumo de Receitas</h4>
+        </div>
+        <div class="card-body">
+            <div class="finance-summary">
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Total de Receitas</div>
+                        <div class="summary-value">@string.Format("{0:C2}", totalIncomeAmount)</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Total Recebido</div>
+                        <div class="summary-value">@string.Format("{0:C2}", receivedIncomeAmount)</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Pendente Recebimento</div>
+                        <div class="summary-value">@string.Format("{0:C2}", pendingIncomeAmount)</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Vencido Sem Recebimento</div>
+                        <div class="summary-value">@string.Format("{0:C2}", overdueIncomeAmount)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Pagamentos -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="m-0">Pagamentos de @monthName/@currentYear</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th class="text-end">Valor</th>
+                        <th class="text-center">Vencimento</th>
+                        <th class="text-center">Status</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var payment in Model)
+                    {
+                        <tr>
+                            <td>@payment.Description</td>
+                            <td class="text-end">@payment.GetFormattedAmount()</td>
+                            <td class="text-center">@payment.GetFormattedDueDate()</td>
+                            <td class="text-center">
+                                <span class="badge @payment.StatusBadgeClass">@payment.StatusDescription</span>
+                            </td>
+                            <td>@payment.PaymentTypeName</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Total</th>
+                        <th class="text-end">@string.Format("{0:C2}", totalAmount)</th>
+                        <th colspan="3"></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quebra de página antes da tabela de receitas -->
+    <div class="page-break-before"></div>
+
+    <!-- Tabela de Receitas -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="m-0">Receitas de @monthName/@currentYear</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th class="text-end">Valor</th>
+                        <th class="text-center">Vencimento</th>
+                        <th class="text-center">Status</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var income in incomes)
+                    {
+                        <tr>
+                            <td>@income.Description</td>
+                            <td class="text-end">@income.GetFormattedAmount()</td>
+                            <td class="text-center">@income.GetFormattedDueDate()</td>
+                            <td class="text-center">
+                                <span class="badge @income.StatusBadgeClass">@income.StatusDescription</span>
+                            </td>
+                            <td>@income.IncomeTypeName</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Total</th>
+                        <th class="text-end">@string.Format("{0:C2}", totalIncomeAmount)</th>
+                        <th colspan="3"></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,17 +1,108 @@
-﻿<!DOCTYPE html>
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Equilibrium</title>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <title>@ViewData["Title"] - Equilibrium+ Finance</title>
+
+    <!-- CSS otimizado para impressão -->
+    <link rel="stylesheet" href="~/css/print.css" asp-append-version="true" />
+
+    <!-- CSS específicos adicionais se necessário -->
     @await RenderSectionAsync("Styles", required: false)
+
+    <!-- Estilos inline para garantir impressão adequada -->
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: white;
+            color: #333;
+        }
+
+        .printHeader {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .printFooter {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+            table th, table td {
+                padding: 8px;
+                border: 1px solid #ddd;
+                text-align: left;
+            }
+
+            table th {
+                background-color: #f5f5f5;
+            }
+
+        .text-end {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        @@media print {
+            a
+
+        {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        @RenderBody()
+    <div class="printHeader">
+        <h1>Equilibrium+</h1>
+        <h2>@ViewData["Title"]</h2>
+        <p>Data de Impressão: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
     </div>
 
+    <div class="container">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <div class="printFooter">
+        <p>Equilibrium+ | SeveroTech - &copy; @DateTime.Now.Year</p>
+    </div>
+
+    <script src="~/js/print.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
