@@ -6,7 +6,6 @@ using Equilibrium.Domain.Enums;
 using Equilibrium.Domain.Interfaces.Services;
 using Equilibrium.Resources;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace Equilibrium.Application.Services
 {

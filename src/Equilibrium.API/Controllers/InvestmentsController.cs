@@ -2,28 +2,23 @@
 using Equilibrium.Application.DTOs.Investment;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Enums;
-using Microsoft.AspNetCore.Authorization;
+using Equilibrium.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    [Route("api/investments")]
-    [ApiController]
-    [Authorize]
-    public class InvestmentsController : ControllerBase
+    public class InvestmentsController : AuthenticatedController<IInvestmentService>
     {
-        private readonly IInvestmentService _investmentService;
-
-        public InvestmentsController(IInvestmentService investmentService)
+        public InvestmentsController(IUnitOfWork unitOfWork, 
+            IInvestmentService service) : base(unitOfWork, service)
         {
-            _investmentService = investmentService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<InvestmentDto>>> GetAll()
         {
             var userId = HttpContext.GetCurrentUserId();
-            var investments = await _investmentService.GetAllByUserIdAsync(userId);
+            var investments = await _service.GetAllByUserIdAsync(userId);
             return Ok(investments);
         }
 
@@ -32,7 +27,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var investment = await _investmentService.GetByIdAsync(id);
+                var investment = await _service.GetByIdAsync(id);
 
                 return investment.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<InvestmentDto>)Forbid() : (ActionResult<InvestmentDto>)Ok(investment);
             }
@@ -46,7 +41,7 @@ namespace Equilibrium.API.Controllers
         public async Task<ActionResult<IEnumerable<InvestmentDto>>> GetByType(InvestmentType type)
         {
             var userId = HttpContext.GetCurrentUserId();
-            var investments = await _investmentService.GetByTypeAsync(userId, type);
+            var investments = await _service.GetByTypeAsync(userId, type);
             return Ok(investments);
         }
 
@@ -56,7 +51,7 @@ namespace Equilibrium.API.Controllers
             try
             {
                 var userId = HttpContext.GetCurrentUserId();
-                var investment = await _investmentService.CreateAsync(createInvestmentDto, userId);
+                var investment = await _service.CreateAsync(createInvestmentDto, userId);
                 return CreatedAtAction(nameof(GetById), new { id = investment.Id }, investment);
             }
             catch (KeyNotFoundException ex)
@@ -74,11 +69,11 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var investment = await _investmentService.GetByIdAsync(id);
+                var investment = await _service.GetByIdAsync(id);
                 if (investment.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 
-                await _investmentService.DeleteAsync(id);
+                await _service.DeleteAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -92,11 +87,11 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var investment = await _investmentService.GetByIdAsync(id);
+                var investment = await _service.GetByIdAsync(id);
                 if (investment.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 
-                var updatedInvestment = await _investmentService.RefreshPriceAsync(id);
+                var updatedInvestment = await _service.RefreshPriceAsync(id);
                 return Ok(updatedInvestment);
             }
             catch (KeyNotFoundException ex)
@@ -115,7 +110,7 @@ namespace Equilibrium.API.Controllers
             try
             {
                 var userId = HttpContext.GetCurrentUserId();
-                var updatedInvestments = await _investmentService.RefreshAllPricesAsync(userId);
+                var updatedInvestments = await _service.RefreshAllPricesAsync(userId);
                 return Ok(updatedInvestments);
             }
             catch (Exception ex)

@@ -1,27 +1,24 @@
 ﻿using Equilibrium.Application.DTOs.Role;
 using Equilibrium.Application.Interfaces;
+using Equilibrium.Domain.Interfaces.Services;
 using Equilibrium.Resources;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class RolesController : ControllerBase
+    public class RolesController : AuthenticatedController<IRoleService>
     {
-        private readonly IRoleService _roleService;
-
-        public RolesController(IRoleService roleService)
+        public RolesController(IUnitOfWork unitOfWork, 
+            IRoleService service) : base(unitOfWork, service)
         {
-            _roleService = roleService;
         }
 
         [HttpGet]
         [Authorize]
         public async Task<ActionResult> GetAll()
         {
-            var roles = await _roleService.GetAllAsync();
+            var roles = await _service.GetAllAsync();
             return Ok(roles);
         }
 
@@ -31,7 +28,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var role = await _roleService.GetByIdAsync(id);
+                var role = await _service.GetByIdAsync(id);
                 return Ok(role);
             }
             catch (KeyNotFoundException ex)
@@ -46,7 +43,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var role = await _roleService.CreateAsync(createRoleDto);
+                var role = await _service.CreateAsync(createRoleDto);
                 return CreatedAtAction(nameof(GetById), new { id = role.Id }, role);
             }
             catch (InvalidOperationException ex)
@@ -61,7 +58,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var role = await _roleService.UpdateAsync(id, updateRoleDto);
+                var role = await _service.UpdateAsync(id, updateRoleDto);
                 return Ok(role);
             }
             catch (KeyNotFoundException ex)
@@ -80,7 +77,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                await _roleService.DeleteAsync(id);
+                await _service.DeleteAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -99,7 +96,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var result = await _roleService.HasPermissionAsync(roleId, permissionName);
+                var result = await _service.HasPermissionAsync(roleId, permissionName);
                 return Ok(result);
             }
             catch (KeyNotFoundException ex)
@@ -114,7 +111,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var role = await _roleService.UpdateRolePermissionsAsync(roleId, permissionIds);
+                var role = await _service.UpdateRolePermissionsAsync(roleId, permissionIds);
                 return Ok(role);
             }
             catch (KeyNotFoundException ex)

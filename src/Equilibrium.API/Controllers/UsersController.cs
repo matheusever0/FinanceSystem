@@ -1,26 +1,23 @@
 ﻿using Equilibrium.Application.DTOs.User;
 using Equilibrium.Application.Interfaces;
+using Equilibrium.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController : AuthenticatedController<IUserService>
     {
-        private readonly IUserService _userService;
-
-        public UsersController(IUserService userService, ILogger<UsersController> logger)
+        public UsersController(IUnitOfWork unitOfWork, 
+            IUserService service) : base(unitOfWork, service)
         {
-            _userService = userService;
         }
 
         [HttpGet]
         [Authorize]
         public async Task<ActionResult> GetAll()
         {
-            var users = await _userService.GetAllAsync();
+            var users = await _service.GetAllAsync();
             return Ok(users);
         }
 
@@ -30,7 +27,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var user = await _userService.GetByIdAsync(id);
+                var user = await _service.GetByIdAsync(id);
                 return Ok(user);
             }
             catch (Exception ex)
@@ -45,7 +42,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var user = await _userService.CreateAsync(createUserDto);
+                var user = await _service.CreateAsync(createUserDto);
                 return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
             }
             catch (Exception ex)
@@ -60,7 +57,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var user = await _userService.UpdateAsync(id, updateUserDto);
+                var user = await _service.UpdateAsync(id, updateUserDto);
                 return Ok(user);
             }
             catch (KeyNotFoundException ex)
@@ -79,7 +76,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                await _userService.DeleteAsync(id);
+                await _service.DeleteAsync(id);
                 return NoContent();
             }
             catch (Exception ex)

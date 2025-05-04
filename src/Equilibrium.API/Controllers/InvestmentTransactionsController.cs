@@ -1,24 +1,20 @@
 ﻿using Equilibrium.API.Extensions;
 using Equilibrium.Application.DTOs.InvestmentTransaction;
 using Equilibrium.Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
+using Equilibrium.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    [Route("api/investment-transactions")]
-    [ApiController]
-    [Authorize]
-    public class InvestmentTransactionsController : ControllerBase
+    public class InvestmentTransactionsController : AuthenticatedController<IInvestmentTransactionService>
     {
-        private readonly IInvestmentTransactionService _transactionService;
         private readonly IInvestmentService _investmentService;
 
-        public InvestmentTransactionsController(
-            IInvestmentTransactionService transactionService,
-            IInvestmentService investmentService)
+        public InvestmentTransactionsController(IUnitOfWork unitOfWork, 
+            IInvestmentTransactionService service,
+            IInvestmentService investmentService
+            ) : base(unitOfWork, service)
         {
-            _transactionService = transactionService;
             _investmentService = investmentService;
         }
 
@@ -31,7 +27,7 @@ namespace Equilibrium.API.Controllers
                 if (investment.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 
-                var transactions = await _transactionService.GetByInvestmentIdAsync(investmentId);
+                var transactions = await _service.GetByInvestmentIdAsync(investmentId);
                 return Ok(transactions);
             }
             catch (KeyNotFoundException ex)
@@ -45,7 +41,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var transaction = await _transactionService.GetByIdAsync(id);
+                var transaction = await _service.GetByIdAsync(id);
                 var investment = await _investmentService.GetByIdAsync(transaction.Id);
 
                 return investment.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<InvestmentTransactionDto>)Forbid() : (ActionResult<InvestmentTransactionDto>)Ok(transaction);
@@ -67,7 +63,7 @@ namespace Equilibrium.API.Controllers
                 if (investment.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 
-                var transaction = await _transactionService.CreateAsync(investmentId, createDto);
+                var transaction = await _service.CreateAsync(investmentId, createDto);
                 return CreatedAtAction(nameof(GetById), new { id = transaction.Id }, transaction);
             }
             catch (KeyNotFoundException ex)
@@ -85,13 +81,13 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var transaction = await _transactionService.GetByIdAsync(id);
+                var transaction = await _service.GetByIdAsync(id);
                 var investment = await _investmentService.GetByIdAsync(transaction.InvestmentId);
 
                 if (investment.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 
-                await _transactionService.DeleteAsync(id);
+                await _service.DeleteAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
