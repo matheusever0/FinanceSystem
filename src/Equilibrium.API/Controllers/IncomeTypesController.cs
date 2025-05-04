@@ -7,9 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    [Route("api/income-types")]
-    [ApiController]
-    [Authorize]
     public class IncomeTypesController : AuthenticatedController<IIncomeTypeService>
     {
         public IncomeTypesController(IUnitOfWork unitOfWork, 

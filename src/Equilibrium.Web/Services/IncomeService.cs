@@ -19,7 +19,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo todas as receitas");
-                return await _apiService.GetAsync<IEnumerable<IncomeModel>>("/api/incomes", token);
+                return await _apiService.GetAsync<IEnumerable<IncomeModel>>("/api/Incomes", token);
             }
             catch (Exception ex)
             {
@@ -33,7 +33,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo receita com ID: {IncomeId}", id);
-                return await _apiService.GetAsync<IncomeModel>($"/api/incomes/{id}", token);
+                return await _apiService.GetAsync<IncomeModel>($"/api/Incomes/{id}", token);
             }
             catch (Exception ex)
             {
@@ -47,7 +47,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo receitas do mês {Month}/{Year}", month, year);
-                return await _apiService.GetAsync<IEnumerable<IncomeModel>>($"/api/incomes/month/{year}/{month}", token);
+                return await _apiService.GetAsync<IEnumerable<IncomeModel>>($"/api/Incomes/month/{year}/{month}", token);
             }
             catch (Exception ex)
             {
@@ -61,7 +61,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo receitas pendentes");
-                return await _apiService.GetAsync<IEnumerable<IncomeModel>>("/api/incomes/pending", token);
+                return await _apiService.GetAsync<IEnumerable<IncomeModel>>("/api/Incomes/pending", token);
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo receitas recebidas");
-                return await _apiService.GetAsync<IEnumerable<IncomeModel>>("/api/incomes/received", token);
+                return await _apiService.GetAsync<IEnumerable<IncomeModel>>("/api/Incomes/received", token);
             }
             catch (Exception ex)
             {
@@ -89,7 +89,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo receitas por tipo: {TypeId}", typeId);
-                return await _apiService.GetAsync<IEnumerable<IncomeModel>>($"/api/incomes/type/{typeId}", token);
+                return await _apiService.GetAsync<IEnumerable<IncomeModel>>($"/api/Incomes/type/{typeId}", token);
             }
             catch (Exception ex)
             {
@@ -103,7 +103,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Criando nova receita: {Description}", model.Description);
-                return await _apiService.PostAsync<IncomeModel>("/api/incomes", model, token);
+                return await _apiService.PostAsync<IncomeModel>("/api/Incomes", model, token);
             }
             catch (Exception ex)
             {
@@ -117,7 +117,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Atualizando receita com ID: {IncomeId}", id);
-                return await _apiService.PutAsync<IncomeModel>($"/api/incomes/{id}", model, token);
+                return await _apiService.PutAsync<IncomeModel>($"/api/Incomes/{id}", model, token);
             }
             catch (Exception ex)
             {
@@ -131,7 +131,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Excluindo receita com ID: {IncomeId}", id);
-                await _apiService.DeleteAsync($"/api/incomes/{id}", token);
+                await _apiService.DeleteAsync($"/api/Incomes/{id}", token);
             }
             catch (Exception ex)
             {
@@ -145,7 +145,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Marcando receita como recebida: {IncomeId}", id);
-                return await _apiService.PostAsync<IncomeModel>($"/api/incomes/{id}/received", receivedDate, token);
+                return await _apiService.PostAsync<IncomeModel>($"/api/Incomes/{id}/received", receivedDate, token);
             }
             catch (Exception ex)
             {
@@ -159,7 +159,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Cancelando receita: {IncomeId}", id);
-                return await _apiService.PostAsync<IncomeModel>($"/api/incomes/{id}/cancel", null, token);
+                return await _apiService.PostAsync<IncomeModel>($"/api/Incomes/{id}/cancel", null, token);
             }
             catch (Exception ex)
             {
@@ -198,7 +198,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Marcando parcela como recebida: {InstallmentId}", installmentId);
-                return await _apiService.PostAsync<bool>($"/api/income-installments/{installmentId}/received", receivedDate, token);
+                return await _apiService.PostAsync<bool>($"/api/IncomeInstallments/{installmentId}/received", receivedDate, token);
             }
             catch (Exception ex)
             {
@@ -212,7 +212,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Cancelando parcela: {InstallmentId}", installmentId);
-                return await _apiService.PostAsync<bool>($"/api/income-installments/{installmentId}/cancel", null, token);
+                return await _apiService.PostAsync<bool>($"/api/IncomeInstallments/{installmentId}/cancel", null, token);
             }
             catch (Exception ex)
             {
@@ -226,7 +226,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo receitas vencidas");
-                return await _apiService.GetAsync<IEnumerable<IncomeModel>>("/api/incomes/overdue", token);
+                return await _apiService.GetAsync<IEnumerable<IncomeModel>>("/api/Incomes/overdue", token);
             }
             catch (Exception ex)
             {

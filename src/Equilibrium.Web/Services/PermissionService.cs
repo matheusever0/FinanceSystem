@@ -21,7 +21,7 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                return await _apiService.GetAsync<IEnumerable<PermissionModel>>("/api/permissions", token);
+                return await _apiService.GetAsync<IEnumerable<PermissionModel>>("/api/Permissions", token);
             }
             catch (Exception ex)
             {
@@ -32,32 +32,32 @@ namespace Equilibrium.Web.Services
 
         public async Task<PermissionModel> GetPermissionByIdAsync(string id, string token)
         {
-            return await _apiService.GetAsync<PermissionModel>($"/api/permissions/{id}", token);
+            return await _apiService.GetAsync<PermissionModel>($"/api/Permissions/{id}", token);
         }
 
         public async Task<PermissionModel> CreatePermissionAsync(CreatePermissionModel model, string token)
         {
             _userPermissionsCache.Clear();
-            return await _apiService.PostAsync<PermissionModel>("/api/permissions", model, token);
+            return await _apiService.PostAsync<PermissionModel>("/api/Permissions", model, token);
         }
 
         public async Task<PermissionModel> UpdatePermissionAsync(string id, UpdatePermissionModel model, string token)
         {
             _userPermissionsCache.Clear();
-            return await _apiService.PutAsync<PermissionModel>($"/api/permissions/{id}", model, token);
+            return await _apiService.PutAsync<PermissionModel>($"/api/Permissions/{id}", model, token);
         }
 
         public async Task DeletePermissionAsync(string id, string token)
         {
             _userPermissionsCache.Clear();
-            await _apiService.DeleteAsync($"/api/permissions/{id}", token);
+            await _apiService.DeleteAsync($"/api/Permissions/{id}", token);
         }
 
         public async Task<IEnumerable<PermissionModel>> GetPermissionsByRoleIdAsync(string roleId, string token)
         {
             try
             {
-                return await _apiService.GetAsync<IEnumerable<PermissionModel>>($"/api/permissions/role/{roleId}", token);
+                return await _apiService.GetAsync<IEnumerable<PermissionModel>>($"/api/Permissions/role/{roleId}", token);
             }
             catch (Exception ex)
             {
@@ -69,13 +69,13 @@ namespace Equilibrium.Web.Services
         public async Task<bool> AssignPermissionToRoleAsync(string roleId, string permissionId, string token)
         {
             _userPermissionsCache.Clear();
-            return await _apiService.PostAsync<bool>($"/api/permissions/role/{roleId}/permission/{permissionId}", token: token);
+            return await _apiService.PostAsync<bool>($"/api/Permissions/role/{roleId}/permission/{permissionId}", token: token);
         }
 
         public async Task<bool> RemovePermissionFromRoleAsync(string roleId, string permissionId, string token)
         {
             _userPermissionsCache.Clear();
-            return await _apiService.DeleteAsync<bool>($"/api/permissions/role/{roleId}/permission/{permissionId}", token);
+            return await _apiService.DeleteAsync<bool>($"/api/Permissions/role/{roleId}/permission/{permissionId}", token);
         }
 
         public async Task<IEnumerable<PermissionModel>> GetPermissionsByUserIdAsync(string userId, string token)
@@ -94,7 +94,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogDebug("Buscando permissões da API para o usuário: {UserId}", userId);
-                var permissions = await _apiService.GetAsync<IEnumerable<PermissionModel>>($"/api/permissions/user/{userId}", token);
+                var permissions = await _apiService.GetAsync<IEnumerable<PermissionModel>>($"/api/Permissions/user/{userId}", token);
 
                 _userPermissionsCache[cacheKey] = (DateTime.Now, permissions);
 

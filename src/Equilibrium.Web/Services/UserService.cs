@@ -21,7 +21,7 @@ namespace Equilibrium.Web.Services
             {
                 _logger.LogInformation($"Tentando login via API para usuário: {model.Username}");
 
-                var response = await _apiService.PostAsync<LoginResponseModel>("/api/auth/login", model);
+                var response = await _apiService.PostAsync<LoginResponseModel>("/api/Auth/login", model);
 
                 if (response == null)
                 {
@@ -45,27 +45,27 @@ namespace Equilibrium.Web.Services
 
         public async Task<IEnumerable<UserModel>> GetAllUsersAsync(string token)
         {
-            return await _apiService.GetAsync<IEnumerable<UserModel>>("/api/users", token);
+            return await _apiService.GetAsync<IEnumerable<UserModel>>("/api/Users", token);
         }
 
         public async Task<UserModel> GetUserByIdAsync(string id, string token)
         {
-            return await _apiService.GetAsync<UserModel>($"/api/users/{id}", token);
+            return await _apiService.GetAsync<UserModel>($"/api/Users/{id}", token);
         }
 
         public async Task<UserModel> CreateUserAsync(CreateUserModel model, string token)
         {
-            return await _apiService.PostAsync<UserModel>("/api/users", model, token);
+            return await _apiService.PostAsync<UserModel>("/api/Users", model, token);
         }
 
         public async Task<UserModel> UpdateUserAsync(string id, UpdateUserModel model, string token)
         {
-            return await _apiService.PutAsync<UserModel>($"/api/users/{id}", model, token);
+            return await _apiService.PutAsync<UserModel>($"/api/Users/{id}", model, token);
         }
 
         public async Task DeleteUserAsync(string id, string token)
         {
-            await _apiService.DeleteAsync($"/api/users/{id}", token);
+            await _apiService.DeleteAsync($"/api/Users/{id}", token);
         }
     }
 }
