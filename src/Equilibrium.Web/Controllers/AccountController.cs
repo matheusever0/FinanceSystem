@@ -70,7 +70,7 @@ namespace Equilibrium.Web.Controllers
                     ModelState.AddModelError(string.Empty, ResourceFinanceWeb.Error_InvalidToken);
                     return View(model);
                 }
-                HttpContext.SetJwtToken(result.Token);
+                HttpContext.SetJwtTokenCookie(result.Token);
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     principal,
