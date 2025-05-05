@@ -24,6 +24,10 @@
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	</ItemGroup>
+	
+	<ItemGroup>
+	  <Folder Include="Models\ViewModels\" />
+	</ItemGroup>
 	<PropertyGroup>
 		<NoWarn>$(NoWarn);S6562;S6967;IDE0290;CS0108</NoWarn>
 	</PropertyGroup>
