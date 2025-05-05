@@ -20,7 +20,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo todos os pagamentos");
-                return await _apiService.GetAsync<IEnumerable<PaymentModel>>("/api/payments", token);
+                return await _apiService.GetAsync<IEnumerable<PaymentModel>>("/api/Payments", token);
             }
             catch (Exception ex)
             {
@@ -34,7 +34,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo pagamento com ID: {PaymentId}", id);
-                return await _apiService.GetAsync<PaymentModel>($"/api/payments/{id}", token);
+                return await _apiService.GetAsync<PaymentModel>($"/api/Payments/{id}", token);
             }
             catch (Exception ex)
             {
@@ -48,7 +48,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo pagamentos do mês {Month}/{Year}", month, year);
-                return await _apiService.GetAsync<IEnumerable<PaymentModel>>($"/api/payments/month/{year}/{month}", token);
+                return await _apiService.GetAsync<IEnumerable<PaymentModel>>($"/api/Payments/month/{year}/{month}", token);
             }
             catch (Exception ex)
             {
@@ -62,7 +62,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo pagamentos pendentes");
-                return await _apiService.GetAsync<IEnumerable<PaymentModel>>("/api/payments/pending", token);
+                return await _apiService.GetAsync<IEnumerable<PaymentModel>>("/api/Payments/pending", token);
             }
             catch (Exception ex)
             {
@@ -76,7 +76,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo pagamentos vencidos");
-                return await _apiService.GetAsync<IEnumerable<PaymentModel>>("/api/payments/overdue", token);
+                return await _apiService.GetAsync<IEnumerable<PaymentModel>>("/api/Payments/overdue", token);
             }
             catch (Exception ex)
             {
@@ -90,7 +90,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo pagamentos por tipo: {TypeId}", typeId);
-                return await _apiService.GetAsync<IEnumerable<PaymentModel>>($"/api/payments/type/{typeId}", token);
+                return await _apiService.GetAsync<IEnumerable<PaymentModel>>($"/api/Payments/type/{typeId}", token);
             }
             catch (Exception ex)
             {
@@ -104,7 +104,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo pagamentos por método: {MethodId}", methodId);
-                return await _apiService.GetAsync<IEnumerable<PaymentModel>>($"/api/payments/method/{methodId}", token);
+                return await _apiService.GetAsync<IEnumerable<PaymentModel>>($"/api/Payments/method/{methodId}", token);
             }
             catch (Exception ex)
             {
@@ -118,7 +118,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Criando novo pagamento: {Description}", model.Description);
-                return await _apiService.PostAsync<PaymentModel>("/api/payments", model, token);
+                return await _apiService.PostAsync<PaymentModel>("/api/Payments", model, token);
             }
             catch (Exception ex)
             {
@@ -132,7 +132,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Atualizando pagamento com ID: {PaymentId}", id);
-                return await _apiService.PutAsync<PaymentModel>($"/api/payments/{id}", model, token);
+                return await _apiService.PutAsync<PaymentModel>($"/api/Payments/{id}", model, token);
             }
             catch (Exception ex)
             {
@@ -146,7 +146,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Excluindo pagamento com ID: {PaymentId}", id);
-                await _apiService.DeleteAsync($"/api/payments/{id}", token);
+                await _apiService.DeleteAsync($"/api/Payments/{id}", token);
             }
             catch (Exception ex)
             {
@@ -160,7 +160,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Marcando pagamento como pago: {PaymentId}", id);
-                return await _apiService.PostAsync<PaymentModel>($"/api/payments/{id}/paid", paymentDate, token);
+                return await _apiService.PostAsync<PaymentModel>($"/api/Payments/{id}/paid", paymentDate, token);
             }
             catch (Exception ex)
             {
@@ -174,7 +174,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Marcando pagamento como vencido: {PaymentId}", id);
-                return await _apiService.PostAsync<PaymentModel>($"/api/payments/{id}/overdue", null, token);
+                return await _apiService.PostAsync<PaymentModel>($"/api/Payments/{id}/overdue", null, token);
             }
             catch (Exception ex)
             {
@@ -188,7 +188,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Cancelando pagamento: {PaymentId}", id);
-                return await _apiService.PostAsync<PaymentModel>($"/api/payments/{id}/cancel", null, token);
+                return await _apiService.PostAsync<PaymentModel>($"/api/Payments/{id}/cancel", null, token);
             }
             catch (Exception ex)
             {
@@ -227,7 +227,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Marcando parcela como paga: {InstallmentId}", installmentId);
-                return await _apiService.PostAsync<bool>($"/api/payment-installments/{installmentId}/paid", paymentDate, token);
+                return await _apiService.PostAsync<bool>($"/api/PaymentInstallments/{installmentId}/paid", paymentDate, token);
             }
             catch (Exception ex)
             {
@@ -241,7 +241,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Marcando parcela como vencida: {InstallmentId}", installmentId);
-                return await _apiService.PostAsync<bool>($"/api/payment-installments/{installmentId}/overdue", null, token);
+                return await _apiService.PostAsync<bool>($"/api/PaymentInstallments/{installmentId}/overdue", null, token);
             }
             catch (Exception ex)
             {
@@ -255,7 +255,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Cancelando parcela: {InstallmentId}", installmentId);
-                return await _apiService.PostAsync<bool>($"/api/payment-installments/{installmentId}/cancel", null, token);
+                return await _apiService.PostAsync<bool>($"/api/PaymentInstallments/{installmentId}/cancel", null, token);
             }
             catch (Exception ex)
             {
@@ -270,7 +270,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo financiamentos disponíveis para pagamento");
-                return await _apiService.GetAsync<IEnumerable<FinancingModel>>("/api/payments/financing-options", token);
+                return await _apiService.GetAsync<IEnumerable<FinancingModel>>("/api/Payments/financing-options", token);
             }
             catch (Exception ex)
             {
@@ -285,7 +285,7 @@ namespace Equilibrium.Web.Services
             {
                 _logger.LogInformation("Obtendo parcelas do financiamento {FinancingId}", financingId);
                 return await _apiService.GetAsync<IEnumerable<FinancingInstallmentModel>>(
-                    $"/api/payments/financing/{financingId}/installments", token);
+                    $"/api/Payments/financing/{financingId}/installments", token);
             }
             catch (Exception ex)
             {

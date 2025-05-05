@@ -1,0 +1,228 @@
+﻿/* Estilos CSS para impressão do Equilibrium+ */
+
+/* Reset e normalização básica */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #333;
+    background-color: white;
+    margin: 0;
+    padding: 0;
+}
+
+/* Cabeçalho e rodapé da página */
+.printHeader, .printFooter {
+    width: 100%;
+    text-align: center;
+}
+
+.printHeader {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.printFooter {
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+    font-size: 10pt;
+    color: #666;
+}
+
+/* Contêiner principal */
+.container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: 0 auto;
+}
+
+/* Estilos para cards */
+.card {
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.card-header {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    font-weight: bold;
+}
+
+.card-body {
+    padding: 15px;
+    background-color: white;
+}
+
+/* Estilos para tabelas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+}
+
+    table th, table td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    table th {
+        background-color: #f5f5f5;
+        font-weight: bold;
+    }
+
+/* Variações de tabelas */
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #f9f9f9;
+}
+
+/* Alinhamentos de texto */
+.text-center {
+    text-align: center !important;
+}
+
+.text-end {
+    text-align: right !important;
+}
+
+/* Utilitários de margem */
+.mb-1 {
+    margin-bottom: 0.25rem !important;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem !important;
+}
+
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem !important;
+}
+
+.mb-5 {
+    margin-bottom: 3rem !important;
+}
+
+/* Estilos para resumos financeiros */
+.finance-summary {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+    page-break-inside: avoid;
+}
+
+.summary-item {
+    flex: 1 0 25%;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.summary-box {
+    border: 1px solid #ddd;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+.summary-title {
+    font-size: 10pt;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.summary-value {
+    font-size: 14pt;
+    font-weight: bold;
+}
+
+/* Status de pagamentos */
+.badge {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 9pt;
+    border-radius: 3px;
+    color: white;
+    background-color: #777;
+}
+
+.bg-warning {
+    background-color: #f6c23e !important;
+}
+
+.bg-success {
+    background-color: #1cc88a !important;
+}
+
+.bg-danger {
+    background-color: #e74a3b !important;
+}
+
+.bg-secondary {
+    background-color: #858796 !important;
+}
+
+.bg-primary {
+    background-color: #4e73df !important;
+}
+
+/* Quebras de página */
+.page-break-after {
+    page-break-after: always;
+}
+
+.page-break-before {
+    page-break-before: always;
+}
+
+/* Elementos que não devem ser exibidos na impressão */
+.no-print {
+    display: none !important;
+}
+
+/* Ajustes específicos para impressão */
+@media print {
+    a {
+        color: #333 !important;
+        text-decoration: none !important;
+    }
+
+        a[href]:after {
+            content: none !important;
+        }
+
+    .card {
+        box-shadow: none !important;
+    }
+
+    /* Ajusta impressão para evitar cortes em tabelas */
+    table {
+        page-break-inside: auto;
+    }
+
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tfoot {
+        display: table-footer-group;
+    }
+}

@@ -19,7 +19,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo todos os investimentos");
-                return await _apiService.GetAsync<IEnumerable<InvestmentModel>>("/api/investments", token);
+                return await _apiService.GetAsync<IEnumerable<InvestmentModel>>("/api/Investments", token);
             }
             catch (Exception ex)
             {
@@ -33,7 +33,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo investimento com ID: {InvestmentId}", id);
-                return await _apiService.GetAsync<InvestmentModel>($"/api/investments/{id}", token);
+                return await _apiService.GetAsync<InvestmentModel>($"/api/Investments/{id}", token);
             }
             catch (Exception ex)
             {
@@ -47,7 +47,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo investimentos por tipo: {Type}", type);
-                return await _apiService.GetAsync<IEnumerable<InvestmentModel>>($"/api/investments/type/{type}", token);
+                return await _apiService.GetAsync<IEnumerable<InvestmentModel>>($"/api/Investments/type/{type}", token);
             }
             catch (Exception ex)
             {
@@ -61,7 +61,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Criando novo investimento: {Symbol}", model.Symbol);
-                return await _apiService.PostAsync<InvestmentModel>("/api/investments", model, token);
+                return await _apiService.PostAsync<InvestmentModel>("/api/Investments", model, token);
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Excluindo investimento com ID: {InvestmentId}", id);
-                await _apiService.DeleteAsync($"/api/investments/{id}", token);
+                await _apiService.DeleteAsync($"/api/Investments/{id}", token);
             }
             catch (Exception ex)
             {
@@ -89,7 +89,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Atualizando preço do investimento com ID: {InvestmentId}", id);
-                return await _apiService.PostAsync<InvestmentModel>($"/api/investments/{id}/refresh", null, token);
+                return await _apiService.PostAsync<InvestmentModel>($"/api/Investments/{id}/refresh", null, token);
             }
             catch (Exception ex)
             {
@@ -103,7 +103,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Atualizando preços de todos os investimentos");
-                return await _apiService.PostAsync<IEnumerable<InvestmentModel>>("/api/investments/refresh-all", null, token);
+                return await _apiService.PostAsync<IEnumerable<InvestmentModel>>("/api/Investments/refresh-all", null, token);
             }
             catch (Exception ex)
             {

@@ -11,10 +11,11 @@ namespace Equilibrium.Web.Configuration
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromHours(24);
+                options.IdleTimeout = TimeSpan.FromDays(1); 
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
-                options.Cookie.MaxAge = TimeSpan.FromHours(24);
+                options.Cookie.MaxAge = TimeSpan.FromDays(1);
+                options.Cookie.SameSite = SameSiteMode.Strict;
             });
 
             services.AddControllersWithViews(options =>

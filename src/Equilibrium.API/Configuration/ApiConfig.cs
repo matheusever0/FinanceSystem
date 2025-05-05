@@ -11,11 +11,11 @@ namespace Equilibrium.API.Configuration
             services.AddControllers();
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowSpecificOrigin",
+                options.AddPolicy("AllowAll",
                     builder => builder
+                        .AllowAnyOrigin()
                         .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials());
+                        .AllowAnyHeader());
             });
 
             services.AddApplication();
@@ -39,10 +39,11 @@ namespace Equilibrium.API.Configuration
             });
 
             app.UseHttpsRedirection();
-            app.UseCors("AllowSpecificOrigin");
+            app.UseCors("AllowAll"); // Aplicando a política CORS "AllowAll"
+            app.UseMiddleware<WafExceptionMiddleware>(); // Adicionamos nossa middleware personalizada
             app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseRouting();
-            app.UseHttpMethodOverride();
+            app.UseHttpMethodOverride(); // Para lidar com PUT e DELETE
             app.UseAuthentication();
             app.UseAuthorization();
 

@@ -19,7 +19,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo todos os tipos de pagamento");
-                return await _apiService.GetAsync<IEnumerable<PaymentTypeModel>>("/api/payment-types", token);
+                return await _apiService.GetAsync<IEnumerable<PaymentTypeModel>>("/api/PaymentTypes", token);
             }
             catch (Exception ex)
             {
@@ -33,7 +33,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo tipos de pagamento do sistema");
-                return await _apiService.GetAsync<IEnumerable<PaymentTypeModel>>("/api/payment-types/system", token);
+                return await _apiService.GetAsync<IEnumerable<PaymentTypeModel>>("/api/PaymentTypes/system", token);
             }
             catch (Exception ex)
             {
@@ -47,7 +47,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo tipos de pagamento do usuário");
-                return await _apiService.GetAsync<IEnumerable<PaymentTypeModel>>("/api/payment-types/user", token);
+                return await _apiService.GetAsync<IEnumerable<PaymentTypeModel>>("/api/PaymentTypes/user", token);
             }
             catch (Exception ex)
             {
@@ -61,7 +61,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo tipo de pagamento com ID: {TypeId}", id);
-                return await _apiService.GetAsync<PaymentTypeModel>($"/api/payment-types/{id}", token);
+                return await _apiService.GetAsync<PaymentTypeModel>($"/api/PaymentTypes/{id}", token);
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Criando novo tipo de pagamento: {Name}", model.Name);
-                return await _apiService.PostAsync<PaymentTypeModel>("/api/payment-types", model, token);
+                return await _apiService.PostAsync<PaymentTypeModel>("/api/PaymentTypes", model, token);
             }
             catch (Exception ex)
             {
@@ -89,7 +89,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Atualizando tipo de pagamento com ID: {TypeId}", id);
-                return await _apiService.PutAsync<PaymentTypeModel>($"/api/payment-types/{id}", model, token);
+                return await _apiService.PutAsync<PaymentTypeModel>($"/api/PaymentTypes/{id}", model, token);
             }
             catch (Exception ex)
             {
@@ -103,7 +103,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Excluindo tipo de pagamento com ID: {TypeId}", id);
-                await _apiService.DeleteAsync($"/api/payment-types/{id}", token);
+                await _apiService.DeleteAsync($"/api/PaymentTypes/{id}", token);
             }
             catch (Exception ex)
             {

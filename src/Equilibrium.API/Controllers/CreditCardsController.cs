@@ -1,28 +1,22 @@
 ﻿using Equilibrium.API.Extensions;
 using Equilibrium.Application.DTOs.CreditCard;
 using Equilibrium.Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
+using Equilibrium.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    [Route("api/credit-cards")]
-    [ApiController]
-    [Authorize]
-    public class CreditCardsController : ControllerBase
+    public class CreditCardsController : AuthenticatedController<ICreditCardService>
     {
-        private readonly ICreditCardService _creditCardService;
-
-        public CreditCardsController(ICreditCardService creditCardService)
+        public CreditCardsController(IUnitOfWork unitOfWork, ICreditCardService service) : base(unitOfWork, service)
         {
-            _creditCardService = creditCardService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CreditCardDto>>> GetAll()
         {
             var userId = HttpContext.GetCurrentUserId();
-            var creditCards = await _creditCardService.GetByUserIdAsync(userId);
+            var creditCards = await _service.GetByUserIdAsync(userId);
 
             return Ok(creditCards);
         }
@@ -32,7 +26,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var creditCard = await _creditCardService.GetByIdAsync(id);
+                var creditCard = await _service.GetByIdAsync(id);
 
                 return creditCard.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<CreditCardDto>)Forbid() : (ActionResult<CreditCardDto>)Ok(creditCard);
             }
@@ -48,7 +42,7 @@ namespace Equilibrium.API.Controllers
             try
             {
                 var userId = HttpContext.GetCurrentUserId();
-                var creditCard = await _creditCardService.CreateAsync(createCreditCardDto, userId);
+                var creditCard = await _service.CreateAsync(createCreditCardDto, userId);
 
                 return CreatedAtAction(nameof(GetById), new { id = creditCard.Id }, creditCard);
             }
@@ -75,13 +69,13 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var existingCard = await _creditCardService.GetByIdAsync(id);
+                var existingCard = await _service.GetByIdAsync(id);
                 if (existingCard.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();
                 }
 
-                var creditCard = await _creditCardService.UpdateAsync(id, updateCreditCardDto);
+                var creditCard = await _service.UpdateAsync(id, updateCreditCardDto);
                 return Ok(creditCard);
             }
             catch (KeyNotFoundException ex)
@@ -99,13 +93,13 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var existingCard = await _creditCardService.GetByIdAsync(id);
+                var existingCard = await _service.GetByIdAsync(id);
                 if (existingCard.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();
                 }
 
-                await _creditCardService.DeleteAsync(id);
+                await _service.DeleteAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

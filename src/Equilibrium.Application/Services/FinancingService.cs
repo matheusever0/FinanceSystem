@@ -4,7 +4,6 @@ using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Entities;
 using Equilibrium.Domain.Enums;
 using Equilibrium.Domain.Interfaces.Services;
-using Microsoft.VisualBasic;
 
 namespace Equilibrium.Application.Services
 {

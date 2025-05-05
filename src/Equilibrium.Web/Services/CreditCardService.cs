@@ -19,7 +19,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo todos os cartões de crédito");
-                return await _apiService.GetAsync<IEnumerable<CreditCardModel>>("/api/credit-cards", token);
+                return await _apiService.GetAsync<IEnumerable<CreditCardModel>>("/api/CreditCards", token);
             }
             catch (Exception ex)
             {
@@ -33,7 +33,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Obtendo cartão de crédito com ID: {CardId}", id);
-                return await _apiService.GetAsync<CreditCardModel>($"/api/credit-cards/{id}", token);
+                return await _apiService.GetAsync<CreditCardModel>($"/api/CreditCards/{id}", token);
             }
             catch (Exception ex)
             {
@@ -47,7 +47,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Criando novo cartão de crédito: {Name}", model.Name);
-                return await _apiService.PostAsync<CreditCardModel>("/api/credit-cards", model, token);
+                return await _apiService.PostAsync<CreditCardModel>("/api/CreditCards", model, token);
             }
             catch (Exception ex)
             {
@@ -61,7 +61,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Atualizando cartão de crédito com ID: {CardId}", id);
-                return await _apiService.PutAsync<CreditCardModel>($"/api/credit-cards/{id}", model, token);
+                return await _apiService.PutAsync<CreditCardModel>($"/api/CreditCards/{id}", model, token);
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 _logger.LogInformation("Excluindo cartão de crédito com ID: {CardId}", id);
-                await _apiService.DeleteAsync($"/api/credit-cards/{id}", token);
+                await _apiService.DeleteAsync($"/api/CreditCards/{id}", token);
             }
             catch (Exception ex)
             {

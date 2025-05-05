@@ -222,7 +222,6 @@ namespace Equilibrium.Web.Controllers
                 ViewBag.OverdueIncomeAmount = overdueIncomeAmount;
 
                 ViewBag.Balance = totalIncomeAmount - totalAmount;
-                ViewBag.PrintMode = true;
 
                 return View("PrintMonthly", payments);
             }

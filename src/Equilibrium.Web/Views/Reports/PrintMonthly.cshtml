@@ -1,0 +1,225 @@
+﻿@using System.Text.Json
+@using Equilibrium.Web.Models
+@using Equilibrium.Web.Models.Generics
+@using Equilibrium.Web.Models.Payment
+@using Equilibrium.Web.Models.Income
+@model IEnumerable<PaymentModel>
+@{
+    Layout = "_PrintLayout";
+
+    var currentMonth = ViewBag.Month;
+    var currentYear = ViewBag.Year;
+
+    var monthName = new DateTime(currentYear, currentMonth, 1).ToString("MMMM");
+    var totalAmount = ViewBag.TotalAmount;
+    var paidAmount = ViewBag.PaidAmount;
+    var pendingAmount = ViewBag.PendingAmount;
+    var overdueAmount = ViewBag.OverdueAmount;
+
+    // Dados de receitas
+    var incomes = ViewBag.Incomes as IEnumerable<IncomeModel> ?? Enumerable.Empty<IncomeModel>();
+    var totalIncomeAmount = ViewBag.TotalIncomeAmount;
+    var receivedIncomeAmount = ViewBag.ReceivedIncomeAmount;
+    var pendingIncomeAmount = ViewBag.PendingIncomeAmount;
+    var overdueIncomeAmount = ViewBag.OverdueIncomeAmount;
+
+    // Saldo
+    var balance = ViewBag.Balance;
+
+    ViewData["Title"] = $"Relatório Mensal: {monthName.ToUpper()}/{currentYear}";
+}
+
+<div class="report-container">
+    <!-- Cabeçalho do Relatório -->
+    <h3 class="text-center mb-3">Resumo Financeiro de @monthName.ToUpper()/@currentYear</h3>
+
+    <!-- Resumo Comparativo -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="m-0">Comparativo Mensal</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Categoria</th>
+                        <th class="text-end">Valor</th>
+                        <th class="text-end">Saldo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Receitas</strong></td>
+                        <td class="text-end">@string.Format("{0:C2}", totalIncomeAmount)</td>
+                        <td class="text-end"></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Despesas</strong></td>
+                        <td class="text-end">@string.Format("{0:C2}", totalAmount)</td>
+                        <td class="text-end"></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Saldo</strong></td>
+                        <td class="text-end"></td>
+                        <td class="text-end"><strong>@string.Format("{0:C2}", balance)</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Resumo de Despesas -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="m-0">Resumo de Despesas</h4>
+        </div>
+        <div class="card-body">
+            <div class="finance-summary">
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Total de Despesas</div>
+                        <div class="summary-value">@string.Format("{0:C2}", totalAmount)</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Total Pago</div>
+                        <div class="summary-value">@string.Format("{0:C2}", paidAmount)</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Total Pendente</div>
+                        <div class="summary-value">@string.Format("{0:C2}", pendingAmount)</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Total Vencido</div>
+                        <div class="summary-value">@string.Format("{0:C2}", overdueAmount)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumo de Receitas -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="m-0">Resumo de Receitas</h4>
+        </div>
+        <div class="card-body">
+            <div class="finance-summary">
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Total de Receitas</div>
+                        <div class="summary-value">@string.Format("{0:C2}", totalIncomeAmount)</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Total Recebido</div>
+                        <div class="summary-value">@string.Format("{0:C2}", receivedIncomeAmount)</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Pendente Recebimento</div>
+                        <div class="summary-value">@string.Format("{0:C2}", pendingIncomeAmount)</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-box">
+                        <div class="summary-title">Vencido Sem Recebimento</div>
+                        <div class="summary-value">@string.Format("{0:C2}", overdueIncomeAmount)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Pagamentos -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="m-0">Pagamentos de @monthName/@currentYear</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th class="text-end">Valor</th>
+                        <th class="text-center">Vencimento</th>
+                        <th class="text-center">Status</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var payment in Model)
+                    {
+                        <tr>
+                            <td>@payment.Description</td>
+                            <td class="text-end">@payment.GetFormattedAmount()</td>
+                            <td class="text-center">@payment.GetFormattedDueDate()</td>
+                            <td class="text-center">
+                                <span class="badge @payment.StatusBadgeClass">@payment.StatusDescription</span>
+                            </td>
+                            <td>@payment.PaymentTypeName</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Total</th>
+                        <th class="text-end">@string.Format("{0:C2}", totalAmount)</th>
+                        <th colspan="3"></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quebra de página antes da tabela de receitas -->
+    <div class="page-break-before"></div>
+
+    <!-- Tabela de Receitas -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="m-0">Receitas de @monthName/@currentYear</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th class="text-end">Valor</th>
+                        <th class="text-center">Vencimento</th>
+                        <th class="text-center">Status</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var income in incomes)
+                    {
+                        <tr>
+                            <td>@income.Description</td>
+                            <td class="text-end">@income.GetFormattedAmount()</td>
+                            <td class="text-center">@income.GetFormattedDueDate()</td>
+                            <td class="text-center">
+                                <span class="badge @income.StatusBadgeClass">@income.StatusDescription</span>
+                            </td>
+                            <td>@income.IncomeTypeName</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Total</th>
+                        <th class="text-end">@string.Format("{0:C2}", totalIncomeAmount)</th>
+                        <th colspan="3"></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

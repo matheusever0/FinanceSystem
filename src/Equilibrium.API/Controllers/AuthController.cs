@@ -1,17 +1,20 @@
 ﻿using Equilibrium.Application.DTOs.Login;
 using Equilibrium.Application.Interfaces;
+using Equilibrium.Domain.Interfaces.Services;
 using Equilibrium.Resources;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseController
     {
         private readonly IUserService _userService;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUnitOfWork unitOfWork, IUserService userService)
+            : base(unitOfWork)
         {
             _userService = userService;
         }
@@ -22,12 +25,20 @@ namespace Equilibrium.API.Controllers
             try
             {
                 var response = await _userService.LoginAsync(loginDto);
+
                 return Ok(response);
             }
             catch (Exception ex)
             {
                 return Unauthorized(ex.Message);
             }
+        }
+
+        [HttpGet("test-auth")]
+        [Authorize]
+        public IActionResult TestAuth()
+        {
+            return Ok(new { message = "Você está autenticado!" });
         }
 
         [HttpGet("verify-token")]

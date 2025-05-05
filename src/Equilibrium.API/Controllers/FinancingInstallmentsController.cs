@@ -1,24 +1,19 @@
 ﻿using Equilibrium.API.Extensions;
 using Equilibrium.Application.DTOs.Financing;
 using Equilibrium.Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
+using Equilibrium.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    [Route("api/financing-installments")]
-    [ApiController]
-    [Authorize]
-    public class FinancingInstallmentsController : ControllerBase
+    public class FinancingInstallmentsController : AuthenticatedController<IFinancingInstallmentService>
     {
-        private readonly IFinancingInstallmentService _installmentService;
         private readonly IFinancingService _financingService;
 
-        public FinancingInstallmentsController(
-            IFinancingInstallmentService installmentService,
-            IFinancingService financingService)
+        public FinancingInstallmentsController(IUnitOfWork unitOfWork, 
+            IFinancingInstallmentService service, 
+            IFinancingService financingService) : base(unitOfWork, service)
         {
-            _installmentService = installmentService;
             _financingService = financingService;
         }
 
@@ -31,7 +26,7 @@ namespace Equilibrium.API.Controllers
                 if (financing.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 
-                var installments = await _installmentService.GetByFinancingIdAsync(financingId);
+                var installments = await _service.GetByFinancingIdAsync(financingId);
                 return Ok(installments);
             }
             catch (KeyNotFoundException ex)
@@ -44,7 +39,7 @@ namespace Equilibrium.API.Controllers
         public async Task<ActionResult<IEnumerable<FinancingInstallmentDto>>> GetByDueDate([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
             var userId = HttpContext.GetCurrentUserId();
-            var installments = await _installmentService.GetByDueDateAsync(userId, startDate, endDate);
+            var installments = await _service.GetByDueDateAsync(userId, startDate, endDate);
             return Ok(installments);
         }
 
@@ -52,7 +47,7 @@ namespace Equilibrium.API.Controllers
         public async Task<ActionResult<IEnumerable<FinancingInstallmentDto>>> GetPending()
         {
             var userId = HttpContext.GetCurrentUserId();
-            var installments = await _installmentService.GetPendingAsync(userId);
+            var installments = await _service.GetPendingAsync(userId);
             return Ok(installments);
         }
 
@@ -60,7 +55,7 @@ namespace Equilibrium.API.Controllers
         public async Task<ActionResult<IEnumerable<FinancingInstallmentDto>>> GetOverdue()
         {
             var userId = HttpContext.GetCurrentUserId();
-            var installments = await _installmentService.GetOverdueAsync(userId);
+            var installments = await _service.GetOverdueAsync(userId);
             return Ok(installments);
         }
 
@@ -69,7 +64,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var installment = await _installmentService.GetByIdAsync(id);
+                var installment = await _service.GetByIdAsync(id);
                 var financing = await _financingService.GetByIdAsync(installment.FinancingId);
 
                 if (financing.UserId != HttpContext.GetCurrentUserId())
@@ -88,7 +83,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var details = await _installmentService.GetDetailsByIdAsync(id);
+                var details = await _service.GetDetailsByIdAsync(id);
                 var financing = await _financingService.GetByIdAsync(details.FinancingId);
 
                 if (financing.UserId != HttpContext.GetCurrentUserId())

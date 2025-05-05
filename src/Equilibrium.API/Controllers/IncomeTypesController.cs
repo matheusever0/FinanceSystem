@@ -1,28 +1,24 @@
 ﻿using Equilibrium.API.Extensions;
 using Equilibrium.Application.DTOs.IncomeType;
 using Equilibrium.Application.Interfaces;
+using Equilibrium.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    [Route("api/income-types")]
-    [ApiController]
-    [Authorize]
-    public class IncomeTypesController : ControllerBase
+    public class IncomeTypesController : AuthenticatedController<IIncomeTypeService>
     {
-        private readonly IIncomeTypeService _incomeTypeService;
-
-        public IncomeTypesController(IIncomeTypeService incomeTypeService)
+        public IncomeTypesController(IUnitOfWork unitOfWork, 
+            IIncomeTypeService service) : base(unitOfWork, service)
         {
-            _incomeTypeService = incomeTypeService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<IncomeTypeDto>>> GetAll()
         {
             var userId = HttpContext.GetCurrentUserId();
-            var incomeTypes = await _incomeTypeService.GetAllAvailableForUserAsync(userId);
+            var incomeTypes = await _service.GetAllAvailableForUserAsync(userId);
 
             return Ok(incomeTypes);
         }
@@ -30,7 +26,7 @@ namespace Equilibrium.API.Controllers
         [HttpGet("system")]
         public async Task<ActionResult<IEnumerable<IncomeTypeDto>>> GetAllSystem()
         {
-            var incomeTypes = await _incomeTypeService.GetAllSystemTypesAsync();
+            var incomeTypes = await _service.GetAllSystemTypesAsync();
 
             return Ok(incomeTypes);
         }
@@ -39,7 +35,7 @@ namespace Equilibrium.API.Controllers
         public async Task<ActionResult<IEnumerable<IncomeTypeDto>>> GetAllUser()
         {
             var userId = HttpContext.GetCurrentUserId();
-            var incomeTypes = await _incomeTypeService.GetUserTypesAsync(userId);
+            var incomeTypes = await _service.GetUserTypesAsync(userId);
 
             return Ok(incomeTypes);
         }
@@ -49,7 +45,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var incomeType = await _incomeTypeService.GetByIdAsync(id);
+                var incomeType = await _service.GetByIdAsync(id);
 
                 return !incomeType.IsSystem && incomeType.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<IncomeTypeDto>)Forbid() : (ActionResult<IncomeTypeDto>)Ok(incomeType);
             }
@@ -65,7 +61,7 @@ namespace Equilibrium.API.Controllers
             try
             {
                 var userId = HttpContext.GetCurrentUserId();
-                var incomeType = await _incomeTypeService.CreateAsync(createIncomeTypeDto, userId);
+                var incomeType = await _service.CreateAsync(createIncomeTypeDto, userId);
 
                 return CreatedAtAction(nameof(GetById), new { id = incomeType.Id }, incomeType);
             }
@@ -84,7 +80,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var existingType = await _incomeTypeService.GetByIdAsync(id);
+                var existingType = await _service.GetByIdAsync(id);
 
                 if (existingType.IsSystem)
                 {
@@ -96,7 +92,7 @@ namespace Equilibrium.API.Controllers
                     return Forbid();
                 }
 
-                var incomeType = await _incomeTypeService.UpdateAsync(id, updateIncomeTypeDto);
+                var incomeType = await _service.UpdateAsync(id, updateIncomeTypeDto);
                 return Ok(incomeType);
             }
             catch (KeyNotFoundException ex)
@@ -114,7 +110,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var existingType = await _incomeTypeService.GetByIdAsync(id);
+                var existingType = await _service.GetByIdAsync(id);
 
                 if (existingType.IsSystem)
                 {
@@ -126,7 +122,7 @@ namespace Equilibrium.API.Controllers
                     return Forbid();
                 }
 
-                await _incomeTypeService.DeleteAsync(id);
+                await _service.DeleteAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

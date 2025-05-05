@@ -3,28 +3,23 @@ using Equilibrium.Application.DTOs.Financing;
 using Equilibrium.Application.DTOs.Payment;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Enums;
-using Microsoft.AspNetCore.Authorization;
+using Equilibrium.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [Authorize]
-    public class PaymentsController : ControllerBase
+    public class PaymentsController : AuthenticatedController<IPaymentService>
     {
-        private readonly IPaymentService _paymentService;
-
-        public PaymentsController(IPaymentService paymentService)
+        public PaymentsController(IUnitOfWork unitOfWork, 
+            IPaymentService service) : base(unitOfWork, service)
         {
-            _paymentService = paymentService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PaymentDto>>> GetAll()
         {
             var userId = HttpContext.GetCurrentUserId();
-            var payments = await _paymentService.GetAllByUserIdAsync(userId);
+            var payments = await _service.GetAllByUserIdAsync(userId);
 
             return Ok(payments);
         }
@@ -34,7 +29,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var payment = await _paymentService.GetByIdAsync(id);
+                var payment = await _service.GetByIdAsync(id);
 
                 return payment.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<PaymentDto>)Forbid() : (ActionResult<PaymentDto>)Ok(payment);
             }
@@ -53,7 +48,7 @@ namespace Equilibrium.API.Controllers
             }
 
             var userId = HttpContext.GetCurrentUserId();
-            var payments = await _paymentService.GetByMonthAsync(userId, month, year);
+            var payments = await _service.GetByMonthAsync(userId, month, year);
 
             return Ok(payments);
         }
@@ -62,7 +57,7 @@ namespace Equilibrium.API.Controllers
         public async Task<ActionResult<IEnumerable<PaymentDto>>> GetPending()
         {
             var userId = HttpContext.GetCurrentUserId();
-            var payments = await _paymentService.GetPendingAsync(userId);
+            var payments = await _service.GetPendingAsync(userId);
 
             return Ok(payments);
         }
@@ -71,7 +66,7 @@ namespace Equilibrium.API.Controllers
         public async Task<ActionResult<IEnumerable<PaymentDto>>> GetOverdue()
         {
             var userId = HttpContext.GetCurrentUserId();
-            var payments = await _paymentService.GetOverdueAsync(userId);
+            var payments = await _service.GetOverdueAsync(userId);
 
             return Ok(payments);
         }
@@ -80,7 +75,7 @@ namespace Equilibrium.API.Controllers
         public async Task<ActionResult<IEnumerable<PaymentDto>>> GetByType(Guid typeId)
         {
             var userId = HttpContext.GetCurrentUserId();
-            var payments = await _paymentService.GetByTypeAsync(userId, typeId);
+            var payments = await _service.GetByTypeAsync(userId, typeId);
 
             return Ok(payments);
         }
@@ -89,7 +84,7 @@ namespace Equilibrium.API.Controllers
         public async Task<ActionResult<IEnumerable<PaymentDto>>> GetByMethod(Guid methodId)
         {
             var userId = HttpContext.GetCurrentUserId();
-            var payments = await _paymentService.GetByMethodAsync(userId, methodId);
+            var payments = await _service.GetByMethodAsync(userId, methodId);
 
             return Ok(payments);
         }
@@ -100,7 +95,7 @@ namespace Equilibrium.API.Controllers
             try
             {
                 var userId = HttpContext.GetCurrentUserId();
-                var payment = await _paymentService.CreateAsync(createPaymentDto, userId);
+                var payment = await _service.CreateAsync(createPaymentDto, userId);
 
                 return CreatedAtAction(nameof(GetById), new { id = payment.Id }, payment);
             }
@@ -123,13 +118,13 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var existingPayment = await _paymentService.GetByIdAsync(id);
+                var existingPayment = await _service.GetByIdAsync(id);
                 if (existingPayment.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();
                 }
 
-                var payment = await _paymentService.UpdateAsync(id, updatePaymentDto);
+                var payment = await _service.UpdateAsync(id, updatePaymentDto);
                 return Ok(payment);
             }
             catch (KeyNotFoundException ex)
@@ -151,13 +146,13 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var existingPayment = await _paymentService.GetByIdAsync(id);
+                var existingPayment = await _service.GetByIdAsync(id);
                 if (existingPayment.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();
                 }
 
-                await _paymentService.DeleteAsync(id);
+                await _service.DeleteAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -175,14 +170,14 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var existingPayment = await _paymentService.GetByIdAsync(id);
+                var existingPayment = await _service.GetByIdAsync(id);
                 if (existingPayment.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();
                 }
 
                 var date = paymentDate ?? DateTime.Now;
-                var payment = await _paymentService.MarkAsPaidAsync(id, date);
+                var payment = await _service.MarkAsPaidAsync(id, date);
                 return Ok(payment);
             }
             catch (KeyNotFoundException ex)
@@ -196,13 +191,13 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var existingPayment = await _paymentService.GetByIdAsync(id);
+                var existingPayment = await _service.GetByIdAsync(id);
                 if (existingPayment.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();
                 }
 
-                var payment = await _paymentService.MarkAsOverdueAsync(id);
+                var payment = await _service.MarkAsOverdueAsync(id);
                 return Ok(payment);
             }
             catch (KeyNotFoundException ex)
@@ -216,13 +211,13 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var existingPayment = await _paymentService.GetByIdAsync(id);
+                var existingPayment = await _service.GetByIdAsync(id);
                 if (existingPayment.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();
                 }
 
-                var payment = await _paymentService.CancelAsync(id);
+                var payment = await _service.CancelAsync(id);
                 return Ok(payment);
             }
             catch (KeyNotFoundException ex)

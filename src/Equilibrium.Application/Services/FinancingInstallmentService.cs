@@ -2,10 +2,7 @@
 using Equilibrium.Application.DTOs.Financing;
 using Equilibrium.Application.DTOs.Payment;
 using Equilibrium.Application.Interfaces;
-using Equilibrium.Domain.Entities;
-using Equilibrium.Domain.Enums;
 using Equilibrium.Domain.Interfaces.Services;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Equilibrium.Application.Services
 {

@@ -1,35 +1,30 @@
 ﻿using Equilibrium.API.Extensions;
 using Equilibrium.Application.DTOs.PaymentType;
 using Equilibrium.Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
+using Equilibrium.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    [Route("api/payment-types")]
-    [ApiController]
-    [Authorize]
-    public class PaymentTypesController : ControllerBase
+    public class PaymentTypesController : AuthenticatedController<IPaymentTypeService>
     {
-        private readonly IPaymentTypeService _paymentTypeService;
-
-        public PaymentTypesController(IPaymentTypeService paymentTypeService)
+        public PaymentTypesController(IUnitOfWork unitOfWork, 
+            IPaymentTypeService service) : base(unitOfWork, service)
         {
-            _paymentTypeService = paymentTypeService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PaymentTypeDto>>> GetAll()
         {
             var userId = HttpContext.GetCurrentUserId();
-            var paymentTypes = await _paymentTypeService.GetAllAvailableForUserAsync(userId);
+            var paymentTypes = await _service.GetAllAvailableForUserAsync(userId);
             return Ok(paymentTypes);
         }
 
         [HttpGet("system")]
         public async Task<ActionResult<IEnumerable<PaymentTypeDto>>> GetAllSystem()
         {
-            var paymentTypes = await _paymentTypeService.GetAllSystemTypesAsync();
+            var paymentTypes = await _service.GetAllSystemTypesAsync();
             return Ok(paymentTypes);
         }
 
@@ -37,7 +32,7 @@ namespace Equilibrium.API.Controllers
         public async Task<ActionResult<IEnumerable<PaymentTypeDto>>> GetAllUser()
         {
             var userId = HttpContext.GetCurrentUserId();
-            var paymentTypes = await _paymentTypeService.GetUserTypesAsync(userId);
+            var paymentTypes = await _service.GetUserTypesAsync(userId);
             return Ok(paymentTypes);
         }
 
@@ -46,7 +41,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var paymentType = await _paymentTypeService.GetByIdAsync(id);
+                var paymentType = await _service.GetByIdAsync(id);
 
                 return !paymentType.IsSystem && paymentType.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<PaymentTypeDto>)Forbid() : (ActionResult<PaymentTypeDto>)Ok(paymentType);
             }
@@ -62,7 +57,7 @@ namespace Equilibrium.API.Controllers
             try
             {
                 var userId = HttpContext.GetCurrentUserId();
-                var paymentType = await _paymentTypeService.CreateAsync(createPaymentTypeDto, userId);
+                var paymentType = await _service.CreateAsync(createPaymentTypeDto, userId);
                 return CreatedAtAction(nameof(GetById), new { id = paymentType.Id }, paymentType);
             }
             catch (KeyNotFoundException ex)
@@ -80,7 +75,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var existingType = await _paymentTypeService.GetByIdAsync(id);
+                var existingType = await _service.GetByIdAsync(id);
 
                 if (existingType.IsSystem)
                     return BadRequest(new { message = "Cannot update system payment type" });
@@ -88,7 +83,7 @@ namespace Equilibrium.API.Controllers
                 if (existingType.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 
-                var paymentType = await _paymentTypeService.UpdateAsync(id, updatePaymentTypeDto);
+                var paymentType = await _service.UpdateAsync(id, updatePaymentTypeDto);
                 return Ok(paymentType);
             }
             catch (KeyNotFoundException ex)
@@ -106,7 +101,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var existingType = await _paymentTypeService.GetByIdAsync(id);
+                var existingType = await _service.GetByIdAsync(id);
 
                 if (existingType.IsSystem)
                     return BadRequest(new { message = "Cannot delete system payment type" });
@@ -114,7 +109,7 @@ namespace Equilibrium.API.Controllers
                 if (existingType.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 
-                await _paymentTypeService.DeleteAsync(id);
+                await _service.DeleteAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
