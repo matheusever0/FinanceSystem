@@ -7,13 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    public class InvestmentsController : AuthenticatedController<IInvestmentService>
+    public class InvestmentsController(IUnitOfWork unitOfWork,
+        IInvestmentService service) : AuthenticatedController<IInvestmentService>(unitOfWork, service)
     {
-        public InvestmentsController(IUnitOfWork unitOfWork, 
-            IInvestmentService service) : base(unitOfWork, service)
-        {
-        }
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<InvestmentDto>>> GetAll()
         {

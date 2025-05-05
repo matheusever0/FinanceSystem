@@ -2,20 +2,14 @@
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Interfaces.Services;
 using Equilibrium.Resources;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    public class RolesController : AuthenticatedController<IRoleService>
+    public class RolesController(IUnitOfWork unitOfWork,
+        IRoleService service) : AuthenticatedController<IRoleService>(unitOfWork, service)
     {
-        public RolesController(IUnitOfWork unitOfWork, 
-            IRoleService service) : base(unitOfWork, service)
-        {
-        }
-
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult> GetAll()
         {
             var roles = await _service.GetAllAsync();
@@ -23,7 +17,6 @@ namespace Equilibrium.API.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<ActionResult> GetById(Guid id)
         {
             try
@@ -38,7 +31,6 @@ namespace Equilibrium.API.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult> Create(CreateRoleDto createRoleDto)
         {
             try
@@ -53,7 +45,6 @@ namespace Equilibrium.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize]
         public async Task<ActionResult> Update(Guid id, UpdateRoleDto updateRoleDto)
         {
             try
@@ -72,7 +63,6 @@ namespace Equilibrium.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<ActionResult> Delete(Guid id)
         {
             try
@@ -91,7 +81,6 @@ namespace Equilibrium.API.Controllers
         }
 
         [HttpGet("{roleId}/has-permission/{permissionName}")]
-        [Authorize]
         public async Task<ActionResult> HasPermission(Guid roleId, string permissionName)
         {
             try
@@ -106,7 +95,6 @@ namespace Equilibrium.API.Controllers
         }
 
         [HttpPut("{roleId}/permissions")]
-        [Authorize]
         public async Task<ActionResult> UpdateRolePermissions(Guid roleId, [FromBody] List<Guid> permissionIds)
         {
             try

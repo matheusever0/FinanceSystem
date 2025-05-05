@@ -2,18 +2,13 @@
 using Equilibrium.Application.DTOs.IncomeType;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Interfaces.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    public class IncomeTypesController : AuthenticatedController<IIncomeTypeService>
+    public class IncomeTypesController(IUnitOfWork unitOfWork,
+        IIncomeTypeService service) : AuthenticatedController<IIncomeTypeService>(unitOfWork, service)
     {
-        public IncomeTypesController(IUnitOfWork unitOfWork, 
-            IIncomeTypeService service) : base(unitOfWork, service)
-        {
-        }
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<IncomeTypeDto>>> GetAll()
         {

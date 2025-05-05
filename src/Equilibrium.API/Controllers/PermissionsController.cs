@@ -5,13 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    public class PermissionsController : AuthenticatedController<IPermissionService>
+    public class PermissionsController(IUnitOfWork unitOfWork,
+        IPermissionService service) : AuthenticatedController<IPermissionService>(unitOfWork, service)
     {
-        public PermissionsController(IUnitOfWork unitOfWork, 
-            IPermissionService service) : base(unitOfWork, service)
-        {
-        }
-
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {

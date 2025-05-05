@@ -9,22 +9,15 @@ namespace Equilibrium.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : BaseController
+    public class AuthController(IUnitOfWork unitOfWork, 
+        IUserService userService) : BaseController(unitOfWork)
     {
-        private readonly IUserService _userService;
-
-        public AuthController(IUnitOfWork unitOfWork, IUserService userService)
-            : base(unitOfWork)
-        {
-            _userService = userService;
-        }
-
         [HttpPost("login")]
         public async Task<ActionResult> Login([FromBody] LoginDto loginDto)
         {
             try
             {
-                var response = await _userService.LoginAsync(loginDto);
+                var response = await userService.LoginAsync(loginDto);
 
                 return Ok(response);
             }

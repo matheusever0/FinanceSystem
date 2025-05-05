@@ -6,13 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    public class PaymentTypesController : AuthenticatedController<IPaymentTypeService>
+    public class PaymentTypesController(IUnitOfWork unitOfWork,
+        IPaymentTypeService service) : AuthenticatedController<IPaymentTypeService>(unitOfWork, service)
     {
-        public PaymentTypesController(IUnitOfWork unitOfWork, 
-            IPaymentTypeService service) : base(unitOfWork, service)
-        {
-        }
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PaymentTypeDto>>> GetAll()
         {

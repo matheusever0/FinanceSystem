@@ -6,12 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    public class CreditCardsController : AuthenticatedController<ICreditCardService>
+    public class CreditCardsController(IUnitOfWork unitOfWork, 
+        ICreditCardService service) : AuthenticatedController<ICreditCardService>(unitOfWork, service)
     {
-        public CreditCardsController(IUnitOfWork unitOfWork, ICreditCardService service) : base(unitOfWork, service)
-        {
-        }
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CreditCardDto>>> GetAll()
         {

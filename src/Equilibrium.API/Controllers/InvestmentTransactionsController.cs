@@ -6,24 +6,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    public class InvestmentTransactionsController : AuthenticatedController<IInvestmentTransactionService>
+    public class InvestmentTransactionsController(IUnitOfWork unitOfWork,
+        IInvestmentTransactionService service,
+        IInvestmentService investmentService
+            ) : AuthenticatedController<IInvestmentTransactionService>(unitOfWork, service)
     {
-        private readonly IInvestmentService _investmentService;
-
-        public InvestmentTransactionsController(IUnitOfWork unitOfWork, 
-            IInvestmentTransactionService service,
-            IInvestmentService investmentService
-            ) : base(unitOfWork, service)
-        {
-            _investmentService = investmentService;
-        }
-
         [HttpGet("investment/{investmentId}")]
         public async Task<ActionResult<IEnumerable<InvestmentTransactionDto>>> GetByInvestment(Guid investmentId)
         {
             try
             {
-                var investment = await _investmentService.GetByIdAsync(investmentId);
+                var investment = await investmentService.GetByIdAsync(investmentId);
                 if (investment.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 
@@ -42,7 +35,7 @@ namespace Equilibrium.API.Controllers
             try
             {
                 var transaction = await _service.GetByIdAsync(id);
-                var investment = await _investmentService.GetByIdAsync(transaction.Id);
+                var investment = await investmentService.GetByIdAsync(transaction.Id);
 
                 return investment.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<InvestmentTransactionDto>)Forbid() : (ActionResult<InvestmentTransactionDto>)Ok(transaction);
             }
@@ -59,7 +52,7 @@ namespace Equilibrium.API.Controllers
         {
             try
             {
-                var investment = await _investmentService.GetByIdAsync(investmentId);
+                var investment = await investmentService.GetByIdAsync(investmentId);
                 if (investment.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 
@@ -82,7 +75,7 @@ namespace Equilibrium.API.Controllers
             try
             {
                 var transaction = await _service.GetByIdAsync(id);
-                var investment = await _investmentService.GetByIdAsync(transaction.InvestmentId);
+                var investment = await investmentService.GetByIdAsync(transaction.InvestmentId);
 
                 if (investment.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();

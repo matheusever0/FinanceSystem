@@ -1,20 +1,14 @@
 ﻿using Equilibrium.Application.DTOs.User;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Interfaces.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    public class UsersController : AuthenticatedController<IUserService>
+    public class UsersController(IUnitOfWork unitOfWork,
+        IUserService service) : AuthenticatedController<IUserService>(unitOfWork, service)
     {
-        public UsersController(IUnitOfWork unitOfWork, 
-            IUserService service) : base(unitOfWork, service)
-        {
-        }
-
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult> GetAll()
         {
             var users = await _service.GetAllAsync();
@@ -22,7 +16,6 @@ namespace Equilibrium.API.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<ActionResult> GetById(Guid id)
         {
             try
@@ -37,7 +30,6 @@ namespace Equilibrium.API.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult> Create(CreateUserDto createUserDto)
         {
             try
@@ -52,7 +44,6 @@ namespace Equilibrium.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize]
         public async Task<ActionResult> Update(Guid id, UpdateUserDto updateUserDto)
         {
             try
@@ -71,7 +62,6 @@ namespace Equilibrium.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<ActionResult> Delete(Guid id)
         {
             try

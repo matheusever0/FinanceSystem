@@ -6,11 +6,9 @@ namespace Equilibrium.API.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public abstract class AuthenticatedController<TService> : DefaultController<TService>
+    public abstract class AuthenticatedController<TService>
+        (IUnitOfWork unitOfWork, TService service) : DefaultController<TService>(unitOfWork, service)
         where TService : class
     {
-        public AuthenticatedController(IUnitOfWork unitOfWork, TService service) : base(unitOfWork, service)
-        {
-        }
     }
 }

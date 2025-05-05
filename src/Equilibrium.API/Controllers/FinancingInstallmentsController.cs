@@ -6,23 +6,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    public class FinancingInstallmentsController : AuthenticatedController<IFinancingInstallmentService>
+    public class FinancingInstallmentsController(IUnitOfWork unitOfWork,
+        IFinancingInstallmentService service,
+        IFinancingService financingService) : AuthenticatedController<IFinancingInstallmentService>(unitOfWork, service)
     {
-        private readonly IFinancingService _financingService;
-
-        public FinancingInstallmentsController(IUnitOfWork unitOfWork, 
-            IFinancingInstallmentService service, 
-            IFinancingService financingService) : base(unitOfWork, service)
-        {
-            _financingService = financingService;
-        }
-
         [HttpGet("financing/{financingId}")]
         public async Task<ActionResult<IEnumerable<FinancingInstallmentDto>>> GetByFinancingId(Guid financingId)
         {
             try
             {
-                var financing = await _financingService.GetByIdAsync(financingId);
+                var financing = await financingService.GetByIdAsync(financingId);
                 if (financing.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 
@@ -65,7 +58,7 @@ namespace Equilibrium.API.Controllers
             try
             {
                 var installment = await _service.GetByIdAsync(id);
-                var financing = await _financingService.GetByIdAsync(installment.FinancingId);
+                var financing = await financingService.GetByIdAsync(installment.FinancingId);
 
                 if (financing.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
@@ -84,7 +77,7 @@ namespace Equilibrium.API.Controllers
             try
             {
                 var details = await _service.GetDetailsByIdAsync(id);
-                var financing = await _financingService.GetByIdAsync(details.FinancingId);
+                var financing = await financingService.GetByIdAsync(details.FinancingId);
 
                 if (financing.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();

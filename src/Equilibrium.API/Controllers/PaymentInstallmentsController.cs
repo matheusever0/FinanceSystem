@@ -6,23 +6,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    public class PaymentInstallmentsController : AuthenticatedController<IPaymentInstallmentService>
+    public class PaymentInstallmentsController(IUnitOfWork unitOfWork,
+        IPaymentInstallmentService service,
+        IPaymentService paymentService) : AuthenticatedController<IPaymentInstallmentService>(unitOfWork, service)
     {
-        private readonly IPaymentService _paymentService;
-
-        public PaymentInstallmentsController(IUnitOfWork unitOfWork, 
-            IPaymentInstallmentService service,
-            IPaymentService paymentService) : base(unitOfWork, service)
-        {
-            _paymentService = paymentService;
-        }
-
         [HttpGet("payment/{paymentId}")]
         public async Task<ActionResult<IEnumerable<PaymentInstallmentDto>>> GetByPayment(Guid paymentId)
         {
             try
             {
-                var payment = await _paymentService.GetByIdAsync(paymentId);
+                var payment = await paymentService.GetByIdAsync(paymentId);
                 if (payment.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();
@@ -71,7 +64,7 @@ namespace Equilibrium.API.Controllers
             {
                 var installment = await _service.GetByIdAsync(id);
 
-                var payment = await _paymentService.GetByIdAsync(installment.PaymentId);
+                var payment = await paymentService.GetByIdAsync(installment.PaymentId);
                 return payment.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<PaymentInstallmentDto>)Forbid() : (ActionResult<PaymentInstallmentDto>)Ok(installment);
             }
             catch (KeyNotFoundException ex)
@@ -87,7 +80,7 @@ namespace Equilibrium.API.Controllers
             {
                 var installment = await _service.GetByIdAsync(id);
 
-                var payment = await _paymentService.GetByIdAsync(installment.PaymentId);
+                var payment = await paymentService.GetByIdAsync(installment.PaymentId);
                 if (payment.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();
@@ -110,7 +103,7 @@ namespace Equilibrium.API.Controllers
             {
                 var installment = await _service.GetByIdAsync(id);
 
-                var payment = await _paymentService.GetByIdAsync(installment.PaymentId);
+                var payment = await paymentService.GetByIdAsync(installment.PaymentId);
                 if (payment.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();
@@ -132,7 +125,7 @@ namespace Equilibrium.API.Controllers
             {
                 var installment = await _service.GetByIdAsync(id);
 
-                var payment = await _paymentService.GetByIdAsync(installment.PaymentId);
+                var payment = await paymentService.GetByIdAsync(installment.PaymentId);
                 if (payment.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();

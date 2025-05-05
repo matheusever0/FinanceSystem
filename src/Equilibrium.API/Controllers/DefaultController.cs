@@ -2,14 +2,9 @@
 
 namespace Equilibrium.API.Controllers
 {
-    public abstract class DefaultController<TService> : BaseController
+    public abstract class DefaultController<TService>(IUnitOfWork unitOfWork, TService service) : BaseController(unitOfWork)
         where TService : class
     {
-        protected readonly TService _service;
-
-        public DefaultController(IUnitOfWork unitOfWork, TService service) : base(unitOfWork)
-        {
-            _service = service;
-        }
+        protected readonly TService _service = service;
     }
 }

@@ -4,13 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace Equilibrium.API.Controllers
 {
     [ApiController]
-    public abstract class BaseController : ControllerBase
+    public abstract class BaseController(IUnitOfWork unitOfWork) : ControllerBase
     {
-        protected readonly IUnitOfWork _unitOfWork;
-
-        public BaseController(IUnitOfWork unitOfWork)
-        {
-            _unitOfWork = unitOfWork;
-        }
+        protected readonly IUnitOfWork _unitOfWork = unitOfWork;
     }
 }

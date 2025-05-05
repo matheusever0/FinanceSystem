@@ -7,23 +7,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    public class IncomeInstallmentsController : AuthenticatedController<IncomeInstallmentService>
+    public class IncomeInstallmentsController(IUnitOfWork unitOfWork,
+        IncomeInstallmentService service,
+        IIncomeService incomeService) : AuthenticatedController<IncomeInstallmentService>(unitOfWork, service)
     {
-        private readonly IIncomeService _incomeService;
-
-        public IncomeInstallmentsController(IUnitOfWork unitOfWork, 
-            IncomeInstallmentService service, 
-            IIncomeService incomeService) : base(unitOfWork, service)
-        {
-            _incomeService = incomeService;
-        }
-
         [HttpGet("income/{incomeId}")]
         public async Task<ActionResult<IEnumerable<IncomeInstallmentDto>>> GetByIncome(Guid incomeId)
         {
             try
             {
-                var income = await _incomeService.GetByIdAsync(incomeId);
+                var income = await incomeService.GetByIdAsync(incomeId);
                 if (income.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();
@@ -72,7 +65,7 @@ namespace Equilibrium.API.Controllers
             {
                 var installment = await _service.GetByIdAsync(id);
 
-                var income = await _incomeService.GetByIdAsync(installment.IncomeId);
+                var income = await incomeService.GetByIdAsync(installment.IncomeId);
                 return income.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<IncomeInstallmentDto>)Forbid() : (ActionResult<IncomeInstallmentDto>)Ok(installment);
             }
             catch (KeyNotFoundException ex)
@@ -88,7 +81,7 @@ namespace Equilibrium.API.Controllers
             {
                 var installment = await _service.GetByIdAsync(id);
 
-                var income = await _incomeService.GetByIdAsync(installment.IncomeId);
+                var income = await incomeService.GetByIdAsync(installment.IncomeId);
                 if (income.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();
@@ -111,7 +104,7 @@ namespace Equilibrium.API.Controllers
             {
                 var installment = await _service.GetByIdAsync(id);
 
-                var income = await _incomeService.GetByIdAsync(installment.IncomeId);
+                var income = await incomeService.GetByIdAsync(installment.IncomeId);
                 if (income.UserId != HttpContext.GetCurrentUserId())
                 {
                     return Forbid();

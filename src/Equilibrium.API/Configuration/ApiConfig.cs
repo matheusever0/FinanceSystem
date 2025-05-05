@@ -40,7 +40,6 @@ namespace Equilibrium.API.Configuration
 
             app.UseHttpsRedirection();
             app.UseCors("AllowAll"); // Aplicando a política CORS "AllowAll"
-            app.UseMiddleware<WafExceptionMiddleware>(); // Adicionamos nossa middleware personalizada
             app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseRouting();
             app.UseHttpMethodOverride(); // Para lidar com PUT e DELETE
