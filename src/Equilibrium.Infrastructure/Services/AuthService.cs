@@ -31,13 +31,9 @@ namespace Equilibrium.Infrastructure.Services
 
             if (user.UserRoles != null)
             {
-                foreach (var userRole in user.UserRoles)
-                {
-                    if (userRole.Role != null)
-                    {
-                        claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
-                    }
-                }
+                claims.AddRange(user.UserRoles
+                    .Where(userRole => userRole.Role != null)
+                    .Select(userRole => new Claim(ClaimTypes.Role, userRole.Role.Name)));
             }
 
             Console.WriteLine(DateTime.Now);

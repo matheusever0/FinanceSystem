@@ -35,14 +35,14 @@ namespace Equilibrium.API.Configuration
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Finance System API v1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Equilibrium+ API v1");
             });
 
             app.UseHttpsRedirection();
-            app.UseCors("AllowAll"); // Aplicando a política CORS "AllowAll"
+            app.UseCors("AllowAll"); 
             app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseRouting();
-            app.UseHttpMethodOverride(); // Para lidar com PUT e DELETE
+            app.UseHttpMethodOverride(); 
             app.UseAuthentication();
             app.UseAuthorization();
 
