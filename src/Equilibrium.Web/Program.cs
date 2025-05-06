@@ -8,6 +8,7 @@ builder.Services.AddWebConfiguration();
 builder.Services.AddHttpConfiguration(builder.Configuration);
 builder.Services.AddAuthenticationConfiguration();
 builder.Services.AddServices();
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
