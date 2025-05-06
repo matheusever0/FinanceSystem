@@ -29,6 +29,7 @@ FinanceSystem.Pages.Investments = (function () {
 
         if (isDetailsView) {
             initializeInvestmentDetails();
+            initializeConvertedValues();
         }
 
         if (isTransactionView) {
@@ -37,11 +38,14 @@ FinanceSystem.Pages.Investments = (function () {
     }
 
     /**
-     * Inicializa formulário de investimento
+     * Inicializa o formulário de investimento com suporte a ações fracionadas
      */
     function initializeInvestmentForm() {
         const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
         if (!form) return;
+
+        // Campo de símbolo
+        const symbolInput = document.getElementById('Symbol');
 
         // Inicializa campos monetários
         initializeMoneyInputs();
@@ -51,6 +55,82 @@ FinanceSystem.Pages.Investments = (function () {
 
         // Configura validação do formulário
         setupFormValidation(form);
+
+        // Adiciona evento para verificar se é ação americana quando o símbolo mudar
+        if (symbolInput) {
+            symbolInput.addEventListener('blur', function () {
+                adjustInputsForStockType(this.value);
+            });
+        }
+
+        const typeSelect = document.getElementById('investmentType');
+        if (typeSelect) {
+            typeSelect.addEventListener('change', function () {
+                // Se selecionou Ações Estrangeiras
+                if (this.value === '4') {
+                    // Atualiza para formato de dólar
+                    adjustInputsForStockType('AAPL'); // Exemplo de ação americana para forçar o formato
+                } else {
+                    // Atualiza para formato de real
+                    adjustInputsForStockType('PETR4'); // Exemplo de ação brasileira para forçar o formato
+                }
+            });
+        }
+    }
+
+    /**
+ * Ajusta os campos do formulário baseado no tipo de ação
+ * @param {string} symbol - Símbolo da ação
+ */
+    function adjustInputsForStockType(symbol) {
+        const quantityInput = document.getElementById('InitialQuantity');
+        const priceInput = document.getElementById('InitialPrice');
+
+        // Se parece ser uma ação americana
+        if (isUSStock(symbol)) {
+            // Atualiza o step para permitir frações (até 4 casas decimais para ações americanas)
+            if (quantityInput) {
+                quantityInput.setAttribute('step', '0.0001');
+                // Atualiza o placeholder para indicar que frações são permitidas
+                quantityInput.setAttribute('placeholder', 'Ex: 1.5');
+            }
+
+            // Atualiza o formato de moeda para dólar
+            if (priceInput) {
+                // Remove máscara anterior se estiver usando jQuery mask
+                if (typeof $.fn.mask !== 'undefined') {
+                    $(priceInput).unmask();
+                    $(priceInput).mask('###0.00', { reverse: true });
+                }
+
+                // Atualiza o prefixo do grupo de entrada
+                const inputGroupText = priceInput.parentElement.querySelector('.input-group-text');
+                if (inputGroupText) {
+                    inputGroupText.textContent = 'US$';
+                }
+            }
+        } else {
+            // Se for ação brasileira, usa configuração padrão
+            if (quantityInput) {
+                quantityInput.setAttribute('step', '1');
+                quantityInput.setAttribute('placeholder', 'Ex: 100');
+            }
+
+            // Atualiza o formato de moeda para real
+            if (priceInput) {
+                // Remove máscara anterior se estiver usando jQuery mask
+                if (typeof $.fn.mask !== 'undefined') {
+                    $(priceInput).unmask();
+                    $(priceInput).mask('#.##0,00', { reverse: true });
+                }
+
+                // Atualiza o prefixo do grupo de entrada
+                const inputGroupText = priceInput.parentElement.querySelector('.input-group-text');
+                if (inputGroupText) {
+                    inputGroupText.textContent = 'R$';
+                }
+            }
+        }
     }
 
     /**
@@ -120,15 +200,28 @@ FinanceSystem.Pages.Investments = (function () {
         const quantityInput = document.getElementById('InitialQuantity');
         const priceInput = document.getElementById('InitialPrice');
         const totalValueInput = document.getElementById('totalValue');
+        const symbolInput = document.getElementById('Symbol');
+        const typeSelect = document.getElementById('investmentType');
 
         if (quantityInput && priceInput && totalValueInput) {
             // Função para calcular e exibir o total
             const calculateTotal = () => {
                 const quantity = parseFloat(quantityInput.value) || 0;
-                const price = parseCurrency(priceInput.value);
+
+                // Determina a moeda com base no tipo ou símbolo
+                let isUSD = false;
+                if (typeSelect && typeSelect.value === '4') {
+                    isUSD = true;
+                } else if (symbolInput && isUSStock(symbolInput.value)) {
+                    isUSD = true;
+                }
+
+                // Parse o preço considerando o formato da moeda
+                const price = parseCurrency(priceInput.value, isUSD ? 'USD' : 'BRL');
                 const total = quantity * price;
 
-                totalValueInput.value = formatCurrency(total);
+                // Formata o total na moeda apropriada
+                totalValueInput.value = formatCurrency(total, isUSD ? 'USD' : 'BRL');
             };
 
             // Inicializa o cálculo
@@ -137,6 +230,16 @@ FinanceSystem.Pages.Investments = (function () {
             // Adiciona event listeners
             quantityInput.addEventListener('input', calculateTotal);
             priceInput.addEventListener('input', calculateTotal);
+
+            // Adiciona listener para quando o símbolo mudar
+            if (symbolInput) {
+                symbolInput.addEventListener('change', calculateTotal);
+            }
+
+            // Adiciona listener para quando o tipo mudar
+            if (typeSelect) {
+                typeSelect.addEventListener('change', calculateTotal);
+            }
         }
     }
 
@@ -719,6 +822,78 @@ FinanceSystem.Pages.Investments = (function () {
             style: 'currency',
             currency: 'BRL'
         }).format(value);
+    }
+
+    /**
+ * Verifica se o símbolo parece ser de uma ação americana
+ * @param {string} symbol - Símbolo da ação
+ * @returns {boolean} - Verdadeiro se parecer uma ação americana
+ */
+    function isUSStock(symbol) {
+        // Ações americanas geralmente não têm números no final do símbolo
+        // e não seguem o padrão brasileiro de 4-5 letras + número
+        if (!symbol) return false;
+
+        // Verifica se não tem números no final (padrão brasileiro)
+        const hasBrazilianPattern = /[A-Z]{4}\d+$/.test(symbol.toUpperCase());
+
+        // Se não segue o padrão brasileiro e tem menos de 5 caracteres
+        // ou se o símbolo contém um ponto (comum em ações americanas como BRK.A)
+        return (!hasBrazilianPattern && symbol.length <= 5) || symbol.includes('.');
+    }
+
+    /**
+ * Busca a taxa de câmbio atual do dólar para real
+ * @returns {Promise<number>} - Taxa de conversão
+ */
+    async function fetchUSDToBRLRate() {
+        try {
+            const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+            const data = await response.json();
+            return data.rates.BRL;
+        } catch (error) {
+            console.error("Erro ao buscar taxa de câmbio:", error);
+            return 5.0; // Valor padrão caso a API falhe
+        }
+    }
+
+    /**
+     * Inicializa a exibição de valores convertidos
+     */
+    async function initializeConvertedValues() {
+        // Verifica se há investimentos em dólar
+        const usdInvestments = document.querySelectorAll('[data-currency="USD"]');
+
+        if (usdInvestments.length > 0) {
+            // Busca a taxa de câmbio
+            const exchangeRate = await fetchUSDToBRLRate();
+
+            // Adiciona um elemento para mostrar a taxa de câmbio atual
+            const exchangeRateInfo = document.createElement('div');
+            exchangeRateInfo.className = 'alert alert-info mt-3';
+            exchangeRateInfo.innerHTML = `
+            <i class="fas fa-info-circle me-2"></i>
+            Taxa de câmbio atual: 1 USD = ${exchangeRate.toFixed(2)} BRL
+        `;
+
+            // Adiciona o elemento ao container
+            const container = document.querySelector('.card-body');
+            if (container) {
+                container.prepend(exchangeRateInfo);
+            }
+
+            // Converte os valores de cada investimento
+            usdInvestments.forEach(element => {
+                const value = parseFloat(element.getAttribute('data-value')) || 0;
+                const convertedValue = value * exchangeRate;
+
+                const convertedElement = document.createElement('div');
+                convertedElement.className = 'text-muted small';
+                convertedElement.innerHTML = `Equivalente a R$ ${convertedValue.toFixed(2)}`;
+
+                element.appendChild(convertedElement);
+            });
+        }
     }
 
     // API pública do módulo

@@ -20,7 +20,8 @@
                         <input asp-for="Symbol" class="form-control" required />
                         <span asp-validation-for="Symbol" class="text-danger"></span>
                         <small class="form-text text-muted">
-                            Para ações e FIIs, use o código de negociação (ex: PETR4, HGLG11).
+                            Para ações brasileiras, use o código de negociação (ex: PETR4).
+                            Para ações americanas, use o ticker (ex: AAPL, MSFT).
                         </small>
                     </div>
                 </div>
@@ -34,7 +35,7 @@
                 <div class="col-md-4">
                     <div class="mb-3">
                         <label asp-for="Type" class="form-label">Tipo</label>
-                        <select asp-for="Type" class="form-select" required>
+                        <select asp-for="Type" class="form-select" required id="investmentType">
                             <option value="">Selecione...</option>
                             <option value="1">Ações</option>
                             <option value="2">Fundos Imobiliários</option>
