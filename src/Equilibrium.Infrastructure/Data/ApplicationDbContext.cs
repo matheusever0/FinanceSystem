@@ -243,6 +243,11 @@ namespace Equilibrium.Infrastructure.Data
                 .Property(pt => pt.IsFinancingType)
                 .HasDefaultValue(false);
 
+            modelBuilder.Entity<Investment>()
+                .Property(pt => pt.Currency)
+                .HasColumnType("varchar(50)");
+
+
         }
     }
 }

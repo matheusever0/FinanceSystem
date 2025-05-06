@@ -58,6 +58,7 @@ namespace Equilibrium.Application.Services
             var investment = new Investment(
                 createInvestmentDto.Symbol,
                 stockQuoteDto.ShortName,
+                stockQuoteDto.Currency,
                 createInvestmentDto.Type,
                 createInvestmentDto.InitialQuantity,
                 createInvestmentDto.InitialPrice,
