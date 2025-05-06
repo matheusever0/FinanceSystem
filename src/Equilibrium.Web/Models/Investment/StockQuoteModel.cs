@@ -7,7 +7,6 @@
         public decimal Change { get; set; }
         public decimal ChangePercent { get; set; }
         public decimal PreviousClose { get; set; }
-        public required string Currency { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
 }

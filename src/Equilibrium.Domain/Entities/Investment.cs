@@ -6,8 +6,7 @@ namespace Equilibrium.Domain.Entities
     {
         public Guid Id { get; protected set; }
         public string Symbol { get; protected set; }  
-        public string Name { get; protected set; }
-        public string Currency { get; protected set; }
+        public string Name { get; protected set; }  
         public InvestmentType Type { get; protected set; }  
         public decimal TotalQuantity { get; protected set; } 
         public decimal AveragePrice { get; protected set; }  
@@ -30,7 +29,6 @@ namespace Equilibrium.Domain.Entities
         public Investment(
             string symbol,
             string name,
-            string currency,
             InvestmentType type,
             decimal totalQuantity,
             decimal averagePrice,
@@ -44,7 +42,6 @@ namespace Equilibrium.Domain.Entities
             Id = Guid.NewGuid();
             Symbol = symbol;
             Name = name;
-            Currency = currency;
             Type = type;
             TotalQuantity = totalQuantity;
             AveragePrice = averagePrice;

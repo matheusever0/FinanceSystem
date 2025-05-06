@@ -318,10 +318,6 @@ namespace Equilibrium.Infrastructure.Migrations
                     b.Property<decimal>("AveragePrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasColumnType("varchar(50)");
-
                     b.Property<decimal>("CurrentPrice")
                         .HasColumnType("decimal(18,2)");
 
