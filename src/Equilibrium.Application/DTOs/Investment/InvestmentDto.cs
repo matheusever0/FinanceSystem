@@ -7,6 +7,7 @@ namespace Equilibrium.Application.DTOs.Investment
     {
         public Guid Id { get; set; }
         public required string Symbol { get; set; }
+        public required string Currency { get; set; }
         public required string Name { get; set; }
         public InvestmentType Type { get; set; }
         public string TypeDescription => Type.ToString();
