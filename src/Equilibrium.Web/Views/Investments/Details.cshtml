@@ -76,9 +76,7 @@
                     <div class="col-md-6">
                         <div class="financial-data">
                             <div class="label">Preço Atual</div>
-                            <div class="value" data-currency="@Model.Currency" data-value="@Model.CurrentPrice">
-                                @string.Format(Model.Currency == "USD" ? "${0:N2}" : "R${0:N2}", Model.CurrentPrice)
-                            </div>
+                            <div class="value">@string.Format("{0:C2}", Model.CurrentPrice)</div>
                             <div class="secondary">Última atualização: @Model.LastUpdate.ToString("dd/MM/yyyy HH:mm")</div>
                         </div>
                     </div>

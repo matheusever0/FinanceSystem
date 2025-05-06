@@ -117,10 +117,10 @@
                                         @typeDescription
                                     </td>
                                     <td class="text-center">@investment.TotalQuantity.ToString("N2")</td>
-                                    <td class="text-center">@string.Format(investment.Currency == "USD" ? "${0:N2}" : "R${0:N2}", investment.CurrentPrice)</td>
-                                    <td class="text-center">@string.Format(investment.Currency == "USD" ? "${0:N2}" : "R${0:N2}", investment.AveragePrice)</td>
-                                    <td class="text-center">@string.Format(investment.Currency == "USD" ? "${0:N2}" : "R${0:N2}", investment.TotalInvested)</td>
-                                    <td class="text-center">@string.Format(investment.Currency == "USD" ? "${0:N2}" : "R${0:N2}", investment.CurrentTotal)</td>
+                                    <td class="text-center">@string.Format("{0:C2}", investment.AveragePrice)</td>
+                                    <td class="text-center">@string.Format("{0:C2}", investment.CurrentPrice)</td>
+                                    <td class="text-center">@string.Format("{0:C2}", investment.TotalInvested)</td>
+                                    <td class="text-center">@string.Format("{0:C2}", investment.CurrentTotal)</td>
                                     <td class="text-center">
                                         @if (investment.GainLossPercentage > 0)
                                         {

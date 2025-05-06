@@ -19,86 +19,51 @@ FinanceSystem.Modules.Financial = (function () {
     /**
      * Inicializa uma máscara de moeda em um campo
      * @param {string} selector - Seletor do campo
-     * @param {string} currency - Moeda (BRL ou USD)
      */
-    function initializeMoneyMask(selector, currency = 'BRL') {
+    function initializeMoneyMask(selector) {
+
+        console.log('mask aqui')
+
         const moneyInput = document.querySelector(selector);
+
+        console.log(moneyInput)
         if (!moneyInput) return;
 
         if (typeof $.fn.mask !== 'undefined') {
-            // Remove qualquer máscara existente
-            $(moneyInput).unmask();
+            $(moneyInput).mask('#.##0,00', { reverse: true });
 
-            // Aplica a máscara conforme a moeda
-            if (currency === 'USD') {
-                $(moneyInput).mask('###0.00', { reverse: true });
-            } else {
-                $(moneyInput).mask('#.##0,00', { reverse: true });
-            }
+            // Evento blur para validação
+            $(moneyInput).on('blur', function () {
+                let value = $(this).val();
+                value = value.replace(/\./g, '').replace(',', '.');
+                const parsedValue = parseFloat(value);
+
+                if (!isNaN(parsedValue) && parsedValue > 0) {
+                    $(this).val(parsedValue.toFixed(2).replace('.', ','));
+                    $(this).removeClass('input-validation-error');
+                    $(this).next('.text-danger').text('');
+                } else {
+                    $(this).addClass('input-validation-error');
+                    $(this).next('.text-danger').text('O campo Valor deve ser um número válido.');
+                }
+            });
         } else {
             // Implementação manual se mask não estiver disponível
             moneyInput.addEventListener('input', function () {
-                if (currency === 'USD') {
-                    formatUSDCurrencyInput(this);
-                } else {
-                    formatBRLCurrencyInput(this);
-                }
+                formatCurrencyInput(this);
             });
 
-            // Formata valor inicial se existir
-            if (moneyInput.value) {
-                if (currency === 'USD') {
-                    formatUSDCurrencyInput(moneyInput);
-                } else {
-                    formatBRLCurrencyInput(moneyInput);
-                }
-            }
+            moneyInput.addEventListener('blur', function () {
+                validateCurrencyInput(this);
+            });
         }
     }
 
     /**
-     * Formata campo de entrada monetária em dólares
+     * Formata um campo de entrada como moeda
      * @param {HTMLElement} input - Campo a ser formatado
      */
-    function formatUSDCurrencyInput(input) {
-        // Preserva a posição do cursor
-        const cursorPosition = input.selectionStart;
-        const inputLength = input.value.length;
-
-        // Remove caracteres não numéricos, exceto ponto
-        let value = input.value.replace(/[^\d.]/g, '');
-
-        // Garante apenas um ponto decimal
-        const parts = value.split('.');
-        if (parts.length > 2) {
-            value = parts[0] + '.' + parts.slice(1).join('');
-        }
-
-        // Formata com duas casas decimais se tiver ponto
-        if (value.includes('.')) {
-            const decimalPart = parts[1] || '';
-            value = parts[0] + '.' + (decimalPart.substring(0, 2).padEnd(2, '0'));
-        } else if (value) {
-            // Se não tiver ponto e não for vazio, adiciona .00
-            value = value + '.00';
-        }
-
-        input.value = value;
-
-        // Ajusta a posição do cursor se necessário
-        const newLength = input.value.length;
-        const newPosition = cursorPosition + (newLength - inputLength);
-        if (newPosition >= 0) {
-            input.setSelectionRange(newPosition, newPosition);
-        }
-    }
-
-    /**
- * Formata campo de entrada monetária em reais
- * @param {HTMLElement} input - Campo a ser formatado
- */
-    function formatBRLCurrencyInput(input) {
-        // Implementação existente para o formato brasileiro
+    function formatCurrencyInput(input) {
         // Preserva a posição do cursor
         const cursorPosition = input.selectionStart;
         const inputLength = input.value.length;
@@ -524,59 +489,15 @@ FinanceSystem.Modules.Financial = (function () {
     }
 
     /**
-     * Formata um valor como moeda
+     * Formata um valor como moeda brasileira
      * @param {number} value - Valor a ser formatado
-     * @param {string} currency - Código da moeda (padrão: 'BRL')
      * @returns {string} - Valor formatado
      */
-    function formatCurrency(value, currency = 'BRL') {
-        try {
-            if (currency === 'USD') {
-                return new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD'
-                }).format(value);
-            } else {
-                // Padrão: moeda brasileira
-                return new Intl.NumberFormat('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                }).format(value);
-            }
-        } catch (error) {
-            console.error("Erro ao formatar moeda:", error);
-            return value.toFixed(2);
-        }
-    }
-
-    /**
- * Converte valor monetário de string para número
- * @param {string} value - Valor em formato monetário
- * @param {string} currency - Código da moeda (padrão: 'BRL')
- * @returns {number} - Valor numérico
- */
-    function parseCurrency(value, currency = 'BRL') {
-        if (typeof value === 'number') {
-            return value;
-        }
-
-        // Remove símbolos de moeda e espaços
-        value = value.toString().replace(/[$R\s]/g, '');
-
-        if (currency === 'USD') {
-            // Formato americano: já usa ponto como decimal
-            return parseFloat(value) || 0;
-        } else {
-            // Formato brasileiro
-            // Trata formato brasileiro (1.234,56)
-            if (value.indexOf(',') > -1 && value.indexOf('.') > -1) {
-                value = value.replace(/\./g, '').replace(',', '.');
-            } else if (value.indexOf(',') > -1) {
-                value = value.replace(',', '.');
-            }
-
-            return parseFloat(value) || 0;
-        }
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(value);
     }
 
     /**
