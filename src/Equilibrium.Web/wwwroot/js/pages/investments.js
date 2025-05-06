@@ -64,16 +64,13 @@ FinanceSystem.Pages.Investments = (function () {
         }
 
         const typeSelect = document.getElementById('investmentType');
+        console.log(typeSelect);
         if (typeSelect) {
             typeSelect.addEventListener('change', function () {
-                // Se selecionou Ações Estrangeiras
-                if (this.value === '4') {
-                    // Atualiza para formato de dólar
-                    adjustInputsForStockType('AAPL'); // Exemplo de ação americana para forçar o formato
-                } else {
-                    // Atualiza para formato de real
-                    adjustInputsForStockType('PETR4'); // Exemplo de ação brasileira para forçar o formato
-                }
+                console.log("Tipo alterado para:", this.value);
+                // Força USD se for ações estrangeiras (tipo 4)
+                const forceUSD = this.value === '4';
+                adjustInputsForStockType('', forceUSD);
             });
         }
     }
@@ -83,6 +80,10 @@ FinanceSystem.Pages.Investments = (function () {
  * @param {string} symbol - Símbolo da ação
  */
     function adjustInputsForStockType(symbol) {
+        const isUSD = forceUSD || isUSStock(symbol);
+
+        console.log("Ajustando campos para:", symbol, "ForceUSD:", forceUSD, "isUSD:", isUSD);
+
         const quantityInput = document.getElementById('InitialQuantity');
         const priceInput = document.getElementById('InitialPrice');
 
