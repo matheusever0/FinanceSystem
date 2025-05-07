@@ -1,6 +1,7 @@
 ﻿/**
  * Finance System - Investments Page
  * Scripts específicos para a página de investimentos
+ * Com suporte a múltiplas moedas
  */
 
 // Namespace global para o sistema
@@ -13,27 +14,12 @@ FinanceSystem.Pages.Investments = (function () {
      * Inicializa a página de investimentos
      */
     function initialize() {
-        // Determina qual view está ativa
-        const isFormView = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
-        const isListView = document.querySelector('#investments-table');
-        const isDetailsView = document.querySelector('.investment-details-container');
-        const isTransactionView = document.querySelector('form[asp-action="AddTransaction"]');
 
-        if (isFormView) {
-            initializeInvestmentForm();
-        }
+        initializeInvestmentForm();
+        initializeInvestmentsList();
+        initializeInvestmentDetails();
+        initializeTransactionForm();
 
-        if (isListView) {
-            initializeInvestmentsList();
-        }
-
-        if (isDetailsView) {
-            initializeInvestmentDetails();
-        }
-
-        if (isTransactionView) {
-            initializeTransactionForm();
-        }
     }
 
     /**
@@ -41,8 +27,6 @@ FinanceSystem.Pages.Investments = (function () {
      */
     function initializeInvestmentForm() {
         const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
-        if (!form) return;
-
         // Inicializa campos monetários
         initializeMoneyInputs();
 
@@ -51,6 +35,35 @@ FinanceSystem.Pages.Investments = (function () {
 
         // Configura validação do formulário
         setupFormValidation(form);
+
+        // Inicializa o campo de seleção de moeda
+        initializeCurrencyField();
+    }
+
+    /**
+ * Inicializa o campo de seleção de moeda
+ */
+    function initializeCurrencyField() {
+        const typeSelect = document.getElementById('Type');
+        const currencySelect = document.getElementById('Currency');
+
+        if (typeSelect && currencySelect) {
+            // Atualiza moeda com base no tipo de investimento selecionado
+            typeSelect.addEventListener('change', function () {
+                // Se for ações estrangeiras (tipo 4), definir moeda como USD
+                if (this.value == '4') {
+                    currencySelect.value = 'USD';
+                } else {
+                    // Caso contrário, definir como BRL (padrão para investimentos brasileiros)
+                    currencySelect.value = 'BRL';
+                }
+            });
+
+            // Trigger inicial para definir a moeda correta
+            if (typeSelect.value) {
+                typeSelect.dispatchEvent(new Event('change'));
+            }
+        }
     }
 
     /**
@@ -72,22 +85,34 @@ FinanceSystem.Pages.Investments = (function () {
             const moneyInputs = document.querySelectorAll('#InitialPrice, #CurrentPrice');
             moneyInputs.forEach(input => {
                 input.addEventListener('input', function () {
-                    formatCurrencyInput(this);
+                    const currency = getCurrencyFromForm();
+                    formatCurrencyInput(this, currency);
                 });
 
                 // Formata valor inicial se existir
                 if (input.value) {
-                    formatCurrencyInput(input);
+                    const currency = getCurrencyFromForm();
+                    formatCurrencyInput(input, currency);
                 }
             });
         }
     }
 
     /**
+ * Obtém a moeda selecionada no formulário
+ * @returns {string} - Código da moeda (BRL, USD, etc.)
+ */
+    function getCurrencyFromForm() {
+        const currencySelect = document.getElementById('Currency');
+        return currencySelect ? currencySelect.value : 'BRL';
+    }
+
+    /**
      * Formata campo de entrada monetária
      * @param {HTMLElement} input - Campo a ser formatado
+     * @param {string} currency - Código da moeda (BRL, USD, etc.)
      */
-    function formatCurrencyInput(input) {
+    function formatCurrencyInput(input, currency = 'BRL') {
         // Preserva a posição do cursor
         const cursorPosition = input.selectionStart;
         const inputLength = input.value.length;
@@ -95,15 +120,49 @@ FinanceSystem.Pages.Investments = (function () {
         // Remove caracteres não numéricos, exceto vírgula e ponto
         let value = input.value.replace(/[^\d.,]/g, '');
 
-        // Converte para o formato brasileiro (vírgula como separador decimal)
-        value = value.replace(/\D/g, '');
-        if (value === '') {
-            input.value = '';
-            return;
-        }
+        if (currency === 'BRL') {
+            // Formato brasileiro (vírgula como separador decimal)
+            value = value.replace(/\D/g, '');
+            if (value === '') {
+                input.value = '';
+                return;
+            }
 
-        value = (parseFloat(value) / 100).toFixed(2);
-        input.value = value.replace('.', ',');
+            value = (parseFloat(value) / 100).toFixed(2);
+            input.value = value.replace('.', ',');
+        } else {
+            // Formato americano/internacional (ponto como separador decimal)
+            value = value.replace(/,/g, '');
+            if (value === '') {
+                input.value = '';
+                return;
+            }
+
+            // Remove todos os pontos exceto o último (separador decimal)
+            let parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+
+            if (!value.includes('.')) {
+                value = value.replace(/\D/g, '');
+                value = (parseFloat(value) / 100).toFixed(2);
+            } else if (value.endsWith('.')) {
+                // Mantém o ponto decimal se for o último caractere
+                value = parseFloat(value.replace(/\.$/, '')).toFixed(0) + '.';
+            } else {
+                // Mantém as casas decimais conforme digitado
+                let [whole, decimal] = value.split('.');
+                whole = whole.replace(/\D/g, '') || '0';
+                decimal = decimal.replace(/\D/g, '');
+                value = whole + '.' + decimal;
+                if (decimal.length > 2) {
+                    value = parseFloat(value).toFixed(2);
+                }
+            }
+
+            input.value = value;
+        }
 
         // Ajusta a posição do cursor se necessário
         const newLength = input.value.length;
@@ -120,15 +179,17 @@ FinanceSystem.Pages.Investments = (function () {
         const quantityInput = document.getElementById('InitialQuantity');
         const priceInput = document.getElementById('InitialPrice');
         const totalValueInput = document.getElementById('totalValue');
+        const currencySelect = document.getElementById('Currency');
 
         if (quantityInput && priceInput && totalValueInput) {
             // Função para calcular e exibir o total
             const calculateTotal = () => {
                 const quantity = parseFloat(quantityInput.value) || 0;
-                const price = parseCurrency(priceInput.value);
+                const currency = currencySelect ? currencySelect.value : 'BRL';
+                const price = parseCurrency(priceInput.value, currency);
                 const total = quantity * price;
 
-                totalValueInput.value = formatCurrency(total);
+                totalValueInput.value = formatCurrency(total, currency);
             };
 
             // Inicializa o cálculo
@@ -137,6 +198,11 @@ FinanceSystem.Pages.Investments = (function () {
             // Adiciona event listeners
             quantityInput.addEventListener('input', calculateTotal);
             priceInput.addEventListener('input', calculateTotal);
+
+            // Observa mudanças no seletor de moeda, se estiver presente
+            if (currencySelect) {
+                currencySelect.addEventListener('change', calculateTotal);
+            }
         }
     }
 
@@ -688,45 +754,63 @@ FinanceSystem.Pages.Investments = (function () {
     /**
      * Converte valor monetário para número
      * @param {string|number} value - Valor em formato monetário
+     * @param {string} currency - Código da moeda (BRL, USD, etc.)
      * @returns {number} - Valor numérico
      */
-    function parseCurrency(value) {
+    function parseCurrency(value, currency = 'BRL') {
         // Se já for um número, retorna diretamente
         if (typeof value === 'number') return value;
 
         // Se for string vazia ou undefined, retorna 0
         if (!value) return 0;
 
-        // Remove símbolos de moeda, pontos e espaços
-        value = value.toString().replace(/[R$\s.]/g, '').replace(',', '.');
+        if (currency === 'BRL') {
+            // Remove símbolos de moeda, pontos e espaços
+            value = value.toString().replace(/[R$\s.]/g, '').replace(',', '.');
+        } else {
+            // Formato americano/internacional
+            value = value.toString().replace(/[$\s,]/g, '');
+        }
 
         return parseFloat(value) || 0;
     }
 
     /**
-     * Formata um valor como moeda brasileira
+     * Formata um valor como moeda
      * @param {number} value - Valor a ser formatado
+     * @param {string} currency - Código da moeda (BRL, USD, etc.)
      * @returns {string} - Valor formatado
      */
-    function formatCurrency(value) {
+    function formatCurrency(value, currency = 'BRL') {
         // Usa o módulo Core se disponível
         if (FinanceSystem.Core && FinanceSystem.Core.formatCurrency) {
-            return FinanceSystem.Core.formatCurrency(value);
+            return FinanceSystem.Core.formatCurrency(value, currency);
         }
 
         // Fallback
-        return new Intl.NumberFormat('pt-BR', {
+        const locales = {
+            'BRL': 'pt-BR',
+            'USD': 'en-US',
+            'EUR': 'de-DE',
+            'GBP': 'en-GB'
+        };
+
+        const locale = locales[currency] || 'en-US';
+
+        return new Intl.NumberFormat(locale, {
             style: 'currency',
-            currency: 'BRL'
+            currency: currency
         }).format(value);
     }
 
-    // API pública do módulo
+
     return {
         initialize: initialize,
         initializeInvestmentForm: initializeInvestmentForm,
         initializeInvestmentsList: initializeInvestmentsList,
         initializeInvestmentDetails: initializeInvestmentDetails,
-        initializeTransactionForm: initializeTransactionForm
+        initializeTransactionForm: initializeTransactionForm,
+        formatCurrency: formatCurrency,
+        parseCurrency: parseCurrency
     };
 })();

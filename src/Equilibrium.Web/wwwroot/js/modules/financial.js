@@ -22,11 +22,7 @@ FinanceSystem.Modules.Financial = (function () {
      */
     function initializeMoneyMask(selector) {
 
-        console.log('mask aqui')
-
         const moneyInput = document.querySelector(selector);
-
-        console.log(moneyInput)
         if (!moneyInput) return;
 
         if (typeof $.fn.mask !== 'undefined') {
@@ -467,10 +463,11 @@ FinanceSystem.Modules.Financial = (function () {
 
     /**
      * Converte um valor monetário para número
-     * @param {string} value - Valor em formato monetário (ex: "R$ 1.234,56")
+     * @param {string} value - Valor em formato monetário (ex: "R$ 1.234,56", "$1,234.56")
+     * @param {string} currency - Código da moeda (ex: 'BRL', 'USD')
      * @returns {number} - Valor numérico
      */
-    function parseCurrency(value) {
+    function parseCurrency(value, currency = 'BRL') {
         if (typeof value === 'number') {
             return value;
         }
@@ -478,25 +475,43 @@ FinanceSystem.Modules.Financial = (function () {
         // Remove símbolos de moeda e espaços
         value = value.replace(/[^\d,.-]/g, '');
 
-        // Trata formato brasileiro (1.234,56)
-        if (value.indexOf(',') > -1 && value.indexOf('.') > -1) {
-            value = value.replace(/\./g, '').replace(',', '.');
-        } else if (value.indexOf(',') > -1) {
-            value = value.replace(',', '.');
+        if (currency === 'BRL') {
+            // Formato brasileiro (1.234,56)
+            if (value.indexOf(',') > -1 && value.indexOf('.') > -1) {
+                value = value.replace(/\./g, '').replace(',', '.');
+            } else if (value.indexOf(',') > -1) {
+                value = value.replace(',', '.');
+            }
+        } else {
+            // Formato americano/internacional (1,234.56)
+            if (value.indexOf(',') > -1) {
+                value = value.replace(/,/g, '');
+            }
         }
 
         return parseFloat(value);
     }
 
     /**
-     * Formata um valor como moeda brasileira
+     * Formata um valor como moeda
      * @param {number} value - Valor a ser formatado
+     * @param {string} currency - Código da moeda (ex: 'BRL', 'USD')
      * @returns {string} - Valor formatado
      */
-    function formatCurrency(value) {
-        return new Intl.NumberFormat('pt-BR', {
+    function formatCurrency(value, currency = 'BRL') {
+        const locales = {
+            'BRL': 'pt-BR',
+            'USD': 'en-US',
+            'EUR': 'de-DE',
+            'GBP': 'en-GB',
+            'JPY': 'ja-JP'
+        };
+
+        const locale = locales[currency] || 'en-US';
+
+        return new Intl.NumberFormat(locale, {
             style: 'currency',
-            currency: 'BRL'
+            currency: currency
         }).format(value);
     }
 

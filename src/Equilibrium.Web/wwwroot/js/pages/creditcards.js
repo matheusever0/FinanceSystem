@@ -13,22 +13,9 @@ FinanceSystem.Pages.CreditCards = (function () {
      * Inicializa a página de cartões de crédito
      */
     function initialize() {
-        // Determina qual view está ativa
-        const isFormView = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
-        const isListView = document.querySelector('.credit-card-container');
-        const isDetailsView = document.querySelector('.credit-card-details-container');
-
-        if (isFormView) {
             initializeCreditCardForm();
-        }
-
-        if (isListView) {
             initializeCreditCardsList();
-        }
-
-        if (isDetailsView) {
             initializeCreditCardDetails();
-        }
     }
 
     /**
@@ -36,7 +23,6 @@ FinanceSystem.Pages.CreditCards = (function () {
      */
     function initializeCreditCardForm() {
         const cardForm = document.getElementById('credit-card-form');
-        if (!cardForm) return;
 
         // Inicializa máscaras para campos monetários
         initializeMoneyMasks();
@@ -195,7 +181,6 @@ FinanceSystem.Pages.CreditCards = (function () {
      */
     function setupFormValidation() {
         const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
-        if (!form) return;
 
         // Usa o módulo de validação se disponível
         if (FinanceSystem.Validation && FinanceSystem.Validation.setupFormValidation) {

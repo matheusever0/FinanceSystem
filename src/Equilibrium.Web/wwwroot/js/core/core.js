@@ -45,14 +45,27 @@ FinanceSystem.Core = (function () {
     }
 
     /**
-     * Formata um valor numérico como moeda brasileira
+     * Formata um valor numérico como moeda
      * @param {number} value - Valor a ser formatado
+     * @param {string} currency - Código da moeda (ex: 'BRL', 'USD')
      * @returns {string} - Valor formatado
      */
-    function formatCurrency(value) {
-        return new Intl.NumberFormat('pt-BR', {
+    function formatCurrency(value, currency = 'BRL') {
+        // Define locales e formatos com base na moeda
+        const locales = {
+            'BRL': 'pt-BR',
+            'USD': 'en-US',
+            'EUR': 'de-DE',
+            'GBP': 'en-GB',
+            'JPY': 'ja-JP'
+        };
+
+        // Define locale padrão para outras moedas não listadas
+        const locale = locales[currency] || 'en-US';
+
+        return new Intl.NumberFormat(locale, {
             style: 'currency',
-            currency: 'BRL'
+            currency: currency
         }).format(value);
     }
 

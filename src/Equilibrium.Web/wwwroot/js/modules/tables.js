@@ -365,7 +365,6 @@ FinanceSystem.Modules.Tables = (function () {
             });
         } else {
             alert('Exportação para Excel requer a biblioteca tableExport.js');
-            console.log('Exportação para Excel requer biblioteca adicional');
         }
     }
 
@@ -389,7 +388,6 @@ FinanceSystem.Modules.Tables = (function () {
             doc.save(filename);
         } else {
             alert('Exportação para PDF requer as bibliotecas jsPDF e jsPDF-AutoTable');
-            console.log('Exportação para PDF requer biblioteca adicional');
         }
     }
 

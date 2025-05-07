@@ -4,6 +4,27 @@
 
 @{
     ViewData["Title"] = "Detalhes do Investimento: " + @Model.Symbol + " - " + @Model.Name;
+
+    // Função helper para formatação de moeda
+    string FormatCurrency(decimal value, string currency)
+    {
+        return currency == "BRL"
+            ? string.Format("{0:C2}", value)
+            : currency == "USD"
+                ? $"$ {value:N2}"
+                : currency == "EUR"
+                    ? $"€ {value:N2}"
+                    : currency == "GBP"
+                        ? $"£ {value:N2}"
+                        : $"{currency} {value:N2}";
+    }
+
+    // Símbolo da moeda para uso em scripts
+    string currencySymbol = Model.Currency == "BRL" ? "R$" :
+                           Model.Currency == "USD" ? "$" :
+                           Model.Currency == "EUR" ? "€" :
+                           Model.Currency == "GBP" ? "£" :
+                           Model.Currency;
 }
 
 <div class="d-flex justify-content-end mb-3">
@@ -32,13 +53,13 @@
             </div>
             <div class="card-body">
                 <div class="row mb-3">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="financial-data">
                             <div class="label">Símbolo</div>
                             <div class="value">@Model.Symbol</div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="financial-data">
                             <div class="label">Tipo</div>
                             <div class="value">
@@ -57,6 +78,12 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-4">
+                        <div class="financial-data">
+                            <div class="label">Moeda</div>
+                            <div class="value">@Model.Currency</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -68,7 +95,7 @@
                     <div class="col-md-6">
                         <div class="financial-data">
                             <div class="label">Preço Médio</div>
-                            <div class="value">@string.Format("{0:C2}", Model.AveragePrice)</div>
+                            <div class="value">@FormatCurrency(Model.AveragePrice, Model.Currency)</div>
                         </div>
                     </div>
                 </div>
@@ -76,14 +103,14 @@
                     <div class="col-md-6">
                         <div class="financial-data">
                             <div class="label">Preço Atual</div>
-                            <div class="value">@string.Format("{0:C2}", Model.CurrentPrice)</div>
+                            <div class="value">@FormatCurrency(Model.CurrentPrice, Model.Currency)</div>
                             <div class="secondary">Última atualização: @Model.LastUpdate.ToString("dd/MM/yyyy HH:mm")</div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="financial-data">
                             <div class="label">Total Investido</div>
-                            <div class="value">@string.Format("{0:C2}", Model.TotalInvested)</div>
+                            <div class="value">@FormatCurrency(Model.TotalInvested, Model.Currency)</div>
                         </div>
                     </div>
                 </div>
@@ -91,7 +118,7 @@
                     <div class="col-md-6">
                         <div class="financial-data">
                             <div class="label">Valor Atual</div>
-                            <div class="value">@string.Format("{0:C2}", Model.CurrentTotal)</div>
+                            <div class="value">@FormatCurrency(Model.CurrentTotal, Model.Currency)</div>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -106,7 +133,7 @@
                                 {
                                     <i class="fas fa-arrow-down me-1"></i>
                                 }
-                                @string.Format("{0:C2}", Model.GainLossValue) (@Model.GainLossPercentage.ToString("N2")%)
+                                @FormatCurrency(Model.GainLossValue, Model.Currency) (@Model.GainLossPercentage.ToString("N2")%)
                             </div>
                         </div>
                     </div>
@@ -121,7 +148,7 @@
             </div>
             <div class="card-body">
                 <div class="performance-chart-container">
-                    <canvas id="performanceChart" height="300" data-investment-id="@Model.Id"></canvas>
+                    <canvas id="performanceChart" height="300" data-investment-id="@Model.Id" data-currency="@Model.Currency"></canvas>
                 </div>
                 <div class="mt-3 text-center text-muted">
                     <small>Gráfico de desempenho baseado nas transações e preços atualizados.</small>
@@ -194,9 +221,9 @@
                                     @transactionType
                                 </td>
                                 <td class="text-center">@transaction.Quantity.ToString("N2")</td>
-                                <td class="text-center">@string.Format("{0:C2}", transaction.Price)</td>
-                                <td class="text-center">@string.Format("{0:C2}", transaction.Taxes)</td>
-                                <td class="text-center">@string.Format("{0:C2}", transaction.TotalValue)</td>
+                                <td class="text-center">@FormatCurrency(transaction.Price, Model.Currency)</td>
+                                <td class="text-center">@FormatCurrency(transaction.Taxes, Model.Currency)</td>
+                                <td class="text-center">@FormatCurrency(transaction.TotalValue, Model.Currency)</td>
                                 <td>@transaction.Broker</td>
                                 <td>@transaction.Notes</td>
                                 <td class="text-center">
@@ -221,3 +248,118 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializa o gráfico de desempenho com a moeda correta
+            const chartCanvas = document.getElementById('performanceChart');
+            if (chartCanvas) {
+                const investmentId = chartCanvas.getAttribute('data-investment-id');
+                const currency = chartCanvas.getAttribute('data-currency') || 'BRL';
+
+                // Configuração para gráfico de linha baseado na moeda
+                // Simulação de dados - Este código deve ser substituído pela chamada real à API
+                const labels = [
+                    'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+                    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+                ];
+
+                const values = generateMockData();
+
+                // Utiliza a função do módulo Charts com o parâmetro de moeda
+                if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
+                    FinanceSystem.Modules.Charts.createLineChart('performanceChart', labels, values, {}, currency);
+                } else if (typeof Chart !== 'undefined') {
+                    createPerformanceChart(chartCanvas, labels, values, currency);
+                }
+            }
+        });
+
+        // Função para gerar dados simulados
+        function generateMockData() {
+            const data = [];
+            let value = 5000 + Math.random() * 2000;
+
+            for (let i = 0; i < 12; i++) {
+                // Adiciona variação para simular movimentos do mercado
+                value = value * (1 + (Math.random() * 0.1 - 0.03));
+                data.push(value.toFixed(2));
+            }
+
+            return data;
+        }
+
+        // Função para criar gráfico de desempenho (fallback)
+        function createPerformanceChart(canvas, labels, values, currency = 'BRL') {
+            const currencySymbol = currency === 'BRL' ? 'R$ ' :
+                                  currency === 'USD' ? '$ ' :
+                                  currency === 'EUR' ? '€ ' :
+                                  currency === 'GBP' ? '£ ' : currency + ' ';
+
+            const useComma = ['BRL', 'EUR'].includes(currency);
+
+            // Formata número para o padrão da moeda
+            function formatValue(value) {
+                if (useComma) {
+                    return currencySymbol + value.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                } else {
+                    return currencySymbol + value.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+            }
+
+            new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Valor Total (' + currencySymbol + ')',
+                        backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                        borderColor: 'rgba(78, 115, 223, 1)',
+                        pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
+                        data: values,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                callback: function (value) {
+                                    return formatValue(value);
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return formatValue(context.parsed.y);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}

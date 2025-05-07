@@ -247,6 +247,10 @@ namespace Equilibrium.Infrastructure.Data
                 .Property(pt => pt.Currency)
                 .HasColumnType("varchar(50)");
 
+            modelBuilder.Entity<Investment>()
+                .Property(e => e.TotalQuantity)
+                .HasPrecision(18, 9);
+
 
         }
     }

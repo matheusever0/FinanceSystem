@@ -21,6 +21,7 @@
                         <span asp-validation-for="Symbol" class="text-danger"></span>
                         <small class="form-text text-muted">
                             Para ações e FIIs, use o código de negociação (ex: PETR4, HGLG11).
+                            Para ações estrangeiras, use o ticker (ex: AAPL, MSFT).
                         </small>
                     </div>
                 </div>
@@ -47,6 +48,24 @@
                 </div>
             </div>
 
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="Currency" class="form-label">Moeda</label>
+                        <select asp-for="Currency" class="form-select" required>
+                            <option value="BRL">Real (BRL)</option>
+                            <option value="USD">Dólar (USD)</option>
+                            <option value="EUR">Euro (EUR)</option>
+                            <option value="GBP">Libra (GBP)</option>
+                        </select>
+                        <span asp-validation-for="Currency" class="text-danger"></span>
+                        <small class="form-text text-muted">
+                            A moeda será definida automaticamente com base no tipo de investimento selecionado.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
             <h5 class="mt-4 mb-3">Transação Inicial</h5>
 
             <div class="row mb-3">
@@ -60,7 +79,7 @@
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label asp-for="InitialQuantity" class="form-label">Quantidade</label>
-                        <input asp-for="InitialQuantity" type="number" step="0.01" min="0.01" class="form-control" required />
+                        <input asp-for="InitialQuantity" type="number" step="0.000001" min="0.000001" class="form-control" required />
                         <span asp-validation-for="InitialQuantity" class="text-danger"></span>
                     </div>
                 </div>
@@ -71,8 +90,8 @@
                     <div class="mb-3">
                         <label asp-for="InitialPrice" class="form-label">Preço Unitário</label>
                         <div class="input-group">
-                            <span class="input-group-text">R$</span>
-                            <input asp-for="InitialPrice" type="number" step="0.01" min="0.01" class="form-control" required />
+                            <span class="input-group-text currency-symbol">R$</span>
+                            <input asp-for="InitialPrice" type="text" class="form-control" required />
                         </div>
                         <span asp-validation-for="InitialPrice" class="text-danger"></span>
                     </div>
@@ -81,7 +100,7 @@
                     <div class="mb-3">
                         <label class="form-label">Valor Total</label>
                         <div class="input-group">
-                            <span class="input-group-text">R$</span>
+                            <span class="input-group-text currency-symbol">R$</span>
                             <input type="text" id="totalValue" class="form-control" readonly />
                         </div>
                     </div>
@@ -95,3 +114,33 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Script para atualizar o símbolo da moeda
+        document.addEventListener('DOMContentLoaded', function () {
+            const currencySelect = document.getElementById('Currency');
+            const currencySymbols = document.querySelectorAll('.currency-symbol');
+
+            function updateCurrencySymbol(currency) {
+                const symbol = currency === 'BRL' ? 'R$' :
+                               currency === 'USD' ? '$' :
+                               currency === 'EUR' ? '€' :
+                               currency === 'GBP' ? '£' : '$';
+
+                currencySymbols.forEach(span => {
+                    span.textContent = symbol;
+                });
+            }
+
+            if (currencySelect) {
+                currencySelect.addEventListener('change', function() {
+                    updateCurrencySymbol(this.value);
+                });
+
+                // Inicializar com o valor atual
+                updateCurrencySymbol(currencySelect.value);
+            }
+        });
+    </script>
+}
