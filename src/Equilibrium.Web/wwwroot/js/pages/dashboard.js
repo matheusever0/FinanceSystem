@@ -605,15 +605,15 @@ FinanceSystem.Pages.Dashboard = (function () {
      * @param {number} value - Valor
      * @returns {string} - Valor formatado
      */
-    function formatCurrency(value) {
+    function formatCurrency(value, currency = 'BRL') {
         if (FinanceSystem.Core && FinanceSystem.Core.formatCurrency) {
-            return FinanceSystem.Core.formatCurrency(value);
+            return FinanceSystem.Core.formatCurrency(value, currency); // Pass both parameters
         }
 
         // Fallback
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
-            currency: 'BRL'
+            currency: currency
         }).format(value);
     }
 
@@ -856,6 +856,10 @@ FinanceSystem.Pages.Dashboard = (function () {
                 // Inicializa gráficos específicos após carregar o conteúdo
                 if (id === 'monthly-chart') {
                     initializeMonthlyComparisonChart();
+                }
+                // Adicione esta condição
+                else if (id === 'investment-summary') {
+                    formatCurrencyValues();
                 }
             })
             .catch(error => {
