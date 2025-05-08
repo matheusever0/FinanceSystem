@@ -220,13 +220,33 @@ namespace Equilibrium.Web.Controllers
             var investmentService = HttpContext.RequestServices.GetService<IInvestmentService>();
             var investments = (await investmentService!.GetAllInvestmentsAsync(token)).ToArray();
 
-            ViewBag.TotalInvested = investments.Sum(i => i.TotalInvested);
-            ViewBag.CurrentInvestmentsValue = investments.Sum(i => i.CurrentTotal);
-            ViewBag.InvestmentsGainLoss = investments.Sum(i => i.GainLossValue);
-            ViewBag.TopPerformingInvestments = investments
-                .OrderByDescending(i => i.GainLossPercentage)
-                .Take(3)
-                .ToList();
+            var investmentsByCurrency = investments.GroupBy(i => i.Currency).ToDictionary(g => g.Key, g => g.ToList());
+
+            var totalInvestedByCurrency = investmentsByCurrency.ToDictionary(
+                g => g.Key,
+                g => g.Value.Sum(i => i.TotalInvested)
+            );
+
+            var currentValueByCurrency = investmentsByCurrency.ToDictionary(
+                g => g.Key,
+                g => g.Value.Sum(i => i.CurrentTotal)
+            );
+
+            var gainLossByCurrency = investmentsByCurrency.ToDictionary(
+                g => g.Key,
+                g => g.Value.Sum(i => i.GainLossValue)
+            );
+
+            ViewBag.InvestmentsByCurrency = investmentsByCurrency;
+            ViewBag.TotalInvestedByCurrency = totalInvestedByCurrency;
+            ViewBag.CurrentValueByCurrency = currentValueByCurrency;
+            ViewBag.GainLossByCurrency = gainLossByCurrency;
+
+            ViewBag.TopPerformingInvestmentsByCurrency = investmentsByCurrency
+                .ToDictionary(g => g.Key, g => g.Value
+                    .OrderByDescending(i => i.GainLossPercentage)
+                    .Take(3)
+                    .ToList());
         }
 
         public IActionResult Privacy()

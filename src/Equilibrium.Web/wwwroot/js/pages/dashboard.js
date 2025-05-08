@@ -17,6 +17,7 @@ FinanceSystem.Pages.Dashboard = (function () {
         initializeDashboardStats();
         setupDashboardFilters();
         initializeCollapseSections();
+        formatCurrencyValues();
 
         // Inicializar gráficos de relatórios se estiver na página de relatórios
         if (document.getElementById('monthlyComparisonChart') ||
@@ -588,13 +589,23 @@ FinanceSystem.Pages.Dashboard = (function () {
         });
     }
 
+    function formatCurrencyValues() {
+        const currencyElements = document.querySelectorAll('.currency-value');
+        currencyElements.forEach(element => {
+            const value = parseFloat(element.getAttribute('data-value'));
+            const currency = element.getAttribute('data-currency');
+            if (!isNaN(value) && currency) {
+                element.textContent = formatCurrency(value, currency);
+            }
+        });
+    }
+
     /**
      * Formata um valor como moeda
      * @param {number} value - Valor
      * @returns {string} - Valor formatado
      */
     function formatCurrency(value) {
-        // Usa a função do módulo Core se disponível
         if (FinanceSystem.Core && FinanceSystem.Core.formatCurrency) {
             return FinanceSystem.Core.formatCurrency(value);
         }
@@ -1069,6 +1080,7 @@ FinanceSystem.Pages.Dashboard = (function () {
         initializeIncomeTypesPieChart: initializeIncomeTypesPieChart,
         initializeIncomeStatusPieChart: initializeIncomeStatusPieChart,
         initializeMonthlyReportComparisonChart: initializeMonthlyReportComparisonChart,
-        initializeMonthlyAnnualComparisonChart: initializeMonthlyAnnualComparisonChart
+        initializeMonthlyAnnualComparisonChart: initializeMonthlyAnnualComparisonChart,
+        formatCurrencyValues: formatCurrencyValues
     };
 })();
