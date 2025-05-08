@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 
 namespace Equilibrium.Web.Controllers
 {
@@ -88,12 +89,12 @@ namespace Equilibrium.Web.Controllers
             return File(bytes, "text/csv", "modelo_jogadores.csv");
         }
 
-        [HttpGet("export")]
-        public IActionResult GetTeamsCsv(string teamsData)
+        [HttpPost("ExportTeamsToCsv")]
+        public IActionResult ExportTeamsToCsv(string teamsData)
         {
             if (string.IsNullOrEmpty(teamsData))
             {
-                return BadRequest("Não há times para exportar.");
+                return RedirectToAction("Index", new { errorMessage = "Não há times para exportar." });
             }
 
             try
@@ -102,7 +103,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (teams == null || teams.Count == 0)
                 {
-                    return BadRequest("Não há times para exportar.");
+                    return RedirectToAction("Index", new { errorMessage = "Não há times para exportar." });
                 }
 
                 string csvContent = _teamService.ConvertTeamsToCSV(teams);
@@ -112,7 +113,7 @@ namespace Equilibrium.Web.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao gerar CSV: {ex.Message}");
+                return RedirectToAction("Index", new { errorMessage = $"Erro ao gerar CSV: {ex.Message}" });
             }
         }
     }

@@ -45,14 +45,14 @@ namespace Equilibrium.Web.Services
             // Embaralhar inicialmente para garantir aleatoriedade entre jogadores com características idênticas
             var shuffledPlayers = players.OrderBy(_ => _random.Next()).ToList();
 
-            // 1. Primeiro os que têm Prelive (ordenados por nível e energia)
+            // 1. Primeiro os que têm Prelive (ordenados por nível)
             var prelivePlayers = shuffledPlayers.Where(p => p.Prelive)
                 .OrderByDescending(p => p.Level)
                 .ToList();
 
-            // Shuffle dentro do mesmo nível e energia para adicionar aleatoriedade controlada
+            // Shuffle dentro do mesmo nível para adicionar aleatoriedade controlada
             var preliveGroups = prelivePlayers
-                .GroupBy(p => new { p.Level })
+                .GroupBy(p => p.Level)
                 .SelectMany(g => g.OrderBy(_ => _random.Next()));
 
             foreach (var player in preliveGroups)
@@ -66,7 +66,7 @@ namespace Equilibrium.Web.Services
                 .ToList();
 
             var gira50xGroups = gira50xPlayers
-                .GroupBy(p => new { p.Level })
+                .GroupBy(p => p.Level)
                 .SelectMany(g => g.OrderBy(_ => _random.Next()));
 
             foreach (var player in gira50xGroups)
@@ -82,7 +82,7 @@ namespace Equilibrium.Web.Services
                 .ToList();
 
             var descansoEspecialGroups = descansoEspecialPlayers
-                .GroupBy(p => new { p.Level })
+                .GroupBy(p => p.Level)
                 .SelectMany(g => g.OrderBy(_ => _random.Next()));
 
             foreach (var player in descansoEspecialGroups)
@@ -96,7 +96,7 @@ namespace Equilibrium.Web.Services
                 .ToList();
 
             var descansoGroups = descansoPlayers
-                .GroupBy(p => new { p.Level })
+                .GroupBy(p => p.Level)
                 .SelectMany(g => g.OrderBy(_ => _random.Next()));
 
             foreach (var player in descansoGroups)
@@ -110,7 +110,7 @@ namespace Equilibrium.Web.Services
                 .ToList();
 
             var restGroups = restPlayers
-                .GroupBy(p => new { p.Level })
+                .GroupBy(p => p.Level)
                 .SelectMany(g => g.OrderBy(_ => _random.Next()));
 
             foreach (var player in restGroups)
@@ -201,7 +201,7 @@ namespace Equilibrium.Web.Services
             if (teams.Count == 0 || players.Count == 0)
                 return;
 
-            // Ordenar os jogadores por Level e MaxEnergia
+            // Ordenar os jogadores por Level
             var orderedPlayers = players
                 .OrderByDescending(p => p.Level)
                 .ToList();
@@ -270,7 +270,7 @@ namespace Equilibrium.Web.Services
             // Verificar se algum time excede o limite máximo
             foreach (var team in teams.Where(t => t.Players.Count > maxPlayersPerTeam))
             {
-                // Identificar jogadores para remover, priorizando os com menor nível/energia
+                // Identificar jogadores para remover, priorizando os com menor nível
                 var playersToMove = team.Players
                     .OrderBy(p => p.Level)
                     .Take(team.Players.Count - maxPlayersPerTeam)
@@ -516,14 +516,21 @@ namespace Equilibrium.Web.Services
         {
             var csvLines = new List<string>
             {
-                "Time;Nickname;Level;Gira50x;Descanso;Prelive" // Cabeçalho
+                "Time;Nickname;Level;Prelive;Gira50x;Descanso" // Cabeçalho atualizado
             };
 
             foreach (var team in teams)
             {
-                foreach (var player in team.Players)
+                // Ordenar jogadores por prioridade: Prelive, Gira50x, Descanso e Level
+                var orderedPlayers = team.Players
+                    .OrderByDescending(p => p.Prelive)
+                    .ThenByDescending(p => p.Gira50x)
+                    .ThenByDescending(p => p.Descanso)
+                    .ThenByDescending(p => p.Level);
+
+                foreach (var player in orderedPlayers)
                 {
-                    csvLines.Add($"{team.TeamNumber};{player.Nickname};{player.Level};{(player.Gira50x ? "Sim" : "Não")};{(player.Descanso ? "Sim" : "Não")};{(player.Prelive ? "Sim" : "Não")}");
+                    csvLines.Add($"{team.TeamNumber};{player.Nickname};{player.Level};{(player.Prelive ? "Sim" : "Não")};{(player.Gira50x ? "Sim" : "Não")};{(player.Descanso ? "Sim" : "Não")}");
                 }
             }
 
