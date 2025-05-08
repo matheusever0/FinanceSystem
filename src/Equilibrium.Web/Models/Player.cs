@@ -16,9 +16,6 @@ namespace Equilibrium.Web.Models
         public bool Descanso { get; set; }
 
         public bool Prelive { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "A energia máxima deve ser um valor positivo")]
-        public int MaxEnergia { get; set; }
     }
 
     public class Team

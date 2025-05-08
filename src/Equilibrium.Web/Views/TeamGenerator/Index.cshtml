@@ -39,7 +39,7 @@
                         <label for="csvFile" class="form-label">Arquivo CSV</label>
                         <input type="file" class="form-control" id="csvFile" name="csvFile" accept=".csv" required>
                         <div class="form-text">
-                            Formato: Nickname;Level;Gira50x;Descanso;Prelive;MaxEnergia
+                            Formato: Nickname;Level;Gira50x;Descanso;Prelive
                         </div>
                         <div class="mt-2">
                             <a asp-action="DownloadSampleCsv" class="btn btn-outline-secondary btn-sm">
@@ -72,7 +72,7 @@
                     <li><strong>Prelive:</strong> Jogadores com esta característica têm maior prioridade</li>
                     <li><strong>Gira50x:</strong> Segunda prioridade</li>
                     <li><strong>Descanso:</strong> Jogadores com Prelive ou Gira50x que também têm Descanso</li>
-                    <li><strong>Level + Energia:</strong> Dentro de cada categoria</li>
+                    <li><strong>Level:</strong> Dentro de cada categoria</li>
                 </ol>
 
                 <div class="alert alert-warning mt-3 mb-0">
@@ -92,10 +92,10 @@
                     <i class="bi bi-file-earmark-spreadsheet me-2"></i> Exportar Resultados
                 </div>
                 <div class="card-body">
-                    <form id="exportForm" method="post">
+                    <form asp-action="ExportTeamsToCsv" method="post">
                         <input type="hidden" id="teamsData" name="teamsData"
                                value="@System.Text.Json.JsonSerializer.Serialize(Model.Teams)" />
-                        <button type="button" id="exportButton" class="btn btn-success w-100">
+                        <button type="submit" class="btn btn-success w-100">
                             <i class="bi bi-download"></i> Exportar Times para CSV
                         </button>
                     </form>
@@ -165,13 +165,21 @@
                                                         <th>Nickname</th>
                                                         <th style="width: 70px">Level</th>
                                                         <th style="width: 90px">Características</th>
-                                                        <th style="width: 120px">Máx. Energia</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @for (int i = 0; i < team.Players.Count; i++)
+                                                    @{
+                                                        // Ordenar jogadores por prioridade: Prelive, Gira50x, Descanso e depois Level
+                                                        var orderedPlayers = team.Players.OrderByDescending(p => p.Prelive)
+                                                        .ThenByDescending(p => p.Gira50x)
+                                                        .ThenByDescending(p => p.Descanso)
+                                                        .ThenByDescending(p => p.Level)
+                                                        .ToList();
+                                                    }
+
+                                                    @for (int i = 0; i < orderedPlayers.Count; i++)
                                                     {
-                                                        var player = team.Players[i];
+                                                        var player = orderedPlayers[i];
                                                         <tr>
                                                             <td class="text-center">@(i + 1)</td>
                                                             <td><strong>@player.Nickname</strong></td>
@@ -190,7 +198,6 @@
                                                                     <span class="player-tag descanso">Descanso</span>
                                                                 }
                                                             </td>
-                                                            <td class="text-end">@player.MaxEnergia.ToString("N0")</td>
                                                         </tr>
                                                     }
                                                 </tbody>
@@ -236,12 +243,6 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Configurar botão de exportação
-            document.getElementById('exportButton')?.addEventListener('click', function() {
-                const teamsData = document.getElementById('teamsData').value;
-                window.location.href = '@Url.Action("GetTeamsCsv")?teamsData=' + encodeURIComponent(teamsData);
-            });
-
             // Configurar botão para expandir/contrair todos os times
             const btnExpandAll = document.getElementById('btnExpandAll');
             if (btnExpandAll) {

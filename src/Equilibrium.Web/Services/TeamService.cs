@@ -48,12 +48,11 @@ namespace Equilibrium.Web.Services
             // 1. Primeiro os que têm Prelive (ordenados por nível e energia)
             var prelivePlayers = shuffledPlayers.Where(p => p.Prelive)
                 .OrderByDescending(p => p.Level)
-                .ThenByDescending(p => p.MaxEnergia)
                 .ToList();
 
             // Shuffle dentro do mesmo nível e energia para adicionar aleatoriedade controlada
             var preliveGroups = prelivePlayers
-                .GroupBy(p => new { p.Level, p.MaxEnergia })
+                .GroupBy(p => new { p.Level })
                 .SelectMany(g => g.OrderBy(_ => _random.Next()));
 
             foreach (var player in preliveGroups)
@@ -64,11 +63,10 @@ namespace Equilibrium.Web.Services
             // 2. Jogadores com Gira50x (que não têm Prelive)
             var gira50xPlayers = shuffledPlayers.Where(p => p.Gira50x && !p.Prelive)
                 .OrderByDescending(p => p.Level)
-                .ThenByDescending(p => p.MaxEnergia)
                 .ToList();
 
             var gira50xGroups = gira50xPlayers
-                .GroupBy(p => new { p.Level, p.MaxEnergia })
+                .GroupBy(p => new { p.Level })
                 .SelectMany(g => g.OrderBy(_ => _random.Next()));
 
             foreach (var player in gira50xGroups)
@@ -81,11 +79,10 @@ namespace Equilibrium.Web.Services
                                                                  !preliveGroups.Contains(p) &&
                                                                  !gira50xGroups.Contains(p))
                 .OrderByDescending(p => p.Level)
-                .ThenByDescending(p => p.MaxEnergia)
                 .ToList();
 
             var descansoEspecialGroups = descansoEspecialPlayers
-                .GroupBy(p => new { p.Level, p.MaxEnergia })
+                .GroupBy(p => new { p.Level })
                 .SelectMany(g => g.OrderBy(_ => _random.Next()));
 
             foreach (var player in descansoEspecialGroups)
@@ -96,11 +93,10 @@ namespace Equilibrium.Web.Services
             // 4. Jogadores com apenas Descanso
             var descansoPlayers = shuffledPlayers.Where(p => p.Descanso && !p.Prelive && !p.Gira50x)
                 .OrderByDescending(p => p.Level)
-                .ThenByDescending(p => p.MaxEnergia)
                 .ToList();
 
             var descansoGroups = descansoPlayers
-                .GroupBy(p => new { p.Level, p.MaxEnergia })
+                .GroupBy(p => new { p.Level })
                 .SelectMany(g => g.OrderBy(_ => _random.Next()));
 
             foreach (var player in descansoGroups)
@@ -111,11 +107,10 @@ namespace Equilibrium.Web.Services
             // 5. Todos os outros jogadores
             var restPlayers = shuffledPlayers.Where(p => !p.Prelive && !p.Gira50x && !p.Descanso)
                 .OrderByDescending(p => p.Level)
-                .ThenByDescending(p => p.MaxEnergia)
                 .ToList();
 
             var restGroups = restPlayers
-                .GroupBy(p => new { p.Level, p.MaxEnergia })
+                .GroupBy(p => new { p.Level })
                 .SelectMany(g => g.OrderBy(_ => _random.Next()));
 
             foreach (var player in restGroups)
@@ -209,7 +204,6 @@ namespace Equilibrium.Web.Services
             // Ordenar os jogadores por Level e MaxEnergia
             var orderedPlayers = players
                 .OrderByDescending(p => p.Level)
-                .ThenByDescending(p => p.MaxEnergia)
                 .ToList();
 
             // Distribuição em serpentina para garantir equilíbrio de força
@@ -278,7 +272,7 @@ namespace Equilibrium.Web.Services
             {
                 // Identificar jogadores para remover, priorizando os com menor nível/energia
                 var playersToMove = team.Players
-                    .OrderBy(p => p.Level * (p.MaxEnergia > 0 ? p.MaxEnergia : 1000))
+                    .OrderBy(p => p.Level)
                     .Take(team.Players.Count - maxPlayersPerTeam)
                     .ToList();
 
@@ -351,7 +345,7 @@ namespace Equilibrium.Web.Services
                     // Encontrar jogador adequado para transferir (preferencialmente sem características especiais)
                     var candidatesToMove = teamWithMax.Players
                         .OrderBy(p => p.Prelive ? 3 : (p.Gira50x ? 2 : (p.Descanso ? 1 : 0)))
-                        .ThenBy(p => p.Level * (p.MaxEnergia > 0 ? p.MaxEnergia : 1000))
+                        .ThenBy(p => p.Level)
                         .Take(3)
                         .ToList();
 
@@ -399,7 +393,7 @@ namespace Equilibrium.Web.Services
                     // Encontrar jogador adequado para transferir
                     var candidatesToMove = teamWithMax.Players
                         .Where(featurePredicate)
-                        .OrderBy(p => p.Level * (p.MaxEnergia > 0 ? p.MaxEnergia : 1000))
+                        .OrderBy(p => p.Level)
                         .ToList();
 
                     if (candidatesToMove.Any())
@@ -409,7 +403,7 @@ namespace Equilibrium.Web.Services
                         // Encontrar um jogador para troca que não tenha a característica
                         var swapCandidates = teamWithMin.Players
                             .Where(p => !featurePredicate(p))
-                            .OrderByDescending(p => p.Level * (p.MaxEnergia > 0 ? p.MaxEnergia : 1000))
+                            .OrderByDescending(p => p.Level)
                             .ToList();
 
                         if (swapCandidates.Any())
@@ -522,14 +516,14 @@ namespace Equilibrium.Web.Services
         {
             var csvLines = new List<string>
             {
-                "Time;Nickname;Level;Gira50x;Descanso;Prelive;MaxEnergia" // Cabeçalho
+                "Time;Nickname;Level;Gira50x;Descanso;Prelive" // Cabeçalho
             };
 
             foreach (var team in teams)
             {
                 foreach (var player in team.Players)
                 {
-                    csvLines.Add($"{team.TeamNumber};{player.Nickname};{player.Level};{(player.Gira50x ? "Sim" : "Não")};{(player.Descanso ? "Sim" : "Não")};{(player.Prelive ? "Sim" : "Não")};{player.MaxEnergia}");
+                    csvLines.Add($"{team.TeamNumber};{player.Nickname};{player.Level};{(player.Gira50x ? "Sim" : "Não")};{(player.Descanso ? "Sim" : "Não")};{(player.Prelive ? "Sim" : "Não")}");
                 }
             }
 
@@ -550,7 +544,7 @@ namespace Equilibrium.Web.Services
                 var line = lines[i];
                 var values = line.Split(';');
 
-                if (values.Length >= 6)
+                if (values.Length >= 5)
                 {
                     try
                     {
@@ -560,8 +554,7 @@ namespace Equilibrium.Web.Services
                             Level = int.TryParse(values[1].Trim(), out var level) ? level : 1,
                             Gira50x = IsPositiveValue(values[2]),
                             Descanso = IsPositiveValue(values[3]),
-                            Prelive = IsPositiveValue(values[4]),
-                            MaxEnergia = int.TryParse(values[5].Trim(), out var maxEnergia) ? maxEnergia : 0
+                            Prelive = IsPositiveValue(values[4])
                         });
                     }
                     catch

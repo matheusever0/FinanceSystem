@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace Equilibrium.Web.Controllers
 {
-    // Controller independente sem necessidade de autenticação ou conexão com outras partes do sistema
     [Route("teamgenerator")]
     public class TeamGeneratorController : Controller
     {
@@ -77,12 +76,12 @@ namespace Equilibrium.Web.Controllers
         [HttpGet("sample")]
         public IActionResult DownloadSampleCsv()
         {
-            string csvContent = "Nickname;Level;Gira50x;Descanso;Prelive;MaxEnergia\n" +
-                               "Player1;85;Sim;Não;Não;50000\n" +
-                               "Player2;90;Não;Sim;Não;40000\n" +
-                               "Player3;75;Não;Não;Sim;35000\n" +
-                               "Player4;92;Sim;Não;Não;60000\n" +
-                               "Player5;88;Não;Sim;Não;45000";
+            string csvContent = "Nickname;Level;Gira50x;Descanso;Prelive\n" +
+                               "Player1;85;Sim;Não;Não\n" +
+                               "Player2;90;Não;Sim;Não\n" +
+                               "Player3;75;Não;Não;Sim\n" +
+                               "Player4;92;Sim;Não;Não\n" +
+                               "Player5;88;Não;Sim;Não";
 
             byte[] bytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(csvContent);
 
