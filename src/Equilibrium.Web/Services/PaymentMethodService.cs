@@ -1,4 +1,6 @@
-Ôªøusing Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.PaymentMethod;
 
 namespace Equilibrium.Web.Services
@@ -18,12 +20,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo todos os m√©todos de pagamento");
+                _logger.LogInformation("Obtendo todos os mÈtodos de pagamento");
                 return await _apiService.GetAsync<IEnumerable<PaymentMethodModel>>("/api/PaymentMethods", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter m√©todos de pagamento");
+                _logger.LogError(ex, "Erro ao obter mÈtodos de pagamento");
                 throw;
             }
         }
@@ -32,12 +34,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo m√©todos de pagamento do sistema");
+                _logger.LogInformation("Obtendo mÈtodos de pagamento do sistema");
                 return await _apiService.GetAsync<IEnumerable<PaymentMethodModel>>("/api/PaymentMethods/system", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter m√©todos de pagamento do sistema");
+                _logger.LogError(ex, "Erro ao obter mÈtodos de pagamento do sistema");
                 throw;
             }
         }
@@ -46,12 +48,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo m√©todos de pagamento do usu√°rio");
+                _logger.LogInformation("Obtendo mÈtodos de pagamento do usu·rio");
                 return await _apiService.GetAsync<IEnumerable<PaymentMethodModel>>("/api/PaymentMethods/user", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter m√©todos de pagamento do usu√°rio");
+                _logger.LogError(ex, "Erro ao obter mÈtodos de pagamento do usu·rio");
                 throw;
             }
         }
@@ -60,12 +62,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo m√©todos de pagamento por tipo: {Type}", type);
+                _logger.LogInformation("Obtendo mÈtodos de pagamento por tipo: {Type}", type);
                 return await _apiService.GetAsync<IEnumerable<PaymentMethodModel>>($"/api/PaymentMethods/type/{type}", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter m√©todos de pagamento por tipo: {Type}", type);
+                _logger.LogError(ex, "Erro ao obter mÈtodos de pagamento por tipo: {Type}", type);
                 throw;
             }
         }
@@ -74,12 +76,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo m√©todo de pagamento com ID: {MethodId}", id);
+                _logger.LogInformation("Obtendo mÈtodo de pagamento com ID: {MethodId}", id);
                 return await _apiService.GetAsync<PaymentMethodModel>($"/api/PaymentMethods/{id}", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter m√©todo de pagamento com ID: {MethodId}", id);
+                _logger.LogError(ex, "Erro ao obter mÈtodo de pagamento com ID: {MethodId}", id);
                 throw;
             }
         }
@@ -88,12 +90,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Criando novo m√©todo de pagamento: {Name}", model.Name);
+                _logger.LogInformation("Criando novo mÈtodo de pagamento: {Name}", model.Name);
                 return await _apiService.PostAsync<PaymentMethodModel>("/api/PaymentMethods", model, token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao criar m√©todo de pagamento: {Name}", model.Name);
+                _logger.LogError(ex, "Erro ao criar mÈtodo de pagamento: {Name}", model.Name);
                 throw;
             }
         }
@@ -102,12 +104,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Atualizando m√©todo de pagamento com ID: {MethodId}", id);
+                _logger.LogInformation("Atualizando mÈtodo de pagamento com ID: {MethodId}", id);
                 return await _apiService.PutAsync<PaymentMethodModel>($"/api/PaymentMethods/{id}", model, token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar m√©todo de pagamento com ID: {MethodId}", id);
+                _logger.LogError(ex, "Erro ao atualizar mÈtodo de pagamento com ID: {MethodId}", id);
                 throw;
             }
         }
@@ -116,14 +118,25 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Excluindo m√©todo de pagamento com ID: {MethodId}", id);
+                _logger.LogInformation("Excluindo mÈtodo de pagamento com ID: {MethodId}", id);
                 await _apiService.DeleteAsync($"/api/PaymentMethods/{id}", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao excluir m√©todo de pagamento com ID: {MethodId}", id);
+                _logger.LogError(ex, "Erro ao excluir mÈtodo de pagamento com ID: {MethodId}", id);
                 throw;
             }
         }
-    }
-}
+        public async Task<PagedResult<PaymentMethodModel>> GetFilteredAsync(PaymentMethodFilter filter, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Obtendo registros filtrados");
+                return await _apiService.GetFilteredAsync<PagedResult<PaymentMethodModel>>("/api/PaymentMethods/filter", filter, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter registros filtrados");
+                throw;
+            }
+        }

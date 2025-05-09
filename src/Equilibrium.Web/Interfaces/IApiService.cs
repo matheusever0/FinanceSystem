@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 
 namespace Equilibrium.Web.Interfaces
 {
@@ -10,6 +10,7 @@ namespace Equilibrium.Web.Interfaces
         Task<T> PutAsync<T>(string endpoint, object? data = null, string token = "");
         Task DeleteAsync(string endpoint, string token);
         Task<T> DeleteAsync<T>(string endpoint, string token);
+        Task<T> GetFilteredAsync<T>(string endpoint, object filter, string token);
         Task<ClaimsPrincipal> GetClaimsPrincipalFromToken(string token);
     }
 }

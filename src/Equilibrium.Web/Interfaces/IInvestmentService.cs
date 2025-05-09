@@ -1,4 +1,7 @@
-﻿namespace Equilibrium.Web.Interfaces
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
+
+namespace Equilibrium.Web.Interfaces
 {
     public interface IInvestmentService
     {
@@ -9,5 +12,8 @@
         Task DeleteInvestmentAsync(string id, string token);
         Task<Models.Investment.InvestmentModel> RefreshPriceAsync(string id, string token);
         Task<IEnumerable<Models.Investment.InvestmentModel>> RefreshAllPricesAsync(string token);
+        Task<PagedResult<Models.Investment.InvestmentModel>> GetFilteredAsync(InvestmentFilter filter, string token);
     }
 }
+
+

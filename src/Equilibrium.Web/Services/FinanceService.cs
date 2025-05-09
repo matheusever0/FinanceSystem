@@ -1,4 +1,6 @@
-ï»¿using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Financing;
 
 namespace Equilibrium.Web.Services
@@ -130,12 +132,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Marcando financiamento como concluÃ­do: {FinancingId}", id);
+                _logger.LogInformation("Marcando financiamento como concluído: {FinancingId}", id);
                 return await _apiService.PostAsync<bool>($"/api/Financings/{id}/complete", null, token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao marcar financiamento como concluÃ­do: {FinancingId}", id);
+                _logger.LogError(ex, "Erro ao marcar financiamento como concluído: {FinancingId}", id);
                 throw;
             }
         }
@@ -154,5 +156,16 @@ namespace Equilibrium.Web.Services
                 throw;
             }
         }
-    }
-}
+        public async Task<PagedResult<FinancingModel>> GetFilteredAsync(FinancingFilter filter, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Obtendo registros filtrados");
+                return await _apiService.GetFilteredAsync<PagedResult<FinancingModel>>("/api/Financings/filter", filter, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter registros filtrados");
+                throw;
+            }
+        }

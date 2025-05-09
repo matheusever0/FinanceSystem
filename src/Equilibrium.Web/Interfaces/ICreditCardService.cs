@@ -1,4 +1,7 @@
-﻿using Equilibrium.Web.Models.CreditCard;
+using Equilibrium.Web.Models.CreditCard;
+
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
 
 namespace Equilibrium.Web.Services
 {
@@ -9,5 +12,7 @@ namespace Equilibrium.Web.Services
         Task<CreditCardModel> CreateCreditCardAsync(CreateCreditCardModel model, string token);
         Task<CreditCardModel> UpdateCreditCardAsync(string id, UpdateCreditCardModel model, string token);
         Task DeleteCreditCardAsync(string id, string token);
+        Task<PagedResult<CreditCardModel>> GetFilteredAsync(CreditCardFilter filter, string token);
     }
 }
+

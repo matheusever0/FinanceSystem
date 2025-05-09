@@ -1,4 +1,6 @@
-Ôªøusing Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Login;
 using Equilibrium.Web.Models.User;
 
@@ -19,22 +21,22 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation($"Tentando login via API para usu√°rio: {model.Username}");
+                _logger.LogInformation($"Tentando login via API para usu·rio: {model.Username}");
 
                 var response = await _apiService.PostAsync<LoginResponseModel>("/api/Auth/login", model);
 
                 if (response == null)
                 {
                     _logger.LogWarning($"Login falhou para {model.Username} - Resposta nula");
-                    throw new Exception("N√£o foi poss√≠vel autenticar o usu√°rio");
+                    throw new Exception("N„o foi possÌvel autenticar o usu·rio");
                 }
 
                 return response;
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, $"Erro de comunica√ß√£o com a API durante login de {model.Username}");
-                throw new Exception("N√£o foi poss√≠vel conectar ao servidor. Verifique sua conex√£o.", ex);
+                _logger.LogError(ex, $"Erro de comunicaÁ„o com a API durante login de {model.Username}");
+                throw new Exception("N„o foi possÌvel conectar ao servidor. Verifique sua conex„o.", ex);
             }
             catch (Exception ex)
             {
@@ -67,5 +69,16 @@ namespace Equilibrium.Web.Services
         {
             await _apiService.DeleteAsync($"/api/Users/{id}", token);
         }
-    }
-}
+        public async Task<PagedResult<UserModel>> GetFilteredAsync(UserFilter filter, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Obtendo registros filtrados");
+                return await _apiService.GetFilteredAsync<PagedResult<UserModel>>("/api/Users/filter", filter, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter registros filtrados");
+                throw;
+            }
+        }

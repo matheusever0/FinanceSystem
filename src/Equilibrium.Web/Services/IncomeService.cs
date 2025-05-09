@@ -1,4 +1,6 @@
-ï»¿using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Income;
 
 namespace Equilibrium.Web.Services
@@ -46,12 +48,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo receitas do mÃªs {Month}/{Year}", month, year);
+                _logger.LogInformation("Obtendo receitas do mês {Month}/{Year}", month, year);
                 return await _apiService.GetAsync<IEnumerable<IncomeModel>>($"/api/Incomes/month/{year}/{month}", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter receitas do mÃªs {Month}/{Year}", month, year);
+                _logger.LogError(ex, "Erro ao obter receitas do mês {Month}/{Year}", month, year);
                 throw;
             }
         }
@@ -234,5 +236,16 @@ namespace Equilibrium.Web.Services
                 throw;
             }
         }
-    }
-}
+        public async Task<PagedResult<IncomeModel>> GetFilteredAsync(IncomeFilter filter, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Obtendo registros filtrados");
+                return await _apiService.GetFilteredAsync<PagedResult<IncomeModel>>("/api/Incomes/filter", filter, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter registros filtrados");
+                throw;
+            }
+        }

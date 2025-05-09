@@ -1,4 +1,6 @@
-Ôªøusing Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models;
 
 namespace Equilibrium.Web.Services
@@ -46,12 +48,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo tipos de pagamento do usu√°rio");
+                _logger.LogInformation("Obtendo tipos de pagamento do usu·rio");
                 return await _apiService.GetAsync<IEnumerable<PaymentTypeModel>>("/api/PaymentTypes/user", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter tipos de pagamento do usu√°rio");
+                _logger.LogError(ex, "Erro ao obter tipos de pagamento do usu·rio");
                 throw;
             }
         }
@@ -111,5 +113,16 @@ namespace Equilibrium.Web.Services
                 throw;
             }
         }
-    }
-}
+        public async Task<PagedResult<PaymentTypeModel>> GetFilteredAsync(PaymentTypeFilter filter, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Obtendo registros filtrados");
+                return await _apiService.GetFilteredAsync<PagedResult<PaymentTypeModel>>("/api/PaymentTypes/filter", filter, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter registros filtrados");
+                throw;
+            }
+        }

@@ -1,4 +1,6 @@
-ï»¿using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Investment;
 
 namespace Equilibrium.Web.Services
@@ -88,12 +90,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Atualizando preÃ§o do investimento com ID: {InvestmentId}", id);
+                _logger.LogInformation("Atualizando preço do investimento com ID: {InvestmentId}", id);
                 return await _apiService.PostAsync<InvestmentModel>($"/api/Investments/{id}/refresh", null, token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar preÃ§o do investimento com ID: {InvestmentId}", id);
+                _logger.LogError(ex, "Erro ao atualizar preço do investimento com ID: {InvestmentId}", id);
                 throw;
             }
         }
@@ -102,14 +104,25 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Atualizando preÃ§os de todos os investimentos");
+                _logger.LogInformation("Atualizando preços de todos os investimentos");
                 return await _apiService.PostAsync<IEnumerable<InvestmentModel>>("/api/Investments/refresh-all", null, token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar preÃ§os de todos os investimentos");
+                _logger.LogError(ex, "Erro ao atualizar preços de todos os investimentos");
                 throw;
             }
         }
-    }
-}
+        public async Task<PagedResult<Models.Investment.InvestmentModel>> GetFilteredAsync(InvestmentFilter filter, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Obtendo registros filtrados");
+                return await _apiService.GetFilteredAsync<PagedResult<Models.Investment.InvestmentModel>>("/api/Investments/filter", filter, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter registros filtrados");
+                throw;
+            }
+        }

@@ -1,4 +1,6 @@
-Ôªøusing Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.CreditCard;
 
 namespace Equilibrium.Web.Services
@@ -18,12 +20,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo todos os cart√µes de cr√©dito");
+                _logger.LogInformation("Obtendo todos os cartıes de crÈdito");
                 return await _apiService.GetAsync<IEnumerable<CreditCardModel>>("/api/CreditCards", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter cart√µes de cr√©dito");
+                _logger.LogError(ex, "Erro ao obter cartıes de crÈdito");
                 throw;
             }
         }
@@ -32,12 +34,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo cart√£o de cr√©dito com ID: {CardId}", id);
+                _logger.LogInformation("Obtendo cart„o de crÈdito com ID: {CardId}", id);
                 return await _apiService.GetAsync<CreditCardModel>($"/api/CreditCards/{id}", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter cart√£o de cr√©dito com ID: {CardId}", id);
+                _logger.LogError(ex, "Erro ao obter cart„o de crÈdito com ID: {CardId}", id);
                 throw;
             }
         }
@@ -46,12 +48,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Criando novo cart√£o de cr√©dito: {Name}", model.Name);
+                _logger.LogInformation("Criando novo cart„o de crÈdito: {Name}", model.Name);
                 return await _apiService.PostAsync<CreditCardModel>("/api/CreditCards", model, token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao criar cart√£o de cr√©dito: {Name}", model.Name);
+                _logger.LogError(ex, "Erro ao criar cart„o de crÈdito: {Name}", model.Name);
                 throw;
             }
         }
@@ -60,12 +62,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Atualizando cart√£o de cr√©dito com ID: {CardId}", id);
+                _logger.LogInformation("Atualizando cart„o de crÈdito com ID: {CardId}", id);
                 return await _apiService.PutAsync<CreditCardModel>($"/api/CreditCards/{id}", model, token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar cart√£o de cr√©dito com ID: {CardId}", id);
+                _logger.LogError(ex, "Erro ao atualizar cart„o de crÈdito com ID: {CardId}", id);
                 throw;
             }
         }
@@ -74,14 +76,25 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Excluindo cart√£o de cr√©dito com ID: {CardId}", id);
+                _logger.LogInformation("Excluindo cart„o de crÈdito com ID: {CardId}", id);
                 await _apiService.DeleteAsync($"/api/CreditCards/{id}", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao excluir cart√£o de cr√©dito com ID: {CardId}", id);
+                _logger.LogError(ex, "Erro ao excluir cart„o de crÈdito com ID: {CardId}", id);
                 throw;
             }
         }
-    }
-}
+        public async Task<PagedResult<CreditCardModel>> GetFilteredAsync(CreditCardFilter filter, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Obtendo registros filtrados");
+                return await _apiService.GetFilteredAsync<PagedResult<CreditCardModel>>("/api/CreditCards/filter", filter, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter registros filtrados");
+                throw;
+            }
+        }

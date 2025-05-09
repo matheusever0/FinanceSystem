@@ -1,4 +1,6 @@
-Ôªøusing Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Permission;
 using System.Collections.Concurrent;
 
@@ -25,7 +27,7 @@ namespace Equilibrium.Web.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter todas as permiss√µes");
+                _logger.LogError(ex, "Erro ao obter todas as permissıes");
                 return Enumerable.Empty<PermissionModel>();
             }
         }
@@ -61,7 +63,7 @@ namespace Equilibrium.Web.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter permiss√µes para o perfil: {RoleId}", roleId);
+                _logger.LogError(ex, "Erro ao obter permissıes para o perfil: {RoleId}", roleId);
                 return Enumerable.Empty<PermissionModel>();
             }
         }
@@ -86,14 +88,14 @@ namespace Equilibrium.Web.Services
             {
                 if (DateTime.Now.Subtract(cachedResult.Timestamp).TotalMinutes < 5)
                 {
-                    _logger.LogDebug("Retornando permiss√µes em cache para o usu√°rio: {UserId}", userId);
+                    _logger.LogDebug("Retornando permissıes em cache para o usu·rio: {UserId}", userId);
                     return cachedResult.Permissions;
                 }
             }
 
             try
             {
-                _logger.LogDebug("Buscando permiss√µes da API para o usu√°rio: {UserId}", userId);
+                _logger.LogDebug("Buscando permissıes da API para o usu·rio: {UserId}", userId);
                 var permissions = await _apiService.GetAsync<IEnumerable<PermissionModel>>($"/api/Permissions/user/{userId}", token);
 
                 _userPermissionsCache[cacheKey] = (DateTime.Now, permissions);
@@ -102,9 +104,20 @@ namespace Equilibrium.Web.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter permiss√µes para o usu√°rio: {UserId}", userId);
+                _logger.LogError(ex, "Erro ao obter permissıes para o usu·rio: {UserId}", userId);
                 return Enumerable.Empty<PermissionModel>();
             }
         }
-    }
-}
+        public async Task<PagedResult<PermissionModel>> GetFilteredAsync(PermissionFilter filter, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Obtendo registros filtrados");
+                return await _apiService.GetFilteredAsync<PagedResult<PermissionModel>>("/api/Permissions/filter", filter, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter registros filtrados");
+                throw;
+            }
+        }

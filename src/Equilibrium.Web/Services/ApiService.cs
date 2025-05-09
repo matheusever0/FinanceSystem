@@ -1,4 +1,4 @@
-Ôªøusing Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.IdentityModel.Tokens.Jwt;
@@ -38,7 +38,7 @@ namespace Equilibrium.Web.Services
 
         private async Task HandleUnauthorizedResponse()
         {
-            _logger.LogWarning("Token expirado ou inv√°lido. Redirecionando para login...");
+            _logger.LogWarning("Token expirado ou inv·lido. Redirecionando para login...");
             if (_httpContextAccessor.HttpContext != null)
             {
                 await _httpContextAccessor.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -65,7 +65,7 @@ namespace Equilibrium.Web.Services
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 await HandleUnauthorizedResponse();
-                var errorMessage = string.IsNullOrEmpty(content) ? "Sess√£o expirada ou inv√°lida" : content;
+                var errorMessage = string.IsNullOrEmpty(content) ? "Sess„o expirada ou inv·lida" : content;
                 throw new UnauthorizedAccessException(errorMessage);
             }
 
@@ -81,12 +81,12 @@ namespace Equilibrium.Web.Services
                             .ToList();
 
                         var formattedMessage = string.Join("\n", allMessages);
-                        throw new Exception($"Erros de valida√ß√£o:\n{formattedMessage}");
+                        throw new Exception($"Erros de validaÁ„o:\n{formattedMessage}");
                     }
                 }
                 catch (JsonException)
                 {
-                    // ignora, segue com erro gen√©rico
+                    // ignora, segue com erro genÈrico
                 }
 
                 var fallbackMessage = string.IsNullOrEmpty(content) ? "Erro desconhecido na API" : content;
@@ -133,7 +133,7 @@ namespace Equilibrium.Web.Services
         {
             var client = CreateClient(token);
             var json = data != null ? JsonSerializer.Serialize(data) : "";
-            _logger.LogInformation("Enviando requisi√ß√£o para {Endpoint}: {Json}", endpoint, json);
+            _logger.LogInformation("Enviando requisiÁ„o para {Endpoint}: {Json}", endpoint, json);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await client.PostAsync(endpoint, content);
             var responseContent = await HandleResponse(response);
@@ -175,7 +175,7 @@ namespace Equilibrium.Web.Services
             {
                 if (!TokenHandler.CanReadToken(token))
                 {
-                    _logger.LogError("Token JWT inv√°lido");
+                    _logger.LogError("Token JWT inv·lido");
                     return Task.FromResult<ClaimsPrincipal>(null);
                 }
 
@@ -196,6 +196,64 @@ namespace Equilibrium.Web.Services
                 return Task.FromResult<ClaimsPrincipal>(null);
             }
         }
-
+    private string ConvertFilterToQueryString(object filter)
+    {
+        if (filter == null) return string.Empty;
+        
+        var properties = filter.GetType().GetProperties();
+        var parameters = new List<string>();
+        
+        foreach (var prop in properties)
+        {
+            var value = prop.GetValue(filter);
+            if (value != null)
+            {
+                if (value is DateTime dateTime)
+                    parameters.Add($"{prop.Name}={Uri.EscapeDataString(dateTime.ToString("yyyy-MM-dd"))}");
+                else
+                    parameters.Add($"{prop.Name}={Uri.EscapeDataString(value.ToString())}");
+            }
+        }
+        
+        return parameters.Count > 0 ? $"?{string.Join("&", parameters)}" : string.Empty;
     }
-}
+
+    public async Task<T> GetFilteredAsync<T>(string endpoint, object filter, string token)
+    {
+        var client = CreateClient(token);
+        
+        // Converter objeto de filtro para query string
+        var queryString = ConvertFilterToQueryString(filter);
+        var response = await client.GetAsync($"{endpoint}{queryString}");
+        var content = await HandleResponse(response);
+        
+        // Extract pagination headers if present
+        if (_httpContextAccessor?.HttpContext != null)
+        {
+            if (response.Headers.Contains("X-Pagination-Total"))
+            {
+                response.Headers.TryGetValues("X-Pagination-Total", out var totalValues);
+                _httpContextAccessor.HttpContext.Items["X-Pagination-Total"] = totalValues?.FirstOrDefault();
+            }
+            
+            if (response.Headers.Contains("X-Pagination-Pages"))
+            {
+                response.Headers.TryGetValues("X-Pagination-Pages", out var pagesValues);
+                _httpContextAccessor.HttpContext.Items["X-Pagination-Pages"] = pagesValues?.FirstOrDefault();
+            }
+            
+            if (response.Headers.Contains("X-Pagination-Page"))
+            {
+                response.Headers.TryGetValues("X-Pagination-Page", out var pageValues);
+                _httpContextAccessor.HttpContext.Items["X-Pagination-Page"] = pageValues?.FirstOrDefault();
+            }
+            
+            if (response.Headers.Contains("X-Pagination-Size"))
+            {
+                response.Headers.TryGetValues("X-Pagination-Size", out var sizeValues);
+                _httpContextAccessor.HttpContext.Items["X-Pagination-Size"] = sizeValues?.FirstOrDefault();
+            }
+        }
+        
+        return JsonSerializer.Deserialize<T>(content, _jsonOptions)!;
+    }

@@ -1,4 +1,7 @@
-﻿using Equilibrium.Web.Models.IncomeType;
+using Equilibrium.Web.Models.IncomeType;
+
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
 
 namespace Equilibrium.Web.Services
 {
@@ -11,5 +14,8 @@ namespace Equilibrium.Web.Services
         Task<IncomeTypeModel> CreateIncomeTypeAsync(CreateIncomeTypeModel model, string token);
         Task<IncomeTypeModel> UpdateIncomeTypeAsync(string id, UpdateIncomeTypeModel model, string token);
         Task DeleteIncomeTypeAsync(string id, string token);
+        Task<PagedResult<IncomeTypeModel>> GetFilteredAsync(IncomeTypeFilter filter, string token);
     }
 }
+
+

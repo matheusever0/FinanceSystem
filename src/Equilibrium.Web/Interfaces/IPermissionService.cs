@@ -1,4 +1,7 @@
-﻿using Equilibrium.Web.Models.Permission;
+using Equilibrium.Web.Models.Permission;
+
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
 
 namespace Equilibrium.Web.Services
 {
@@ -13,5 +16,7 @@ namespace Equilibrium.Web.Services
         Task<bool> AssignPermissionToRoleAsync(string roleId, string permissionId, string token);
         Task<bool> RemovePermissionFromRoleAsync(string roleId, string permissionId, string token);
         Task<IEnumerable<PermissionModel>> GetPermissionsByUserIdAsync(string userId, string token);
+        Task<PagedResult<PermissionModel>> GetFilteredAsync(PermissionFilter filter, string token);
     }
 }
+

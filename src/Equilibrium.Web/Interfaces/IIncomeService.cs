@@ -1,4 +1,7 @@
-﻿using Equilibrium.Web.Models.Income;
+using Equilibrium.Web.Models.Income;
+
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
 
 namespace Equilibrium.Web.Services
 {
@@ -19,5 +22,8 @@ namespace Equilibrium.Web.Services
         Task<string> GetInstallmentParentIncomeAsync(string installmentId, string token);
         Task<bool> MarkInstallmentAsReceivedAsync(string installmentId, DateTime receivedDate, string token);
         Task<bool> CancelInstallmentAsync(string installmentId, string token);
+        Task<PagedResult<IncomeModel>> GetFilteredAsync(IncomeFilter filter, string token);
     }
 }
+
+

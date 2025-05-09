@@ -1,4 +1,6 @@
-ï»¿using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Financing;
 using Equilibrium.Web.Models.Payment;
 
@@ -47,12 +49,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo pagamentos do mÃªs {Month}/{Year}", month, year);
+                _logger.LogInformation("Obtendo pagamentos do mês {Month}/{Year}", month, year);
                 return await _apiService.GetAsync<IEnumerable<PaymentModel>>($"/api/Payments/month/{year}/{month}", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter pagamentos do mÃªs {Month}/{Year}", month, year);
+                _logger.LogError(ex, "Erro ao obter pagamentos do mês {Month}/{Year}", month, year);
                 throw;
             }
         }
@@ -103,12 +105,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo pagamentos por mÃ©todo: {MethodId}", methodId);
+                _logger.LogInformation("Obtendo pagamentos por método: {MethodId}", methodId);
                 return await _apiService.GetAsync<IEnumerable<PaymentModel>>($"/api/Payments/method/{methodId}", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter pagamentos por mÃ©todo: {MethodId}", methodId);
+                _logger.LogError(ex, "Erro ao obter pagamentos por método: {MethodId}", methodId);
                 throw;
             }
         }
@@ -269,12 +271,12 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo financiamentos disponÃ­veis para pagamento");
+                _logger.LogInformation("Obtendo financiamentos disponíveis para pagamento");
                 return await _apiService.GetAsync<IEnumerable<FinancingModel>>("/api/Payments/financing-options", token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter financiamentos disponÃ­veis");
+                _logger.LogError(ex, "Erro ao obter financiamentos disponíveis");
                 throw;
             }
         }
@@ -293,5 +295,16 @@ namespace Equilibrium.Web.Services
                 throw;
             }
         }
-    }
-}
+        public async Task<PagedResult<PaymentModel>> GetFilteredAsync(PaymentFilter filter, string token)
+        {
+            try
+            {
+                _logger.LogInformation("Obtendo registros filtrados");
+                return await _apiService.GetFilteredAsync<PagedResult<PaymentModel>>("/api/Payments/filter", filter, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter registros filtrados");
+                throw;
+            }
+        }
