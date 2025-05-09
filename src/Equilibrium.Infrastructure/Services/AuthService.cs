@@ -41,7 +41,7 @@ namespace Equilibrium.Infrastructure.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(double.Parse(_configuration["JwtSettings:ExpiryDays"] ?? "1")),
+                Expires = DateTime.UtcNow.AddDays(double.Parse("1")),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature

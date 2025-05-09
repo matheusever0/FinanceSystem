@@ -157,7 +157,7 @@ namespace Equilibrium.Application.Services
                 return new LoginResponseDto
                 {
                     Token = token,
-                    Expiration = DateTime.Now.AddDays(1),
+                    Expiration = DateTime.UtcNow.AddDays(double.Parse("1")),
                     User = _mapper.Map<UserDto>(user)
                 };
             }
