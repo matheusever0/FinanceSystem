@@ -1,9 +1,10 @@
-Ôªøusing Equilibrium.Resources.Web;
+using Equilibrium.Resources.Web;
 using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
 using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Investment;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -53,12 +54,12 @@ namespace Equilibrium.Web.Controllers
 
                 string typeDescription = type switch
                 {
-                    1 => "A√ß√µes",
-                    2 => "Fundos Imobili√°rios",
+                    1 => "AÁıes",
+                    2 => "Fundos Imobili·rios",
                     3 => "ETFs",
-                    4 => "A√ß√µes Estrangeiras",
+                    4 => "AÁıes Estrangeiras",
                     5 => "Renda Fixa",
-                    _ => "N√£o Categorizado"
+                    _ => "N„o Categorizado"
                 };
 
                 ViewBag.Title = $"Investimentos por Tipo: {typeDescription}";
@@ -78,7 +79,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do investimento n√£o fornecido");
+                return BadRequest("ID do investimento n„o fornecido");
             }
 
             try
@@ -88,10 +89,10 @@ namespace Equilibrium.Web.Controllers
 
                 if (investment == null)
                 {
-                    return NotFound("Investimento n√£o encontrado");
+                    return NotFound("Investimento n„o encontrado");
                 }
 
-                // Carregar transa√ß√µes para este investimento
+                // Carregar transaÁıes para este investimento
                 var transactions = await _investmentTransactionService.GetTransactionsByInvestmentIdAsync(id, token);
                 investment.Transactions = [.. transactions];
 
@@ -119,7 +120,7 @@ namespace Equilibrium.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao preparar formul√°rio de cria√ß√£o de investimento");
+                _logger.LogError(ex, "Erro ao preparar formul·rio de criaÁ„o de investimento");
                 TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PreparingForm;
                 return RedirectToAction(nameof(Index));
             }
@@ -155,7 +156,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do investimento n√£o fornecido");
+                return BadRequest("ID do investimento n„o fornecido");
             }
 
             try
@@ -163,11 +164,11 @@ namespace Equilibrium.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var investment = await _investmentService.GetInvestmentByIdAsync(id, token);
 
-                return investment == null ? NotFound("Investimento n√£o encontrado") : View(investment);
+                return investment == null ? NotFound("Investimento n„o encontrado") : View(investment);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar investimento para exclus√£o: {Id}", id);
+                _logger.LogError(ex, "Erro ao carregar investimento para exclus„o: {Id}", id);
                 TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Investment, ex);
                 return RedirectToAction(nameof(Index));
             }
@@ -180,7 +181,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do investimento n√£o fornecido");
+                return BadRequest("ID do investimento n„o fornecido");
             }
 
             try
@@ -205,19 +206,19 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do investimento n√£o fornecido");
+                return BadRequest("ID do investimento n„o fornecido");
             }
 
             try
             {
                 var token = HttpContext.GetJwtToken();
                 await _investmentService.RefreshPriceAsync(id, token);
-                TempData["SuccessMessage"] = "Pre√ßo atualizado com sucesso!";
+                TempData["SuccessMessage"] = "PreÁo atualizado com sucesso!";
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar pre√ßo do investimento: {Id}", id);
+                _logger.LogError(ex, "Erro ao atualizar preÁo do investimento: {Id}", id);
                 TempData["ErrorMessage"] = ResourceFinanceWeb.Error_RefreshingPrice;
                 return RedirectToAction(nameof(Details), new { id });
             }
@@ -232,15 +233,75 @@ namespace Equilibrium.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
                 await _investmentService.RefreshAllPricesAsync(token);
-                TempData["SuccessMessage"] = "Todos os pre√ßos foram atualizados com sucesso!";
+                TempData["SuccessMessage"] = "Todos os preÁos foram atualizados com sucesso!";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao atualizar pre√ßos de todos os investimentos");
+                _logger.LogError(ex, "Erro ao atualizar preÁos de todos os investimentos");
                 TempData["ErrorMessage"] = ResourceFinanceWeb.Error_RefreshingPrice;
                 return RedirectToAction(nameof(Index));
             }
         }
     }
-}
+
+    [HttpGet("filter")]
+    [RequirePermission("investments.view")]
+    public async Task<IActionResult> Filter(InvestmentFilter filter = null)
+    {
+        if (filter == null)
+            filter = new InvestmentFilter();
+        
+        try
+        {
+            var token = HttpContext.GetJwtToken();
+            var result = await _investmentService.GetFilteredAsync(filter, token);
+            
+            // Add pagination headers
+            Response.Headers.Add("X-Pagination-Total", result.TotalCount.ToString());
+            Response.Headers.Add("X-Pagination-Pages", result.TotalPages.ToString());
+            Response.Headers.Add("X-Pagination-Page", result.PageNumber.ToString());
+            Response.Headers.Add("X-Pagination-Size", result.PageSize.ToString());
+            
+            ViewBag.Filter = filter;
+            ViewBag.TotalCount = result.TotalCount;
+            ViewBag.TotalPages = result.TotalPages;
+            ViewBag.CurrentPage = result.PageNumber;
+            ViewBag.PageSize = result.PageSize;
+            
+            return View("Index", result.Items);
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Investment, ex);
+            return RedirectToAction("Index", "Home");
+        }
+    }
+
+    [HttpGet("api/filter")]
+    [RequirePermission("investments.view")]
+    public async Task<IActionResult> FilterJson([FromQuery] InvestmentFilter filter)
+    {
+        if (filter == null)
+            filter = new InvestmentFilter();
+            
+        try
+        {
+            var token = HttpContext.GetJwtToken();
+            var result = await _investmentService.GetFilteredAsync(filter, token);
+            
+            return Json(new { 
+                items = result.Items, 
+                totalCount = result.TotalCount,
+                pageNumber = result.PageNumber,
+                pageSize = result.PageSize,
+                totalPages = result.TotalPages,
+                hasPreviousPage = result.HasPreviousPage,
+                hasNextPage = result.HasNextPage
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }}

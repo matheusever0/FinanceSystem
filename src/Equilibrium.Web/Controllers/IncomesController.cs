@@ -1,8 +1,9 @@
-Ôªøusing Equilibrium.Resources.Web;
+using Equilibrium.Resources.Web;
 using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
 using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
+using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Income;
 using Equilibrium.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -127,7 +128,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do tipo de receita n√£o fornecido");
+                return BadRequest("ID do tipo de receita n„o fornecido");
             }
 
             try
@@ -138,7 +139,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (incomeType == null)
                 {
-                    return NotFound("Tipo de receita n√£o encontrado");
+                    return NotFound("Tipo de receita n„o encontrado");
                 }
 
                 ViewBag.Title = $"Receitas por Tipo: {incomeType.Name}";
@@ -157,7 +158,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita n√£o fornecido");
+                return BadRequest("ID da receita n„o fornecido");
             }
 
             try
@@ -165,7 +166,7 @@ namespace Equilibrium.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var income = await _incomeService.GetIncomeByIdAsync(id, token);
 
-                return income == null ? NotFound("Receita n√£o encontrada") : View(income);
+                return income == null ? NotFound("Receita n„o encontrada") : View(income);
             }
             catch (Exception ex)
             {
@@ -222,7 +223,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita n√£o fornecido");
+                return BadRequest("ID da receita n„o fornecido");
             }
 
             try
@@ -232,7 +233,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (income == null)
                 {
-                    return NotFound("Receita n√£o encontrada");
+                    return NotFound("Receita n„o encontrada");
                 }
 
                 var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
@@ -267,7 +268,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita n√£o fornecido");
+                return BadRequest("ID da receita n„o fornecido");
             }
 
             if (!ModelState.IsValid)
@@ -296,7 +297,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita n√£o fornecido");
+                return BadRequest("ID da receita n„o fornecido");
             }
 
             try
@@ -304,7 +305,7 @@ namespace Equilibrium.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var income = await _incomeService.GetIncomeByIdAsync(id, token);
 
-                return income == null ? NotFound("Receita n√£o encontrada") : View(income);
+                return income == null ? NotFound("Receita n„o encontrada") : View(income);
             }
             catch (Exception ex)
             {
@@ -320,7 +321,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita n√£o fornecido");
+                return BadRequest("ID da receita n„o fornecido");
             }
 
             try
@@ -344,7 +345,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita n√£o fornecido");
+                return BadRequest("ID da receita n„o fornecido");
             }
 
             try
@@ -368,7 +369,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita n√£o fornecido");
+                return BadRequest("ID da receita n„o fornecido");
             }
 
             try
@@ -401,10 +402,10 @@ namespace Equilibrium.Web.Controllers
                 sb.AppendLine("Descricao,Valor,DataVencimento,DataRecebimento,TipoReceitaId,Recorrente,Parcelas,Observacoes");
 
                 // Add example rows
-                sb.AppendLine("Sal√°rio,3500.00,25/06/2025,,id-tipo-receita-1,Sim,1,'Sal√°rio mensal'");
-                sb.AppendLine("Freelance,1200.00,15/06/2025,15/06/2025,id-tipo-receita-2,N√£o,1,'Projeto de design'");
-                sb.AppendLine("Aluguel,1800.00,10/06/2025,,id-tipo-receita-3,Sim,1,'Aluguel do im√≥vel'");
-                sb.AppendLine("Investimentos,350.00,30/06/2025,,id-tipo-receita-4,N√£o,1,'Rendimentos'");
+                sb.AppendLine("Sal·rio,3500.00,25/06/2025,,id-tipo-receita-1,Sim,1,'Sal·rio mensal'");
+                sb.AppendLine("Freelance,1200.00,15/06/2025,15/06/2025,id-tipo-receita-2,N„o,1,'Projeto de design'");
+                sb.AppendLine("Aluguel,1800.00,10/06/2025,,id-tipo-receita-3,Sim,1,'Aluguel do imÛvel'");
+                sb.AppendLine("Investimentos,350.00,30/06/2025,,id-tipo-receita-4,N„o,1,'Rendimentos'");
 
                 // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
                 string content = sb.ToString();
@@ -440,7 +441,7 @@ namespace Equilibrium.Web.Controllers
 
             if (!csvFile.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
             {
-                TempData["ErrorMessage"] = "O arquivo deve ser um CSV v√°lido.";
+                TempData["ErrorMessage"] = "O arquivo deve ser um CSV v·lido.";
                 return RedirectToAction(nameof(Export));
             }
 
@@ -457,7 +458,7 @@ namespace Equilibrium.Web.Controllers
                     var header = await reader.ReadLineAsync();
                     if (header == null)
                     {
-                        TempData["ErrorMessage"] = "O arquivo CSV est√° vazio ou n√£o possui cabe√ßalho.";
+                        TempData["ErrorMessage"] = "O arquivo CSV est· vazio ou n„o possui cabeÁalho.";
                         return RedirectToAction(nameof(Export));
                     }
 
@@ -468,7 +469,7 @@ namespace Equilibrium.Web.Controllers
 
                     if (!ValidateHeader(headerColumns, expectedColumns, out var missingColumns))
                     {
-                        TempData["ErrorMessage"] = $"O cabe√ßalho do CSV est√° inv√°lido. Colunas ausentes: {string.Join(", ", missingColumns)}";
+                        TempData["ErrorMessage"] = $"O cabeÁalho do CSV est· inv·lido. Colunas ausentes: {string.Join(", ", missingColumns)}";
                         return RedirectToAction(nameof(Export));
                     }
 
@@ -511,11 +512,11 @@ namespace Equilibrium.Web.Controllers
                 {
                     if (errorCount == 0)
                     {
-                        TempData["SuccessMessage"] = $"Valida√ß√£o conclu√≠da com sucesso. {successCount} receitas est√£o prontas para importa√ß√£o.";
+                        TempData["SuccessMessage"] = $"ValidaÁ„o concluÌda com sucesso. {successCount} receitas est„o prontas para importaÁ„o.";
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = $"Valida√ß√£o conclu√≠da com {errorCount} erros. {string.Join("<br>", errors)}";
+                        TempData["ErrorMessage"] = $"ValidaÁ„o concluÌda com {errorCount} erros. {string.Join("<br>", errors)}";
                     }
                 }
                 else
@@ -597,10 +598,10 @@ namespace Equilibrium.Web.Controllers
 
             // Validate required fields
             if (string.IsNullOrEmpty(model.Description))
-                throw new Exception("A descri√ß√£o √© obrigat√≥ria");
+                throw new Exception("A descriÁ„o È obrigatÛria");
 
             if (string.IsNullOrEmpty(model.IncomeTypeId))
-                throw new Exception("O tipo de receita √© obrigat√≥rio");
+                throw new Exception("O tipo de receita È obrigatÛrio");
 
             return model;
         }
@@ -654,7 +655,7 @@ namespace Equilibrium.Web.Controllers
             value = value.Replace(".", "").Replace(",", ".");
             if (!decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             {
-                throw new Exception($"Valor inv√°lido: {value}");
+                throw new Exception($"Valor inv·lido: {value}");
             }
             return result;
         }
@@ -665,7 +666,7 @@ namespace Equilibrium.Web.Controllers
             string[] formats = { "dd/MM/yyyy", "yyyy-MM-dd", "MM/dd/yyyy" };
             if (!DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
             {
-                throw new Exception($"Data inv√°lida: {value}. Use o formato DD/MM/AAAA.");
+                throw new Exception($"Data inv·lida: {value}. Use o formato DD/MM/AAAA.");
             }
             return result;
         }
@@ -687,7 +688,7 @@ namespace Equilibrium.Web.Controllers
                     var name = EscapeCsvField(type.Name);
                     var description = EscapeCsvField(type.Description);
 
-                    sb.AppendLine($"{type.Id},{name},{description},{(type.IsSystem ? "Sim" : "N√£o")}");
+                    sb.AppendLine($"{type.Id},{name},{description},{(type.IsSystem ? "Sim" : "N„o")}");
                 }
 
                 // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
@@ -716,7 +717,7 @@ namespace Equilibrium.Web.Controllers
             if (string.IsNullOrEmpty(field))
                 return string.Empty;
 
-            // Se cont√©m v√≠rgula, aspas ou quebra de linha, coloca entre aspas e dobra as aspas internas
+            // Se contÈm vÌrgula, aspas ou quebra de linha, coloca entre aspas e dobra as aspas internas
             if (field.Contains(",") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
             {
                 return "\"" + field.Replace("\"", "\"\"") + "\"";
@@ -737,6 +738,68 @@ namespace Equilibrium.Web.Controllers
             catch
             {
                 ViewBag.IncomeTypes = new List<object>();
+            }
+        }
+
+        [HttpGet("filter")]
+        [RequirePermission("incomes.view")]
+        public async Task<IActionResult> Filter(IncomeFilter filter = null)
+        {
+            if (filter == null)
+                filter = new IncomeFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _incomeService.GetFilteredAsync(filter, token);
+
+                // Add pagination headers
+                Response.Headers.Add("X-Pagination-Total", result.TotalCount.ToString());
+                Response.Headers.Add("X-Pagination-Pages", result.TotalPages.ToString());
+                Response.Headers.Add("X-Pagination-Page", result.PageNumber.ToString());
+                Response.Headers.Add("X-Pagination-Size", result.PageSize.ToString());
+
+                ViewBag.Filter = filter;
+                ViewBag.TotalCount = result.TotalCount;
+                ViewBag.TotalPages = result.TotalPages;
+                ViewBag.CurrentPage = result.PageNumber;
+                ViewBag.PageSize = result.PageSize;
+
+                return View("Index", result.Items);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Incomes, ex);
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpGet("api/filter")]
+        [RequirePermission("incomes.view")]
+        public async Task<IActionResult> FilterJson([FromQuery] IncomeFilter filter)
+        {
+            if (filter == null)
+                filter = new IncomeFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _incomeService.GetFilteredAsync(filter, token);
+
+                return Json(new
+                {
+                    items = result.Items,
+                    totalCount = result.TotalCount,
+                    pageNumber = result.PageNumber,
+                    pageSize = result.PageSize,
+                    totalPages = result.TotalPages,
+                    hasPreviousPage = result.HasPreviousPage,
+                    hasNextPage = result.HasNextPage
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
         }
     }

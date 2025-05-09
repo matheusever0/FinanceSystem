@@ -1,9 +1,10 @@
-Ôªøusing Equilibrium.Resources.Web;
+using Equilibrium.Resources.Web;
 using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
 using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Helpers;
+using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.User;
 using Equilibrium.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -48,7 +49,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do usu√°rio n√£o fornecido");
+                return BadRequest("ID do usu·rio n„o fornecido");
             }
 
             try
@@ -58,7 +59,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (user == null)
                 {
-                    return NotFound("Usu√°rio n√£o encontrado");
+                    return NotFound("Usu·rio n„o encontrado");
                 }
 
                 return View(user);
@@ -125,7 +126,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do usu√°rio n√£o fornecido");
+                return BadRequest("ID do usu·rio n„o fornecido");
             }
 
             try
@@ -135,7 +136,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (user == null)
                 {
-                    return NotFound("Usu√°rio n√£o encontrado");
+                    return NotFound("Usu·rio n„o encontrado");
                 }
 
                 var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -174,7 +175,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do usu√°rio n√£o fornecido");
+                return BadRequest("ID do usu·rio n„o fornecido");
             }
 
             if (!ModelState.IsValid)
@@ -220,7 +221,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do usu√°rio n√£o fornecido");
+                return BadRequest("ID do usu·rio n„o fornecido");
             }
 
             try
@@ -230,13 +231,13 @@ namespace Equilibrium.Web.Controllers
 
                 if (user == null)
                 {
-                    return NotFound("Usu√°rio n√£o encontrado");
+                    return NotFound("Usu·rio n„o encontrado");
                 }
 
                 var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (id == currentUserId)
                 {
-                    TempData["ErrorMessage"] = "N√£o √© poss√≠vel excluir seu pr√≥prio usu√°rio.";
+                    TempData["ErrorMessage"] = "N„o È possÌvel excluir seu prÛprio usu·rio.";
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -256,7 +257,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do usu√°rio n√£o fornecido");
+                return BadRequest("ID do usu·rio n„o fornecido");
             }
 
             try
@@ -266,7 +267,7 @@ namespace Equilibrium.Web.Controllers
                 var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (id == currentUserId)
                 {
-                    TempData["ErrorMessage"] = "N√£o √© poss√≠vel excluir seu pr√≥prio usu√°rio.";
+                    TempData["ErrorMessage"] = "N„o È possÌvel excluir seu prÛprio usu·rio.";
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -292,6 +293,68 @@ namespace Equilibrium.Web.Controllers
             catch
             {
                 ViewBag.Roles = new List<object>();
+            }
+        }
+
+        [HttpGet("filter")]
+        [RequirePermission("users.view")]
+        public async Task<IActionResult> Filter(UserFilter filter = null)
+        {
+            if (filter == null)
+                filter = new UserFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _userService.GetFilteredAsync(filter, token);
+
+                // Add pagination headers
+                Response.Headers.Add("X-Pagination-Total", result.TotalCount.ToString());
+                Response.Headers.Add("X-Pagination-Pages", result.TotalPages.ToString());
+                Response.Headers.Add("X-Pagination-Page", result.PageNumber.ToString());
+                Response.Headers.Add("X-Pagination-Size", result.PageSize.ToString());
+
+                ViewBag.Filter = filter;
+                ViewBag.TotalCount = result.TotalCount;
+                ViewBag.TotalPages = result.TotalPages;
+                ViewBag.CurrentPage = result.PageNumber;
+                ViewBag.PageSize = result.PageSize;
+
+                return View("Index", result.Items);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.User, ex);
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpGet("api/filter")]
+        [RequirePermission("users.view")]
+        public async Task<IActionResult> FilterJson([FromQuery] UserFilter filter)
+        {
+            if (filter == null)
+                filter = new UserFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _userService.GetFilteredAsync(filter, token);
+
+                return Json(new
+                {
+                    items = result.Items,
+                    totalCount = result.TotalCount,
+                    pageNumber = result.PageNumber,
+                    pageSize = result.PageSize,
+                    totalPages = result.TotalPages,
+                    hasPreviousPage = result.HasPreviousPage,
+                    hasNextPage = result.HasNextPage
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
         }
     }

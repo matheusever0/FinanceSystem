@@ -1,7 +1,8 @@
-Ôªøusing Equilibrium.Resources.Web.Enums;
+using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
 using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
+using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Permission;
 using Equilibrium.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -43,7 +44,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da permiss√£o n√£o fornecido");
+                return BadRequest("ID da permiss„o n„o fornecido");
             }
 
             try
@@ -51,7 +52,7 @@ namespace Equilibrium.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var permission = await _permissionService.GetPermissionByIdAsync(id, token);
 
-                return permission == null ? NotFound("Permiss√£o n√£o encontrada") : View(permission);
+                return permission == null ? NotFound("Permiss„o n„o encontrada") : View(permission);
             }
             catch (Exception ex)
             {
@@ -92,7 +93,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da permiss√£o n√£o fornecido");
+                return BadRequest("ID da permiss„o n„o fornecido");
             }
 
             try
@@ -102,7 +103,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (permission == null)
                 {
-                    return NotFound("Permiss√£o n√£o encontrada");
+                    return NotFound("Permiss„o n„o encontrada");
                 }
 
                 var model = new UpdatePermissionModel
@@ -126,7 +127,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da permiss√£o n√£o fornecido");
+                return BadRequest("ID da permiss„o n„o fornecido");
             }
 
             if (!ModelState.IsValid)
@@ -152,7 +153,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da permiss√£o n√£o fornecido");
+                return BadRequest("ID da permiss„o n„o fornecido");
             }
 
             try
@@ -160,7 +161,7 @@ namespace Equilibrium.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var permission = await _permissionService.GetPermissionByIdAsync(id, token);
 
-                return permission == null ? NotFound("Permiss√£o n√£o encontrada") : View(permission);
+                return permission == null ? NotFound("Permiss„o n„o encontrada") : View(permission);
             }
             catch (Exception ex)
             {
@@ -175,7 +176,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da permiss√£o n√£o fornecido");
+                return BadRequest("ID da permiss„o n„o fornecido");
             }
 
             try
@@ -196,7 +197,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do perfil n√£o fornecido");
+                return BadRequest("ID do perfil n„o fornecido");
             }
 
             try
@@ -206,7 +207,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (role == null)
                 {
-                    return NotFound("Perfil n√£o encontrado");
+                    return NotFound("Perfil n„o encontrado");
                 }
 
                 var permissions = await _permissionService.GetAllPermissionsAsync(token);
@@ -231,7 +232,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do perfil n√£o fornecido");
+                return BadRequest("ID do perfil n„o fornecido");
             }
 
             try
@@ -245,8 +246,70 @@ namespace Equilibrium.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Erro ao atualizar permiss√µes do perfil: " + ex.Message;
+                TempData["ErrorMessage"] = "Erro ao atualizar permissıes do perfil: " + ex.Message;
                 return RedirectToAction("RolePermissions", new { id });
+            }
+        }
+
+        [HttpGet("filter")]
+        [RequirePermission("permissions.manage")]
+        public async Task<IActionResult> Filter(PermissionFilter filter = null)
+        {
+            if (filter == null)
+                filter = new PermissionFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _permissionService.GetFilteredAsync(filter, token);
+
+                // Add pagination headers
+                Response.Headers.Add("X-Pagination-Total", result.TotalCount.ToString());
+                Response.Headers.Add("X-Pagination-Pages", result.TotalPages.ToString());
+                Response.Headers.Add("X-Pagination-Page", result.PageNumber.ToString());
+                Response.Headers.Add("X-Pagination-Size", result.PageSize.ToString());
+
+                ViewBag.Filter = filter;
+                ViewBag.TotalCount = result.TotalCount;
+                ViewBag.TotalPages = result.TotalPages;
+                ViewBag.CurrentPage = result.PageNumber;
+                ViewBag.PageSize = result.PageSize;
+
+                return View("Index", result.Items);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Permission, ex);
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpGet("api/filter")]
+        [RequirePermission("permissions.manage")]
+        public async Task<IActionResult> FilterJson([FromQuery] PermissionFilter filter)
+        {
+            if (filter == null)
+                filter = new PermissionFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _permissionService.GetFilteredAsync(filter, token);
+
+                return Json(new
+                {
+                    items = result.Items,
+                    totalCount = result.TotalCount,
+                    pageNumber = result.PageNumber,
+                    pageSize = result.PageSize,
+                    totalPages = result.TotalPages,
+                    hasPreviousPage = result.HasPreviousPage,
+                    hasNextPage = result.HasNextPage
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
         }
     }

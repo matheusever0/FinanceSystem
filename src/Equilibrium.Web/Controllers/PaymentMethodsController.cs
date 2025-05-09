@@ -1,7 +1,8 @@
-ï»¿using Equilibrium.Resources.Web.Enums;
+using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
 using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
+using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.PaymentMethod;
 using Equilibrium.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -43,7 +44,7 @@ namespace Equilibrium.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var paymentMethods = await _paymentMethodService.GetSystemPaymentMethodsAsync(token);
                 ViewBag.IsSystemView = true;
-                ViewBag.Title = "MÃ©todos de Pagamento do Sistema";
+                ViewBag.Title = "Métodos de Pagamento do Sistema";
                 return View("Index", paymentMethods);
             }
             catch (Exception ex)
@@ -60,7 +61,7 @@ namespace Equilibrium.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var paymentMethods = await _paymentMethodService.GetUserPaymentMethodsAsync(token);
                 ViewBag.IsUserView = true;
-                ViewBag.Title = "Meus MÃ©todos de Pagamento";
+                ViewBag.Title = "Meus Métodos de Pagamento";
                 return View("Index", paymentMethods);
             }
             catch (Exception ex)
@@ -74,7 +75,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (type <= 0)
             {
-                return BadRequest("Tipo de mÃ©todo de pagamento invÃ¡lido");
+                return BadRequest("Tipo de método de pagamento inválido");
             }
 
             try
@@ -83,7 +84,7 @@ namespace Equilibrium.Web.Controllers
                 var paymentMethods = await _paymentMethodService.GetByTypeAsync(type, token);
 
                 string typeDescription = GetPaymentMethodTypeDescription(type);
-                ViewBag.Title = $"MÃ©todos de Pagamento do Tipo: {typeDescription}";
+                ViewBag.Title = $"Métodos de Pagamento do Tipo: {typeDescription}";
                 ViewBag.Type = type;
 
                 return View("Index", paymentMethods);
@@ -99,7 +100,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do mÃ©todo de pagamento nÃ£o fornecido");
+                return BadRequest("ID do método de pagamento não fornecido");
             }
 
             try
@@ -107,7 +108,7 @@ namespace Equilibrium.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
 
-                return paymentMethod == null ? NotFound("MÃ©todo de pagamento nÃ£o encontrado") : View(paymentMethod);
+                return paymentMethod == null ? NotFound("Método de pagamento não encontrado") : View(paymentMethod);
             }
             catch (Exception ex)
             {
@@ -154,7 +155,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do mÃ©todo de pagamento nÃ£o fornecido");
+                return BadRequest("ID do método de pagamento não fornecido");
             }
 
             try
@@ -164,7 +165,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (paymentMethod == null)
                 {
-                    return NotFound("MÃ©todo de pagamento nÃ£o encontrado");
+                    return NotFound("Método de pagamento não encontrado");
                 }
 
                 if (paymentMethod.IsSystem)
@@ -195,7 +196,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do mÃ©todo de pagamento nÃ£o fornecido");
+                return BadRequest("ID do método de pagamento não fornecido");
             }
 
             if (!ModelState.IsValid)
@@ -210,7 +211,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (paymentMethod == null)
                 {
-                    return NotFound("MÃ©todo de pagamento nÃ£o encontrado");
+                    return NotFound("Método de pagamento não encontrado");
                 }
 
                 if (paymentMethod.IsSystem)
@@ -235,7 +236,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do mÃ©todo de pagamento nÃ£o fornecido");
+                return BadRequest("ID do método de pagamento não fornecido");
             }
 
             try
@@ -245,7 +246,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (paymentMethod == null)
                 {
-                    return NotFound("MÃ©todo de pagamento nÃ£o encontrado");
+                    return NotFound("Método de pagamento não encontrado");
                 }
 
                 if (paymentMethod.IsSystem)
@@ -270,7 +271,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do mÃ©todo de pagamento nÃ£o fornecido");
+                return BadRequest("ID do método de pagamento não fornecido");
             }
 
             try
@@ -280,7 +281,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (paymentMethod == null)
                 {
-                    return NotFound("MÃ©todo de pagamento nÃ£o encontrado");
+                    return NotFound("Método de pagamento não encontrado");
                 }
 
                 if (paymentMethod.IsSystem)
@@ -305,9 +306,9 @@ namespace Equilibrium.Web.Controllers
             return
             [
                 new() { Value = "1", Text = "Dinheiro" },
-                new() { Value = "2", Text = "CartÃ£o de CrÃ©dito" },
-                new() { Value = "3", Text = "CartÃ£o de DÃ©bito" },
-                new() { Value = "4", Text = "TransferÃªncia BancÃ¡ria" },
+                new() { Value = "2", Text = "Cartão de Crédito" },
+                new() { Value = "3", Text = "Cartão de Débito" },
+                new() { Value = "4", Text = "Transferência Bancária" },
                 new() { Value = "5", Text = "Carteira Digital" },
                 new() { Value = "6", Text = "Cheque" },
                 new() { Value = "7", Text = "Outro" }
@@ -319,14 +320,76 @@ namespace Equilibrium.Web.Controllers
             return type switch
             {
                 1 => "Dinheiro",
-                2 => "CartÃ£o de CrÃ©dito",
-                3 => "CartÃ£o de DÃ©bito",
-                4 => "TransferÃªncia BancÃ¡ria",
+                2 => "Cartão de Crédito",
+                3 => "Cartão de Débito",
+                4 => "Transferência Bancária",
                 5 => "Carteira Digital",
                 6 => "Cheque",
                 7 => "Outro",
                 _ => "Desconhecido"
             };
+        }
+
+        [HttpGet("filter")]
+        [RequirePermission("paymentmethods.view")]
+        public async Task<IActionResult> Filter(PaymentMethodFilter filter = null)
+        {
+            if (filter == null)
+                filter = new PaymentMethodFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _paymentMethodService.GetFilteredAsync(filter, token);
+
+                // Add pagination headers
+                Response.Headers.Add("X-Pagination-Total", result.TotalCount.ToString());
+                Response.Headers.Add("X-Pagination-Pages", result.TotalPages.ToString());
+                Response.Headers.Add("X-Pagination-Page", result.PageNumber.ToString());
+                Response.Headers.Add("X-Pagination-Size", result.PageSize.ToString());
+
+                ViewBag.Filter = filter;
+                ViewBag.TotalCount = result.TotalCount;
+                ViewBag.TotalPages = result.TotalPages;
+                ViewBag.CurrentPage = result.PageNumber;
+                ViewBag.PageSize = result.PageSize;
+
+                return View("Index", result.Items);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.PaymentMethod, ex);
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpGet("api/filter")]
+        [RequirePermission("paymentmethods.view")]
+        public async Task<IActionResult> FilterJson([FromQuery] PaymentMethodFilter filter)
+        {
+            if (filter == null)
+                filter = new PaymentMethodFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _paymentMethodService.GetFilteredAsync(filter, token);
+
+                return Json(new
+                {
+                    items = result.Items,
+                    totalCount = result.TotalCount,
+                    pageNumber = result.PageNumber,
+                    pageSize = result.PageSize,
+                    totalPages = result.TotalPages,
+                    hasPreviousPage = result.HasPreviousPage,
+                    hasNextPage = result.HasNextPage
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }

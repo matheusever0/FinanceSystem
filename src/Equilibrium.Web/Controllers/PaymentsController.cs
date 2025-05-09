@@ -1,9 +1,10 @@
-Ôªøusing Equilibrium.Resources.Web;
+using Equilibrium.Resources.Web;
 using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
 using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Payment;
 using Equilibrium.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -121,7 +122,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do tipo de pagamento n√£o fornecido");
+                return BadRequest("ID do tipo de pagamento n„o fornecido");
             }
 
             try
@@ -132,7 +133,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (paymentType == null)
                 {
-                    return NotFound("Tipo de pagamento n√£o encontrado");
+                    return NotFound("Tipo de pagamento n„o encontrado");
                 }
 
                 ViewBag.Title = $"Pagamentos do Tipo: {paymentType.Name}";
@@ -151,7 +152,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do m√©todo de pagamento n√£o fornecido");
+                return BadRequest("ID do mÈtodo de pagamento n„o fornecido");
             }
 
             try
@@ -162,10 +163,10 @@ namespace Equilibrium.Web.Controllers
 
                 if (paymentMethod == null)
                 {
-                    return NotFound("M√©todo de pagamento n√£o encontrado");
+                    return NotFound("MÈtodo de pagamento n„o encontrado");
                 }
 
-                ViewBag.Title = $"Pagamentos por M√©todo: {paymentMethod.Name}";
+                ViewBag.Title = $"Pagamentos por MÈtodo: {paymentMethod.Name}";
                 ViewBag.MethodId = id;
 
                 return View("Index", payments);
@@ -181,7 +182,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento n√£o fornecido");
+                return BadRequest("ID do pagamento n„o fornecido");
             }
 
             try
@@ -189,7 +190,7 @@ namespace Equilibrium.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var payment = await _paymentService.GetPaymentByIdAsync(id, token);
 
-                return payment == null ? NotFound("Pagamento n√£o encontrado") : View(payment);
+                return payment == null ? NotFound("Pagamento n„o encontrado") : View(payment);
             }
             catch (Exception ex)
             {
@@ -218,7 +219,7 @@ namespace Equilibrium.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Erro ao preparar o formul√°rio.";
+                TempData["ErrorMessage"] = "Erro ao preparar o formul·rio.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -238,7 +239,7 @@ namespace Equilibrium.Web.Controllers
             {
                 var token = HttpContext.GetJwtToken();
 
-                // Verificar se o tipo de pagamento √© de financiamento
+                // Verificar se o tipo de pagamento È de financiamento
                 var paymentType = await _paymentTypeService.GetPaymentTypeByIdAsync(model.PaymentTypeId, token);
                 if (paymentType != null && paymentType.IsFinancingType && string.IsNullOrEmpty(model.FinancingId))
                 {
@@ -247,7 +248,7 @@ namespace Equilibrium.Web.Controllers
                     return View(model);
                 }
 
-                // Verificar se o m√©todo de pagamento √© cart√£o de cr√©dito e se foi selecionado um cart√£o
+                // Verificar se o mÈtodo de pagamento È cart„o de crÈdito e se foi selecionado um cart„o
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(model.PaymentMethodId, token);
                 if (paymentMethod != null && paymentMethod.Type == 2 && string.IsNullOrEmpty(model.CreditCardId))
                 {
@@ -276,12 +277,12 @@ namespace Equilibrium.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
 
-                // Filtrar tipos de pagamento que s√£o marcados como tipo de financiamento
+                // Filtrar tipos de pagamento que s„o marcados como tipo de financiamento
                 var financingPaymentTypes = paymentTypes.Where(pt => pt.IsFinancingType).ToList();
 
                 if (!financingPaymentTypes.Any())
                 {
-                    TempData["WarningMessage"] = "N√£o h√° tipos de pagamento configurados para financiamento.";
+                    TempData["WarningMessage"] = "N„o h· tipos de pagamento configurados para financiamento.";
                     return RedirectToAction(nameof(Create));
                 }
 
@@ -307,7 +308,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento n√£o fornecido");
+                return BadRequest("ID do pagamento n„o fornecido");
             }
 
             try
@@ -317,7 +318,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (payment == null)
                 {
-                    return NotFound("Pagamento n√£o encontrado");
+                    return NotFound("Pagamento n„o encontrado");
                 }
 
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
@@ -358,7 +359,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento n√£o fornecido");
+                return BadRequest("ID do pagamento n„o fornecido");
             }
 
             if (!ModelState.IsValid)
@@ -387,7 +388,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento n√£o fornecido");
+                return BadRequest("ID do pagamento n„o fornecido");
             }
 
             try
@@ -395,7 +396,7 @@ namespace Equilibrium.Web.Controllers
                 var token = HttpContext.GetJwtToken();
                 var payment = await _paymentService.GetPaymentByIdAsync(id, token);
 
-                return payment == null ? NotFound("Pagamento n√£o encontrado") : View(payment);
+                return payment == null ? NotFound("Pagamento n„o encontrado") : View(payment);
             }
             catch (Exception ex)
             {
@@ -411,7 +412,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento n√£o fornecido");
+                return BadRequest("ID do pagamento n„o fornecido");
             }
 
             try
@@ -435,7 +436,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento n√£o fornecido");
+                return BadRequest("ID do pagamento n„o fornecido");
             }
 
             try
@@ -459,7 +460,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento n√£o fornecido");
+                return BadRequest("ID do pagamento n„o fornecido");
             }
 
             try
@@ -483,7 +484,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento n√£o fornecido");
+                return BadRequest("ID do pagamento n„o fornecido");
             }
 
             try
@@ -517,9 +518,9 @@ namespace Equilibrium.Web.Controllers
 
                 // Add example rows
                 sb.AppendLine("Aluguel,1500.00,05/06/2025,,id-tipo-pagamento-1,id-metodo-pagamento-1,Sim,1,,,,'Pagamento mensal de aluguel'");
-                sb.AppendLine("Compra Supermercado,253.45,10/06/2025,10/06/2025,id-tipo-pagamento-2,id-metodo-pagamento-2,N√£o,1,,,,'Compras do m√™s'");
-                sb.AppendLine("Parcela Carro,850.00,15/06/2025,,id-tipo-pagamento-3,id-metodo-pagamento-3,N√£o,1,id-cartao-1,,,'Parcela 10/48'");
-                sb.AppendLine("Presta√ß√£o Apartamento,2500.00,20/06/2025,,id-tipo-pagamento-4,id-metodo-pagamento-4,N√£o,1,,id-financiamento-1,id-parcela-financiamento-1,'Presta√ß√£o 24/360'");
+                sb.AppendLine("Compra Supermercado,253.45,10/06/2025,10/06/2025,id-tipo-pagamento-2,id-metodo-pagamento-2,N„o,1,,,,'Compras do mÍs'");
+                sb.AppendLine("Parcela Carro,850.00,15/06/2025,,id-tipo-pagamento-3,id-metodo-pagamento-3,N„o,1,id-cartao-1,,,'Parcela 10/48'");
+                sb.AppendLine("PrestaÁ„o Apartamento,2500.00,20/06/2025,,id-tipo-pagamento-4,id-metodo-pagamento-4,N„o,1,,id-financiamento-1,id-parcela-financiamento-1,'PrestaÁ„o 24/360'");
 
                 // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
                 string content = sb.ToString();
@@ -555,7 +556,7 @@ namespace Equilibrium.Web.Controllers
 
             if (!csvFile.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
             {
-                TempData["ErrorMessage"] = "O arquivo deve ser um CSV v√°lido.";
+                TempData["ErrorMessage"] = "O arquivo deve ser um CSV v·lido.";
                 return RedirectToAction(nameof(Export));
             }
 
@@ -572,7 +573,7 @@ namespace Equilibrium.Web.Controllers
                     var header = await reader.ReadLineAsync();
                     if (header == null)
                     {
-                        TempData["ErrorMessage"] = "O arquivo CSV est√° vazio ou n√£o possui cabe√ßalho.";
+                        TempData["ErrorMessage"] = "O arquivo CSV est· vazio ou n„o possui cabeÁalho.";
                         return RedirectToAction(nameof(Export));
                     }
 
@@ -584,7 +585,7 @@ namespace Equilibrium.Web.Controllers
 
                     if (!ValidateHeader(headerColumns, expectedColumns, out var missingColumns))
                     {
-                        TempData["ErrorMessage"] = $"O cabe√ßalho do CSV est√° inv√°lido. Colunas ausentes: {string.Join(", ", missingColumns)}";
+                        TempData["ErrorMessage"] = $"O cabeÁalho do CSV est· inv·lido. Colunas ausentes: {string.Join(", ", missingColumns)}";
                         return RedirectToAction(nameof(Export));
                     }
 
@@ -627,11 +628,11 @@ namespace Equilibrium.Web.Controllers
                 {
                     if (errorCount == 0)
                     {
-                        TempData["SuccessMessage"] = $"Valida√ß√£o conclu√≠da com sucesso. {successCount} pagamentos est√£o prontos para importa√ß√£o.";
+                        TempData["SuccessMessage"] = $"ValidaÁ„o concluÌda com sucesso. {successCount} pagamentos est„o prontos para importaÁ„o.";
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = $"Valida√ß√£o conclu√≠da com {errorCount} erros. {string.Join("<br>", errors)}";
+                        TempData["ErrorMessage"] = $"ValidaÁ„o concluÌda com {errorCount} erros. {string.Join("<br>", errors)}";
                     }
                 }
                 else
@@ -725,17 +726,17 @@ namespace Equilibrium.Web.Controllers
 
             // Validate required fields
             if (string.IsNullOrEmpty(model.Description))
-                throw new Exception("A descri√ß√£o √© obrigat√≥ria");
+                throw new Exception("A descriÁ„o È obrigatÛria");
 
             if (string.IsNullOrEmpty(model.PaymentTypeId))
-                throw new Exception("O tipo de pagamento √© obrigat√≥rio");
+                throw new Exception("O tipo de pagamento È obrigatÛrio");
 
             if (string.IsNullOrEmpty(model.PaymentMethodId))
-                throw new Exception("O m√©todo de pagamento √© obrigat√≥rio");
+                throw new Exception("O mÈtodo de pagamento È obrigatÛrio");
 
-            // Validar se tem financiamento mas n√£o tem parcela
+            // Validar se tem financiamento mas n„o tem parcela
             if (!string.IsNullOrEmpty(model.FinancingId) && string.IsNullOrEmpty(model.FinancingInstallmentId))
-                throw new Exception("Quando um financiamento √© especificado, a parcela do financiamento √© obrigat√≥ria");
+                throw new Exception("Quando um financiamento È especificado, a parcela do financiamento È obrigatÛria");
 
             return model;
         }
@@ -789,7 +790,7 @@ namespace Equilibrium.Web.Controllers
             value = value.Replace(".", "").Replace(",", ".");
             if (!decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             {
-                throw new Exception($"Valor inv√°lido: {value}");
+                throw new Exception($"Valor inv·lido: {value}");
             }
             return result;
         }
@@ -800,7 +801,7 @@ namespace Equilibrium.Web.Controllers
             string[] formats = { "dd/MM/yyyy", "yyyy-MM-dd", "MM/dd/yyyy" };
             if (!DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
             {
-                throw new Exception($"Data inv√°lida: {value}. Use o formato DD/MM/AAAA.");
+                throw new Exception($"Data inv·lida: {value}. Use o formato DD/MM/AAAA.");
             }
             return result;
         }
@@ -822,7 +823,7 @@ namespace Equilibrium.Web.Controllers
                     var name = EscapeCsvField(type.Name);
                     var description = EscapeCsvField(type.Description);
 
-                    sb.AppendLine($"{type.Id},{name},{description},{(type.IsFinancingType ? "Sim" : "N√£o")}");
+                    sb.AppendLine($"{type.Id},{name},{description},{(type.IsFinancingType ? "Sim" : "N„o")}");
                 }
 
                 // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
@@ -868,7 +869,7 @@ namespace Equilibrium.Web.Controllers
                 }
 
                 // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
-                // Isso √†s vezes resolve problemas de codifica√ß√£o
+                // Isso ‡s vezes resolve problemas de codificaÁ„o
                 string content = sb.ToString();
                 byte[] utf8Bytes = Encoding.UTF8.GetBytes(content);
                 byte[] latin1Bytes = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), utf8Bytes);
@@ -884,7 +885,7 @@ namespace Equilibrium.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Erro ao exportar m√©todos de pagamento: " + ex.Message;
+                TempData["ErrorMessage"] = "Erro ao exportar mÈtodos de pagamento: " + ex.Message;
                 return RedirectToAction(nameof(Export));
             }
         }
@@ -925,7 +926,7 @@ namespace Equilibrium.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Erro ao exportar cart√µes de cr√©dito: " + ex.Message;
+                TempData["ErrorMessage"] = "Erro ao exportar cartıes de crÈdito: " + ex.Message;
                 return RedirectToAction(nameof(Export));
             }
         }
@@ -1029,7 +1030,7 @@ namespace Equilibrium.Web.Controllers
             if (string.IsNullOrEmpty(field))
                 return string.Empty;
 
-            // Se cont√©m v√≠rgula, aspas ou quebra de linha, coloca entre aspas e dobra as aspas internas
+            // Se contÈm vÌrgula, aspas ou quebra de linha, coloca entre aspas e dobra as aspas internas
             if (field.Contains(",") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
             {
                 return "\"" + field.Replace("\"", "\"\"") + "\"";
@@ -1060,6 +1061,68 @@ namespace Equilibrium.Web.Controllers
                 ViewBag.PaymentMethods = new List<object>();
                 ViewBag.CreditCards = new List<object>();
                 ViewBag.Financings = new List<object>();
+            }
+        }
+
+        [HttpGet("filter")]
+        [RequirePermission("payments.view")]
+        public async Task<IActionResult> Filter(PaymentFilter filter = null)
+        {
+            if (filter == null)
+                filter = new PaymentFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _paymentService.GetFilteredAsync(filter, token);
+
+                // Add pagination headers
+                Response.Headers.Add("X-Pagination-Total", result.TotalCount.ToString());
+                Response.Headers.Add("X-Pagination-Pages", result.TotalPages.ToString());
+                Response.Headers.Add("X-Pagination-Page", result.PageNumber.ToString());
+                Response.Headers.Add("X-Pagination-Size", result.PageSize.ToString());
+
+                ViewBag.Filter = filter;
+                ViewBag.TotalCount = result.TotalCount;
+                ViewBag.TotalPages = result.TotalPages;
+                ViewBag.CurrentPage = result.PageNumber;
+                ViewBag.PageSize = result.PageSize;
+
+                return View("Index", result.Items);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Payments, ex);
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpGet("api/filter")]
+        [RequirePermission("payments.view")]
+        public async Task<IActionResult> FilterJson([FromQuery] PaymentFilter filter)
+        {
+            if (filter == null)
+                filter = new PaymentFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _paymentService.GetFilteredAsync(filter, token);
+
+                return Json(new
+                {
+                    items = result.Items,
+                    totalCount = result.TotalCount,
+                    pageNumber = result.PageNumber,
+                    pageSize = result.PageSize,
+                    totalPages = result.TotalPages,
+                    hasPreviousPage = result.HasPreviousPage,
+                    hasNextPage = result.HasNextPage
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
         }
     }

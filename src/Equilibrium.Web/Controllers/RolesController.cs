@@ -1,7 +1,8 @@
-Ôªøusing Equilibrium.Resources.Web.Enums;
+using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
 using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
+using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Role;
 using Equilibrium.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -43,7 +44,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do perfil n√£o fornecido");
+                return BadRequest("ID do perfil n„o fornecido");
             }
 
             try
@@ -53,7 +54,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (role == null)
                 {
-                    return NotFound("Perfil n√£o encontrado");
+                    return NotFound("Perfil n„o encontrado");
                 }
 
                 var permissions = await _permissionService.GetPermissionsByRoleIdAsync(id, token);
@@ -103,7 +104,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do perfil n√£o fornecido");
+                return BadRequest("ID do perfil n„o fornecido");
             }
 
             try
@@ -113,7 +114,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (role == null)
                 {
-                    return NotFound("Perfil n√£o encontrado");
+                    return NotFound("Perfil n„o encontrado");
                 }
 
                 var model = new UpdateRoleModel
@@ -138,7 +139,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do perfil n√£o fornecido");
+                return BadRequest("ID do perfil n„o fornecido");
             }
 
             if (!ModelState.IsValid)
@@ -165,7 +166,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do perfil n√£o fornecido");
+                return BadRequest("ID do perfil n„o fornecido");
             }
 
             try
@@ -175,7 +176,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (role == null)
                 {
-                    return NotFound("Perfil n√£o encontrado");
+                    return NotFound("Perfil n„o encontrado");
                 }
 
                 return View(role);
@@ -194,7 +195,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do perfil n√£o fornecido");
+                return BadRequest("ID do perfil n„o fornecido");
             }
 
             try
@@ -216,7 +217,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do perfil n√£o fornecido");
+                return BadRequest("ID do perfil n„o fornecido");
             }
 
             try
@@ -226,7 +227,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (role == null)
                 {
-                    return NotFound("Perfil n√£o encontrado");
+                    return NotFound("Perfil n„o encontrado");
                 }
 
                 var allPermissions = await _permissionService.GetAllPermissionsAsync(token);
@@ -252,7 +253,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do perfil n√£o fornecido");
+                return BadRequest("ID do perfil n„o fornecido");
             }
 
             try
@@ -262,7 +263,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (role == null)
                 {
-                    return NotFound("Perfil n√£o encontrado");
+                    return NotFound("Perfil n„o encontrado");
                 }
 
                 var permissionList = selectedPermissions ?? [];
@@ -277,5 +278,68 @@ namespace Equilibrium.Web.Controllers
                 return RedirectToAction(nameof(Details), new { id });
             }
         }
+
+        [HttpGet("filter")]
+        [RequirePermission("roles.view")]
+        public async Task<IActionResult> Filter(RoleFilter filter = null)
+        {
+            if (filter == null)
+                filter = new RoleFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _roleService.GetFilteredAsync(filter, token);
+
+                // Add pagination headers
+                Response.Headers.Add("X-Pagination-Total", result.TotalCount.ToString());
+                Response.Headers.Add("X-Pagination-Pages", result.TotalPages.ToString());
+                Response.Headers.Add("X-Pagination-Page", result.PageNumber.ToString());
+                Response.Headers.Add("X-Pagination-Size", result.PageSize.ToString());
+
+                ViewBag.Filter = filter;
+                ViewBag.TotalCount = result.TotalCount;
+                ViewBag.TotalPages = result.TotalPages;
+                ViewBag.CurrentPage = result.PageNumber;
+                ViewBag.PageSize = result.PageSize;
+
+                return View("Index", result.Items);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Role, ex);
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpGet("api/filter")]
+        [RequirePermission("roles.view")]
+        public async Task<IActionResult> FilterJson([FromQuery] RoleFilter filter)
+        {
+            if (filter == null)
+                filter = new RoleFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _roleService.GetFilteredAsync(filter, token);
+
+                return Json(new
+                {
+                    items = result.Items,
+                    totalCount = result.TotalCount,
+                    pageNumber = result.PageNumber,
+                    pageSize = result.PageSize,
+                    totalPages = result.TotalPages,
+                    hasPreviousPage = result.HasPreviousPage,
+                    hasNextPage = result.HasNextPage
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
     }
 }
+
