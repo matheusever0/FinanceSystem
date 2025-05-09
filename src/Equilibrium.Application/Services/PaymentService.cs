@@ -1,9 +1,12 @@
-Ôªøusing AutoMapper;
+using AutoMapper;
+using Equilibrium.Application.DTOs.Common;
+using Equilibrium.Domain.DTOs.Filters;
 using Equilibrium.Application.DTOs.Payment;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Entities;
 using Equilibrium.Domain.Enums;
 using Equilibrium.Domain.Interfaces.Services;
+using Equilibrium.Domain.Specifications;
 using Equilibrium.Resources;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -100,25 +103,25 @@ namespace Equilibrium.Application.Services
             {
                 // Verificar se foi fornecido um financiamento
                 if (!createPaymentDto.FinancingId.HasValue)
-                    throw new InvalidOperationException("√â necess√°rio informar um financiamento para este tipo de pagamento");
+                    throw new InvalidOperationException("… necess·rio informar um financiamento para este tipo de pagamento");
 
                 // Buscar o financiamento
                 var financing = await _unitOfWork.Financings.GetByIdAsync(createPaymentDto.FinancingId.Value);
                 if (financing == null)
-                    throw new KeyNotFoundException("Financiamento n√£o encontrado");
+                    throw new KeyNotFoundException("Financiamento n„o encontrado");
 
                 if (financing.UserId != userId)
                     throw new UnauthorizedAccessException(ResourceFinanceApi.Error_Unauthorized);
 
-                // Se informou uma parcela espec√≠fica
+                // Se informou uma parcela especÌfica
                 if (createPaymentDto.FinancingInstallmentId.HasValue)
                 {
                     var installment = await _unitOfWork.FinancingInstallments.GetByIdAsync(createPaymentDto.FinancingInstallmentId.Value);
                     if (installment == null)
-                        throw new KeyNotFoundException("Parcela de financiamento n√£o encontrada");
+                        throw new KeyNotFoundException("Parcela de financiamento n„o encontrada");
 
                     if (installment.FinancingId != financing.Id)
-                        throw new InvalidOperationException("A parcela n√£o pertence ao financiamento informado");
+                        throw new InvalidOperationException("A parcela n„o pertence ao financiamento informado");
 
                     // Criar um pagamento vinculado ao financiamento e parcela
                     payment = new Payment(
@@ -145,7 +148,7 @@ namespace Equilibrium.Application.Services
                         paymentMethod,
                         user,
                         financing,
-                        null,  // Sem parcela espec√≠fica
+                        null,  // Sem parcela especÌfica
                         createPaymentDto.IsRecurring,
                         createPaymentDto.Notes
                     );
@@ -163,7 +166,7 @@ namespace Equilibrium.Application.Services
                         createPaymentDto.IsRecurring,
                         createPaymentDto.Notes
                     );
-             }
+            }
 
             await _unitOfWork.Payments.AddAsync(payment);
 
@@ -175,7 +178,7 @@ namespace Equilibrium.Application.Services
 
                 if (payment.FinancingId.HasValue)
                 {
-                    // Ap√≥s marcar como pago, recalcular as parcelas restantes
+                    // ApÛs marcar como pago, recalcular as parcelas restantes
                     var financingService = _serviceProvider.GetRequiredService<IFinancingService>();
                     await financingService.RecalculateRemainingInstallmentsAsync(payment.FinancingId.Value, payment.DueDate);
                 }
@@ -309,7 +312,7 @@ namespace Equilibrium.Application.Services
                 {
                     decimal amortizationAmount = 0;
 
-                    // Se o pagamento estiver vinculado a uma parcela espec√≠fica
+                    // Se o pagamento estiver vinculado a uma parcela especÌfica
                     if (payment.FinancingInstallmentId.HasValue)
                     {
                         var installment = await _unitOfWork.FinancingInstallments.GetByIdAsync(payment.FinancingInstallmentId.Value);
@@ -324,12 +327,12 @@ namespace Equilibrium.Application.Services
                     }
                     else
                     {
-                        // Para pagamentos n√£o vinculados a parcelas espec√≠ficas (pagamentos extras)
-                        // Considerar o valor total como amortiza√ß√£o
+                        // Para pagamentos n„o vinculados a parcelas especÌficas (pagamentos extras)
+                        // Considerar o valor total como amortizaÁ„o
                         amortizationAmount = payment.Amount;
                     }
 
-                    // Aumentar a d√≠vida restante pelo valor da amortiza√ß√£o
+                    // Aumentar a dÌvida restante pelo valor da amortizaÁ„o
                     financing.RestoreRemainingDebt(amortizationAmount);
                     await _unitOfWork.Financings.UpdateAsync(financing);
 
@@ -346,7 +349,7 @@ namespace Equilibrium.Application.Services
             return _mapper.Map<PaymentDto>(payment);
         }
 
-        // M√©todo auxiliar para reverter os efeitos de um pagamento em uma parcela
+        // MÈtodo auxiliar para reverter os efeitos de um pagamento em uma parcela
         private async Task RevertPaymentFromInstallment(FinancingInstallment installment, Payment payment)
         {
             // Remover o valor do pagamento do valor pago
@@ -376,5 +379,23 @@ namespace Equilibrium.Application.Services
             installment.RevertPayment(newPaidAmount, newRemainingAmount, newStatus);
             await _unitOfWork.FinancingInstallments.UpdateAsync(installment);
         }
+        public async Task<PagedResult<PaymentDto>> GetFilteredAsync(PaymentFilter filter, Guid userId)
+        {
+            var specification = new PaymentSpecification(filter)
+            {
+                UserId = userId
+            };
+
+            var (payments, totalCount) = await _unitOfWork.Payments.FindWithSpecificationAsync(specification);
+
+            return new PagedResult<PaymentDto>
+            {
+                Items = _mapper.Map<IEnumerable<PaymentDto>>(payments),
+                TotalCount = totalCount,
+                PageNumber = filter.PageNumber,
+                PageSize = filter.PageSize
+            };
+        }
     }
 }
+

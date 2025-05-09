@@ -1,5 +1,8 @@
-﻿using Equilibrium.Application.DTOs.Financing;
+using Equilibrium.Application.DTOs.Financing;
 using Equilibrium.Domain.Enums;
+
+using Equilibrium.Application.DTOs.Common;
+using Equilibrium.Domain.DTOs.Filters;
 
 namespace Equilibrium.Application.Interfaces
 {
@@ -17,5 +20,7 @@ namespace Equilibrium.Application.Interfaces
         Task CancelAsync(Guid id);
         Task<FinancingSimulationDto> SimulateAsync(FinancingSimulationRequestDto simulationRequest);
         Task RecalculateRemainingInstallmentsAsync(Guid financingId, DateTime dueDate, bool cancelling = false);
+        Task<PagedResult<FinancingDto>> GetFilteredAsync(FinancingFilter filter, Guid userId);
     }
 }
+

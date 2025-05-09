@@ -1,8 +1,11 @@
-Ôªøusing AutoMapper;
+using AutoMapper;
 using Equilibrium.Application.DTOs.Financing;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Entities;
 using Equilibrium.Domain.Enums;
+using Equilibrium.Domain.Specifications;
+using Equilibrium.Application.DTOs.Common;
+using Equilibrium.Domain.DTOs.Filters;
 using Equilibrium.Domain.Interfaces.Services;
 
 namespace Equilibrium.Application.Services
@@ -24,7 +27,7 @@ namespace Equilibrium.Application.Services
         {
             var financing = await _unitOfWork.Financings.GetByIdAsync(id);
             return financing == null
-                ? throw new KeyNotFoundException("Financiamento n√£o encontrado")
+                ? throw new KeyNotFoundException("Financiamento n„o encontrado")
                 : _mapper.Map<FinancingDto>(financing);
         }
 
@@ -32,11 +35,11 @@ namespace Equilibrium.Application.Services
         {
             var financing = await _unitOfWork.Financings.GetFinancingWithDetailsAsync(id);
             if (financing == null)
-                throw new KeyNotFoundException("Financiamento n√£o encontrado");
+                throw new KeyNotFoundException("Financiamento n„o encontrado");
 
             var dto = _mapper.Map<FinancingDetailDto>(financing);
 
-            // Calcular m√©tricas adicionais
+            // Calcular mÈtricas adicionais
             var installments = financing.Installments.ToList();
             var paidInstallments = installments.Where(i => i.Status == FinancingInstallmentStatus.Paid
                 || i.Status == FinancingInstallmentStatus.PartiallyPaid).ToList();
@@ -96,13 +99,13 @@ namespace Equilibrium.Application.Services
         public async Task<FinancingDto> CreateAsync(CreateFinancingDto createFinancingDto, Guid userId)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId) ??
-                throw new KeyNotFoundException("Usu√°rio n√£o encontrado");
+                throw new KeyNotFoundException("Usu·rio n„o encontrado");
 
             var paymentType = await _unitOfWork.PaymentTypes.GetByIdAsync(createFinancingDto.PaymentTypeId) ??
-                throw new KeyNotFoundException("Tipo de pagamento n√£o encontrado");
+                throw new KeyNotFoundException("Tipo de pagamento n„o encontrado");
 
             if (!paymentType.IsFinancingType)
-                throw new InvalidOperationException("O tipo de pagamento n√£o √© v√°lido para financiamentos");
+                throw new InvalidOperationException("O tipo de pagamento n„o È v·lido para financiamentos");
 
             var financing = new Financing(
                 createFinancingDto.Description,
@@ -124,10 +127,10 @@ namespace Equilibrium.Application.Services
         public async Task<FinancingDto> UpdateAsync(Guid id, UpdateFinancingDto updateFinancingDto)
         {
             var financing = await _unitOfWork.Financings.GetByIdAsync(id) ??
-                throw new KeyNotFoundException("Financiamento n√£o encontrado");
+                throw new KeyNotFoundException("Financiamento n„o encontrado");
 
             if (financing.Status != FinancingStatus.Active)
-                throw new InvalidOperationException("N√£o √© poss√≠vel atualizar um financiamento que n√£o est√° ativo");
+                throw new InvalidOperationException("N„o È possÌvel atualizar um financiamento que n„o est· ativo");
 
             if (!string.IsNullOrEmpty(updateFinancingDto.Description))
                 financing.UpdateDescription(updateFinancingDto.Description);
@@ -144,10 +147,10 @@ namespace Equilibrium.Application.Services
         public async Task CompleteAsync(Guid id)
         {
             var financing = await _unitOfWork.Financings.GetByIdAsync(id) ??
-                throw new KeyNotFoundException("Financiamento n√£o encontrado");
+                throw new KeyNotFoundException("Financiamento n„o encontrado");
 
             if (financing.Status != FinancingStatus.Active)
-                throw new InvalidOperationException("N√£o √© poss√≠vel completar um financiamento que n√£o est√° ativo");
+                throw new InvalidOperationException("N„o È possÌvel completar um financiamento que n„o est· ativo");
 
             financing.Complete();
 
@@ -158,10 +161,10 @@ namespace Equilibrium.Application.Services
         public async Task CancelAsync(Guid id)
         {
             var financing = await _unitOfWork.Financings.GetByIdAsync(id) ??
-                throw new KeyNotFoundException("Financiamento n√£o encontrado");
+                throw new KeyNotFoundException("Financiamento n„o encontrado");
 
             if (financing.Status != FinancingStatus.Active)
-                throw new InvalidOperationException("N√£o √© poss√≠vel cancelar um financiamento que n√£o est√° ativo");
+                throw new InvalidOperationException("N„o È possÌvel cancelar um financiamento que n„o est· ativo");
 
             financing.Cancel();
 
@@ -183,7 +186,7 @@ namespace Equilibrium.Application.Services
 
             if (simulationRequest.Type == FinancingType.PRICE)
             {
-                // F√≥rmula PRICE
+                // FÛrmula PRICE
                 decimal factor = monthlyRate * (decimal)Math.Pow((double)(1 + monthlyRate), simulationRequest.TermMonths) /
                                 ((decimal)Math.Pow((double)(1 + monthlyRate), simulationRequest.TermMonths) - 1);
 
@@ -257,7 +260,7 @@ namespace Equilibrium.Application.Services
                 result.MonthlyDecreaseAmount = monthlyRate * constantAmortization;
             }
 
-            // Limitar a no m√°ximo 12 parcelas para visualiza√ß√£o
+            // Limitar a no m·ximo 12 parcelas para visualizaÁ„o
             if (result.Installments.Count > 12)
             {
                 var firstInstallments = result.Installments.Take(3).ToList();
@@ -273,7 +276,7 @@ namespace Equilibrium.Application.Services
                 result.Installments = firstInstallments.Concat(middleInstallments).Concat(lastInstallments).ToList();
             }
 
-            await Task.CompletedTask; // Para manter o m√©todo ass√≠ncrono
+            await Task.CompletedTask; // Para manter o mÈtodo assÌncrono
             return result;
         }
 
@@ -281,7 +284,7 @@ namespace Equilibrium.Application.Services
         {
             var financing = await _unitOfWork.Financings.GetFinancingWithDetailsAsync(financingId);
             if (financing == null)
-                throw new KeyNotFoundException("Financiamento n√£o encontrado");
+                throw new KeyNotFoundException("Financiamento n„o encontrado");
 
             if (financing.Status != FinancingStatus.Active)
                 throw new InvalidOperationException("Apenas financiamentos ativos podem ser recalculados");
@@ -292,5 +295,23 @@ namespace Equilibrium.Application.Services
             await _unitOfWork.Financings.UpdateAsync(financing);
             await _unitOfWork.CompleteAsync();
         }
+        public async Task<PagedResult<FinancingDto>> GetFilteredAsync(FinancingFilter filter, Guid userId)
+        {
+            var specification = new FinancingSpecification(filter)
+            {
+                UserId = userId
+            };
+
+            var (financings, totalCount) = await _unitOfWork.Financings.FindWithSpecificationAsync(specification);
+
+            return new PagedResult<FinancingDto>
+            {
+                Items = _mapper.Map<IEnumerable<FinancingDto>>(financings),
+                TotalCount = totalCount,
+                PageNumber = filter.PageNumber,
+                PageSize = filter.PageSize
+            };
+        }
     }
 }
+

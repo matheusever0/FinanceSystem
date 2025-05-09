@@ -1,4 +1,6 @@
-﻿using Equilibrium.Application.DTOs.IncomeInstallment;
+using Equilibrium.Application.DTOs.Common;
+using Equilibrium.Application.DTOs.IncomeInstallment;
+using Equilibrium.Domain.DTOs.Filters;
 
 namespace Equilibrium.Application.Interfaces
 {
@@ -11,5 +13,6 @@ namespace Equilibrium.Application.Interfaces
         Task<IEnumerable<IncomeInstallmentDto>> GetReceivedAsync(Guid userId);
         Task<IncomeInstallmentDto> MarkAsReceivedAsync(Guid id, DateTime? receivedDate = null);
         Task<IncomeInstallmentDto> CancelAsync(Guid id);
+        Task<PagedResult<IncomeInstallmentDto>> GetFilteredAsync(IncomeInstallmentFilter filter, Guid userId);
     }
 }

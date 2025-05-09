@@ -1,4 +1,6 @@
-﻿using Equilibrium.Application.DTOs.PaymentMethod;
+using Equilibrium.Application.DTOs.Common;
+using Equilibrium.Application.DTOs.PaymentMethod;
+using Equilibrium.Domain.DTOs.Filters;
 using Equilibrium.Domain.Enums;
 
 namespace Equilibrium.Application.Interfaces
@@ -13,5 +15,7 @@ namespace Equilibrium.Application.Interfaces
         Task<PaymentMethodDto> CreateAsync(CreatePaymentMethodDto createPaymentMethodDto, Guid userId);
         Task<PaymentMethodDto> UpdateAsync(Guid id, UpdatePaymentMethodDto updatePaymentMethodDto);
         Task DeleteAsync(Guid id);
+        Task<PagedResult<PaymentMethodDto>> GetFilteredAsync(PaymentMethodFilter filter, Guid userId);
     }
 }
+

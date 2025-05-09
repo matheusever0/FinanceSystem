@@ -1,4 +1,7 @@
-﻿using Equilibrium.Application.DTOs.CreditCard;
+using Equilibrium.Application.DTOs.CreditCard;
+
+using Equilibrium.Application.DTOs.Common;
+using Equilibrium.Domain.DTOs.Filters;
 
 namespace Equilibrium.Application.Interfaces
 {
@@ -9,5 +12,7 @@ namespace Equilibrium.Application.Interfaces
         Task<CreditCardDto> CreateAsync(CreateCreditCardDto createCreditCardDto, Guid userId);
         Task<CreditCardDto> UpdateAsync(Guid id, UpdateCreditCardDto updateCreditCardDto);
         Task DeleteAsync(Guid id);
+        Task<PagedResult<CreditCardDto>> GetFilteredAsync(CreditCardFilter filter, Guid userId);
     }
 }
+

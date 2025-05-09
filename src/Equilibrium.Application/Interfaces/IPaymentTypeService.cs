@@ -1,4 +1,6 @@
-﻿using Equilibrium.Application.DTOs.PaymentType;
+using Equilibrium.Application.DTOs.Common;
+using Equilibrium.Application.DTOs.PaymentType;
+using Equilibrium.Domain.DTOs.Filters;
 
 namespace Equilibrium.Application.Interfaces
 {
@@ -11,5 +13,7 @@ namespace Equilibrium.Application.Interfaces
         Task<PaymentTypeDto> CreateAsync(CreatePaymentTypeDto createPaymentTypeDto, Guid userId);
         Task<PaymentTypeDto> UpdateAsync(Guid id, UpdatePaymentTypeDto updatePaymentTypeDto);
         Task DeleteAsync(Guid id);
+        Task<PagedResult<PaymentTypeDto>> GetFilteredAsync(PaymentTypeFilter filter, Guid userId);
     }
 }
+

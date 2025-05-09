@@ -1,8 +1,11 @@
-Ôªøusing AutoMapper;
+using AutoMapper;
 using Equilibrium.Application.DTOs.Investment;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Entities;
 using Equilibrium.Domain.Enums;
+using Equilibrium.Domain.Specifications;
+using Equilibrium.Application.DTOs.Common;
+using Equilibrium.Domain.DTOs.Filters;
 using Equilibrium.Domain.Interfaces.Services;
 
 namespace Equilibrium.Application.Services
@@ -26,7 +29,7 @@ namespace Equilibrium.Application.Services
         public async Task<InvestmentDto> GetByIdAsync(Guid id)
         {
             var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(id);
-            return investment == null ? throw new KeyNotFoundException("Investimento n√£o encontrado") : _mapper.Map<InvestmentDto>(investment);
+            return investment == null ? throw new KeyNotFoundException("Investimento n„o encontrado") : _mapper.Map<InvestmentDto>(investment);
         }
 
         public async Task<IEnumerable<InvestmentDto>> GetAllByUserIdAsync(Guid userId)
@@ -43,12 +46,12 @@ namespace Equilibrium.Application.Services
 
         public async Task<InvestmentDto> CreateAsync(CreateInvestmentDto createInvestmentDto, Guid userId)
         {
-            var user = await _unitOfWork.Users.GetByIdAsync(userId) ?? throw new KeyNotFoundException("Usu√°rio n√£o encontrado");
+            var user = await _unitOfWork.Users.GetByIdAsync(userId) ?? throw new KeyNotFoundException("Usu·rio n„o encontrado");
             var existingInvestment = await _unitOfWork.Investments.GetInvestmentBySymbolAsync(userId, createInvestmentDto.Symbol);
             if (existingInvestment != null)
-                throw new InvalidOperationException("J√° existe um investimento com este s√≠mbolo");
+                throw new InvalidOperationException("J· existe um investimento com este sÌmbolo");
 
-            var stockQuoteDto = await _stockPriceService.GetBatchQuoteAsync(createInvestmentDto.Symbol) ?? throw new ArgumentNullException($"N√£o foi encontrado atualiza√ß√µes para: {createInvestmentDto.Symbol}");
+            var stockQuoteDto = await _stockPriceService.GetBatchQuoteAsync(createInvestmentDto.Symbol) ?? throw new ArgumentNullException($"N„o foi encontrado atualizaÁıes para: {createInvestmentDto.Symbol}");
 
             decimal totalInvested = createInvestmentDto.InitialQuantity * createInvestmentDto.InitialPrice;
             decimal currentTotal = createInvestmentDto.InitialQuantity * stockQuoteDto.Price;
@@ -78,7 +81,7 @@ namespace Equilibrium.Application.Services
                 totalInvested,
                 0,
                 createInvestmentDto.Broker,
-                "Transa√ß√£o inicial",
+                "TransaÁ„o inicial",
                 true
             );
 
@@ -90,16 +93,16 @@ namespace Equilibrium.Application.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(id) ?? throw new KeyNotFoundException("Investimento n√£o encontrado");
+            var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(id) ?? throw new KeyNotFoundException("Investimento n„o encontrado");
             await _unitOfWork.Investments.DeleteAsync(investment);
             await _unitOfWork.CompleteAsync();
         }
 
         public async Task<InvestmentDto> RefreshPriceAsync(Guid id)
         {
-            var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(id) ?? throw new KeyNotFoundException("Investimento n√£o encontrado");
+            var investment = await _unitOfWork.Investments.GetInvestmentWithTransactionsAsync(id) ?? throw new KeyNotFoundException("Investimento n„o encontrado");
 
-            var stockQuote = await _stockPriceService.GetBatchQuoteAsync(investment.Symbol) ?? throw new ArgumentNullException($"Erro ao atualizar pre√ßo, devido a n√£o encontrar: {investment.Symbol}");
+            var stockQuote = await _stockPriceService.GetBatchQuoteAsync(investment.Symbol) ?? throw new ArgumentNullException($"Erro ao atualizar preÁo, devido a n„o encontrar: {investment.Symbol}");
             investment.UpdateCurrentPrice(stockQuote.Price);
 
             await _unitOfWork.Investments.UpdateAsync(investment);
@@ -135,10 +138,29 @@ namespace Equilibrium.Application.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro ao atualizar pre√ßos: {ex.Message}");
+                throw new Exception($"Erro ao atualizar preÁos: {ex.Message}");
             }
 
             return _mapper.Map<IEnumerable<InvestmentDto>>(investments);
         }
+
+        public async Task<PagedResult<InvestmentDto>> GetFilteredAsync(InvestmentFilter filter, Guid userId)
+        {
+            var specification = new InvestmentSpecification(filter)
+            {
+                UserId = userId
+            };
+
+            var (investments, totalCount) = await _unitOfWork.Investments.FindWithSpecificationAsync(specification);
+
+            return new PagedResult<InvestmentDto>
+            {
+                Items = _mapper.Map<IEnumerable<InvestmentDto>>(investments),
+                TotalCount = totalCount,
+                PageNumber = filter.PageNumber,
+                PageSize = filter.PageSize
+            };
+        }
     }
 }
+

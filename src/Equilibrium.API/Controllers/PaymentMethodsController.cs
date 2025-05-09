@@ -1,8 +1,11 @@
-﻿using Equilibrium.API.Extensions;
+using Equilibrium.API.Extensions;
 using Equilibrium.Application.DTOs.PaymentMethod;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Enums;
 using Equilibrium.Domain.Interfaces.Services;
+using Equilibrium.Application.DTOs.Common;
+using Equilibrium.Domain.DTOs.Filters;
+using Equilibrium.Application.Validations.Filters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
@@ -40,6 +43,29 @@ namespace Equilibrium.API.Controllers
             return Ok(paymentMethods);
         }
 
+                [HttpGet("filter")]
+        public async Task<ActionResult<PagedResult<PaymentMethodDto>>> GetFiltered([FromQuery] PaymentMethodFilter filter)
+        {
+            if (filter == null)
+                filter = new PaymentMethodFilter();
+                
+            var validator = new PaymentMethodFilterValidator();
+            var validationResult = await validator.ValidateAsync(filter);
+            
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.Errors);
+                
+            var userId = HttpContext.GetCurrentUserId();
+            var pagedResult = await _service.GetFilteredAsync(filter, userId);
+            
+            // Add pagination headers
+            Response.Headers.Add("X-Pagination-Total", pagedResult.TotalCount.ToString());
+            Response.Headers.Add("X-Pagination-Pages", pagedResult.TotalPages.ToString());
+            Response.Headers.Add("X-Pagination-Page", pagedResult.PageNumber.ToString());
+            Response.Headers.Add("X-Pagination-Size", pagedResult.PageSize.ToString());
+            
+            return Ok(pagedResult);
+        }
         [HttpGet("{id}")]
         public async Task<ActionResult<PaymentMethodDto>> GetById(Guid id)
         {
@@ -127,3 +153,4 @@ namespace Equilibrium.API.Controllers
         }
     }
 }
+

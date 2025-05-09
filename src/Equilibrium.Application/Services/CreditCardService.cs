@@ -1,8 +1,11 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Equilibrium.Application.DTOs.CreditCard;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Entities;
 using Equilibrium.Domain.Enums;
+using Equilibrium.Domain.Specifications;
+using Equilibrium.Application.DTOs.Common;
+using Equilibrium.Domain.DTOs.Filters;
 using Equilibrium.Domain.Interfaces.Services;
 using Equilibrium.Resources;
 
@@ -84,5 +87,24 @@ namespace Equilibrium.Application.Services
             await _unitOfWork.CreditCards.DeleteAsync(creditCard);
             await _unitOfWork.CompleteAsync();
         }
+
+        public async Task<PagedResult<CreditCardDto>> GetFilteredAsync(CreditCardFilter filter, Guid userId)
+        {
+            var specification = new CreditCardSpecification(filter)
+            {
+                UserId = userId
+            };
+
+            var (creditCards, totalCount) = await _unitOfWork.CreditCards.FindWithSpecificationAsync(specification);
+
+            return new PagedResult<CreditCardDto>
+            {
+                Items = _mapper.Map<IEnumerable<CreditCardDto>>(creditCards),
+                TotalCount = totalCount,
+                PageNumber = filter.PageNumber,
+                PageSize = filter.PageSize
+            };
+        }
     }
 }
+

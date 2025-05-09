@@ -1,4 +1,6 @@
-﻿using Equilibrium.Application.DTOs.Investment;
+using Equilibrium.Application.DTOs.Common;
+using Equilibrium.Application.DTOs.Investment;
+using Equilibrium.Domain.DTOs.Filters;
 using Equilibrium.Domain.Enums;
 
 namespace Equilibrium.Application.Interfaces
@@ -12,5 +14,7 @@ namespace Equilibrium.Application.Interfaces
         Task DeleteAsync(Guid id);
         Task<InvestmentDto> RefreshPriceAsync(Guid id);
         Task<IEnumerable<InvestmentDto>> RefreshAllPricesAsync(Guid userId);
+        Task<PagedResult<InvestmentDto>> GetFilteredAsync(InvestmentFilter filter, Guid userId);
     }
 }
+

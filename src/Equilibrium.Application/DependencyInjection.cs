@@ -1,7 +1,9 @@
-﻿using Equilibrium.Application.Interfaces;
+using Equilibrium.Application.Interfaces;
 using Equilibrium.Application.Mappings;
 using Equilibrium.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
+using FluentValidation;
+using System.Reflection;
 
 namespace Equilibrium.Application
 {
@@ -14,7 +16,6 @@ namespace Equilibrium.Application
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IPermissionService, PermissionService>();
-
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IPaymentTypeService, PaymentTypeService>();
             services.AddScoped<IPaymentMethodService, PaymentMethodService>();
@@ -28,6 +29,8 @@ namespace Equilibrium.Application
             services.AddScoped<IStockPriceService, StockPriceService>();
             services.AddScoped<IFinancingService, FinancingService>();
             services.AddScoped<IFinancingInstallmentService, FinancingInstallmentService>();
+
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             return services;
         }

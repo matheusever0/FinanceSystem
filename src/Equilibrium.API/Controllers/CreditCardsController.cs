@@ -1,7 +1,10 @@
-﻿using Equilibrium.API.Extensions;
+using Equilibrium.API.Extensions;
 using Equilibrium.Application.DTOs.CreditCard;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Interfaces.Services;
+using Equilibrium.Application.DTOs.Common;
+using Equilibrium.Domain.DTOs.Filters;
+using Equilibrium.Application.Validations.Filters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
@@ -18,6 +21,29 @@ namespace Equilibrium.API.Controllers
             return Ok(creditCards);
         }
 
+                [HttpGet("filter")]
+        public async Task<ActionResult<PagedResult<CreditCardDto>>> GetFiltered([FromQuery] CreditCardFilter filter)
+        {
+            if (filter == null)
+                filter = new CreditCardFilter();
+                
+            var validator = new CreditCardFilterValidator();
+            var validationResult = await validator.ValidateAsync(filter);
+            
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.Errors);
+                
+            var userId = HttpContext.GetCurrentUserId();
+            var pagedResult = await _service.GetFilteredAsync(filter, userId);
+            
+            // Add pagination headers
+            Response.Headers.Add("X-Pagination-Total", pagedResult.TotalCount.ToString());
+            Response.Headers.Add("X-Pagination-Pages", pagedResult.TotalPages.ToString());
+            Response.Headers.Add("X-Pagination-Page", pagedResult.PageNumber.ToString());
+            Response.Headers.Add("X-Pagination-Size", pagedResult.PageSize.ToString());
+            
+            return Ok(pagedResult);
+        }
         [HttpGet("{id}")]
         public async Task<ActionResult<CreditCardDto>> GetById(Guid id)
         {
@@ -110,3 +136,4 @@ namespace Equilibrium.API.Controllers
         }
     }
 }
+

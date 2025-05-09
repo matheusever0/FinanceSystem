@@ -1,9 +1,12 @@
-﻿using Equilibrium.API.Extensions;
+using Equilibrium.API.Extensions;
 using Equilibrium.Application.DTOs.Income;
 using Equilibrium.Application.DTOs.Payment;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Interfaces.Services;
+using Equilibrium.Application.DTOs.Common;
+using Equilibrium.Application.Validations.Filters;
 using Microsoft.AspNetCore.Mvc;
+using Equilibrium.Domain.DTOs.Filters;
 
 namespace Equilibrium.API.Controllers
 {
@@ -19,6 +22,29 @@ namespace Equilibrium.API.Controllers
             return Ok(incomes);
         }
 
+                [HttpGet("filter")]
+        public async Task<ActionResult<PagedResult<IncomeDto>>> GetFiltered([FromQuery] IncomeFilter filter)
+        {
+            if (filter == null)
+                filter = new IncomeFilter();
+                
+            var validator = new IncomeFilterValidator();
+            var validationResult = await validator.ValidateAsync(filter);
+            
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.Errors);
+                
+            var userId = HttpContext.GetCurrentUserId();
+            var pagedResult = await _service.GetFilteredAsync(filter, userId);
+            
+            // Add pagination headers
+            Response.Headers.Add("X-Pagination-Total", pagedResult.TotalCount.ToString());
+            Response.Headers.Add("X-Pagination-Pages", pagedResult.TotalPages.ToString());
+            Response.Headers.Add("X-Pagination-Page", pagedResult.PageNumber.ToString());
+            Response.Headers.Add("X-Pagination-Size", pagedResult.PageSize.ToString());
+            
+            return Ok(pagedResult);
+        }
         [HttpGet("{id}")]
         public async Task<ActionResult<IncomeDto>> GetById(Guid id)
         {
@@ -39,7 +65,7 @@ namespace Equilibrium.API.Controllers
         {
             if (month < 1 || month > 12)
             {
-                return BadRequest(new { message = "Mês deve estar entre 1 e 12" });
+                return BadRequest(new { message = "M�s deve estar entre 1 e 12" });
             }
 
             var userId = HttpContext.GetCurrentUserId();
@@ -202,3 +228,4 @@ namespace Equilibrium.API.Controllers
         }
     }
 }
+

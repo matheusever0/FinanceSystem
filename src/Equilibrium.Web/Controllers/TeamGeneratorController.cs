@@ -1,12 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Equilibrium.Web.Models;
 using Equilibrium.Web.Services;
-using System;
-using System.IO;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
 
 namespace Equilibrium.Web.Controllers
 {

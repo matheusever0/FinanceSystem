@@ -1,4 +1,4 @@
-﻿using Equilibrium.API.Middlewares;
+using Equilibrium.API.Middlewares;
 using Equilibrium.Application;
 using Equilibrium.Infrastructure;
 
