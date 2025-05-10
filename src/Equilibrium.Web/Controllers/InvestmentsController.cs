@@ -243,65 +243,67 @@ namespace Equilibrium.Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-    }
 
-    [HttpGet("filter")]
-    [RequirePermission("investments.view")]
-    public async Task<IActionResult> Filter(InvestmentFilter filter = null)
-    {
-        if (filter == null)
-            filter = new InvestmentFilter();
-        
-        try
+        [HttpGet("filter")]
+        [RequirePermission("investments.view")]
+        public async Task<IActionResult> Filter(InvestmentFilter filter = null)
         {
-            var token = HttpContext.GetJwtToken();
-            var result = await _investmentService.GetFilteredAsync(filter, token);
-            
-            // Add pagination headers
-            Response.Headers.Add("X-Pagination-Total", result.TotalCount.ToString());
-            Response.Headers.Add("X-Pagination-Pages", result.TotalPages.ToString());
-            Response.Headers.Add("X-Pagination-Page", result.PageNumber.ToString());
-            Response.Headers.Add("X-Pagination-Size", result.PageSize.ToString());
-            
-            ViewBag.Filter = filter;
-            ViewBag.TotalCount = result.TotalCount;
-            ViewBag.TotalPages = result.TotalPages;
-            ViewBag.CurrentPage = result.PageNumber;
-            ViewBag.PageSize = result.PageSize;
-            
-            return View("Index", result.Items);
+            if (filter == null)
+                filter = new InvestmentFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _investmentService.GetFilteredAsync(filter, token);
+
+                // Add pagination headers
+                Response.Headers.Add("X-Pagination-Total", result.TotalCount.ToString());
+                Response.Headers.Add("X-Pagination-Pages", result.TotalPages.ToString());
+                Response.Headers.Add("X-Pagination-Page", result.PageNumber.ToString());
+                Response.Headers.Add("X-Pagination-Size", result.PageSize.ToString());
+
+                ViewBag.Filter = filter;
+                ViewBag.TotalCount = result.TotalCount;
+                ViewBag.TotalPages = result.TotalPages;
+                ViewBag.CurrentPage = result.PageNumber;
+                ViewBag.PageSize = result.PageSize;
+
+                return View("Index", result.Items);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Investment, ex);
+                return RedirectToAction("Index", "Home");
+            }
         }
-        catch (Exception ex)
+
+        [HttpGet("api/filter")]
+        [RequirePermission("investments.view")]
+        public async Task<IActionResult> FilterJson([FromQuery] InvestmentFilter filter)
         {
-            TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Investment, ex);
-            return RedirectToAction("Index", "Home");
+            if (filter == null)
+                filter = new InvestmentFilter();
+
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+                var result = await _investmentService.GetFilteredAsync(filter, token);
+
+                return Json(new
+                {
+                    items = result.Items,
+                    totalCount = result.TotalCount,
+                    pageNumber = result.PageNumber,
+                    pageSize = result.PageSize,
+                    totalPages = result.TotalPages,
+                    hasPreviousPage = result.HasPreviousPage,
+                    hasNextPage = result.HasNextPage
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
-
-    [HttpGet("api/filter")]
-    [RequirePermission("investments.view")]
-    public async Task<IActionResult> FilterJson([FromQuery] InvestmentFilter filter)
-    {
-        if (filter == null)
-            filter = new InvestmentFilter();
-            
-        try
-        {
-            var token = HttpContext.GetJwtToken();
-            var result = await _investmentService.GetFilteredAsync(filter, token);
-            
-            return Json(new { 
-                items = result.Items, 
-                totalCount = result.TotalCount,
-                pageNumber = result.PageNumber,
-                pageSize = result.PageSize,
-                totalPages = result.TotalPages,
-                hasPreviousPage = result.HasPreviousPage,
-                hasNextPage = result.HasNextPage
-            });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-    }}
+}

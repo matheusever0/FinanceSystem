@@ -50,14 +50,7 @@ namespace Equilibrium.Web.Services
         }
         public async Task<PagedResult<RoleModel>> GetFilteredAsync(RoleFilter filter, string token)
         {
-            try
-            {
-                _logger.LogInformation("Obtendo registros filtrados");
-                return await _apiService.GetFilteredAsync<PagedResult<RoleModel>>("/api/Roles/filter", filter, token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao obter registros filtrados");
-                throw;
-            }
+            return await _apiService.GetFilteredAsync<PagedResult<RoleModel>>("/api/Roles/filter", filter, token);
         }
+    }
+}

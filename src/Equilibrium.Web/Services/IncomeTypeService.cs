@@ -126,3 +126,5 @@ namespace Equilibrium.Web.Services
                 throw;
             }
         }
+    }
+}

@@ -196,64 +196,66 @@ namespace Equilibrium.Web.Services
                 return Task.FromResult<ClaimsPrincipal>(null);
             }
         }
-    private string ConvertFilterToQueryString(object filter)
-    {
-        if (filter == null) return string.Empty;
-        
-        var properties = filter.GetType().GetProperties();
-        var parameters = new List<string>();
-        
-        foreach (var prop in properties)
+        private string ConvertFilterToQueryString(object filter)
         {
-            var value = prop.GetValue(filter);
-            if (value != null)
-            {
-                if (value is DateTime dateTime)
-                    parameters.Add($"{prop.Name}={Uri.EscapeDataString(dateTime.ToString("yyyy-MM-dd"))}");
-                else
-                    parameters.Add($"{prop.Name}={Uri.EscapeDataString(value.ToString())}");
-            }
-        }
-        
-        return parameters.Count > 0 ? $"?{string.Join("&", parameters)}" : string.Empty;
-    }
+            if (filter == null) return string.Empty;
 
-    public async Task<T> GetFilteredAsync<T>(string endpoint, object filter, string token)
-    {
-        var client = CreateClient(token);
-        
-        // Converter objeto de filtro para query string
-        var queryString = ConvertFilterToQueryString(filter);
-        var response = await client.GetAsync($"{endpoint}{queryString}");
-        var content = await HandleResponse(response);
-        
-        // Extract pagination headers if present
-        if (_httpContextAccessor?.HttpContext != null)
-        {
-            if (response.Headers.Contains("X-Pagination-Total"))
+            var properties = filter.GetType().GetProperties();
+            var parameters = new List<string>();
+
+            foreach (var prop in properties)
             {
-                response.Headers.TryGetValues("X-Pagination-Total", out var totalValues);
-                _httpContextAccessor.HttpContext.Items["X-Pagination-Total"] = totalValues?.FirstOrDefault();
+                var value = prop.GetValue(filter);
+                if (value != null)
+                {
+                    if (value is DateTime dateTime)
+                        parameters.Add($"{prop.Name}={Uri.EscapeDataString(dateTime.ToString("yyyy-MM-dd"))}");
+                    else
+                        parameters.Add($"{prop.Name}={Uri.EscapeDataString(value.ToString())}");
+                }
             }
-            
-            if (response.Headers.Contains("X-Pagination-Pages"))
-            {
-                response.Headers.TryGetValues("X-Pagination-Pages", out var pagesValues);
-                _httpContextAccessor.HttpContext.Items["X-Pagination-Pages"] = pagesValues?.FirstOrDefault();
-            }
-            
-            if (response.Headers.Contains("X-Pagination-Page"))
-            {
-                response.Headers.TryGetValues("X-Pagination-Page", out var pageValues);
-                _httpContextAccessor.HttpContext.Items["X-Pagination-Page"] = pageValues?.FirstOrDefault();
-            }
-            
-            if (response.Headers.Contains("X-Pagination-Size"))
-            {
-                response.Headers.TryGetValues("X-Pagination-Size", out var sizeValues);
-                _httpContextAccessor.HttpContext.Items["X-Pagination-Size"] = sizeValues?.FirstOrDefault();
-            }
+
+            return parameters.Count > 0 ? $"?{string.Join("&", parameters)}" : string.Empty;
         }
-        
-        return JsonSerializer.Deserialize<T>(content, _jsonOptions)!;
+
+        public async Task<T> GetFilteredAsync<T>(string endpoint, object filter, string token)
+        {
+            var client = CreateClient(token);
+
+            // Converter objeto de filtro para query string
+            var queryString = ConvertFilterToQueryString(filter);
+            var response = await client.GetAsync($"{endpoint}{queryString}");
+            var content = await HandleResponse(response);
+
+            // Extract pagination headers if present
+            if (_httpContextAccessor?.HttpContext != null)
+            {
+                if (response.Headers.Contains("X-Pagination-Total"))
+                {
+                    response.Headers.TryGetValues("X-Pagination-Total", out var totalValues);
+                    _httpContextAccessor.HttpContext.Items["X-Pagination-Total"] = totalValues?.FirstOrDefault();
+                }
+
+                if (response.Headers.Contains("X-Pagination-Pages"))
+                {
+                    response.Headers.TryGetValues("X-Pagination-Pages", out var pagesValues);
+                    _httpContextAccessor.HttpContext.Items["X-Pagination-Pages"] = pagesValues?.FirstOrDefault();
+                }
+
+                if (response.Headers.Contains("X-Pagination-Page"))
+                {
+                    response.Headers.TryGetValues("X-Pagination-Page", out var pageValues);
+                    _httpContextAccessor.HttpContext.Items["X-Pagination-Page"] = pageValues?.FirstOrDefault();
+                }
+
+                if (response.Headers.Contains("X-Pagination-Size"))
+                {
+                    response.Headers.TryGetValues("X-Pagination-Size", out var sizeValues);
+                    _httpContextAccessor.HttpContext.Items["X-Pagination-Size"] = sizeValues?.FirstOrDefault();
+                }
+            }
+
+            return JsonSerializer.Deserialize<T>(content, _jsonOptions)!;
+        }
     }
+}
