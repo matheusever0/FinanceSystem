@@ -3,17 +3,14 @@
  * Funções específicas para cálculos e componentes financeiros
  */
 
-// Namespace global para o sistema
 var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Modules = FinanceSystem.Modules || {};
 
-// Módulo Financial
 FinanceSystem.Modules.Financial = (function () {
     /**
      * Inicializa o módulo financeiro
      */
     function initialize() {
-        // Nada a inicializar automaticamente
     }
 
     /**
@@ -28,7 +25,6 @@ FinanceSystem.Modules.Financial = (function () {
         if (typeof $.fn.mask !== 'undefined') {
             $(moneyInput).mask('#.##0,00', { reverse: true });
 
-            // Evento blur para validação
             $(moneyInput).on('blur', function () {
                 let value = $(this).val();
                 value = value.replace(/\./g, '').replace(',', '.');
@@ -44,7 +40,6 @@ FinanceSystem.Modules.Financial = (function () {
                 }
             });
         } else {
-            // Implementação manual se mask não estiver disponível
             moneyInput.addEventListener('input', function () {
                 formatCurrencyInput(this);
             });
@@ -60,14 +55,11 @@ FinanceSystem.Modules.Financial = (function () {
      * @param {HTMLElement} input - Campo a ser formatado
      */
     function formatCurrencyInput(input) {
-        // Preserva a posição do cursor
         const cursorPosition = input.selectionStart;
         const inputLength = input.value.length;
 
-        // Remove caracteres não numéricos, exceto vírgula e ponto
         let value = input.value.replace(/[^\d.,]/g, '');
 
-        // Converte para o formato brasileiro (vírgula como separador decimal)
         value = value.replace(/\D/g, '');
         if (value === '') {
             input.value = '';
@@ -77,7 +69,6 @@ FinanceSystem.Modules.Financial = (function () {
         value = (parseFloat(value) / 100).toFixed(2);
         input.value = value.replace('.', ',');
 
-        // Ajusta a posição do cursor se necessário
         const newLength = input.value.length;
         const newPosition = cursorPosition + (newLength - inputLength);
         if (newPosition >= 0) {
@@ -136,7 +127,6 @@ FinanceSystem.Modules.Financial = (function () {
                 }
             });
 
-            // Inicializa com o estado atual
             if (isRecurringSwitch.checked) {
                 isRecurringLabel.textContent = 'Sim';
                 installmentsInput.value = '1';
@@ -168,10 +158,8 @@ FinanceSystem.Modules.Financial = (function () {
             }
         }
 
-        // Inicializa com o estado atual
         updateStatusLabel();
 
-        // Atualiza quando o switch mudar
         statusSwitch.addEventListener('change', updateStatusLabel);
     }
 
@@ -188,7 +176,6 @@ FinanceSystem.Modules.Financial = (function () {
             return [];
         }
 
-        // Converte taxa anual para mensal
         const monthlyRate = interestRate > 0 ? (interestRate / 100) / 12 : 0;
         const installments = [];
 
@@ -197,7 +184,6 @@ FinanceSystem.Modules.Financial = (function () {
         let totalInterest = 0;
 
         if (system === 'PRICE') {
-            // Sistema Price (parcelas fixas)
             let installmentValue;
 
             if (monthlyRate === 0) {
@@ -211,7 +197,6 @@ FinanceSystem.Modules.Financial = (function () {
                 const principalAmount = installmentValue - interestAmount;
                 remainingBalance -= principalAmount;
 
-                // Correção para último mês (devido a arredondamentos)
                 let actualInstallment = installmentValue;
                 if (i === termMonths) {
                     actualInstallment = principalAmount + interestAmount;
@@ -232,7 +217,6 @@ FinanceSystem.Modules.Financial = (function () {
                 });
             }
         } else if (system === 'SAC') {
-            // Sistema SAC (amortizações fixas)
             const amortization = totalAmount / termMonths;
 
             for (let i = 1; i <= termMonths; i++) {
@@ -270,15 +254,12 @@ FinanceSystem.Modules.Financial = (function () {
     function calculateFutureValue(presentValue, rate, periods, periodicContribution = 0, contributionAtBeginning = false) {
         rate = rate / 100; // Converte percentual para decimal
 
-        // Cálculo do valor futuro do investimento inicial
         const futureValuePV = presentValue * Math.pow(1 + rate, periods);
 
-        // Se não houver contribuições periódicas, retorna apenas o valor futuro do investimento inicial
         if (periodicContribution === 0) {
             return futureValuePV;
         }
 
-        // Cálculo do valor futuro das contribuições periódicas
         let futureValuePMT;
         if (contributionAtBeginning) {
             futureValuePMT = periodicContribution * ((Math.pow(1 + rate, periods) - 1) / rate) * (1 + rate);
@@ -286,7 +267,6 @@ FinanceSystem.Modules.Financial = (function () {
             futureValuePMT = periodicContribution * ((Math.pow(1 + rate, periods) - 1) / rate);
         }
 
-        // Retorna a soma dos dois valores futuros
         return futureValuePV + futureValuePMT;
     }
 
@@ -422,7 +402,6 @@ FinanceSystem.Modules.Financial = (function () {
      * @returns {number} - Taxa de juros por período
      */
     function calculateRate(principal, payment, periods) {
-        // Esta função usa aproximação iterativa, pois não há fórmula direta
         if (payment * periods <= principal) {
             return 0; // Não é possível amortizar o empréstimo com esses parâmetros
         }
@@ -440,7 +419,6 @@ FinanceSystem.Modules.Financial = (function () {
                 return rate * 100;
             }
 
-            // Ajusta a taxa com base na diferença
             rate = rate * (1 + diff / payment * 0.1);
         }
 
@@ -472,18 +450,15 @@ FinanceSystem.Modules.Financial = (function () {
             return value;
         }
 
-        // Remove símbolos de moeda e espaços
         value = value.replace(/[^\d,.-]/g, '');
 
         if (currency === 'BRL') {
-            // Formato brasileiro (1.234,56)
             if (value.indexOf(',') > -1 && value.indexOf('.') > -1) {
                 value = value.replace(/\./g, '').replace(',', '.');
             } else if (value.indexOf(',') > -1) {
                 value = value.replace(',', '.');
             }
         } else {
-            // Formato americano/internacional (1,234.56)
             if (value.indexOf(',') > -1) {
                 value = value.replace(/,/g, '');
             }
@@ -534,7 +509,6 @@ FinanceSystem.Modules.Financial = (function () {
         progressBars.forEach(progressBar => {
             const percentage = progressBar.getAttribute('data-percentage') || 0;
 
-            // Define a cor da barra com base na porcentagem
             if (percentage > 90) {
                 progressBar.classList.add('bg-danger');
             } else if (percentage > 70) {
@@ -545,11 +519,9 @@ FinanceSystem.Modules.Financial = (function () {
                 progressBar.classList.add('bg-success');
             }
 
-            // Define a largura da barra
             progressBar.style.width = `${percentage}%`;
         });
 
-        // Atualiza exibição de limites
         updateLimitsDisplay();
     }
 
@@ -565,7 +537,6 @@ FinanceSystem.Modules.Financial = (function () {
             const available = total - used;
             const percentage = (used / total * 100) || 0;
 
-            // Atualiza elementos na tela
             const totalElement = display.querySelector('.total-limit');
             const availableElement = display.querySelector('.available-limit');
             const usedElement = display.querySelector('.used-limit');
@@ -576,12 +547,10 @@ FinanceSystem.Modules.Financial = (function () {
             if (usedElement) usedElement.textContent = formatCurrency(used);
             if (percentageElement) percentageElement.textContent = `${percentage.toFixed(0)}%`;
 
-            // Atualiza barra de progresso
             const progressBar = display.querySelector('.progress-bar');
             if (progressBar) {
                 progressBar.style.width = `${percentage}%`;
 
-                // Atualiza classe baseado no uso
                 progressBar.classList.remove('bg-success', 'bg-info', 'bg-warning', 'bg-danger');
 
                 if (percentage > 90) {
@@ -613,17 +582,14 @@ FinanceSystem.Modules.Financial = (function () {
             let nextClosingDate = new Date(today.getFullYear(), today.getMonth(), closingDay);
             let nextDueDate = new Date(today.getFullYear(), today.getMonth(), dueDay);
 
-            // Se a data de fechamento já passou este mês, avança para o próximo
             if (today.getDate() > closingDay) {
                 nextClosingDate.setMonth(nextClosingDate.getMonth() + 1);
             }
 
-            // Se a data de vencimento já passou este mês, avança para o próximo
             if (today.getDate() > dueDay) {
                 nextDueDate.setMonth(nextDueDate.getMonth() + 1);
             }
 
-            // Atualiza elementos na página
             const closingDateElement = element.querySelector('.next-closing-date');
             const dueDateElement = element.querySelector('.next-due-date');
             const daysToClosingElement = element.querySelector('.days-to-closing');
@@ -666,19 +632,15 @@ FinanceSystem.Modules.Financial = (function () {
 
         filterButtons.forEach(button => {
             button.addEventListener('click', function () {
-                // Remove classe ativa de todos os botões
                 filterButtons.forEach(btn => btn.classList.remove('active'));
 
-                // Adiciona classe ativa ao botão clicado
                 this.classList.add('active');
 
-                // Filtra a tabela
                 const filterValue = this.getAttribute('data-filter');
                 filterFinancialTable(filterValue);
             });
         });
 
-        // Filtro de pesquisa
         const searchInput = document.getElementById('financial-search');
         if (searchInput) {
             searchInput.addEventListener('input', function () {
@@ -737,7 +699,6 @@ FinanceSystem.Modules.Financial = (function () {
         });
     }
 
-    // API pública do módulo
     return {
         initialize: initialize,
         initializeMoneyMask: initializeMoneyMask,

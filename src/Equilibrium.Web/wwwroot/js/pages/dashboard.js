@@ -3,11 +3,9 @@
  * Scripts específicos para a página de dashboard
  */
 
-// Namespace global para o sistema
 var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Pages = FinanceSystem.Pages || {};
 
-// Módulo Dashboard
 FinanceSystem.Pages.Dashboard = (function () {
     /**
      * Inicializa a página de dashboard
@@ -19,7 +17,6 @@ FinanceSystem.Pages.Dashboard = (function () {
         initializeCollapseSections();
         formatCurrencyValues();
 
-        // Inicializar gráficos de relatórios se estiver na página de relatórios
         if (document.getElementById('monthlyComparisonChart') ||
             document.getElementById('incomeTypesPieChart') ||
             document.getElementById('incomeStatusPieChart')) {
@@ -31,21 +28,17 @@ FinanceSystem.Pages.Dashboard = (function () {
      * Clean up all dashboard charts
      */
     function cleanupDashboardCharts() {
-        // Use our chart registry if available
         if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
             const charts = FinanceSystem.Modules.Charts;
             if (typeof charts.destroyChartSafely === 'function') {
                 charts.destroyChartSafely('monthlyExpensesChart');
                 charts.destroyChartSafely('paymentTypesPieChart');
                 charts.destroyChartSafely('paymentStatusPieChart');
-                // Any other charts you have
             } else if (typeof charts.cleanupAllCharts === 'function') {
-                // Alternative: clean up all charts at once
                 charts.cleanupAllCharts();
             }
         }
 
-        // Reset instance variables
         monthlyExpensesChart = null;
         paymentTypesPieChart = null;
         paymentStatusPieChart = null;
@@ -56,11 +49,9 @@ FinanceSystem.Pages.Dashboard = (function () {
      * Inicializa gráficos do dashboard
      */
     function initializeDashboardCharts() {
-        // Gráfico de gastos mensais com comparação de receitas
         initializeMonthlyComparisonChart();
         initializeMonthlyAnnualComparisonChart();
 
-        // Outros gráficos
         initializePaymentTypesChart();
         initializePaymentStatusChart();
         initializeCreditCardChart();
@@ -70,14 +61,11 @@ FinanceSystem.Pages.Dashboard = (function () {
      * Inicializa gráficos da página de relatórios
      */
     function initializeReportCharts() {
-        // Gráfico de comparação mensal (receitas x despesas)
         initializeMonthlyReportComparisonChart();
 
-        // Gráficos de receitas
         initializeIncomeTypesPieChart();
         initializeIncomeStatusPieChart();
 
-        // Gráficos de pagamentos já estão sendo inicializados
         initializePaymentTypesChart();
         initializePaymentStatusChart();
     }
@@ -90,17 +78,14 @@ FinanceSystem.Pages.Dashboard = (function () {
         if (!chartCanvas) return;
 
         try {
-            // Obter dados do elemento canvas ou atributos de data
             const labelsRaw = chartCanvas.getAttribute('data-labels');
             const incomeValuesRaw = chartCanvas.getAttribute('data-income-values');
             const paymentValuesRaw = chartCanvas.getAttribute('data-payment-values');
 
-            // Parsear os dados JSON
             const labels = JSON.parse(labelsRaw);
             const incomeValues = JSON.parse(incomeValuesRaw);
             const paymentValues = JSON.parse(paymentValuesRaw);
 
-            // Preparar conjuntos de dados para o gráfico
             const datasets = [
                 {
                     label: 'Receitas',
@@ -114,7 +99,6 @@ FinanceSystem.Pages.Dashboard = (function () {
                 }
             ];
 
-            // Criar gráfico de barras agrupadas usando o módulo Charts
             if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
                 FinanceSystem.Modules.Charts.createGroupedBarChart('monthlyExpensesChart', labels, datasets, {
                     responsive: true,
@@ -129,7 +113,6 @@ FinanceSystem.Pages.Dashboard = (function () {
                     }
                 });
             } else {
-                // Fallback para Chart.js direto se o módulo não estiver disponível
                 createMonthlyChartFallback(chartCanvas, labels, incomeValues, paymentValues);
             }
         } catch (error) {
@@ -359,21 +342,17 @@ FinanceSystem.Pages.Dashboard = (function () {
         const chartCanvas = document.getElementById('paymentTypesPieChart');
         if (!chartCanvas) return;
 
-        // Obter dados do elemento canvas
         const labelsRaw = chartCanvas.getAttribute('data-labels');
         const valuesRaw = chartCanvas.getAttribute('data-values');
 
-        // Parsear os dados JSON
         const labels = JSON.parse(labelsRaw);
         const values = JSON.parse(valuesRaw);
 
-        // Criar gráfico de pizza usando o módulo Charts
         if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
             FinanceSystem.Modules.Charts.createPieChart('paymentTypesPieChart', labels, values, {
                 cutout: '70%'
             });
         } else {
-            // Fallback para Chart.js direto se o módulo não estiver disponível
             createPieChartFallback(chartCanvas, labels, values);
         }
     }
@@ -385,11 +364,9 @@ FinanceSystem.Pages.Dashboard = (function () {
         const chartCanvas = document.getElementById('paymentStatusPieChart');
         if (!chartCanvas) return;
 
-        // Obter dados do elemento canvas
         const labels = JSON.parse(chartCanvas.getAttribute('data-labels') || '[]');
         const values = JSON.parse(chartCanvas.getAttribute('data-values') || '[]');
 
-        // Cores para cada status
         const backgroundColors = [
             'rgba(28, 200, 138, 0.8)',   // Pago
             'rgba(246, 194, 62, 0.8)',   // Pendente
@@ -397,14 +374,12 @@ FinanceSystem.Pages.Dashboard = (function () {
             'rgba(133, 135, 150, 0.8)'   // Cancelado
         ];
 
-        // Criar gráfico de pizza usando o módulo Charts
         if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
             FinanceSystem.Modules.Charts.createPieChart('paymentStatusPieChart', labels, values, {
                 cutout: '70%',
                 colors: backgroundColors
             });
         } else {
-            // Fallback para Chart.js direto se o módulo não estiver disponível
             createPieChartFallback(chartCanvas, labels, values, backgroundColors);
         }
     }
@@ -419,7 +394,6 @@ FinanceSystem.Pages.Dashboard = (function () {
     function createPieChartFallback(canvas, labels, values, colors) {
         if (typeof Chart === 'undefined') return;
 
-        // Se não foram fornecidas cores, gera cores
         if (!colors) {
             colors = generateColors(values.length);
         }
@@ -507,7 +481,6 @@ FinanceSystem.Pages.Dashboard = (function () {
             if (i < baseColors.length) {
                 colors.push(baseColors[i]);
             } else {
-                // Gera cores aleatórias se precisar de mais
                 const r = Math.floor(Math.random() * 200) + 55;
                 const g = Math.floor(Math.random() * 200) + 55;
                 const b = Math.floor(Math.random() * 200) + 55;
@@ -544,10 +517,8 @@ FinanceSystem.Pages.Dashboard = (function () {
      * Inicializa estatísticas do dashboard
      */
     function initializeDashboardStats() {
-        // Atualiza contadores
         updateCounters();
 
-        // Inicializa tendências
         initializeTrends();
     }
 
@@ -563,7 +534,6 @@ FinanceSystem.Pages.Dashboard = (function () {
             const isDecimal = counter.getAttribute('data-decimal') === 'true';
             const isCurrency = counter.getAttribute('data-currency') === 'true';
 
-            // Animação de contagem
             let start = 0;
             const increment = target / (duration / 16);
             const timer = setInterval(() => {
@@ -574,7 +544,6 @@ FinanceSystem.Pages.Dashboard = (function () {
                     clearInterval(timer);
                 }
 
-                // Formata o número
                 let formattedValue = '';
                 if (isCurrency) {
                     formattedValue = formatCurrency(start);
@@ -610,7 +579,6 @@ FinanceSystem.Pages.Dashboard = (function () {
             return FinanceSystem.Core.formatCurrency(value, currency); // Pass both parameters
         }
 
-        // Fallback
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: currency
@@ -626,7 +594,6 @@ FinanceSystem.Pages.Dashboard = (function () {
         trends.forEach(trend => {
             const value = parseFloat(trend.getAttribute('data-value') || '0');
 
-            // Define classe e ícone baseado no valor
             if (value > 0) {
                 trend.classList.add('text-success');
                 trend.innerHTML = `<i class="fas fa-arrow-up me-1"></i>${value.toFixed(1)}%`;
@@ -648,13 +615,10 @@ FinanceSystem.Pages.Dashboard = (function () {
 
         filterButtons.forEach(button => {
             button.addEventListener('click', function () {
-                // Remove classe ativa de todos os botões
                 filterButtons.forEach(btn => btn.classList.remove('active'));
 
-                // Adiciona classe ativa ao botão clicado
                 this.classList.add('active');
 
-                // Filtra dados conforme o período selecionado
                 const period = this.getAttribute('data-period');
                 filterDashboardData(period);
             });
@@ -666,20 +630,16 @@ FinanceSystem.Pages.Dashboard = (function () {
      * @param {string} period - Período para filtro
      */
     function filterDashboardData(period) {
-        // Exibe indicador de carregamento se existir
         const loadingIndicator = document.getElementById('dashboard-loading');
         if (loadingIndicator) {
             loadingIndicator.style.display = 'block';
         }
 
-        // Busca os dados para o período selecionado
         fetch(`/Dashboard/GetData?period=${period}`)
             .then(response => response.json())
             .then(data => {
-                // Atualiza os gráficos com os novos dados
                 updateDashboardCharts(data);
 
-                // Esconde indicador de carregamento
                 if (loadingIndicator) {
                     loadingIndicator.style.display = 'none';
                 }
@@ -687,12 +647,10 @@ FinanceSystem.Pages.Dashboard = (function () {
             .catch(error => {
                 console.error('Erro ao carregar dados:', error);
 
-                // Esconde indicador de carregamento
                 if (loadingIndicator) {
                     loadingIndicator.style.display = 'none';
                 }
 
-                // Exibe mensagem de erro
                 alert('Erro ao carregar dados do dashboard. Tente novamente mais tarde.');
             });
     }
@@ -702,7 +660,6 @@ FinanceSystem.Pages.Dashboard = (function () {
      * @param {Object} data - Dados para atualização
      */
     function updateDashboardCharts(data) {
-        // Atualiza o gráfico de gastos mensais
         if (data.monthlyExpenses && window.monthlyExpensesChart) {
             window.monthlyExpensesChart.data.labels = data.monthlyExpenses.labels;
             window.monthlyExpensesChart.data.datasets[0].data = data.monthlyExpenses.incomeValues;
@@ -710,23 +667,19 @@ FinanceSystem.Pages.Dashboard = (function () {
             window.monthlyExpensesChart.update();
         }
 
-        // Atualiza o gráfico de tipos de pagamento
         if (data.paymentTypes && window.paymentTypesChart) {
             window.paymentTypesChart.data.labels = data.paymentTypes.labels;
             window.paymentTypesChart.data.datasets[0].data = data.paymentTypes.values;
             window.paymentTypesChart.update();
         }
 
-        // Atualiza o gráfico de status de pagamentos
         if (data.paymentStatus && window.paymentStatusChart) {
             window.paymentStatusChart.data.labels = data.paymentStatus.labels;
             window.paymentStatusChart.data.datasets[0].data = data.paymentStatus.values;
             window.paymentStatusChart.update();
         }
 
-        // Atualiza estatísticas
         if (data.stats) {
-            // Atualiza contadores
             document.querySelectorAll('[data-stat]').forEach(element => {
                 const statName = element.getAttribute('data-stat');
                 if (data.stats[statName] !== undefined) {
@@ -735,7 +688,6 @@ FinanceSystem.Pages.Dashboard = (function () {
                 }
             });
 
-            // Atualiza tendências
             document.querySelectorAll('[data-trend]').forEach(element => {
                 const trendName = element.getAttribute('data-trend');
                 if (data.stats[trendName] !== undefined) {
@@ -778,7 +730,6 @@ FinanceSystem.Pages.Dashboard = (function () {
                         loadSectionContent(id, url);
                     }
 
-                    // Usa Bootstrap para mostrar o collapse
                     if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
                         new bootstrap.Collapse(collapseElement, {
                             show: true
@@ -787,7 +738,6 @@ FinanceSystem.Pages.Dashboard = (function () {
                         collapseElement.classList.add('show');
                     }
                 } else {
-                    // Usa Bootstrap para esconder o collapse
                     if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
                         new bootstrap.Collapse(collapseElement, {
                             hide: true
@@ -810,7 +760,6 @@ FinanceSystem.Pages.Dashboard = (function () {
             });
         });
 
-        // Inicializa seções que começam expandidas
         document.querySelectorAll('.collapse-toggle[data-expanded="true"]').forEach(button => {
             const id = button.getAttribute('data-id');
             const url = button.getAttribute('data-url');
@@ -853,11 +802,9 @@ FinanceSystem.Pages.Dashboard = (function () {
                 contentContainer.classList.remove('d-none');
                 loadingIndicator.classList.add('d-none');
 
-                // Inicializa gráficos específicos após carregar o conteúdo
                 if (id === 'monthly-chart') {
                     initializeMonthlyComparisonChart();
                 }
-                // Adicione esta condição
                 else if (id === 'investment-summary') {
                     formatCurrencyValues();
                 }
@@ -879,12 +826,10 @@ FinanceSystem.Pages.Dashboard = (function () {
         if (!chartCanvas) return;
 
         try {
-            // Obter dados do elemento canvas
             const labels = JSON.parse(chartCanvas.getAttribute('data-labels') || '[]');
             const incomeValues = JSON.parse(chartCanvas.getAttribute('data-income-values') || '[]');
             const expenseValues = JSON.parse(chartCanvas.getAttribute('data-payment-values') || '[]');
 
-            // Preparar conjuntos de dados para o gráfico
             const datasets = [
                 {
                     label: 'Receitas',
@@ -900,7 +845,6 @@ FinanceSystem.Pages.Dashboard = (function () {
                 }
             ];
 
-            // Criar gráfico de barras agrupadas usando o módulo Charts
             if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
                 FinanceSystem.Modules.Charts.createGroupedBarChart('monthlyComparisonChart', labels, datasets, {
                     responsive: true,
@@ -915,7 +859,6 @@ FinanceSystem.Pages.Dashboard = (function () {
                     }
                 });
             } else {
-                // Fallback para Chart.js direto se o módulo não estiver disponível
                 createComparisonChartFallback(chartCanvas, labels, incomeValues, expenseValues);
             }
         } catch (error) {
@@ -1007,23 +950,19 @@ FinanceSystem.Pages.Dashboard = (function () {
         if (!chartCanvas) return;
 
         try {
-            // Obter dados do elemento canvas
             const labelsRaw = chartCanvas.getAttribute('data-labels');
             const valuesRaw = chartCanvas.getAttribute('data-values');
 
             if (!labelsRaw || !valuesRaw) return;
 
-            // Parsear os dados JSON
             const labels = JSON.parse(labelsRaw);
             const values = JSON.parse(valuesRaw);
 
-            // Criar gráfico de pizza usando o módulo Charts
             if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
                 FinanceSystem.Modules.Charts.createPieChart('incomeTypesPieChart', labels, values, {
                     cutout: '70%'
                 });
             } else {
-                // Fallback para Chart.js direto se o módulo não estiver disponível
                 createPieChartFallback(chartCanvas, labels, values, backgroundColors);
             }
         } catch (error) {
@@ -1039,17 +978,14 @@ FinanceSystem.Pages.Dashboard = (function () {
         if (!chartCanvas) return;
 
         try {
-            // Obter dados do elemento canvas
             const labelsRaw = chartCanvas.getAttribute('data-labels');
             const valuesRaw = chartCanvas.getAttribute('data-values');
 
             if (!labelsRaw || !valuesRaw) return;
 
-            // Parsear os dados JSON
             const labels = JSON.parse(labelsRaw);
             const values = JSON.parse(valuesRaw);
 
-            // Cores para cada status
             const backgroundColors = [
                 'rgba(28, 200, 138, 0.8)',   // Recebido - Verde
                 'rgba(246, 194, 62, 0.8)',   // Pendente - Amarelo
@@ -1057,14 +993,12 @@ FinanceSystem.Pages.Dashboard = (function () {
                 'rgba(133, 135, 150, 0.8)'   // Cancelado - Cinza
             ];
 
-            // Criar gráfico de pizza usando o módulo Charts
             if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
                 FinanceSystem.Modules.Charts.createPieChart('incomeStatusPieChart', labels, values, {
                     cutout: '70%',
                     colors: backgroundColors
                 });
             } else {
-                // Fallback para Chart.js direto se o módulo não estiver disponível
                 createPieChartFallback(chartCanvas, labels, values, backgroundColors);
             }
         } catch (error) {
@@ -1072,7 +1006,6 @@ FinanceSystem.Pages.Dashboard = (function () {
         }
     }
 
-    // API pública do módulo
     return {
         initialize: initialize,
         initializeDashboardCharts: initializeDashboardCharts,

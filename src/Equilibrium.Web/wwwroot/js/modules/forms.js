@@ -3,11 +3,9 @@
  * Funções reutilizáveis para manipulação de formulários
  */
 
-// Namespace global para o sistema
 var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Modules = FinanceSystem.Modules || {};
 
-// Módulo Forms
 FinanceSystem.Modules.Forms = (function () {
     /**
      * Inicializa o módulo de formulários
@@ -22,9 +20,7 @@ FinanceSystem.Modules.Forms = (function () {
      * Inicializa campos formatados (máscaras)
      */
     function initializeFormatedInputs() {
-        // Verifica se a biblioteca de máscaras está disponível
         if (typeof $.fn.mask !== 'undefined') {
-            // Máscaras comuns
             $('.mask-date').mask('00/00/0000');
             $('.mask-time').mask('00:00');
             $('.mask-date-time').mask('00/00/0000 00:00');
@@ -42,7 +38,6 @@ FinanceSystem.Modules.Forms = (function () {
             $('.mask-money').mask('#.##0,00', { reverse: true });
             $('.mask-percent').mask('##0,00%', { reverse: true });
         } else {
-            // Inicialização manual de máscaras se a biblioteca não estiver disponível
             initializeManualMasks();
         }
     }
@@ -51,79 +46,67 @@ FinanceSystem.Modules.Forms = (function () {
      * Inicializa máscaras manualmente quando jQuery mask não está disponível
      */
     function initializeManualMasks() {
-        // Campos de moeda
         const moneyInputs = document.querySelectorAll('.mask-money');
         moneyInputs.forEach(input => {
             input.addEventListener('input', function (e) {
                 formatCurrencyInput(this);
             });
 
-            // Formata valor inicial se existir
             if (input.value) {
                 formatCurrencyInput(input);
             }
         });
 
-        // Campos de percentual
         const percentInputs = document.querySelectorAll('.mask-percent');
         percentInputs.forEach(input => {
             input.addEventListener('input', function (e) {
                 formatPercentInput(this);
             });
 
-            // Formata valor inicial se existir
             if (input.value) {
                 formatPercentInput(input);
             }
         });
 
-        // Campos de data
         const dateInputs = document.querySelectorAll('.mask-date');
         dateInputs.forEach(input => {
             input.addEventListener('input', function (e) {
                 formatDateInput(this);
             });
 
-            // Formata valor inicial se existir
             if (input.value) {
                 formatDateInput(input);
             }
         });
 
-        // Campos de CPF
         const cpfInputs = document.querySelectorAll('.mask-cpf');
         cpfInputs.forEach(input => {
             input.addEventListener('input', function (e) {
                 formatCPFInput(this);
             });
 
-            // Formata valor inicial se existir
             if (input.value) {
                 formatCPFInput(input);
             }
         });
 
-        // Campos de CNPJ
         const cnpjInputs = document.querySelectorAll('.mask-cnpj');
         cnpjInputs.forEach(input => {
             input.addEventListener('input', function (e) {
                 formatCNPJInput(this);
             });
 
-            // Formata valor inicial se existir
             if (input.value) {
                 formatCNPJInput(input);
             }
         });
 
-        // Campos de telefone
         const phoneInputs = document.querySelectorAll('.mask-phone');
         phoneInputs.forEach(input => {
             input.addEventListener('input', function (e) {
                 formatPhoneInput(this);
             });
 
-            // Formata valor inicial se existir
             if (input.value) {
                 formatPhoneInput(input);
             }
@@ -135,14 +118,11 @@ FinanceSystem.Modules.Forms = (function () {
      * @param {HTMLElement} input - Campo a ser formatado
      */
     function formatCurrencyInput(input) {
-        // Preserva a posição do cursor
         const cursorPosition = input.selectionStart;
         const inputLength = input.value.length;
 
-        // Remove caracteres não numéricos, exceto vírgula e ponto
         let value = input.value.replace(/[^\d.,]/g, '');
 
-        // Converte para o formato brasileiro (vírgula como separador decimal)
         value = value.replace(/\D/g, '');
         if (value === '') {
             input.value = '';
@@ -152,7 +132,6 @@ FinanceSystem.Modules.Forms = (function () {
         value = (parseFloat(value) / 100).toFixed(2);
         input.value = value.replace('.', ',');
 
-        // Ajusta a posição do cursor se necessário
         const newLength = input.value.length;
         const newPosition = cursorPosition + (newLength - inputLength);
         if (newPosition >= 0) {
@@ -167,7 +146,6 @@ FinanceSystem.Modules.Forms = (function () {
     function formatPercentInput(input) {
         let value = input.value.replace(/[^\d.,]/g, '');
 
-        // Se tem vírgula, limita a duas casas decimais
         if (value.includes(',')) {
             const parts = value.split(',');
             if (parts[1].length > 2) {
@@ -176,7 +154,6 @@ FinanceSystem.Modules.Forms = (function () {
             }
         }
 
-        // Adiciona o símbolo de percentual
         if (value && !value.includes('%')) {
             value = value + '%';
         }
@@ -266,7 +243,6 @@ FinanceSystem.Modules.Forms = (function () {
      * Inicializa campos select
      */
     function initializeSelectFields() {
-        // Verifica se há elementos select2 na página
         if (typeof $.fn.select2 !== 'undefined') {
             $('.select2').select2({
                 width: '100%',
@@ -274,7 +250,6 @@ FinanceSystem.Modules.Forms = (function () {
             });
         }
 
-        // Manipulação de eventos em campos select dependentes
         initializeSelectDependencies();
     }
 
@@ -292,7 +267,6 @@ FinanceSystem.Modules.Forms = (function () {
                     updateDependentSelect(select, this.value);
                 });
 
-                // Inicializa com o valor atual do parent
                 if (parentSelect.value) {
                     updateDependentSelect(select, parentSelect.value);
                 }
@@ -306,12 +280,10 @@ FinanceSystem.Modules.Forms = (function () {
      * @param {string} parentValue - Valor do select pai
      */
     function updateDependentSelect(select, parentValue) {
-        // Obtém a URL de dados ou filtra opções existentes
         const dataUrl = select.getAttribute('data-url');
         const filterAttribute = select.getAttribute('data-filter-attribute') || 'data-parent';
 
         if (dataUrl) {
-            // Carrega opções via AJAX
             fetch(`${dataUrl}?parentId=${parentValue}`)
                 .then(response => response.json())
                 .then(data => {
@@ -319,7 +291,6 @@ FinanceSystem.Modules.Forms = (function () {
                 })
                 .catch(error => console.error('Erro ao carregar opções:', error));
         } else {
-            // Filtra opções existentes
             const options = select.querySelectorAll('option');
             options.forEach(option => {
                 if (option.value === '' || option.getAttribute(filterAttribute) === parentValue) {
@@ -329,7 +300,6 @@ FinanceSystem.Modules.Forms = (function () {
                 }
             });
 
-            // Reseta o valor se a opção atual não estiver mais disponível
             if (select.value !== '' &&
                 select.querySelector(`option[value="${select.value}"][${filterAttribute}="${parentValue}"]`) === null) {
                 select.value = '';
@@ -343,22 +313,18 @@ FinanceSystem.Modules.Forms = (function () {
      * @param {Array} data - Array de dados para as opções
      */
     function populateSelect(select, data) {
-        // Limpa opções existentes
         select.innerHTML = '';
 
-        // Adiciona opção vazia
         const emptyOption = document.createElement('option');
         emptyOption.value = '';
         emptyOption.text = select.getAttribute('data-placeholder') || 'Selecione...';
         select.appendChild(emptyOption);
 
-        // Adiciona novas opções
         data.forEach(item => {
             const option = document.createElement('option');
             option.value = item.value || item.id;
             option.text = item.text || item.name;
 
-            // Adiciona atributos customizados se necessário
             if (item.attributes) {
                 Object.keys(item.attributes).forEach(key => {
                     option.setAttribute(key, item.attributes[key]);
@@ -368,7 +334,6 @@ FinanceSystem.Modules.Forms = (function () {
             select.appendChild(option);
         });
 
-        // Atualiza select2 se estiver sendo usado
         if (typeof $.fn.select2 !== 'undefined' && $(select).hasClass('select2')) {
             $(select).trigger('change');
         }
@@ -389,7 +354,6 @@ FinanceSystem.Modules.Forms = (function () {
                     toggleTargetVisibility(targets, this.checked);
                 });
 
-                // Inicializa com o estado atual
                 toggleTargetVisibility(targets, element.checked);
             } else if (element.tagName === 'SELECT') {
                 element.addEventListener('change', function () {
@@ -398,7 +362,6 @@ FinanceSystem.Modules.Forms = (function () {
                     toggleTargetVisibility(targets, isMatch);
                 });
 
-                // Inicializa com o valor atual
                 const showValue = element.getAttribute('data-toggle-value');
                 toggleTargetVisibility(targets, showValue === element.value);
             }
@@ -415,7 +378,6 @@ FinanceSystem.Modules.Forms = (function () {
             if (show) {
                 target.style.display = '';
 
-                // Habilita campos dentro do target
                 const fields = target.querySelectorAll('input, select, textarea');
                 fields.forEach(field => {
                     field.disabled = false;
@@ -423,7 +385,6 @@ FinanceSystem.Modules.Forms = (function () {
             } else {
                 target.style.display = 'none';
 
-                // Desabilita campos dentro do target
                 const fields = target.querySelectorAll('input, select, textarea');
                 fields.forEach(field => {
                     field.disabled = true;
@@ -443,12 +404,10 @@ FinanceSystem.Modules.Forms = (function () {
         if (typeof $.fn.mask !== 'undefined') {
             $(moneyInput).mask('#.##0,00', { reverse: true });
         } else {
-            // Implementação manual se mask não estiver disponível
             moneyInput.addEventListener('input', function () {
                 formatCurrencyInput(this);
             });
 
-            // Formata valor inicial se existir
             if (moneyInput.value) {
                 formatCurrencyInput(moneyInput);
             }
@@ -475,7 +434,6 @@ FinanceSystem.Modules.Forms = (function () {
                 }
             });
 
-            // Inicializa com o estado atual
             if (isRecurringSwitch.checked) {
                 isRecurringLabel.textContent = 'Sim';
                 installmentsInput.value = '1';
@@ -507,10 +465,8 @@ FinanceSystem.Modules.Forms = (function () {
             }
         }
 
-        // Inicializa com o estado atual
         updateStatusLabel();
 
-        // Atualiza quando o switch mudar
         statusSwitch.addEventListener('change', updateStatusLabel);
     }
 
@@ -522,11 +478,9 @@ FinanceSystem.Modules.Forms = (function () {
     function clearForm(form, excludeSelectors = []) {
         if (!form) return;
 
-        // Seleciona todos os campos do formulário
         const fields = form.querySelectorAll('input, select, textarea');
 
         fields.forEach(field => {
-            // Verifica se o campo deve ser excluído da limpeza
             let excluded = false;
             for (let selector of excludeSelectors) {
                 if (field.matches(selector)) {
@@ -537,7 +491,6 @@ FinanceSystem.Modules.Forms = (function () {
 
             if (excluded) return;
 
-            // Limpa o campo de acordo com seu tipo
             switch (field.type) {
                 case 'checkbox':
                 case 'radio':
@@ -546,7 +499,6 @@ FinanceSystem.Modules.Forms = (function () {
                 case 'select-one':
                 case 'select-multiple':
                     field.selectedIndex = 0;
-                    // Atualiza select2 se estiver sendo usado
                     if (typeof $.fn.select2 !== 'undefined' && $(field).hasClass('select2')) {
                         $(field).val(null).trigger('change');
                     }
@@ -555,17 +507,14 @@ FinanceSystem.Modules.Forms = (function () {
                     field.value = '';
             }
 
-            // Remove classes de validação
             field.classList.remove('is-invalid', 'is-valid');
         });
 
-        // Limpa mensagens de erro
         const errorMessages = form.querySelectorAll('.text-danger, .invalid-feedback');
         errorMessages.forEach(message => {
             message.textContent = '';
         });
 
-        // Remove classe de validação do formulário
         form.classList.remove('was-validated');
     }
 
@@ -577,37 +526,30 @@ FinanceSystem.Modules.Forms = (function () {
     function populateForm(form, data) {
         if (!form || !data) return;
 
-        // Itera sobre as propriedades do objeto de dados
         Object.keys(data).forEach(key => {
-            // Procura o campo no formulário
             const field = form.querySelector(`[name="${key}"], #${key}`);
             if (!field) return;
 
             const value = data[key];
 
-            // Preenche o campo de acordo com seu tipo
             switch (field.type) {
                 case 'checkbox':
                     field.checked = Boolean(value);
-                    // Dispara evento change para atualizar dependências
                     field.dispatchEvent(new Event('change'));
                     break;
                 case 'radio':
                     const radio = form.querySelector(`[name="${key}"][value="${value}"]`);
                     if (radio) {
                         radio.checked = true;
-                        // Dispara evento change para atualizar dependências
                         radio.dispatchEvent(new Event('change'));
                     }
                     break;
                 case 'select-one':
                 case 'select-multiple':
                     field.value = value;
-                    // Atualiza select2 se estiver sendo usado
                     if (typeof $.fn.select2 !== 'undefined' && $(field).hasClass('select2')) {
                         $(field).val(value).trigger('change');
                     } else {
-                        // Dispara evento change para atualizar dependências
                         field.dispatchEvent(new Event('change'));
                     }
                     break;
@@ -629,9 +571,7 @@ FinanceSystem.Modules.Forms = (function () {
         const data = {};
 
         formData.forEach((value, key) => {
-            // Verifica se já existe uma propriedade com esta chave
             if (data[key] !== undefined) {
-                // Se já existe, converte para array se ainda não for
                 if (!Array.isArray(data[key])) {
                     data[key] = [data[key]];
                 }
@@ -644,7 +584,6 @@ FinanceSystem.Modules.Forms = (function () {
         return data;
     }
 
-    // API pública do módulo
     return {
         initialize: initialize,
         initializeFormatedInputs: initializeFormatedInputs,

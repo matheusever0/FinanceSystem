@@ -3,17 +3,14 @@
  * Scripts específicos para a página de financiamentos
  */
 
-// Namespace global para o sistema
 var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Pages = FinanceSystem.Pages || {};
 
-// Módulo Financings
 FinanceSystem.Pages.Financings = (function () {
     /**
      * Inicializa a página de financiamentos
      */
     function initialize() {
-        // Determina qual view está ativa
         const isFormView = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
         const isListView = document.querySelector('.financings-list');
         const isDetailsView = document.querySelector('.financing-details-container');
@@ -43,16 +40,12 @@ FinanceSystem.Pages.Financings = (function () {
         const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
         if (!form) return;
 
-        // Inicializa máscaras para campos monetários
         initializeMoneyMasks();
 
-        // Validação de campos específicos
         initializeFieldValidations();
 
-        // Configura calculadora de parcelas
         initializeInstallmentCalculator();
 
-        // Configura validação do formulário
         setupFormValidation(form);
     }
 
@@ -60,39 +53,33 @@ FinanceSystem.Pages.Financings = (function () {
      * Inicializa máscaras para valores monetários
      */
     function initializeMoneyMasks() {
-        // Usa o módulo Financial se disponível
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
             FinanceSystem.Modules.Financial.initializeMoneyMask('#TotalAmount');
             FinanceSystem.Modules.Financial.initializeMoneyMask('#InstallmentValue');
             return;
         }
 
-        // Fallback para jQuery Mask se disponível
         if (typeof $.fn.mask !== 'undefined') {
             $('#TotalAmount, #InstallmentValue').mask('#.##0,00', { reverse: true });
             $('#InterestRate').mask('##0,00%', { reverse: true });
         } else {
-            // Implementação manual se as bibliotecas não estiverem disponíveis
             const moneyInputs = document.querySelectorAll('#TotalAmount, #InstallmentValue');
             moneyInputs.forEach(input => {
                 input.addEventListener('input', function (e) {
                     formatCurrencyInput(this);
                 });
 
-                // Formata valor inicial se existir
                 if (input.value) {
                     formatCurrencyInput(input);
                 }
             });
 
-            // Campo de taxa de juros
             const interestRateInput = document.getElementById('InterestRate');
             if (interestRateInput) {
                 interestRateInput.addEventListener('input', function (e) {
                     formatPercentInput(this);
                 });
 
-                // Formata valor inicial se existir
                 if (interestRateInput.value) {
                     formatPercentInput(interestRateInput);
                 }
@@ -105,14 +92,11 @@ FinanceSystem.Pages.Financings = (function () {
      * @param {HTMLElement} input - Campo a ser formatado
      */
     function formatCurrencyInput(input) {
-        // Preserva a posição do cursor
         const cursorPosition = input.selectionStart;
         const inputLength = input.value.length;
 
-        // Remove caracteres não numéricos, exceto vírgula e ponto
         let value = input.value.replace(/[^\d.,]/g, '');
 
-        // Converte para o formato brasileiro (vírgula como separador decimal)
         value = value.replace(/\D/g, '');
         if (value === '') {
             input.value = '';
@@ -122,7 +106,6 @@ FinanceSystem.Pages.Financings = (function () {
         value = (parseFloat(value) / 100).toFixed(2);
         input.value = value.replace('.', ',');
 
-        // Ajusta a posição do cursor se necessário
         const newLength = input.value.length;
         const newPosition = cursorPosition + (newLength - inputLength);
         if (newPosition >= 0) {
@@ -135,10 +118,8 @@ FinanceSystem.Pages.Financings = (function () {
      * @param {HTMLElement} input - Campo a ser formatado
      */
     function formatPercentInput(input) {
-        // Remove caracteres não numéricos, exceto vírgula e ponto
         let value = input.value.replace(/[^\d.,]/g, '');
 
-        // Se tem vírgula, limita a duas casas decimais
         if (value.includes(',')) {
             const parts = value.split(',');
             if (parts[1].length > 2) {
@@ -147,7 +128,6 @@ FinanceSystem.Pages.Financings = (function () {
             }
         }
 
-        // Adiciona o símbolo de percentual se não estiver presente
         if (!input.value.includes('%') && value) {
             value += '%';
         }
@@ -159,7 +139,6 @@ FinanceSystem.Pages.Financings = (function () {
      * Inicializa validações de campos específicos
      */
     function initializeFieldValidations() {
-        // Validação de prazo
         const termMonthsField = document.getElementById('TermMonths');
         if (termMonthsField) {
             termMonthsField.addEventListener('change', function () {
@@ -173,7 +152,6 @@ FinanceSystem.Pages.Financings = (function () {
             });
         }
 
-        // Validação de taxa de juros
         const interestRateField = document.getElementById('InterestRate');
         if (interestRateField) {
             interestRateField.addEventListener('change', function () {
@@ -207,7 +185,6 @@ FinanceSystem.Pages.Financings = (function () {
             });
         }
 
-        // Recalcula automaticamente quando os valores mudam
         if (totalAmountInput && interestRateInput && termMonthsInput && installmentValueInput) {
             totalAmountInput.addEventListener('change', calculateInstallment);
             interestRateInput.addEventListener('change', calculateInstallment);
@@ -232,7 +209,6 @@ FinanceSystem.Pages.Financings = (function () {
 
         if (!totalAmountInput || !interestRateInput || !termMonthsInput) return;
 
-        // Obter valores dos campos
         let totalAmount = parseCurrency(totalAmountInput.value);
         let interestRate = parsePercent(interestRateInput.value);
         let termMonths = parseInt(termMonthsInput.value);
@@ -245,14 +221,11 @@ FinanceSystem.Pages.Financings = (function () {
             return;
         }
 
-        // Converter taxa de juros anual para mensal
         const monthlyRate = interestRate / 12;
         let installmentValue = 0;
         let message = '';
 
-        // Usar o módulo Financial para cálculos se disponível
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
-            // Obter a primeira parcela do array de parcelas
             const installments = FinanceSystem.Modules.Financial.calculateInstallments(
                 totalAmount, interestRate * 100, termMonths, type
             );
@@ -269,16 +242,13 @@ FinanceSystem.Pages.Financings = (function () {
                 }
             }
         } else {
-            // Cálculos manuais
             if (type === 'PRICE') {
-                // Sistema Price (parcelas fixas)
                 if (interestRate === 0) {
                     installmentValue = totalAmount / termMonths;
                 } else {
                     installmentValue = totalAmount * (monthlyRate * Math.pow(1 + monthlyRate, termMonths)) / (Math.pow(1 + monthlyRate, termMonths) - 1);
                 }
             } else if (type === 'SAC') {
-                // Sistema SAC (amortizações fixas)
                 const amortization = totalAmount / termMonths;
                 const firstInterest = totalAmount * monthlyRate;
                 const firstInstallment = amortization + firstInterest;
@@ -297,12 +267,10 @@ FinanceSystem.Pages.Financings = (function () {
             }
         }
 
-        // Atualiza o campo de valor da parcela
         if (installmentValueInput) {
             installmentValueInput.value = formatNumber(installmentValue);
         }
 
-        // Exibe resultados adicionais se houver elemento para isso
         if (resultElement) {
             if (message) {
                 resultElement.innerHTML = message;
@@ -319,7 +287,6 @@ FinanceSystem.Pages.Financings = (function () {
     function setupFormValidation(form) {
         if (!form) return;
 
-        // Usa o módulo de validação se disponível
         if (FinanceSystem.Validation && FinanceSystem.Validation.setupFormValidation) {
             FinanceSystem.Validation.setupFormValidation(form, validateFinancingForm);
         } else {
@@ -341,14 +308,12 @@ FinanceSystem.Pages.Financings = (function () {
         let isValid = true;
         const form = event.target;
 
-        // Valida descrição
         const nameField = form.querySelector('#Name');
         if (nameField && nameField.value.trim() === '') {
             isValid = false;
             showFieldError(nameField, 'O nome do financiamento é obrigatório');
         }
 
-        // Valida valor total
         const totalAmountField = form.querySelector('#TotalAmount');
         if (totalAmountField) {
             const totalAmount = parseCurrency(totalAmountField.value);
@@ -358,7 +323,6 @@ FinanceSystem.Pages.Financings = (function () {
             }
         }
 
-        // Valida taxa de juros
         const interestRateField = form.querySelector('#InterestRate');
         if (interestRateField) {
             const interestRate = parsePercent(interestRateField.value);
@@ -368,7 +332,6 @@ FinanceSystem.Pages.Financings = (function () {
             }
         }
 
-        // Valida prazo
         const termMonthsField = form.querySelector('#TermMonths');
         if (termMonthsField) {
             const termMonths = parseInt(termMonthsField.value);
@@ -378,7 +341,6 @@ FinanceSystem.Pages.Financings = (function () {
             }
         }
 
-        // Valida tipo de financiamento
         const typeField = form.querySelector('#Type');
         if (typeField && typeField.value === '') {
             isValid = false;
@@ -394,13 +356,11 @@ FinanceSystem.Pages.Financings = (function () {
      * @param {string} message - Mensagem de erro
      */
     function showFieldError(input, message) {
-        // Usa o módulo de validação se disponível
         if (FinanceSystem.Validation && FinanceSystem.Validation.showFieldError) {
             FinanceSystem.Validation.showFieldError(input, message);
             return;
         }
 
-        // Fallback para exibição manual de erro
         let errorElement = input.parentElement.querySelector('.text-danger');
         if (!errorElement) {
             errorElement = document.createElement('span');
@@ -416,13 +376,11 @@ FinanceSystem.Pages.Financings = (function () {
      * @param {HTMLElement} input - Campo
      */
     function clearFieldError(input) {
-        // Usa o módulo de validação se disponível
         if (FinanceSystem.Validation && FinanceSystem.Validation.clearFieldError) {
             FinanceSystem.Validation.clearFieldError(input);
             return;
         }
 
-        // Fallback para limpeza manual de erro
         const errorElement = input.parentElement.querySelector('.text-danger');
         if (errorElement) {
             errorElement.innerText = '';
@@ -434,10 +392,8 @@ FinanceSystem.Pages.Financings = (function () {
      * Inicializa a lista de financiamentos
      */
     function initializeFinancingsList() {
-        // Inicializa DataTables se disponível
         initializeFinancingsDataTable();
 
-        // Inicializa botões de ação
         initializeFinancingActionButtons();
     }
 
@@ -445,7 +401,6 @@ FinanceSystem.Pages.Financings = (function () {
      * Inicializa DataTables para a tabela de financiamentos
      */
     function initializeFinancingsDataTable() {
-        // Verifica se DataTables está disponível
         if (typeof $.fn.DataTable !== 'undefined') {
             $('.financings-table').DataTable({
                 language: {
@@ -460,7 +415,6 @@ FinanceSystem.Pages.Financings = (function () {
                 ]
             });
         } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
-            // Usa o módulo Tables se DataTables não estiver disponível
             FinanceSystem.Modules.Tables.initializeTableSort();
         }
     }
@@ -469,7 +423,6 @@ FinanceSystem.Pages.Financings = (function () {
      * Inicializa botões de ação para financiamentos
      */
     function initializeFinancingActionButtons() {
-        // Botões de exclusão
         const deleteButtons = document.querySelectorAll('.btn-delete-financing');
         deleteButtons.forEach(button => {
             button.addEventListener('click', function (e) {
@@ -479,7 +432,6 @@ FinanceSystem.Pages.Financings = (function () {
             });
         });
 
-        // Botões de correção monetária
         const correctionButtons = document.querySelectorAll('.btn-apply-correction');
         correctionButtons.forEach(button => {
             button.addEventListener('click', function () {
@@ -500,15 +452,12 @@ FinanceSystem.Pages.Financings = (function () {
         if (modal && financingIdInput) {
             financingIdInput.value = financingId;
 
-            // Usa o módulo UI se disponível
             if (FinanceSystem.UI && FinanceSystem.UI.showModal) {
                 FinanceSystem.UI.showModal('correctionModal');
             } else if (typeof bootstrap !== 'undefined') {
-                // Fallback para Bootstrap
                 const modalInstance = new bootstrap.Modal(modal);
                 modalInstance.show();
             } else {
-                // Fallback básico
                 modal.style.display = 'block';
             }
         }
@@ -518,16 +467,13 @@ FinanceSystem.Pages.Financings = (function () {
      * Inicializa a página de detalhes do financiamento
      */
     function initializeFinancingDetails() {
-        // Inicializa gráficos
         initializeFinancingCharts();
 
-        // Inicializa tabela de parcelas
         const installmentsTable = document.querySelector('.installments-table');
         if (installmentsTable) {
             initializeInstallmentsTable();
         }
 
-        // Inicializa ações para parcelas
         initializeInstallmentActions();
     }
 
@@ -535,12 +481,10 @@ FinanceSystem.Pages.Financings = (function () {
      * Inicializa gráficos na página de detalhes
      */
     function initializeFinancingCharts() {
-        // Gráfico de progresso
         const progressChart = document.getElementById('progressChart');
         if (progressChart) {
             const percentage = parseFloat(progressChart.getAttribute('data-progress') || '0');
 
-            // Usa o módulo Charts se disponível
             if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
                 FinanceSystem.Modules.Charts.createDoughnutChart('progressChart',
                     ['Pago', 'Restante'],
@@ -551,24 +495,20 @@ FinanceSystem.Pages.Financings = (function () {
                     }
                 );
             } else if (typeof Chart !== 'undefined') {
-                // Fallback para Chart.js diretamente
                 createProgressDoughnut(progressChart, percentage);
             }
 
-            // Mostrar percentual no centro
             const progressLabel = document.getElementById('progressLabel');
             if (progressLabel) {
                 progressLabel.textContent = `${percentage.toFixed(0)}%`;
             }
         }
 
-        // Gráfico de distribuição principal/juros
         const distributionChart = document.getElementById('distributionChart');
         if (distributionChart) {
             const principal = parseFloat(distributionChart.getAttribute('data-principal') || '0');
             const interest = parseFloat(distributionChart.getAttribute('data-interest') || '0');
 
-            // Usa o módulo Charts se disponível
             if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
                 FinanceSystem.Modules.Charts.createPieChart('distributionChart',
                     ['Principal', 'Juros'],
@@ -578,7 +518,6 @@ FinanceSystem.Pages.Financings = (function () {
                     }
                 );
             } else if (typeof Chart !== 'undefined') {
-                // Fallback para Chart.js diretamente
                 createDistributionPieChart(distributionChart, principal, interest);
             }
         }
@@ -664,7 +603,6 @@ FinanceSystem.Pages.Financings = (function () {
      * Inicializa tabela de parcelas
      */
     function initializeInstallmentsTable() {
-        // Usa DataTables se disponível
         if (typeof $.fn.DataTable !== 'undefined') {
             $('.installments-table').DataTable({
                 language: {
@@ -678,7 +616,6 @@ FinanceSystem.Pages.Financings = (function () {
                 ]
             });
         } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
-            // Usa o módulo Tables se DataTables não estiver disponível
             FinanceSystem.Modules.Tables.initializeTableSort();
         }
     }
@@ -687,7 +624,6 @@ FinanceSystem.Pages.Financings = (function () {
      * Inicializa ações em parcelas
      */
     function initializeInstallmentActions() {
-        // Botões para pagar parcela
         const payButtons = document.querySelectorAll('.pay-installment');
         payButtons.forEach(button => {
             button.addEventListener('click', function () {
@@ -708,15 +644,12 @@ FinanceSystem.Pages.Financings = (function () {
         if (modal && installmentIdInput) {
             installmentIdInput.value = installmentId;
 
-            // Usa o módulo UI se disponível
             if (FinanceSystem.UI && FinanceSystem.UI.showModal) {
                 FinanceSystem.UI.showModal('payInstallmentModal');
             } else if (typeof bootstrap !== 'undefined') {
-                // Fallback para Bootstrap
                 const modalInstance = new bootstrap.Modal(modal);
                 modalInstance.show();
             } else {
-                // Fallback básico
                 modal.style.display = 'block';
             }
         }
@@ -726,17 +659,13 @@ FinanceSystem.Pages.Financings = (function () {
      * Inicializa a página de simulação de financiamento
      */
     function initializeFinancingSimulation() {
-        // Inicializa máscaras para campos monetários
         initializeMoneyMasks();
 
-        // Inicializa calculadora de parcelas
         initializeInstallmentCalculator();
 
-        // Configura botão de simulação
         const simulateButton = document.getElementById('simulateButton');
         if (simulateButton) {
             simulateButton.addEventListener('click', function (e) {
-                // Validar antes de enviar
                 const totalAmountField = document.getElementById('TotalAmount');
                 const interestRateField = document.getElementById('InterestRate');
                 const termMonthsField = document.getElementById('TermMonths');
@@ -748,7 +677,6 @@ FinanceSystem.Pages.Financings = (function () {
             });
         }
 
-        // Inicializa tabela de resultados da simulação se existir
         const simulationResultsTable = document.querySelector('.simulation-results-table');
         if (simulationResultsTable) {
             initializeSimulationResultsTable();
@@ -759,7 +687,6 @@ FinanceSystem.Pages.Financings = (function () {
      * Inicializa tabela de resultados da simulação
      */
     function initializeSimulationResultsTable() {
-        // Usa DataTables se disponível
         if (typeof $.fn.DataTable !== 'undefined') {
             $('.simulation-results-table').DataTable({
                 language: {
@@ -788,11 +715,9 @@ FinanceSystem.Pages.Financings = (function () {
                 ]
             });
         } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
-            // Usa o módulo Tables se DataTables não estiver disponível
             FinanceSystem.Modules.Tables.initializeTableSort();
         }
 
-        // Inicializa gráficos de simulação
         initializeSimulationCharts();
     }
 
@@ -800,10 +725,8 @@ FinanceSystem.Pages.Financings = (function () {
      * Inicializa gráficos da simulação
      */
     function initializeSimulationCharts() {
-        // Gráfico de amortização e juros
         const amortizationChart = document.getElementById('amortizationChart');
         if (amortizationChart) {
-            // Obter dados dos atributos data-*
             const labelsRaw = amortizationChart.getAttribute('data-labels');
             const principalRaw = amortizationChart.getAttribute('data-principal');
             const interestRaw = amortizationChart.getAttribute('data-interest');
@@ -813,7 +736,6 @@ FinanceSystem.Pages.Financings = (function () {
                 const principal = JSON.parse(principalRaw);
                 const interest = JSON.parse(interestRaw);
 
-                // Usar o módulo Charts se disponível
                 if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
                     FinanceSystem.Modules.Charts.createGroupedBarChart('amortizationChart', labels, [
                         {
@@ -828,13 +750,11 @@ FinanceSystem.Pages.Financings = (function () {
                         }
                     ]);
                 } else if (typeof Chart !== 'undefined') {
-                    // Fallback para Chart.js diretamente
                     createAmortizationChart(amortizationChart, labels, principal, interest);
                 }
             }
         }
 
-        // Gráfico de saldo devedor
         const balanceChart = document.getElementById('balanceChart');
         if (balanceChart) {
             const labelsRaw = balanceChart.getAttribute('data-labels');
@@ -844,11 +764,9 @@ FinanceSystem.Pages.Financings = (function () {
                 const labels = JSON.parse(labelsRaw);
                 const values = JSON.parse(valuesRaw);
 
-                // Usar o módulo Charts se disponível
                 if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
                     FinanceSystem.Modules.Charts.createLineChart('balanceChart', labels, values);
                 } else if (typeof Chart !== 'undefined') {
-                    // Fallback para Chart.js diretamente
                     createBalanceChart(balanceChart, labels, values);
                 }
             }
@@ -976,20 +894,16 @@ FinanceSystem.Pages.Financings = (function () {
      * @returns {number} - Valor numérico
      */
     function parseCurrency(value) {
-        // Usa o módulo Financial se disponível
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
             return FinanceSystem.Modules.Financial.parseCurrency(value);
         }
 
-        // Implementação manual
         if (typeof value === 'number') {
             return value;
         }
 
-        // Remove símbolos de moeda e espaços
         value = value.replace(/[^\d,.-]/g, '');
 
-        // Trata formato brasileiro (1.234,56)
         if (value.indexOf(',') > -1 && value.indexOf('.') > -1) {
             value = value.replace(/\./g, '').replace(',', '.');
         } else if (value.indexOf(',') > -1) {
@@ -1009,13 +923,10 @@ FinanceSystem.Pages.Financings = (function () {
             return value;
         }
 
-        // Remove o símbolo de percentual e espaços
         value = value.replace(/[^\d,.-]/g, '');
 
-        // Substitui vírgula por ponto
         value = value.replace(',', '.');
 
-        // Converte para decimal (divide por 100)
         return parseFloat(value) / 100;
     }
 
@@ -1028,7 +939,6 @@ FinanceSystem.Pages.Financings = (function () {
         return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // API pública do módulo
     return {
         initialize: initialize,
         initializeFinancingForm: initializeFinancingForm,

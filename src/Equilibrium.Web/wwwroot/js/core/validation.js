@@ -3,10 +3,8 @@
  * Funções de validação de formulários e campos
  */
 
-// Namespace global para o sistema
 var FinanceSystem = FinanceSystem || {};
 
-// Módulo Validation
 FinanceSystem.Validation = (function () {
     /**
      * Inicializa validação básica de formulários
@@ -49,7 +47,6 @@ FinanceSystem.Validation = (function () {
 
             form.classList.add('was-validated');
 
-            // Chama validação específica se fornecida
             if (typeof validateCallback === 'function') {
                 if (validateCallback(event) === false) {
                     event.preventDefault();
@@ -140,7 +137,6 @@ FinanceSystem.Validation = (function () {
 
         if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false;
 
-        // Validação dos dígitos verificadores
         let size = cnpj.length - 2;
         let numbers = cnpj.substring(0, size);
         let digits = cnpj.substring(size);
@@ -220,7 +216,6 @@ FinanceSystem.Validation = (function () {
      * @returns {boolean} - Resultado da validação
      */
     function isValidCurrency(value) {
-        // Remove formatação para validar
         value = value.replace(/\./g, '').replace(',', '.');
         const number = parseFloat(value);
         return !isNaN(number) && isFinite(number) && number >= 0;
@@ -251,8 +246,6 @@ FinanceSystem.Validation = (function () {
      * @returns {boolean} - Resultado da validação
      */
     function isValidUsername(username) {
-        // Permite letras, números, pontos, hífens e underscores
-        // Mínimo 3 caracteres, máximo 30
         return /^[a-zA-Z0-9._-]{3,30}$/.test(username);
     }
 
@@ -275,18 +268,15 @@ FinanceSystem.Validation = (function () {
         const type = field.type;
         const required = field.required;
 
-        // Verifica se é um campo obrigatório vazio
         if (required && isEmpty(value)) {
             showFieldError(field, 'Este campo é obrigatório');
             return false;
         }
 
-        // Se o campo estiver vazio e não for obrigatório, é válido
         if (isEmpty(value) && !required) {
             return true;
         }
 
-        // Validações por tipo de campo
         switch (type) {
             case 'email':
                 if (!isValidEmail(value)) {
@@ -314,7 +304,6 @@ FinanceSystem.Validation = (function () {
                 break;
         }
 
-        // Validações baseadas em classes
         if (field.classList.contains('validate-cpf') && !isValidCPF(value)) {
             showFieldError(field, 'Digite um CPF válido');
             return false;
@@ -340,7 +329,6 @@ FinanceSystem.Validation = (function () {
             return false;
         }
 
-        // Se passou por todas as validações, limpa erros e retorna sucesso
         clearFieldError(field);
         return true;
     }
@@ -365,7 +353,6 @@ FinanceSystem.Validation = (function () {
         return isValid;
     }
 
-    // API pública do módulo
     return {
         initialize: initialize,
         setupFormValidation: setupFormValidation,

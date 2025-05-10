@@ -3,10 +3,8 @@
  * Funções e utilidades fundamentais do sistema
  */
 
-// Namespace global para o sistema
 var FinanceSystem = FinanceSystem || {};
 
-// Módulo Core
 FinanceSystem.Core = (function () {
     /**
      * Inicializa todas as funcionalidades principais
@@ -19,7 +17,6 @@ FinanceSystem.Core = (function () {
      * Inicializa os interceptores de AJAX para tratamento de erros
      */
     function initializeAjaxInterceptors() {
-        // Interceptar erros de requisições jQuery AJAX
         if (typeof $ !== 'undefined' && $.ajaxError) {
             $(document).ajaxError(function (event, jqXHR, settings, thrownError) {
                 if (jqXHR.status === 401) {
@@ -28,7 +25,6 @@ FinanceSystem.Core = (function () {
             });
         }
 
-        // Interceptar erros de fetch API
         const originalFetch = window.fetch;
         if (originalFetch) {
             window.fetch = function (url, options) {
@@ -51,7 +47,6 @@ FinanceSystem.Core = (function () {
      * @returns {string} - Valor formatado
      */
     function formatCurrency(value, currency = 'BRL') {
-        // Define locales e formatos com base na moeda
         const locales = {
             'BRL': 'pt-BR',
             'USD': 'en-US',
@@ -60,7 +55,6 @@ FinanceSystem.Core = (function () {
             'JPY': 'ja-JP'
         };
 
-        // Define locale padrão para outras moedas não listadas
         const locale = locales[currency] || 'en-US';
 
         return new Intl.NumberFormat(locale, {
@@ -174,7 +168,6 @@ FinanceSystem.Core = (function () {
         return false;
     }
 
-    // API pública do módulo
     return {
         initialize: initialize,
         formatCurrency: formatCurrency,

@@ -2,26 +2,21 @@
  * Equilibrium+ Finance System - Print Utilities
  */
 
-// Namespace global para o sistema
 var FinanceSystem = FinanceSystem || {};
 
-// Módulo Print
 FinanceSystem.Print = (function () {
     /**
      * Inicializa funcionalidades de impressão
      */
     function initialize() {
-        // Aciona impressão ao carregar se estiver em uma página de impressão
         if (document.body.classList.contains('print-page')) {
             setTimeout(function () {
                 window.print();
             }, 500);
         }
 
-        // Adiciona botões de impressão
         addPrintButtons();
 
-        // Adiciona eventos para pré-visualização de impressão
         setupPrintPreview();
     }
 
@@ -38,17 +33,14 @@ FinanceSystem.Print = (function () {
                 const url = this.getAttribute('href') || this.getAttribute('data-url');
 
                 if (url) {
-                    // Abre a URL em uma nova janela
                     const printWindow = window.open(url, '_blank');
 
-                    // Espera a página carregar para imprimir
                     if (printWindow) {
                         printWindow.addEventListener('load', function () {
                             printWindow.print();
                         });
                     }
                 } else {
-                    // Imprime a página atual
                     window.print();
                 }
             });
@@ -70,12 +62,10 @@ FinanceSystem.Print = (function () {
 
                 if (!printContent) return;
 
-                // Cria um iframe para pré-visualização
                 const iframe = document.createElement('iframe');
                 iframe.style.display = 'none';
                 document.body.appendChild(iframe);
 
-                // Escreve o conteúdo no iframe
                 const iframeWindow = iframe.contentWindow;
                 iframeWindow.document.open();
                 iframeWindow.document.write(`
@@ -117,10 +107,8 @@ FinanceSystem.Print = (function () {
         const section = document.getElementById(sectionId);
         if (!section) return;
 
-        // Salva o conteúdo original
         const originalContent = document.body.innerHTML;
 
-        // Substitui pelo conteúdo da seção
         document.body.innerHTML = `
             <div class="printHeader">
                 <h1>Equilibrium+</h1>
@@ -133,30 +121,24 @@ FinanceSystem.Print = (function () {
             </div>
         `;
 
-        // Imprime
         window.print();
 
-        // Restaura o conteúdo original
         document.body.innerHTML = originalContent;
 
-        // Reinicializa eventos
         initialize();
     }
 
-    // API pública do módulo
     return {
         initialize: initialize,
         printSection: printSection
     };
 })();
 
-// Inicializa o módulo quando o documento estiver pronto
 document.addEventListener('DOMContentLoaded', function () {
     if (FinanceSystem.Print) {
         FinanceSystem.Print.initialize();
     }
 
-    // Imprime automaticamente em páginas de impressão
     if (document.body.classList.contains('print-page')) {
         setTimeout(function () {
             window.print();

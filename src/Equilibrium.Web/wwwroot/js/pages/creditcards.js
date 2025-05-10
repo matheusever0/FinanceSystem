@@ -3,11 +3,9 @@
  * Scripts específicos para a página de cartões de crédito
  */
 
-// Namespace global para o sistema
 var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Pages = FinanceSystem.Pages || {};
 
-// Módulo CreditCards
 FinanceSystem.Pages.CreditCards = (function () {
     /**
      * Inicializa a página de cartões de crédito
@@ -24,10 +22,8 @@ FinanceSystem.Pages.CreditCards = (function () {
     function initializeCreditCardForm() {
         const cardForm = document.getElementById('credit-card-form');
 
-        // Inicializa máscaras para campos monetários
         initializeMoneyMasks();
 
-        // Validação de campos específicos
         initializeFieldValidations();
     }
 
@@ -35,25 +31,21 @@ FinanceSystem.Pages.CreditCards = (function () {
      * Inicializa máscaras para valores monetários
      */
     function initializeMoneyMasks() {
-        // Usa o módulo Financial se disponível
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
             FinanceSystem.Modules.Financial.initializeMoneyMask('#Limit');
             FinanceSystem.Modules.Financial.initializeMoneyMask('#AvailableLimit');
             return;
         }
 
-        // Fallback para jQuery Mask se disponível
         if (typeof $.fn.mask !== 'undefined') {
             $('#Limit, #AvailableLimit').mask('#.##0,00', { reverse: true });
         } else {
-            // Implementação manual se as bibliotecas não estiverem disponíveis
             const moneyInputs = document.querySelectorAll('#Limit, #AvailableLimit');
             moneyInputs.forEach(input => {
                 input.addEventListener('input', function (e) {
                     formatCurrencyInput(this);
                 });
 
-                // Formata valor inicial se existir
                 if (input.value) {
                     formatCurrencyInput(input);
                 }
@@ -66,14 +58,11 @@ FinanceSystem.Pages.CreditCards = (function () {
      * @param {HTMLElement} input - Campo a ser formatado
      */
     function formatCurrencyInput(input) {
-        // Preserva a posição do cursor
         const cursorPosition = input.selectionStart;
         const inputLength = input.value.length;
 
-        // Remove caracteres não numéricos, exceto vírgula e ponto
         let value = input.value.replace(/[^\d.,]/g, '');
 
-        // Converte para o formato brasileiro (vírgula como separador decimal)
         value = value.replace(/\D/g, '');
         if (value === '') {
             input.value = '';
@@ -83,7 +72,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         value = (parseFloat(value) / 100).toFixed(2);
         input.value = value.replace('.', ',');
 
-        // Ajusta a posição do cursor se necessário
         const newLength = input.value.length;
         const newPosition = cursorPosition + (newLength - inputLength);
         if (newPosition >= 0) {
@@ -110,13 +98,11 @@ FinanceSystem.Pages.CreditCards = (function () {
             });
         }
 
-        // Validação de limite
         const limitField = document.getElementById('Limit');
         const availableLimitField = document.getElementById('AvailableLimit');
 
         if (limitField && availableLimitField) {
             limitField.addEventListener('change', function () {
-                // Se o limite disponível for maior que o limite total, ajusta
                 const limit = parseFloat(this.value.replace(/[^\d.,]/g, '').replace(',', '.'));
                 const availableLimit = parseFloat(availableLimitField.value.replace(/[^\d.,]/g, '').replace(',', '.'));
 
@@ -126,7 +112,6 @@ FinanceSystem.Pages.CreditCards = (function () {
             });
 
             availableLimitField.addEventListener('change', function () {
-                // Garante que o limite disponível não seja maior que o limite total
                 const limit = parseFloat(limitField.value.replace(/[^\d.,]/g, '').replace(',', '.'));
                 const availableLimit = parseFloat(this.value.replace(/[^\d.,]/g, '').replace(',', '.'));
 
@@ -137,16 +122,13 @@ FinanceSystem.Pages.CreditCards = (function () {
             });
         }
 
-        // Formatação de campo de dígitos do cartão
         const lastFourDigitsField = document.getElementById('LastFourDigits');
         if (lastFourDigitsField) {
             lastFourDigitsField.addEventListener('input', function () {
-                // Limita a 4 dígitos numéricos
                 this.value = this.value.replace(/\D/g, '').substring(0, 4);
             });
         }
 
-        // Configura validação do formulário
         setupFormValidation();
     }
 
@@ -182,7 +164,6 @@ FinanceSystem.Pages.CreditCards = (function () {
     function setupFormValidation() {
         const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
 
-        // Usa o módulo de validação se disponível
         if (FinanceSystem.Validation && FinanceSystem.Validation.setupFormValidation) {
             FinanceSystem.Validation.setupFormValidation(form, validateCreditCardForm);
         } else {
@@ -204,21 +185,18 @@ FinanceSystem.Pages.CreditCards = (function () {
         let isValid = true;
         const form = event.target;
 
-        // Valida nome
         const nameField = form.querySelector('#Name');
         if (nameField && nameField.value.trim() === '') {
             isValid = false;
             showFieldError(nameField, 'O nome do cartão é obrigatório');
         }
 
-        // Valida bandeira
         const brandField = form.querySelector('#Brand');
         if (brandField && brandField.value === '') {
             isValid = false;
             showFieldError(brandField, 'A bandeira do cartão é obrigatória');
         }
 
-        // Valida dias de fechamento e vencimento
         const closingDayField = form.querySelector('#ClosingDay');
         if (closingDayField) {
             const value = parseInt(closingDayField.value, 10);
@@ -237,7 +215,6 @@ FinanceSystem.Pages.CreditCards = (function () {
             }
         }
 
-        // Valida limite
         const limitField = form.querySelector('#Limit');
         if (limitField) {
             const value = limitField.value.replace(/[^\d.,]/g, '').replace(',', '.');
@@ -248,7 +225,6 @@ FinanceSystem.Pages.CreditCards = (function () {
             }
         }
 
-        // Valida limite disponível
         const availableLimitField = form.querySelector('#AvailableLimit');
         const limitField2 = form.querySelector('#Limit');
         if (availableLimitField && limitField2) {
@@ -273,13 +249,11 @@ FinanceSystem.Pages.CreditCards = (function () {
      * @param {string} message - Mensagem de erro
      */
     function showFieldError(input, message) {
-        // Usa o módulo de validação se disponível
         if (FinanceSystem.Validation && FinanceSystem.Validation.showFieldError) {
             FinanceSystem.Validation.showFieldError(input, message);
             return;
         }
 
-        // Fallback para exibição manual de erro
         let errorElement = input.parentElement.querySelector('.text-danger');
         if (!errorElement) {
             errorElement = document.createElement('span');
@@ -294,16 +268,13 @@ FinanceSystem.Pages.CreditCards = (function () {
      * Inicializa a lista de cartões de crédito
      */
     function initializeCreditCardsList() {
-        // Inicializa componentes de cartão de crédito usando o módulo Financial
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
             FinanceSystem.Modules.Financial.initializeCreditCardComponents();
         } else {
-            // Fallback para implementação direta
             initializeProgressBars();
             updateLimitsDisplay();
         }
 
-        // Botões de ação
         initializeActionButtons();
     }
 
@@ -316,7 +287,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         progressBars.forEach(progressBar => {
             const percentage = progressBar.getAttribute('data-percentage') || 0;
 
-            // Define a cor da barra com base na porcentagem
             if (percentage > 90) {
                 progressBar.classList.add('bg-danger');
             } else if (percentage > 70) {
@@ -327,7 +297,6 @@ FinanceSystem.Pages.CreditCards = (function () {
                 progressBar.classList.add('bg-success');
             }
 
-            // Define a largura da barra
             progressBar.style.width = `${percentage}%`;
         });
     }
@@ -344,7 +313,6 @@ FinanceSystem.Pages.CreditCards = (function () {
             const available = total - used;
             const percentage = (used / total * 100) || 0;
 
-            // Atualiza elementos na tela
             const totalElement = display.querySelector('.total-limit');
             const availableElement = display.querySelector('.available-limit');
             const usedElement = display.querySelector('.used-limit');
@@ -355,12 +323,10 @@ FinanceSystem.Pages.CreditCards = (function () {
             if (usedElement) usedElement.textContent = formatCurrency(used);
             if (percentageElement) percentageElement.textContent = `${percentage.toFixed(0)}%`;
 
-            // Atualiza barra de progresso
             const progressBar = display.querySelector('.progress-bar');
             if (progressBar) {
                 progressBar.style.width = `${percentage}%`;
 
-                // Atualiza classe baseado no uso
                 progressBar.classList.remove('bg-success', 'bg-info', 'bg-warning', 'bg-danger');
 
                 if (percentage > 90) {
@@ -380,7 +346,6 @@ FinanceSystem.Pages.CreditCards = (function () {
      * Inicializa botões de ação para cartões
      */
     function initializeActionButtons() {
-        // Botões de exclusão
         const deleteButtons = document.querySelectorAll('.delete-card-btn');
 
         deleteButtons.forEach(button => {
@@ -398,12 +363,10 @@ FinanceSystem.Pages.CreditCards = (function () {
      * @returns {string} - Valor formatado
      */
     function formatCurrency(value) {
-        // Usa o módulo Core se disponível
         if (FinanceSystem.Core && FinanceSystem.Core.formatCurrency) {
             return FinanceSystem.Core.formatCurrency(value);
         }
 
-        // Fallback
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL'
@@ -414,13 +377,10 @@ FinanceSystem.Pages.CreditCards = (function () {
      * Inicializa a página de detalhes do cartão de crédito
      */
     function initializeCreditCardDetails() {
-        // Inicializa datas de fechamento e vencimento
         calculateNextDates();
 
-        // Inicializa gráficos se existirem
         initializeCharts();
 
-        // Inicializa lista de transações se existir
         const transactionsTable = document.querySelector('.transactions-table');
         if (transactionsTable) {
             initializeTransactionsTable();
@@ -431,13 +391,11 @@ FinanceSystem.Pages.CreditCards = (function () {
      * Calcula próximas datas de fechamento e vencimento
      */
     function calculateNextDates() {
-        // Usa o módulo Financial se disponível
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
             FinanceSystem.Modules.Financial.calculateNextDates();
             return;
         }
 
-        // Implementação direta como fallback
         const cardElements = document.querySelectorAll('.credit-card-dates');
 
         cardElements.forEach(element => {
@@ -450,17 +408,14 @@ FinanceSystem.Pages.CreditCards = (function () {
             let nextClosingDate = new Date(today.getFullYear(), today.getMonth(), closingDay);
             let nextDueDate = new Date(today.getFullYear(), today.getMonth(), dueDay);
 
-            // Se a data de fechamento já passou este mês, avança para o próximo
             if (today.getDate() > closingDay) {
                 nextClosingDate.setMonth(nextClosingDate.getMonth() + 1);
             }
 
-            // Se a data de vencimento já passou este mês, avança para o próximo
             if (today.getDate() > dueDay) {
                 nextDueDate.setMonth(nextDueDate.getMonth() + 1);
             }
 
-            // Atualiza elementos na página
             const closingDateElement = element.querySelector('.next-closing-date');
             const dueDateElement = element.querySelector('.next-due-date');
             const daysToClosingElement = element.querySelector('.days-to-closing');
@@ -492,12 +447,10 @@ FinanceSystem.Pages.CreditCards = (function () {
      * @returns {string} - Data formatada
      */
     function formatDate(date) {
-        // Usa o módulo Core se disponível
         if (FinanceSystem.Core && FinanceSystem.Core.formatDate) {
             return FinanceSystem.Core.formatDate(date);
         }
 
-        // Fallback
         return date.toLocaleDateString('pt-BR');
     }
 
@@ -505,14 +458,12 @@ FinanceSystem.Pages.CreditCards = (function () {
      * Inicializa gráficos na página de detalhes
      */
     function initializeCharts() {
-        // Gráfico de uso do cartão
         const usageChartCanvas = document.getElementById('usageChart');
         if (usageChartCanvas) {
             const usedLimit = parseFloat(usageChartCanvas.getAttribute('data-used') || 0);
             const totalLimit = parseFloat(usageChartCanvas.getAttribute('data-limit') || 1);
             const availableLimit = totalLimit - usedLimit;
 
-            // Usa o módulo Charts se disponível
             if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
                 FinanceSystem.Modules.Charts.createPieChart('usageChart',
                     ['Utilizado', 'Disponível'],
@@ -523,22 +474,18 @@ FinanceSystem.Pages.CreditCards = (function () {
                     }
                 );
             } else if (typeof Chart !== 'undefined') {
-                // Fallback para Chart.js diretamente
                 createUsagePieChart(usageChartCanvas, usedLimit, availableLimit);
             }
         }
 
-        // Gráfico de gastos por categoria
         const categoryChartCanvas = document.getElementById('categoryChart');
         if (categoryChartCanvas) {
             const labels = JSON.parse(categoryChartCanvas.getAttribute('data-labels') || '[]');
             const values = JSON.parse(categoryChartCanvas.getAttribute('data-values') || '[]');
 
-            // Usa o módulo Charts se disponível
             if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
                 FinanceSystem.Modules.Charts.createPieChart('categoryChart', labels, values);
             } else if (typeof Chart !== 'undefined') {
-                // Fallback para Chart.js diretamente
                 createCategoryPieChart(categoryChartCanvas, labels, values);
             }
         }
@@ -641,7 +588,6 @@ FinanceSystem.Pages.CreditCards = (function () {
      * Inicializa tabela de transações do cartão
      */
     function initializeTransactionsTable() {
-        // Usa DataTables se disponível
         if (typeof $.fn.DataTable !== 'undefined') {
             $('.transactions-table').DataTable({
                 language: {
@@ -655,11 +601,9 @@ FinanceSystem.Pages.CreditCards = (function () {
                 ]
             });
         } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
-            // Usa o módulo Tables se DataTables não estiver disponível
             FinanceSystem.Modules.Tables.initializeTableSort();
         }
 
-        // Eventos para botões de ação
         const deleteButtons = document.querySelectorAll('.delete-transaction');
         deleteButtons.forEach(button => {
             button.addEventListener('click', function (e) {
@@ -670,7 +614,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         });
     }
 
-    // API pública do módulo
     return {
         initialize: initialize,
         initializeCreditCardForm: initializeCreditCardForm,

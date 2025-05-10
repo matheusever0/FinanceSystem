@@ -3,17 +3,14 @@
  * Scripts específicos para a página de pagamentos
  */
 
-// Namespace global para o sistema
 var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Pages = FinanceSystem.Pages || {};
 
-// Módulo Payments
 FinanceSystem.Pages.Payments = (function () {
     /**
      * Inicializa a página de pagamentos
      */
     function initialize() {
-        // Determina qual view está ativa
         const isFormView = document.querySelector('form[data-page="payment"]');
         const isListView = document.querySelector('.table-payments');
         const isDetailsView = document.querySelector('.payment-details-container');
@@ -30,7 +27,6 @@ FinanceSystem.Pages.Payments = (function () {
             initializePaymentDetails();
         }
 
-        // Inicializa filtros se existirem
         const filterButtons = document.querySelectorAll('.payment-filter');
         if (filterButtons.length > 0) {
             initializePaymentFilters();
@@ -44,38 +40,29 @@ FinanceSystem.Pages.Payments = (function () {
         const form = document.querySelector('form[data-page="payment"]');
         if (!form) return;
 
-        // Inicializa campos comuns usando módulos existentes
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
             FinanceSystem.Modules.Financial.initializeMoneyMask('#Amount');
             FinanceSystem.Modules.Financial.initializeRecurringToggle(form);
         } else {
-            // Fallback para inicialização direta
             initializeMoneyMaskFallback('#Amount');
             initializeRecurringToggleFallback(form);
         }
 
-        // Inicializa seletor de tipo de pagamento
         initializePaymentTypeSelect();
 
-        // Inicializa seletor de método de pagamento
         initializePaymentMethodSelect();
 
-        // Inicializa seletor de financiamento
         initializeFinancingSelect();
 
-        // Configura validação do formulário
         setupFormValidation(form);
 
-        // Verificar se já existe um financiamento selecionado (para pré-seleção)
         const financingSelect = document.getElementById('FinancingId');
         if (financingSelect && financingSelect.value) {
-            // Exibir a seção de financiamento
             const financingSection = document.getElementById('financingSection');
             if (financingSection) {
                 financingSection.style.display = 'block';
             }
 
-            // Exibir a seção de parcelas
             const installmentSection = document.getElementById('financingInstallmentSection');
             if (installmentSection) {
                 installmentSection.style.display = 'block';
@@ -94,7 +81,6 @@ FinanceSystem.Pages.Payments = (function () {
             toggleFinancingSection(this.value);
         });
 
-        // Inicializa com o valor atual
         if (paymentTypeSelect.value) {
             toggleFinancingSection(paymentTypeSelect.value);
         }
@@ -110,20 +96,16 @@ FinanceSystem.Pages.Payments = (function () {
 
         if (!financingSection) return;
 
-        // Verifica se o tipo de pagamento é relacionado a financiamento
         const typeOption = document.querySelector(`#PaymentTypeId option[value="${typeId}"]`);
         const isFinancingType = typeOption && typeOption.getAttribute('data-is-financing-type') === 'true';
 
-        // Exibe/oculta seção de financiamento
         if (isFinancingType) {
             financingSection.style.display = 'block';
 
-            // Torna o campo obrigatório se for tipo de financiamento
             const financingSelect = document.getElementById('FinancingId');
             if (financingSelect) {
                 financingSelect.required = true;
 
-                // Se já houver um financiamento selecionado, exibe a seção de parcelas
                 if (financingSelect.value && installmentSection) {
                     installmentSection.style.display = 'block';
                 } else if (installmentSection) {
@@ -136,14 +118,12 @@ FinanceSystem.Pages.Payments = (function () {
                 installmentSection.style.display = 'none';
             }
 
-            // Remove a obrigatoriedade se não for tipo de financiamento
             const financingSelect = document.getElementById('FinancingId');
             if (financingSelect) {
                 financingSelect.required = false;
                 financingSelect.value = '';
             }
 
-            // Limpa o campo de parcela
             const installmentSelect = document.getElementById('FinancingInstallmentId');
             if (installmentSelect) {
                 installmentSelect.value = '';
@@ -152,7 +132,6 @@ FinanceSystem.Pages.Payments = (function () {
     }
 
     function initializePaymentMethodSelect() {
-        // Check for both possible IDs
         const paymentMethodSelect = document.getElementById('PaymentMethodId') ||
             document.getElementById('paymentMethodSelect');
 
@@ -167,7 +146,6 @@ FinanceSystem.Pages.Payments = (function () {
             togglePaymentMethodFields(this.value, methodType);
         });
 
-        // Initialize with current value
         if (paymentMethodSelect.value) {
             const selectedOption = paymentMethodSelect.options[paymentMethodSelect.selectedIndex];
             const methodType = selectedOption ? selectedOption.getAttribute('data-type') : null;
@@ -182,18 +160,14 @@ FinanceSystem.Pages.Payments = (function () {
         const creditCardSection = document.getElementById('creditCardSection');
         const bankAccountSection = document.getElementById('bankAccountSection');
 
-        // Hide all specific sections by default
         if (creditCardSection) creditCardSection.style.display = 'none';
         if (bankAccountSection) bankAccountSection.style.display = 'none';
 
-        // Convert methodType to string if needed
         const methodTypeStr = String(methodType);
 
-        // Show specific sections based on method type
         if (methodTypeStr === '2' && creditCardSection) { // Credit card
             creditCardSection.style.display = 'block';
 
-            // Make the field required
             const creditCardSelect = document.getElementById('CreditCardId');
             if (creditCardSelect) {
                 creditCardSelect.required = true;
@@ -202,7 +176,6 @@ FinanceSystem.Pages.Payments = (function () {
             bankAccountSection.style.display = 'block';
         }
 
-        // Remove requirement if not credit card
         if (methodTypeStr !== '2') {
             const creditCardSelect = document.getElementById('CreditCardId');
             if (creditCardSelect) {
@@ -223,7 +196,6 @@ FinanceSystem.Pages.Payments = (function () {
         if (typeof $.fn.mask !== 'undefined') {
             $(moneyInput).mask('#.##0,00', { reverse: true });
         } else {
-            // Implementação manual se mask não estiver disponível
             moneyInput.addEventListener('input', function () {
                 formatCurrencyInput(this);
             });
@@ -235,14 +207,11 @@ FinanceSystem.Pages.Payments = (function () {
      * @param {HTMLElement} input - Campo a ser formatado
      */
     function formatCurrencyInput(input) {
-        // Preserva a posição do cursor
         const cursorPosition = input.selectionStart;
         const inputLength = input.value.length;
 
-        // Remove caracteres não numéricos, exceto vírgula e ponto
         let value = input.value.replace(/[^\d.,]/g, '');
 
-        // Converte para o formato brasileiro (vírgula como separador decimal)
         value = value.replace(/\D/g, '');
         if (value === '') {
             input.value = '';
@@ -252,7 +221,6 @@ FinanceSystem.Pages.Payments = (function () {
         value = (parseFloat(value) / 100).toFixed(2);
         input.value = value.replace('.', ',');
 
-        // Ajusta a posição do cursor se necessário
         const newLength = input.value.length;
         const newPosition = cursorPosition + (newLength - inputLength);
         if (newPosition >= 0) {
@@ -280,7 +248,6 @@ FinanceSystem.Pages.Payments = (function () {
                 }
             });
 
-            // Inicializa com o estado atual
             if (isRecurringSwitch.checked) {
                 isRecurringLabel.textContent = 'Sim';
                 installmentsInput.value = '1';
@@ -296,11 +263,9 @@ FinanceSystem.Pages.Payments = (function () {
     function setupFormValidation(form) {
         if (!form) return;
 
-        // Usa o módulo de validação se disponível
         if (FinanceSystem.Validation && FinanceSystem.Validation.setupFormValidation) {
             FinanceSystem.Validation.setupFormValidation(form, validatePaymentForm);
         } else {
-            // Fallback para validação manual
             form.addEventListener('submit', function (event) {
                 if (!validatePaymentForm(event)) {
                     event.preventDefault();
@@ -319,14 +284,12 @@ FinanceSystem.Pages.Payments = (function () {
         let isValid = true;
         const form = event.target;
 
-        // Valida descrição
         const description = form.querySelector('#Description');
         if (description && description.value.trim() === '') {
             isValid = false;
             showFieldError(description, 'A descrição é obrigatória');
         }
 
-        // Valida valor
         const amount = form.querySelector('#Amount');
         if (amount) {
             let rawValue = amount.value;
@@ -342,28 +305,24 @@ FinanceSystem.Pages.Payments = (function () {
             }
         }
 
-        // Valida data de vencimento
         const dueDate = form.querySelector('#DueDate');
         if (dueDate && dueDate.value === '') {
             isValid = false;
             showFieldError(dueDate, 'A data de vencimento é obrigatória');
         }
 
-        // Valida tipo de pagamento
         const paymentTypeId = form.querySelector('#PaymentTypeId');
         if (paymentTypeId && paymentTypeId.value === '') {
             isValid = false;
             showFieldError(paymentTypeId, 'O tipo de pagamento é obrigatório');
         }
 
-        // Valida método de pagamento
         const paymentMethodId = form.querySelector('#PaymentMethodId');
         if (paymentMethodId && paymentMethodId.value === '') {
             isValid = false;
             showFieldError(paymentMethodId, 'O método de pagamento é obrigatório');
         }
 
-        // Valida cartão de crédito se necessário
         const paymentMethodSelect = form.querySelector('#PaymentMethodId');
         const creditCardSelect = form.querySelector('#CreditCardId');
 
@@ -377,7 +336,6 @@ FinanceSystem.Pages.Payments = (function () {
             }
         }
 
-        // Valida financiamento se necessário
         const paymentTypeSelect = form.querySelector('#PaymentTypeId');
         const financingSelect = form.querySelector('#FinancingId');
 
@@ -400,13 +358,11 @@ FinanceSystem.Pages.Payments = (function () {
      * @param {string} message - Mensagem de erro
      */
     function showFieldError(input, message) {
-        // Usa o módulo de validação se disponível
         if (FinanceSystem.Validation && FinanceSystem.Validation.showFieldError) {
             FinanceSystem.Validation.showFieldError(input, message);
             return;
         }
 
-        // Fallback para exibição manual de erro
         let errorElement = input.parentElement.querySelector('.text-danger');
         if (!errorElement) {
             errorElement = document.createElement('span');
@@ -424,13 +380,10 @@ FinanceSystem.Pages.Payments = (function () {
         const paymentTable = document.querySelector('.table-payments');
         if (!paymentTable) return;
 
-        // Adiciona classes para estilização baseada no status
         stylePaymentRows();
 
-        // Inicializa DataTables se disponível
         initializePaymentDataTable();
 
-        // Inicializa botões de ação
         initializePaymentActionButtons();
     }
 
@@ -462,7 +415,6 @@ FinanceSystem.Pages.Payments = (function () {
      * Inicializa DataTables para a tabela de pagamentos
      */
     function initializePaymentDataTable() {
-        // Verifica se DataTables está disponível
         if (typeof $.fn.DataTable !== 'undefined') {
             $('#table-payments').DataTable({
                 language: {
@@ -506,7 +458,6 @@ FinanceSystem.Pages.Payments = (function () {
      * Inicializa botões de ação para pagamentos
      */
     function initializePaymentActionButtons() {
-        // Botões de exclusão
         const deleteButtons = document.querySelectorAll('.btn-delete-payment');
         deleteButtons.forEach(button => {
             button.addEventListener('click', function (e) {
@@ -516,7 +467,6 @@ FinanceSystem.Pages.Payments = (function () {
             });
         });
 
-        // Botões de pagamento
         const payButtons = document.querySelectorAll('.btn-pay-payment');
         payButtons.forEach(button => {
             button.addEventListener('click', function () {
@@ -537,15 +487,12 @@ FinanceSystem.Pages.Payments = (function () {
         if (modal && paymentIdInput) {
             paymentIdInput.value = paymentId;
 
-            // Usa o módulo UI se disponível
             if (FinanceSystem.UI && FinanceSystem.UI.showModal) {
                 FinanceSystem.UI.showModal('paymentModal');
             } else if (typeof bootstrap !== 'undefined') {
-                // Fallback para Bootstrap
                 const modalInstance = new bootstrap.Modal(modal);
                 modalInstance.show();
             } else {
-                // Fallback básico
                 modal.style.display = 'block';
             }
         }
@@ -555,10 +502,8 @@ FinanceSystem.Pages.Payments = (function () {
      * Inicializa detalhes de pagamento
      */
     function initializePaymentDetails() {
-        // Inicializa ações para instalações
         initializeInstallmentActions();
 
-        // Inicializa ações para anexos se existirem
         const attachmentsSection = document.querySelector('.payment-attachments');
         if (attachmentsSection) {
             initializeAttachments();
@@ -569,7 +514,6 @@ FinanceSystem.Pages.Payments = (function () {
      * Inicializa ações em parcelas
      */
     function initializeInstallmentActions() {
-        // Botões para marcar parcela como paga
         const markPaidButtons = document.querySelectorAll('.mark-installment-paid');
         markPaidButtons.forEach(button => {
             button.addEventListener('click', function () {
@@ -581,7 +525,6 @@ FinanceSystem.Pages.Payments = (function () {
             });
         });
 
-        // Botões para cancelar parcela
         const cancelButtons = document.querySelectorAll('.cancel-installment');
         cancelButtons.forEach(button => {
             button.addEventListener('click', function (e) {
@@ -606,7 +549,6 @@ FinanceSystem.Pages.Payments = (function () {
 
             fileInput.addEventListener('change', function () {
                 if (this.files.length > 0) {
-                    // Encontra o formulário de upload
                     const uploadForm = document.getElementById('attachment-form');
                     if (uploadForm) {
                         uploadForm.submit();
@@ -615,7 +557,6 @@ FinanceSystem.Pages.Payments = (function () {
             });
         }
 
-        // Botões para excluir anexos
         const deleteAttachmentButtons = document.querySelectorAll('.delete-attachment');
         deleteAttachmentButtons.forEach(button => {
             button.addEventListener('click', function (e) {
@@ -630,30 +571,24 @@ FinanceSystem.Pages.Payments = (function () {
      * Inicializa filtros de pagamento
      */
     function initializePaymentFilters() {
-        // Usa o módulo Financial se disponível
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
             FinanceSystem.Modules.Financial.initializeFinancialFilters();
             return;
         }
 
-        // Fallback para implementação direta
         const filterButtons = document.querySelectorAll('.payment-filter');
 
         filterButtons.forEach(button => {
             button.addEventListener('click', function () {
-                // Remove classe ativa de todos os botões
                 filterButtons.forEach(btn => btn.classList.remove('active'));
 
-                // Adiciona classe ativa ao botão clicado
                 this.classList.add('active');
 
-                // Filtra a tabela
                 const filterValue = this.getAttribute('data-filter');
                 filterPaymentTable(filterValue);
             });
         });
 
-        // Filtro de pesquisa
         const searchInput = document.getElementById('payment-search');
         if (searchInput) {
             searchInput.addEventListener('input', function () {
@@ -725,19 +660,15 @@ FinanceSystem.Pages.Payments = (function () {
         financingSelect.addEventListener('change', function () {
             const financingId = this.value;
             if (financingId) {
-                // Mostrar a seção de parcelas
                 const installmentSection = document.getElementById('financingInstallmentSection');
                 if (installmentSection) {
                     installmentSection.style.display = 'block';
-                    // Carregar as parcelas do financiamento selecionado
                     loadFinancingInstallments(financingId);
                 }
             } else {
-                // Esconder a seção de parcelas se nenhum financiamento for selecionado
                 const installmentSection = document.getElementById('financingInstallmentSection');
                 if (installmentSection) {
                     installmentSection.style.display = 'none';
-                    // Limpar as opções
                     const installmentSelect = document.getElementById('FinancingInstallmentId');
                     if (installmentSelect) {
                         installmentSelect.innerHTML = '<option value="">Selecione a parcela</option>';
@@ -747,7 +678,6 @@ FinanceSystem.Pages.Payments = (function () {
         });
     }
 
-    // Adicionar esta função ao módulo
     function initializeFinancingSelect() {
         const financingSelect = document.getElementById('FinancingId');
         if (!financingSelect) return;
@@ -759,11 +689,9 @@ FinanceSystem.Pages.Payments = (function () {
 
             if (!installmentSection || !installmentSelect) return;
 
-            // Limpar seleção atual
             installmentSelect.innerHTML = '<option value="">Selecione a parcela</option>';
 
             if (financingId) {
-                // Mostrar seção de parcelas
                 installmentSection.style.display = 'block';
 
                 $.ajax({
@@ -778,14 +706,12 @@ FinanceSystem.Pages.Payments = (function () {
                         installmentSelect.appendChild(loadingOption);
                     },
                     success: function (data) {
-                        // Remover opção de carregamento
                         const loadingOption = document.getElementById('loading-option');
                         if (loadingOption) {
                             installmentSelect.removeChild(loadingOption);
                         }
 
                         if (data && data.length > 0) {
-                            // Adicionar parcelas
                             data.forEach(function (installment) {
                                 const option = document.createElement('option');
                                 option.value = installment.id;
@@ -803,7 +729,6 @@ FinanceSystem.Pages.Payments = (function () {
                         }
                     },
                     error: function () {
-                        // Remover opção de carregamento
                         const loadingOption = document.getElementById('loading-option');
                         if (loadingOption) {
                             installmentSelect.removeChild(loadingOption);
@@ -816,7 +741,6 @@ FinanceSystem.Pages.Payments = (function () {
                     }
                 });
             } else {
-                // Esconder seção de parcelas
                 installmentSection.style.display = 'none';
             }
 
@@ -837,7 +761,6 @@ FinanceSystem.Pages.Payments = (function () {
         });
     }
 
-    // Função auxiliar para formatação de moeda
     function formatCurrency(value) {
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
@@ -845,7 +768,6 @@ FinanceSystem.Pages.Payments = (function () {
         }).format(value);
     }
 
-    // API pública do módulo
     return {
         initialize: initialize,
         initializePaymentForm: initializePaymentForm,

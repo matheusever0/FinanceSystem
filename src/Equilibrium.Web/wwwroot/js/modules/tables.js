@@ -3,11 +3,9 @@
  * Funções reutilizáveis para manipulação de tabelas
  */
 
-// Namespace global para o sistema
 var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Modules = FinanceSystem.Modules || {};
 
-// Módulo Tables
 FinanceSystem.Modules.Tables = (function () {
     /**
      * Inicializa o módulo de tabelas
@@ -25,9 +23,7 @@ FinanceSystem.Modules.Tables = (function () {
      * Inicializa DataTables
      */
     function initializeDataTables() {
-        // Verifica se a biblioteca DataTables está disponível
         if (typeof $.fn.DataTable !== 'undefined') {
-            // Configuração padrão para todas as tabelas de dados
             $('.datatable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
@@ -37,7 +33,6 @@ FinanceSystem.Modules.Tables = (function () {
                 lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]]
             });
         } else {
-            // Implementação básica de ordenação se DataTables não estiver disponível
             implementBasicTableSorting();
         }
     }
@@ -46,7 +41,6 @@ FinanceSystem.Modules.Tables = (function () {
      * Inicializa tabelas específicas dos relatórios
      */
     function initializeReportTables() {
-        // Inicializar tabela de pagamentos de relatório
 
         var paymentsTable = $('#payments-table');
         if (paymentsTable.length > 0 && !$.fn.DataTable.isDataTable('#payments-table')) {
@@ -78,7 +72,6 @@ FinanceSystem.Modules.Tables = (function () {
             });
         }
 
-        // Inicializar tabela de receitas de relatório
         var incomesTable = $('#incomes-table');
         if (incomesTable.length > 0 && !$.fn.DataTable.isDataTable('#incomes-table')) {
             incomesTable.DataTable({
@@ -126,7 +119,6 @@ FinanceSystem.Modules.Tables = (function () {
                     });
                     header.style.cursor = 'pointer';
 
-                    // Adiciona ícone de ordenação
                     const span = document.createElement('span');
                     span.className = 'sort-icon';
                     span.innerHTML = ' ⇵';
@@ -147,40 +139,33 @@ FinanceSystem.Modules.Tables = (function () {
         const header = table.querySelectorAll('th')[columnIndex];
         const isAsc = header.classList.contains('sort-asc');
 
-        // Remove classes de ordenação de todos os cabeçalhos
         table.querySelectorAll('th').forEach(th => {
             th.classList.remove('sort-asc', 'sort-desc');
         });
 
-        // Adiciona classe de ordenação ao cabeçalho clicado
         header.classList.add(isAsc ? 'sort-desc' : 'sort-asc');
 
-        // Ordena as linhas
         rows.sort((a, b) => {
             const aValue = a.querySelectorAll('td')[columnIndex].textContent.trim();
             const bValue = b.querySelectorAll('td')[columnIndex].textContent.trim();
 
-            // Verifica se os valores são datas
             if (isDate(aValue) && isDate(bValue)) {
                 const aDate = parseDate(aValue);
                 const bDate = parseDate(bValue);
                 return isAsc ? aDate - bDate : bDate - aDate;
             }
 
-            // Verifica se os valores são números
             if (isNumber(aValue) && isNumber(bValue)) {
                 const aNum = parseFloat(aValue.replace(/[^\d.-]/g, ''));
                 const bNum = parseFloat(bValue.replace(/[^\d.-]/g, ''));
                 return isAsc ? aNum - bNum : bNum - aNum;
             }
 
-            // Ordenação de texto
             return isAsc ?
                 aValue.localeCompare(bValue, 'pt-BR') :
                 bValue.localeCompare(aValue, 'pt-BR');
         });
 
-        // Reordena as linhas na tabela
         rows.forEach(row => {
             tbody.appendChild(row);
         });
@@ -192,7 +177,6 @@ FinanceSystem.Modules.Tables = (function () {
      * @returns {boolean} - Resultado da verificação
      */
     function isDate(value) {
-        // Verifica se o valor é uma data no formato dd/mm/yyyy
         return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value);
     }
 
@@ -202,7 +186,6 @@ FinanceSystem.Modules.Tables = (function () {
      * @returns {Date} - Objeto Date
      */
     function parseDate(dateStr) {
-        // Converte data no formato dd/mm/yyyy para objeto Date
         const parts = dateStr.split('/');
         return new Date(parts[2], parts[1] - 1, parts[0]);
     }
@@ -213,7 +196,6 @@ FinanceSystem.Modules.Tables = (function () {
      * @returns {boolean} - Resultado da verificação
      */
     function isNumber(value) {
-        // Verifica se o valor é um número (com ou sem formatação)
         return /^[R$\s]*[\d.,]+%?$/.test(value);
     }
 
@@ -240,7 +222,6 @@ FinanceSystem.Modules.Tables = (function () {
             });
         });
 
-        // Filtros por coluna
         initializeColumnFilters();
     }
 
@@ -315,13 +296,10 @@ FinanceSystem.Modules.Tables = (function () {
             const row = [], cols = rows[i].querySelectorAll('td, th');
 
             for (let j = 0; j < cols.length; j++) {
-                // Remove HTML e limpa texto
                 let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').trim();
 
-                // Escapa aspas duplas
                 text = text.replace(/"/g, '""');
 
-                // Adiciona aspas para lidar com vírgulas
                 row.push(`"${text}"`);
             }
 
@@ -356,7 +334,6 @@ FinanceSystem.Modules.Tables = (function () {
      * @param {string} filename - Nome do arquivo
      */
     function exportTableToExcel(table, filename) {
-        // Esta função requer a biblioteca SheetJS ou uma implementação personalizada
         if (typeof $(table).tableExport === 'function') {
             $(table).tableExport({
                 type: 'xlsx',
@@ -374,17 +351,13 @@ FinanceSystem.Modules.Tables = (function () {
      * @param {string} filename - Nome do arquivo
      */
     function exportTableToPDF(table, filename) {
-        // Esta função requer a biblioteca jsPDF ou uma implementação personalizada
         if (typeof jsPDF !== 'undefined' && typeof jsPDF.autoTable !== 'undefined') {
             const doc = new jsPDF();
 
-            // Adiciona título
             doc.text(filename.replace('.pdf', ''), 14, 16);
 
-            // Exporta a tabela
             doc.autoTable({ html: table });
 
-            // Salva o PDF
             doc.save(filename);
         } else {
             alert('Exportação para PDF requer as bibliotecas jsPDF e jsPDF-AutoTable');
@@ -395,7 +368,6 @@ FinanceSystem.Modules.Tables = (function () {
      * Inicializa ações de tabela
      */
     function initializeTableActions() {
-        // Botões de ação em linhas de tabela
         const actionButtons = document.querySelectorAll('.table-action-btn');
 
         actionButtons.forEach(button => {
@@ -404,24 +376,19 @@ FinanceSystem.Modules.Tables = (function () {
                 const rowId = this.closest('tr').getAttribute('data-id');
 
                 if (action === 'delete') {
-                    // Confirmação de exclusão
                     e.preventDefault();
                     if (confirm('Tem certeza que deseja excluir este item?')) {
-                        // Continua com a exclusão
                         this.closest('form').submit();
                     }
                 } else if (action === 'toggle') {
-                    // Toggle de status
                     e.preventDefault();
                     toggleStatus(rowId, this);
                 }
             });
         });
 
-        // Checkbox para selecionar/deselecionar todos
         initializeSelectAll();
 
-        // Ações em massa
         initializeBulkActions();
     }
 
@@ -464,10 +431,8 @@ FinanceSystem.Modules.Tables = (function () {
                     return;
                 }
 
-                // Coleta IDs dos itens selecionados
                 const ids = Array.from(selectedRows).map(checkbox => checkbox.value);
 
-                // Executa a ação
                 executeBulkAction(action, ids);
             });
         }
@@ -494,7 +459,6 @@ FinanceSystem.Modules.Tables = (function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Atualiza o botão
                     if (currentStatus === 'active') {
                         button.setAttribute('data-status', 'inactive');
                         button.innerHTML = '<i class="fas fa-toggle-off"></i>';
@@ -507,7 +471,6 @@ FinanceSystem.Modules.Tables = (function () {
                         button.classList.add('btn-success');
                     }
 
-                    // Atualiza a linha da tabela se necessário
                     const statusCell = button.closest('tr').querySelector('.status-cell');
                     if (statusCell) {
                         if (currentStatus === 'active') {
@@ -546,7 +509,6 @@ FinanceSystem.Modules.Tables = (function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Recarrega a página ou atualiza a tabela
                     window.location.reload();
                 } else {
                     alert('Erro ao executar a ação: ' + data.message);
@@ -567,30 +529,24 @@ FinanceSystem.Modules.Tables = (function () {
             headers.forEach(header => {
                 header.style.cursor = 'pointer';
 
-                // Adiciona ícone de ordenação
                 const sortIcon = document.createElement('span');
                 sortIcon.className = 'ms-1 sort-icon';
                 sortIcon.innerHTML = '⇵';
                 header.appendChild(sortIcon);
 
-                // Adiciona evento de clique
                 header.addEventListener('click', function () {
                     const column = this.getAttribute('data-sort');
                     const direction = this.getAttribute('data-direction') === 'asc' ? 'desc' : 'asc';
 
-                    // Remove direção de todos os cabeçalhos
                     headers.forEach(h => h.removeAttribute('data-direction'));
 
-                    // Define direção neste cabeçalho
                     this.setAttribute('data-direction', direction);
 
-                    // Atualiza ícone
                     table.querySelectorAll('.sort-icon').forEach(icon => {
                         icon.innerHTML = '⇵';
                     });
                     sortIcon.innerHTML = direction === 'asc' ? '↑' : '↓';
 
-                    // Ordena a tabela
                     sortTableByColumn(table, column, direction);
                 });
             });
@@ -628,7 +584,6 @@ FinanceSystem.Modules.Tables = (function () {
                 : bValue.localeCompare(aValue, 'pt-BR');
         });
 
-        // Limpa e reconstrói a tabela
         rows.forEach(row => tbody.appendChild(row));
     }
 
@@ -649,7 +604,6 @@ FinanceSystem.Modules.Tables = (function () {
             let content;
 
             if (columnIndex !== undefined) {
-                // Filtrar apenas uma coluna específica
                 const cell = typeof columnIndex === 'number'
                     ? row.querySelectorAll('td')[columnIndex]
                     : row.querySelector(`td[data-column="${columnIndex}"]`);
@@ -657,7 +611,6 @@ FinanceSystem.Modules.Tables = (function () {
                 if (!cell) return;
                 content = cell.textContent.toLowerCase();
             } else {
-                // Filtrar toda a linha
                 content = row.textContent.toLowerCase();
             }
 
@@ -698,7 +651,6 @@ FinanceSystem.Modules.Tables = (function () {
         const tbody = table.querySelector('tbody') || table.createTBody();
         const row = tbody.insertRow();
 
-        // Adiciona classes à linha
         if (options.classes) {
             if (Array.isArray(options.classes)) {
                 row.classList.add(...options.classes);
@@ -707,18 +659,15 @@ FinanceSystem.Modules.Tables = (function () {
             }
         }
 
-        // Adiciona atributos à linha
         if (options.attributes) {
             Object.keys(options.attributes).forEach(attr => {
                 row.setAttribute(attr, options.attributes[attr]);
             });
         }
 
-        // Adiciona células
         cells.forEach((cell, index) => {
             const td = row.insertCell();
 
-            // Se a célula for um objeto com configurações
             if (typeof cell === 'object' && cell !== null && !Array.isArray(cell) && !(cell instanceof Node)) {
                 if (cell.html) {
                     td.innerHTML = cell.html;
@@ -726,7 +675,6 @@ FinanceSystem.Modules.Tables = (function () {
                     td.textContent = cell.text;
                 }
 
-                // Adiciona classes à célula
                 if (cell.classes) {
                     if (Array.isArray(cell.classes)) {
                         td.classList.add(...cell.classes);
@@ -735,7 +683,6 @@ FinanceSystem.Modules.Tables = (function () {
                     }
                 }
 
-                // Adiciona atributos à célula
                 if (cell.attributes) {
                     Object.keys(cell.attributes).forEach(attr => {
                         td.setAttribute(attr, cell.attributes[attr]);
@@ -759,7 +706,6 @@ FinanceSystem.Modules.Tables = (function () {
      * @returns {boolean} - Indica se a linha foi removida
      */
     function removeTableRow(row, withConfirmation = true, message = 'Tem certeza que deseja remover este item?') {
-        // Se for um botão ou elemento dentro da linha, busca a linha
         if (!row.tagName || row.tagName.toLowerCase() !== 'tr') {
             row = row.closest('tr');
         }
@@ -796,7 +742,6 @@ FinanceSystem.Modules.Tables = (function () {
         }
     }
 
-    // API pública do módulo
     return {
         initialize: initialize,
         sortTable: sortTable,

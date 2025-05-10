@@ -4,16 +4,12 @@
  * With chart registry for better chart instance management
  */
 
-// Namespace global para o sistema
 var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Modules = FinanceSystem.Modules || {};
 
-// Módulo Charts
 FinanceSystem.Modules.Charts = (function () {
-    // Registry to store chart instances
     const chartRegistry = {};
 
-    // Cores padrão para gráficos
     const defaultColors = [
         'rgba(78, 115, 223, 0.8)',   // Azul
         'rgba(28, 200, 138, 0.8)',   // Verde
@@ -23,7 +19,6 @@ FinanceSystem.Modules.Charts = (function () {
         'rgba(133, 135, 150, 0.8)'   // Cinza
     ];
 
-    // Cores para estados específicos
     const statusColors = {
         success: 'rgba(28, 200, 138, 0.8)',
         warning: 'rgba(246, 194, 62, 0.8)',
@@ -37,13 +32,11 @@ FinanceSystem.Modules.Charts = (function () {
      * Inicializa o módulo de gráficos
      */
     function initialize() {
-        // Verificar se Chart.js está disponível
         if (typeof Chart === 'undefined') {
             console.warn('Chart.js não está disponível. Os gráficos não serão renderizados.');
             return;
         }
 
-        // Configurações globais para Chart.js
         configureChartDefaults();
     }
 
@@ -53,12 +46,10 @@ FinanceSystem.Modules.Charts = (function () {
     function configureChartDefaults() {
         if (typeof Chart === 'undefined') return;
 
-        // Configurações padrão para todos os gráficos
         Chart.defaults.font.family = "'Nunito', 'Segoe UI', 'Arial', sans-serif";
         Chart.defaults.color = '#666';
         Chart.defaults.responsive = true;
 
-        // Configurações padrão para tooltips
         Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(0, 0, 0, 0.7)';
         Chart.defaults.plugins.tooltip.titleColor = '#fff';
         Chart.defaults.plugins.tooltip.bodyColor = '#fff';
@@ -108,21 +99,17 @@ FinanceSystem.Modules.Charts = (function () {
      * @param {string} chartId - ID of the chart element
      */
     function destroyChartSafely(chartId) {
-        // First try from our registry
         if (destroyChart(chartId)) return;
 
-        // If not in registry, try Chart.js methods
         const chartElement = document.getElementById(chartId);
         if (!chartElement) return;
 
-        // For Chart.js v3+
         if (typeof Chart.getChart === 'function') {
             const chartInstance = Chart.getChart(chartElement);
             if (chartInstance) {
                 chartInstance.destroy();
             }
         }
-        // For Chart.js v2
         else if (chartElement.chart) {
             chartElement.chart.destroy();
         }
@@ -138,13 +125,10 @@ FinanceSystem.Modules.Charts = (function () {
         const chartElement = document.getElementById(chartId);
         if (!chartElement || typeof Chart === 'undefined') return null;
 
-        // Destroy any existing chart on this canvas
         destroyChartSafely(chartId);
 
-        // Create new chart instance
         const chart = new Chart(chartElement, config);
 
-        // Register chart in our registry
         return registerChart(chartId, chart);
     }
 
@@ -275,7 +259,6 @@ FinanceSystem.Modules.Charts = (function () {
 
         const mergedOptions = { ...defaultOptions, ...options };
 
-        // Formata os conjuntos de dados
         const formattedDatasets = datasets.map((dataset, index) => {
             const color = dataset.color || defaultColors[index % defaultColors.length];
             return {
@@ -426,7 +409,6 @@ FinanceSystem.Modules.Charts = (function () {
 
         const mergedOptions = { ...defaultOptions, ...options };
 
-        // Formata os conjuntos de dados
         const formattedDatasets = datasets.map((dataset, index) => {
             const color = dataset.color || defaultColors[index % defaultColors.length];
             return {
@@ -593,7 +575,6 @@ FinanceSystem.Modules.Charts = (function () {
 
         const mergedOptions = { ...defaultOptions, ...options };
 
-        // Formata os conjuntos de dados
         const formattedDatasets = datasets.map((dataset, index) => {
             const color = dataset.color || defaultColors[index % defaultColors.length];
             return {
@@ -630,10 +611,8 @@ FinanceSystem.Modules.Charts = (function () {
      * @returns {Chart|null} - Instância do gráfico ou null
      */
     function createGaugeChart(chartId, value, options = {}) {
-        // Limita o valor entre 0 e 100
         value = Math.max(0, Math.min(100, value));
 
-        // Determina a cor do gauge com base no valor
         let color = statusColors.success;
         if (value > 90) {
             color = statusColors.danger;
@@ -676,16 +655,13 @@ FinanceSystem.Modules.Charts = (function () {
             options: mergedOptions
         };
 
-        // Cria o gráfico
         const chart = initializeChart(chartId, config);
 
-        // Adiciona texto central, se possível
         if (chart) {
             const chartElement = document.getElementById(chartId);
             if (chartElement) {
                 const container = chartElement.parentNode;
                 if (container) {
-                    // Cria ou atualiza o indicador de valor
                     let indicator = container.querySelector('.gauge-value');
                     if (!indicator) {
                         indicator = document.createElement('div');
@@ -719,7 +695,6 @@ FinanceSystem.Modules.Charts = (function () {
             if (i < defaultColors.length) {
                 colors.push(defaultColors[i]);
             } else {
-                // Gera cores aleatórias se precisar de mais
                 const r = Math.floor(Math.random() * 200) + 55;
                 const g = Math.floor(Math.random() * 200) + 55;
                 const b = Math.floor(Math.random() * 200) + 55;
@@ -769,7 +744,6 @@ FinanceSystem.Modules.Charts = (function () {
             return `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${opacity})`;
         }
 
-        // Para cores hexadecimais
         const hexMatch = color.match(/#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/i);
         if (hexMatch) {
             const r = parseInt(hexMatch[1], 16);
@@ -794,12 +768,10 @@ FinanceSystem.Modules.Charts = (function () {
         chart.data.labels = labels;
 
         if (Array.isArray(data)) {
-            // Se data for um array simples, atualiza o primeiro dataset
             if (chart.data.datasets.length > 0) {
                 chart.data.datasets[0].data = data;
             }
         } else if (typeof data === 'object') {
-            // Se data for um objeto com múltiplos datasets
             Object.keys(data).forEach((key, index) => {
                 if (chart.data.datasets.length > index) {
                     chart.data.datasets[index].data = data[key];
@@ -807,7 +779,6 @@ FinanceSystem.Modules.Charts = (function () {
             });
         }
 
-        // Atualiza o gráfico
         chart.update(animate ? undefined : 'none');
     }
 
@@ -820,7 +791,6 @@ FinanceSystem.Modules.Charts = (function () {
     function addDataset(chart, dataset, update = true) {
         if (!chart) return;
 
-        // Configura o dataset com valores padrão
         const color = dataset.color || defaultColors[chart.data.datasets.length % defaultColors.length];
 
         const newDataset = {
@@ -831,7 +801,6 @@ FinanceSystem.Modules.Charts = (function () {
             borderWidth: dataset.borderWidth || 1
         };
 
-        // Para gráficos de linha, adiciona configurações específicas
         if (chart.config.type === 'line') {
             newDataset.pointBackgroundColor = dataset.pointBackgroundColor || color;
             newDataset.pointBorderColor = dataset.pointBorderColor || '#fff';
@@ -843,10 +812,8 @@ FinanceSystem.Modules.Charts = (function () {
             newDataset.fill = dataset.fill || false;
         }
 
-        // Adiciona o dataset ao gráfico
         chart.data.datasets.push(newDataset);
 
-        // Atualiza o gráfico, se necessário
         if (update) {
             chart.update();
         }
@@ -861,10 +828,8 @@ FinanceSystem.Modules.Charts = (function () {
     function removeDataset(chart, index, update = true) {
         if (!chart || index < 0 || index >= chart.data.datasets.length) return;
 
-        // Remove o dataset
         chart.data.datasets.splice(index, 1);
 
-        // Atualiza o gráfico, se necessário
         if (update) {
             chart.update();
         }
@@ -880,33 +845,27 @@ FinanceSystem.Modules.Charts = (function () {
         let html = '<table class="table table-striped table-sm">';
         html += '<thead><tr><th>Categoria</th>';
 
-        // Determina se datasets é um array de objetos ou um array simples
         const isMultiDataset = Array.isArray(datasets) && typeof datasets[0] === 'object' && datasets[0].data;
 
         if (isMultiDataset) {
-            // Adiciona cabeçalhos para múltiplos datasets
             datasets.forEach(dataset => {
                 html += `<th>${dataset.label || 'Valor'}</th>`;
             });
         } else {
-            // Apenas uma coluna para dataset único
             html += '<th>Valor</th>';
         }
 
         html += '</tr></thead><tbody>';
 
-        // Adiciona linhas de dados
         labels.forEach((label, index) => {
             html += `<tr><td>${label}</td>`;
 
             if (isMultiDataset) {
-                // Adiciona células para múltiplos datasets
                 datasets.forEach(dataset => {
                     const value = dataset.data[index];
                     html += `<td>${typeof value === 'number' ? value.toLocaleString('pt-BR') : value}</td>`;
                 });
             } else {
-                // Apenas uma célula para dataset único
                 const value = datasets[index];
                 html += `<td>${typeof value === 'number' ? value.toLocaleString('pt-BR') : value}</td>`;
             }
@@ -922,13 +881,11 @@ FinanceSystem.Modules.Charts = (function () {
      * Clean up all charts - useful when navigating away from a page
      */
     function cleanupAllCharts() {
-        // Destroy all charts in the registry
         Object.keys(chartRegistry).forEach(chartId => {
             destroyChart(chartId);
         });
     }
 
-    // API pública do módulo
     return {
         initialize: initialize,
         createLineChart: createLineChart,

@@ -3,11 +3,9 @@
  * Scripts específicos para a página de usuários
  */
 
-// Namespace global para o sistema
 var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Pages = FinanceSystem.Pages || {};
 
-// Módulo Users
 FinanceSystem.Pages.Users = (function () {
     /**
      * Inicializa a página de usuários
@@ -26,13 +24,10 @@ FinanceSystem.Pages.Users = (function () {
     function initializeUserForm() {
         const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
 
-        // Inicializa gerenciador de perfis
         initializeRoleManager();
 
-        // Inicializa toggle de status
         initializeStatusToggle();
 
-        // Configura validação de formulário
         setupFormValidation(form);
     }
 
@@ -53,7 +48,6 @@ FinanceSystem.Pages.Users = (function () {
             addRoleBtn.setAttribute('disabled', 'true');
             roleSelector.setAttribute('disabled', 'true');
 
-            // Oculta os botões de remover perfil
             document.querySelectorAll('.remove-role').forEach(el => {
                 el.style.display = 'none';
             });
@@ -139,7 +133,6 @@ FinanceSystem.Pages.Users = (function () {
         const selectedRoles = Array.from(document.querySelectorAll("#selectedRolesContainer input[name='selectedRoles']"))
             .map(input => input.value);
 
-        // Iterar pelas opções do selector e esconder as que já estão selecionadas
         Array.from(roleSelector.options).forEach(option => {
             if (option.value && selectedRoles.includes(option.value)) {
                 option.style.display = 'none';
@@ -156,7 +149,6 @@ FinanceSystem.Pages.Users = (function () {
         const statusSwitch = document.getElementById('IsActive');
         if (!statusSwitch) return;
 
-        // Função para atualizar o label de status
         function updateStatusLabel() {
             const statusLabel = document.getElementById('statusLabel');
             if (!statusLabel) return;
@@ -172,10 +164,8 @@ FinanceSystem.Pages.Users = (function () {
             }
         }
 
-        // Inicializar o status
         updateStatusLabel();
 
-        // Atualizar quando o switch mudar
         statusSwitch.addEventListener('change', updateStatusLabel);
     }
 
@@ -186,7 +176,6 @@ FinanceSystem.Pages.Users = (function () {
     function setupFormValidation(form) {
         if (!form) return;
 
-        // Validação de campos específicos
         const usernameField = document.getElementById('Username');
         const emailField = document.getElementById('Email');
         const passwordField = document.getElementById('Password');
@@ -204,7 +193,6 @@ FinanceSystem.Pages.Users = (function () {
         }
 
         if (passwordField) {
-            // Se estiver em modo de edição, a senha é opcional
             const isEditMode = form.getAttribute('asp-action') === 'Edit';
 
             if (isEditMode) {
@@ -219,15 +207,12 @@ FinanceSystem.Pages.Users = (function () {
             });
         }
 
-        // Verifica se existe pelo menos um perfil na submissão
         form.addEventListener('submit', function (e) {
-            // Verificar se pelo menos um perfil foi selecionado
             const selectedRoles = document.querySelectorAll('#selectedRolesContainer input[name="selectedRoles"]');
 
             if (selectedRoles.length === 0) {
                 e.preventDefault();
 
-                // Mostrar mensagem de erro
                 let errorMessage = document.getElementById('roles-error-message');
 
                 if (!errorMessage) {
@@ -244,7 +229,6 @@ FinanceSystem.Pages.Users = (function () {
                     errorMessage.style.display = 'block';
                 }
 
-                // Rolagem para o erro
                 errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         });
@@ -291,14 +275,12 @@ FinanceSystem.Pages.Users = (function () {
      * @param {HTMLElement} field - Campo a ser validado
      */
     function validatePassword(field) {
-        // Se o campo estiver vazio em modo de edição, é válido
         const isEditMode = field.closest('form').getAttribute('asp-action') === 'Edit';
         if (isEditMode && field.value === '') {
             clearFieldError(field);
             return true;
         }
 
-        // Validação de senha
         const value = field.value;
         if (value.length < 6) {
             showFieldError(field, 'A senha deve ter pelo menos 6 caracteres');
@@ -318,13 +300,11 @@ FinanceSystem.Pages.Users = (function () {
      * @param {string} message - Mensagem de erro
      */
     function showFieldError(input, message) {
-        // Usa o módulo de validação se disponível
         if (FinanceSystem.Validation && FinanceSystem.Validation.showFieldError) {
             FinanceSystem.Validation.showFieldError(input, message);
             return;
         }
 
-        // Fallback para exibição manual de erro
         let errorElement = input.parentElement.querySelector('.text-danger');
         if (!errorElement) {
             errorElement = document.createElement('span');
@@ -340,13 +320,11 @@ FinanceSystem.Pages.Users = (function () {
      * @param {HTMLElement} input - Campo
      */
     function clearFieldError(input) {
-        // Usa o módulo de validação se disponível
         if (FinanceSystem.Validation && FinanceSystem.Validation.clearFieldError) {
             FinanceSystem.Validation.clearFieldError(input);
             return;
         }
 
-        // Fallback para limpeza manual de erro
         const errorElement = input.parentElement.querySelector('.text-danger');
         if (errorElement) {
             errorElement.innerText = '';
@@ -358,7 +336,6 @@ FinanceSystem.Pages.Users = (function () {
      * Inicializa a lista de usuários
      */
     function initializeUsersList() {
-        // Adicionar classes para linhas com status inativo
         const usersList = document.querySelector('.table-users');
         if (!usersList) return;
 
@@ -370,10 +347,8 @@ FinanceSystem.Pages.Users = (function () {
             }
         });
 
-        // Inicializa DataTables se disponível
         initializeUsersDataTable();
 
-        // Inicializa botões de ação
         initializeUserActionButtons();
     }
 
@@ -381,7 +356,6 @@ FinanceSystem.Pages.Users = (function () {
      * Inicializa DataTables para a tabela de usuários
      */
     function initializeUsersDataTable() {
-        // Verifica se DataTables está disponível
         if (typeof $.fn.DataTable !== 'undefined') {
             $('.table-users').DataTable({
                 language: {
@@ -395,7 +369,6 @@ FinanceSystem.Pages.Users = (function () {
                 ]
             });
         } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
-            // Usa o módulo Tables se DataTables não estiver disponível
             FinanceSystem.Modules.Tables.initializeTableSort();
         }
     }
@@ -404,7 +377,6 @@ FinanceSystem.Pages.Users = (function () {
      * Inicializa botões de ação para usuários
      */
     function initializeUserActionButtons() {
-        // Confirmação para exclusão de usuário
         const deleteButtons = document.querySelectorAll('.btn-delete-user');
         deleteButtons.forEach(button => {
             button.addEventListener('click', function (e) {
@@ -414,7 +386,6 @@ FinanceSystem.Pages.Users = (function () {
             });
         });
 
-        // Toggle para status de usuário
         const toggleStatusButtons = document.querySelectorAll('.btn-toggle-status');
         toggleStatusButtons.forEach(button => {
             button.addEventListener('click', function (e) {
@@ -436,7 +407,6 @@ FinanceSystem.Pages.Users = (function () {
         const url = button.getAttribute('data-url');
         if (!url) return;
 
-        // Obtém o token de verificação CSRF
         const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
         fetch(url, {
@@ -450,11 +420,9 @@ FinanceSystem.Pages.Users = (function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Atualiza o botão
                     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
                     button.setAttribute('data-status', newStatus);
 
-                    // Atualiza ícone e classes
                     if (newStatus === 'active') {
                         button.innerHTML = '<i class="fas fa-toggle-on"></i>';
                         button.classList.remove('btn-secondary');
@@ -467,7 +435,6 @@ FinanceSystem.Pages.Users = (function () {
                         button.title = 'Ativar usuário';
                     }
 
-                    // Atualiza a badge de status na linha
                     const row = button.closest('tr');
                     const statusBadge = row.querySelector('.status-badge');
                     if (statusBadge) {
@@ -497,10 +464,8 @@ FinanceSystem.Pages.Users = (function () {
      * Inicializa a página de detalhes do usuário
      */
     function initializeUserDetails() {
-        // Inicializa abas de informações
         initializeUserTabs();
 
-        // Inicializa histórico de atividades
         initializeActivityLog();
     }
 
@@ -515,17 +480,13 @@ FinanceSystem.Pages.Users = (function () {
             link.addEventListener('click', function (e) {
                 e.preventDefault();
 
-                // Remove classe ativa de todas as abas
                 tabLinks.forEach(tab => tab.classList.remove('active'));
 
-                // Adiciona classe ativa na aba clicada
                 this.classList.add('active');
 
-                // Esconde todos os conteúdos de aba
                 const tabContents = document.querySelectorAll('.user-tab-content');
                 tabContents.forEach(content => content.style.display = 'none');
 
-                // Mostra o conteúdo da aba selecionada
                 const targetId = this.getAttribute('href').substring(1);
                 const targetContent = document.getElementById(targetId);
                 if (targetContent) {
@@ -534,7 +495,6 @@ FinanceSystem.Pages.Users = (function () {
             });
         });
 
-        // Ativa a primeira aba por padrão
         if (tabLinks[0]) {
             tabLinks[0].click();
         }
@@ -547,7 +507,6 @@ FinanceSystem.Pages.Users = (function () {
         const activityLog = document.querySelector('.activity-log');
         if (!activityLog) return;
 
-        // Inicializa paginação do log
         const loadMoreBtn = document.getElementById('load-more-activities');
         if (loadMoreBtn) {
             loadMoreBtn.addEventListener('click', function () {
@@ -568,7 +527,6 @@ FinanceSystem.Pages.Users = (function () {
         const page = parseInt(loadMoreBtn.getAttribute('data-page') || '1') + 1;
         const url = `/User/GetActivityLog?userId=${userId}&page=${page}`;
 
-        // Mostra indicador de carregamento
         loadMoreBtn.textContent = 'Carregando...';
         loadMoreBtn.disabled = true;
 
@@ -576,19 +534,15 @@ FinanceSystem.Pages.Users = (function () {
             .then(response => response.text())
             .then(html => {
                 if (html.trim() === '') {
-                    // Não há mais atividades
                     loadMoreBtn.textContent = 'Não há mais atividades';
                     loadMoreBtn.disabled = true;
                 } else {
-                    // Adiciona novas atividades
                     const activityItems = document.querySelector('.activity-items');
                     activityItems.insertAdjacentHTML('beforeend', html);
 
-                    // Atualiza botão
                     loadMoreBtn.textContent = 'Carregar mais';
                     loadMoreBtn.disabled = false;
 
-                    // Atualiza o número da página
                     loadMoreBtn.setAttribute('data-page', page.toString());
                 }
             })
@@ -599,7 +553,6 @@ FinanceSystem.Pages.Users = (function () {
             });
     }
 
-    // API pública do módulo
     return {
         initialize: initialize,
         initializeUserForm: initializeUserForm,

@@ -3,10 +3,8 @@
  * Componentes e funcionalidades de interface reutilizáveis
  */
 
-// Namespace global para o sistema
 var FinanceSystem = FinanceSystem || {};
 
-// Módulo UI
 FinanceSystem.UI = (function () {
     /**
      * Inicializa todos os componentes de UI
@@ -30,22 +28,17 @@ FinanceSystem.UI = (function () {
 
         if (menuToggle && sidebar) {
             menuToggle.addEventListener('click', function () {
-                // Comportamento diferente em dispositivos móveis e desktop
                 if (window.innerWidth < 992) {
-                    // Em dispositivos móveis, mostra/esconde o sidebar
                     sidebar.classList.toggle('show');
                 } else {
-                    // Em desktop, colapsa/expande o sidebar
                     sidebar.classList.toggle('collapsed');
                     if (topbar) topbar.classList.toggle('expanded');
                     if (mainContent) mainContent.classList.toggle('expanded');
 
-                    // Salvar estado no localStorage apenas para desktop
                     localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
                 }
             });
 
-            // Restaurar estado do sidebar do localStorage (apenas em desktop)
             if (window.innerWidth >= 992) {
                 const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
                 if (sidebarCollapsed) {
@@ -55,7 +48,6 @@ FinanceSystem.UI = (function () {
                 }
             }
 
-            // Manipular cliques fora do sidebar para fechá-lo em dispositivos móveis
             document.addEventListener('click', function (e) {
                 if (window.innerWidth < 992 &&
                     sidebar.classList.contains('show') &&
@@ -65,7 +57,6 @@ FinanceSystem.UI = (function () {
                 }
             });
 
-            // Adicionar evento para expansão em telas pequenas
             const handleResize = function () {
                 if (window.innerWidth < 992) {
                     sidebar.classList.remove('show'); // Esconde em resize
@@ -76,14 +67,11 @@ FinanceSystem.UI = (function () {
             };
 
             window.addEventListener('resize', handleResize);
-            // Executar ao carregar
             handleResize();
         }
 
-        // Inicializar submenus
         initializeSubmenus();
 
-        // Destacar item ativo do menu
         highlightActiveMenuItem();
     }
 
@@ -95,26 +83,21 @@ FinanceSystem.UI = (function () {
 
         if (submenus.length > 0) {
             submenus.forEach(function (menuItem) {
-                // Verificar se o Bootstrap está disponível
                 if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
-                    // Usar o Bootstrap para gerenciar collapses
                     const targetId = menuItem.getAttribute('data-bs-target') ||
                         menuItem.getAttribute('href');
 
                     if (targetId) {
                         const collapseElement = document.querySelector(targetId);
                         if (collapseElement) {
-                            // Criar instância do Collapse
                             const bsCollapse = new bootstrap.Collapse(collapseElement, {
                                 toggle: false
                             });
 
-                            // Adicionar evento de clique
                             menuItem.addEventListener('click', function (e) {
                                 e.preventDefault();
                                 bsCollapse.toggle();
 
-                                // Alternar ícone
                                 const icon = this.querySelector('.fa-angle-down, .fa-angle-right');
                                 if (icon) {
                                     icon.classList.toggle('fa-angle-down');
@@ -124,7 +107,6 @@ FinanceSystem.UI = (function () {
                         }
                     }
                 } else {
-                    // Implementação manual para quando o Bootstrap não estiver disponível
                     menuItem.addEventListener('click', function (e) {
                         e.preventDefault();
 
@@ -136,7 +118,6 @@ FinanceSystem.UI = (function () {
                             if (targetElement) {
                                 targetElement.classList.toggle('show');
 
-                                // Alternar ícone
                                 const icon = this.querySelector('.fa-angle-down, .fa-angle-right');
                                 if (icon) {
                                     icon.classList.toggle('fa-angle-down');
@@ -156,26 +137,21 @@ FinanceSystem.UI = (function () {
     function highlightActiveMenuItem() {
         const currentPath = window.location.pathname;
 
-        // Encontra todos os links de menu
         const menuLinks = document.querySelectorAll('.sidebar-menu-link');
 
-        // Remove a classe 'active' de todos os links
         menuLinks.forEach(link => {
             link.classList.remove('active');
         });
 
-        // Encontra e marca o link que corresponde à URL atual
         menuLinks.forEach(link => {
             const href = link.getAttribute('href');
             if (href && (href === currentPath || currentPath.startsWith(href))) {
                 link.classList.add('active');
 
-                // Se o link estiver em um submenu, expande o submenu
                 const parentCollapse = link.closest('.collapse');
                 if (parentCollapse) {
                     parentCollapse.classList.add('show');
 
-                    // Atualiza o ícone do botão de toggle
                     const toggle = document.querySelector(`[data-bs-target="#${parentCollapse.id}"]`) ||
                         document.querySelector(`[href="#${parentCollapse.id}"]`);
                     if (toggle) {
@@ -199,12 +175,10 @@ FinanceSystem.UI = (function () {
         if (alerts.length > 0) {
             alerts.forEach(function (alert) {
                 setTimeout(function () {
-                    // Verificar se o Bootstrap está disponível
                     if (typeof bootstrap !== 'undefined' && bootstrap.Alert) {
                         const bsAlert = new bootstrap.Alert(alert);
                         bsAlert.close();
                     } else {
-                        // Fallback se o Bootstrap não estiver disponível
                         alert.style.display = 'none';
                     }
                 }, 5000); // Alertas desaparecem após 5 segundos
@@ -216,14 +190,12 @@ FinanceSystem.UI = (function () {
      * Inicializa os dropdowns do Bootstrap
      */
     function initializeDropdowns() {
-        // Verificar se o Bootstrap está disponível
         if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
             const dropdownElements = document.querySelectorAll('[data-bs-toggle="dropdown"]');
             dropdownElements.forEach(element => {
                 new bootstrap.Dropdown(element);
             });
         } else {
-            // Implementação manual simples de dropdown
             const dropdownToggles = document.querySelectorAll('[data-bs-toggle="dropdown"]');
             dropdownToggles.forEach(toggle => {
                 toggle.addEventListener('click', function (e) {
@@ -237,7 +209,6 @@ FinanceSystem.UI = (function () {
                 });
             });
 
-            // Fechar dropdowns ao clicar fora
             document.addEventListener('click', function (e) {
                 const dropdownMenus = document.querySelectorAll('.dropdown-menu.show');
                 dropdownMenus.forEach(menu => {
@@ -253,7 +224,6 @@ FinanceSystem.UI = (function () {
      * Inicializa tooltips do Bootstrap
      */
     function initializeTooltips() {
-        // Verificar se o Bootstrap está disponível
         if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -328,7 +298,6 @@ FinanceSystem.UI = (function () {
                     bsAlert.close();
                 } else {
                     alertDiv.style.display = 'none';
-                    // Remover do DOM após a animação
                     setTimeout(() => {
                         if (alertDiv.parentNode) {
                             alertDiv.parentNode.removeChild(alertDiv);
@@ -359,7 +328,6 @@ FinanceSystem.UI = (function () {
         const sidebar = document.getElementById('sidebar');
         if (!sidebar) return;
 
-        // Criar backdrop se não existir
         let backdrop = document.querySelector('.sidebar-backdrop');
         if (!backdrop) {
             backdrop = document.createElement('div');
@@ -367,13 +335,11 @@ FinanceSystem.UI = (function () {
             document.body.appendChild(backdrop);
         }
 
-        // Adicionar evento de clique no backdrop para fechar o sidebar
         backdrop.addEventListener('click', function () {
             sidebar.classList.remove('show');
         });
     }
 
-    // API pública do módulo
     return {
         initialize: initialize,
         initializeSidebar: initializeSidebar,
