@@ -411,181 +411,14 @@ FinanceSystem.Modules.Charts = (function () {
         return initializeChart(chartId, config);
     }
 
-    function createPolarAreaChart(chartId, labels, data, options = {}) {
-        const colors = generateColors(data.length);
-
-        const defaultOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    display: true
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            const value = context.raw;
-                            return `${context.label}: ${value.toLocaleString('pt-BR')}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                r: {
-                    ticks: {
-                        backdropColor: 'transparent'
-                    }
-                }
-            }
+    function createDoughnutChart(chartId, labels, data, options = {}) {
+        // Explicitly set cutout to make it a doughnut
+        const doughnutOptions = {
+            ...options,
+            cutout: options.cutout || '70%'
         };
 
-        const mergedOptions = { ...defaultOptions, ...options };
-
-        const config = {
-            type: 'polarArea',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: colors,
-                    borderColor: colors.map(color => adjustColor(color, 20)),
-                    borderWidth: 1
-                }]
-            },
-            options: mergedOptions
-        };
-
-        return initializeChart(chartId, config);
-    }
-
-    function createRadarChart(chartId, labels, datasets, options = {}) {
-        if (!Array.isArray(datasets) || datasets.length === 0) return null;
-
-        const defaultOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    display: true
-                }
-            },
-            scales: {
-                r: {
-                    angleLines: {
-                        display: true,
-                        color: 'rgba(0,0,0,0.1)'
-                    },
-                    grid: {
-                        color: 'rgba(0,0,0,0.1)'
-                    }
-                }
-            }
-        };
-
-        const mergedOptions = { ...defaultOptions, ...options };
-
-        const formattedDatasets = datasets.map((dataset, index) => {
-            const color = dataset.color || defaultColors[index % defaultColors.length];
-            return {
-                label: dataset.label || `Dataset ${index + 1}`,
-                data: dataset.data || [],
-                backgroundColor: adjustOpacity(color, 0.2),
-                borderColor: color,
-                pointBackgroundColor: color,
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: color,
-                pointRadius: 3,
-                pointHoverRadius: 5
-            };
-        });
-
-        const config = {
-            type: 'radar',
-            data: {
-                labels: labels,
-                datasets: formattedDatasets
-            },
-            options: mergedOptions
-        };
-
-        return initializeChart(chartId, config);
-    }
-
-    function createGaugeChart(chartId, value, options = {}) {
-        value = Math.max(0, Math.min(100, value));
-
-        let color = statusColors.success;
-        if (value > 90) {
-            color = statusColors.danger;
-        } else if (value > 75) {
-            color = statusColors.warning;
-        } else if (value > 50) {
-            color = statusColors.info;
-        }
-
-        const defaultOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            circumference: 180,
-            rotation: 270,
-            cutout: '75%',
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    enabled: false
-                }
-            }
-        };
-
-        const mergedOptions = { ...defaultOptions, ...options };
-
-        const config = {
-            type: 'doughnut',
-            data: {
-                datasets: [{
-                    data: [value, 100 - value],
-                    backgroundColor: [
-                        color,
-                        'rgba(220, 220, 220, 0.5)'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: mergedOptions
-        };
-
-        const chart = initializeChart(chartId, config);
-
-        if (chart) {
-            const chartElement = document.getElementById(chartId);
-            if (chartElement) {
-                const container = chartElement.parentNode;
-                if (container) {
-                    let indicator = container.querySelector('.gauge-value');
-                    if (!indicator) {
-                        indicator = document.createElement('div');
-                        indicator.className = 'gauge-value';
-                        indicator.style.position = 'absolute';
-                        indicator.style.bottom = '25%';
-                        indicator.style.left = '0';
-                        indicator.style.right = '0';
-                        indicator.style.textAlign = 'center';
-                        indicator.style.fontSize = '1.5rem';
-                        indicator.style.fontWeight = 'bold';
-                        container.style.position = 'relative';
-                        container.appendChild(indicator);
-                    }
-                    indicator.textContent = `${value}%`;
-                }
-            }
-        }
-
-        return chart;
+        return createPieChart(chartId, labels, data, doughnutOptions);
     }
 
     function generateColors(count) {
@@ -703,42 +536,6 @@ FinanceSystem.Modules.Charts = (function () {
         }
     }
 
-    function convertChartToTable(labels, datasets) {
-        let html = '<table class="table table-striped table-sm">';
-        html += '<thead><tr><th>Categoria</th>';
-
-        const isMultiDataset = Array.isArray(datasets) && typeof datasets[0] === 'object' && datasets[0].data;
-
-        if (isMultiDataset) {
-            datasets.forEach(dataset => {
-                html += `<th>${dataset.label || 'Valor'}</th>`;
-            });
-        } else {
-            html += '<th>Valor</th>';
-        }
-
-        html += '</tr></thead><tbody>';
-
-        labels.forEach((label, index) => {
-            html += `<tr><td>${label}</td>`;
-
-            if (isMultiDataset) {
-                datasets.forEach(dataset => {
-                    const value = dataset.data[index];
-                    html += `<td>${typeof value === 'number' ? value.toLocaleString('pt-BR') : value}</td>`;
-                });
-            } else {
-                const value = datasets[index];
-                html += `<td>${typeof value === 'number' ? value.toLocaleString('pt-BR') : value}</td>`;
-            }
-
-            html += '</tr>';
-        });
-
-        html += '</tbody></table>';
-        return html;
-    }
-
     function cleanupAllCharts() {
         Object.keys(chartRegistry).forEach(chartId => {
             destroyChart(chartId);
@@ -752,13 +549,10 @@ FinanceSystem.Modules.Charts = (function () {
         createBarChart: createBarChart,
         createGroupedBarChart: createGroupedBarChart,
         createPieChart: createPieChart,
-        createPolarAreaChart: createPolarAreaChart,
-        createRadarChart: createRadarChart,
-        createGaugeChart: createGaugeChart,
+        createDoughnutChart: createDoughnutChart,
         updateChartData: updateChartData,
         addDataset: addDataset,
         removeDataset: removeDataset,
-        convertChartToTable: convertChartToTable,
         generateColors: generateColors,
         adjustColor: adjustColor,
         adjustOpacity: adjustOpacity,

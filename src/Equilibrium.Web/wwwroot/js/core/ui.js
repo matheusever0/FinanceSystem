@@ -226,6 +226,11 @@ FinanceSystem.UI = (function () {
         const modal = initializeModal(modalId);
         if (modal) {
             modal.show();
+        } else {
+            const modalElement = document.getElementById(modalId);
+            if (modalElement) {
+                modalElement.style.display = 'block';
+            }
         }
     }
 
@@ -233,6 +238,11 @@ FinanceSystem.UI = (function () {
         const modal = initializeModal(modalId);
         if (modal) {
             modal.hide();
+        } else {
+            const modalElement = document.getElementById(modalId);
+            if (modalElement) {
+                modalElement.style.display = 'none';
+            }
         }
     }
 
@@ -296,6 +306,60 @@ FinanceSystem.UI = (function () {
         });
     }
 
+    // Função para alternar elementos de interface com base em condição
+    function toggleVisibility(elements, show) {
+        if (!Array.isArray(elements)) {
+            elements = [elements];
+        }
+
+        elements.forEach(element => {
+            if (typeof element === 'string') {
+                element = document.querySelector(element);
+            }
+
+            if (!element) return;
+
+            if (show) {
+                element.style.display = '';
+
+                // Habilitar campos dentro do elemento
+                const fields = element.querySelectorAll('input, select, textarea');
+                fields.forEach(field => field.disabled = false);
+            } else {
+                element.style.display = 'none';
+
+                // Desabilitar campos dentro do elemento
+                const fields = element.querySelectorAll('input, select, textarea');
+                fields.forEach(field => field.disabled = true);
+            }
+        });
+    }
+
+    // Função para inicializar toggle de status (ativo/inativo)
+    function initializeStatusToggle(switchSelector, labelSelector) {
+        const statusSwitch = typeof switchSelector === 'string' ?
+            document.querySelector(switchSelector) : switchSelector;
+        const statusLabel = typeof labelSelector === 'string' ?
+            document.querySelector(labelSelector) : labelSelector;
+
+        if (!statusSwitch || !statusLabel) return;
+
+        function updateStatusLabel() {
+            if (statusSwitch.checked) {
+                statusLabel.classList.remove('bg-danger');
+                statusLabel.classList.add('bg-success');
+                statusLabel.textContent = 'Ativo';
+            } else {
+                statusLabel.classList.remove('bg-success');
+                statusLabel.classList.add('bg-danger');
+                statusLabel.textContent = 'Inativo';
+            }
+        }
+
+        updateStatusLabel();
+        statusSwitch.addEventListener('change', updateStatusLabel);
+    }
+
     return {
         initialize: initialize,
         initializeSidebar: initializeSidebar,
@@ -307,6 +371,8 @@ FinanceSystem.UI = (function () {
         showModal: showModal,
         hideModal: hideModal,
         showAlert: showAlert,
-        toggleCollapse: toggleCollapse
+        toggleCollapse: toggleCollapse,
+        toggleVisibility: toggleVisibility,
+        initializeStatusToggle: initializeStatusToggle
     };
 })();

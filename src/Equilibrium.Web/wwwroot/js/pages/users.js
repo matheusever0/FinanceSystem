@@ -8,28 +8,25 @@ FinanceSystem.Pages = FinanceSystem.Pages || {};
 
 FinanceSystem.Pages.Users = (function () {
     function initialize() {
-
         initializeUserForm();
         initializeUsersList();
         initializeUserDetails();
         initEmailAssistant();
-
     }
 
     function initializeUserForm() {
         const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
 
         initializeRoleManager();
-
         initializeStatusToggle();
-
-        setupFormValidation(form);
+        FinanceSystem.Validation.setupFormValidation(form, validateUserForm);
     }
 
     function initializeRoleManager() {
         const container = document.querySelector('.card-body[data-is-read-only]');
+        if (!container) return;
 
-        const isReadOnly = container?.getAttribute('data-is-read-only') === 'true';
+        const isReadOnly = container.getAttribute('data-is-read-only') === 'true';
 
         const addRoleBtn = document.getElementById('addRoleBtn');
         const roleSelector = document.getElementById('roleSelector');
@@ -132,200 +129,96 @@ FinanceSystem.Pages.Users = (function () {
     }
 
     function initializeStatusToggle() {
-        const statusSwitch = document.getElementById('IsActive');
-        if (!statusSwitch) return;
-
-        function updateStatusLabel() {
-            const statusLabel = document.getElementById('statusLabel');
-            if (!statusLabel) return;
-
-            if (statusSwitch.checked) {
-                statusLabel.classList.remove('bg-danger');
-                statusLabel.classList.add('bg-success');
-                statusLabel.textContent = 'Ativo';
-            } else {
-                statusLabel.classList.remove('bg-success');
-                statusLabel.classList.add('bg-danger');
-                statusLabel.textContent = 'Inativo';
-            }
-        }
-
-        updateStatusLabel();
-
-        statusSwitch.addEventListener('change', updateStatusLabel);
+        FinanceSystem.UI.initializeStatusToggle('#IsActive', '#statusLabel');
     }
 
-    function setupFormValidation(form) {
-        if (!form) return;
+    function validateUserForm(event) {
+        let isValid = true;
+        const form = event.target;
+
+        const selectedRoles = document.querySelectorAll('#selectedRolesContainer input[name="selectedRoles"]');
+        if (selectedRoles.length === 0) {
+            event.preventDefault();
+
+            let errorMessage = document.getElementById('roles-error-message');
+
+            if (!errorMessage) {
+                errorMessage = document.createElement('div');
+                errorMessage.id = 'roles-error-message';
+                errorMessage.className = 'text-danger mt-2';
+                errorMessage.textContent = 'É necessário selecionar pelo menos um perfil.';
+
+                const rolesContainer = document.getElementById('selectedRolesContainer');
+                if (rolesContainer) {
+                    rolesContainer.parentNode.appendChild(errorMessage);
+                }
+            } else {
+                errorMessage.style.display = 'block';
+            }
+
+            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            isValid = false;
+        }
 
         const usernameField = document.getElementById('Username');
+        if (usernameField && usernameField.value.trim().length < 3) {
+            FinanceSystem.Validation.showFieldError(
+                usernameField,
+                'O nome de usuário deve ter pelo menos 3 caracteres'
+            );
+            isValid = false;
+        } else if (usernameField && !/^[a-zA-Z0-9._-]+$/.test(usernameField.value.trim())) {
+            FinanceSystem.Validation.showFieldError(
+                usernameField,
+                'O nome de usuário pode conter apenas letras, números, pontos, hífens e underscores'
+            );
+            isValid = false;
+        }
+
         const emailField = document.getElementById('Email');
+        if (emailField && !FinanceSystem.Validation.isValidEmail(emailField.value)) {
+            FinanceSystem.Validation.showFieldError(emailField, 'Digite um email válido');
+            isValid = false;
+        }
+
         const passwordField = document.getElementById('Password');
-
-        if (usernameField) {
-            usernameField.addEventListener('blur', function () {
-                validateUsername(this);
-            });
-        }
-
-        if (emailField) {
-            emailField.addEventListener('blur', function () {
-                validateEmail(this);
-            });
-        }
-
         if (passwordField) {
             const isEditMode = form.getAttribute('asp-action') === 'Edit';
 
-            if (isEditMode) {
-                passwordField.setAttribute('placeholder', 'Deixe em branco para manter a senha atual');
-                passwordField.required = false;
-            } else {
-                passwordField.required = true;
+            if (!isEditMode && passwordField.value.trim() === '') {
+                FinanceSystem.Validation.showFieldError(passwordField, 'A senha é obrigatória');
+                isValid = false;
+            } else if (passwordField.value.trim() !== '' && passwordField.value.length < 6) {
+                FinanceSystem.Validation.showFieldError(passwordField, 'A senha deve ter pelo menos 6 caracteres');
+                isValid = false;
+            } else if (passwordField.value.trim() !== '' &&
+                (!(/[a-zA-Z]/.test(passwordField.value)) || !(/\d/.test(passwordField.value)))) {
+                FinanceSystem.Validation.showFieldError(
+                    passwordField,
+                    'A senha deve conter pelo menos uma letra e um número'
+                );
+                isValid = false;
             }
-
-            passwordField.addEventListener('input', function () {
-                validatePassword(this);
-            });
         }
 
-        form.addEventListener('submit', function (e) {
-            const selectedRoles = document.querySelectorAll('#selectedRolesContainer input[name="selectedRoles"]');
-
-            if (selectedRoles.length === 0) {
-                e.preventDefault();
-
-                let errorMessage = document.getElementById('roles-error-message');
-
-                if (!errorMessage) {
-                    errorMessage = document.createElement('div');
-                    errorMessage.id = 'roles-error-message';
-                    errorMessage.className = 'text-danger mt-2';
-                    errorMessage.textContent = 'É necessário selecionar pelo menos um perfil.';
-
-                    const rolesContainer = document.getElementById('selectedRolesContainer');
-                    if (rolesContainer) {
-                        rolesContainer.parentNode.appendChild(errorMessage);
-                    }
-                } else {
-                    errorMessage.style.display = 'block';
-                }
-
-                errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        });
-    }
-
-    function validateUsername(field) {
-        const value = field.value.trim();
-
-        if (value.length < 3) {
-            showFieldError(field, 'O nome de usuário deve ter pelo menos 3 caracteres');
-            return false;
-        } else if (!/^[a-zA-Z0-9._-]+$/.test(value)) {
-            showFieldError(field, 'O nome de usuário pode conter apenas letras, números, pontos, hífens e underscores');
-            return false;
-        } else {
-            clearFieldError(field);
-            return true;
-        }
-    }
-
-    function validateEmail(field) {
-        const value = field.value.trim();
-        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-        if (!regex.test(value)) {
-            showFieldError(field, 'Digite um email válido');
-            return false;
-        } else {
-            clearFieldError(field);
-            return true;
-        }
-    }
-
-    function validatePassword(field) {
-        const isEditMode = field.closest('form').getAttribute('asp-action') === 'Edit';
-        if (isEditMode && field.value === '') {
-            clearFieldError(field);
-            return true;
-        }
-
-        const value = field.value;
-        if (value.length < 6) {
-            showFieldError(field, 'A senha deve ter pelo menos 6 caracteres');
-            return false;
-        } else if (!/[a-zA-Z]/.test(value) || !/\d/.test(value)) {
-            showFieldError(field, 'A senha deve conter pelo menos uma letra e um número');
-            return false;
-        } else {
-            clearFieldError(field);
-            return true;
-        }
-    }
-
-    function showFieldError(input, message) {
-        if (FinanceSystem.Validation && FinanceSystem.Validation.showFieldError) {
-            FinanceSystem.Validation.showFieldError(input, message);
-            return;
-        }
-
-        let errorElement = input.parentElement.querySelector('.text-danger');
-        if (!errorElement) {
-            errorElement = document.createElement('span');
-            errorElement.classList.add('text-danger');
-            input.parentElement.appendChild(errorElement);
-        }
-        errorElement.innerText = message;
-        input.classList.add('is-invalid');
-    }
-
-    function clearFieldError(input) {
-        if (FinanceSystem.Validation && FinanceSystem.Validation.clearFieldError) {
-            FinanceSystem.Validation.clearFieldError(input);
-            return;
-        }
-
-        const errorElement = input.parentElement.querySelector('.text-danger');
-        if (errorElement) {
-            errorElement.innerText = '';
-        }
-        input.classList.remove('is-invalid');
+        return isValid;
     }
 
     function initializeUsersList() {
         const usersList = document.querySelector('.table-users');
-        if (!usersList) return;
+        if (usersList) {
+            const rows = usersList.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const statusBadge = row.querySelector('.badge');
+                if (statusBadge && statusBadge.textContent.trim() === 'Inativo') {
+                    row.classList.add('table-secondary');
+                }
+            });
+        }
 
-        const rows = usersList.querySelectorAll('tbody tr');
-        rows.forEach(row => {
-            const statusBadge = row.querySelector('.badge');
-            if (statusBadge && statusBadge.textContent.trim() === 'Inativo') {
-                row.classList.add('table-secondary');
-            }
-        });
-
-        initializeUsersDataTable();
+        FinanceSystem.Modules.Tables.initializeTable('.table-users');
 
         initializeUserActionButtons();
-    }
-
-    function initializeUsersDataTable() {
-        if (typeof $.fn.DataTable !== 'undefined') {
-            $('.table-users').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-                },
-                responsive: true,
-                pageLength: 10,
-                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                columnDefs: [
-                    { orderable: false, targets: -1 } // Desabilita ordenação na coluna de ações
-                ]
-            });
-        } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
-            FinanceSystem.Modules.Tables.initializeTableSort();
-        }
     }
 
     function initializeUserActionButtons() {
@@ -408,7 +301,6 @@ FinanceSystem.Pages.Users = (function () {
 
     function initializeUserDetails() {
         initializeUserTabs();
-
         initializeActivityLog();
     }
 

@@ -9,21 +9,22 @@ FinanceSystem.Pages = FinanceSystem.Pages || {};
 
 FinanceSystem.Pages.Investments = (function () {
     function initialize() {
-
         initializeInvestmentForm();
         initializeInvestmentsList();
         initializeInvestmentDetails();
         initializeTransactionForm();
-
     }
 
     function initializeInvestmentForm() {
         const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
-        initializeMoneyInputs();
+        if (!form) return;
+
+        FinanceSystem.Modules.Financial.initializeMoneyMask('#InitialPrice');
+        FinanceSystem.Modules.Financial.initializeMoneyMask('#CurrentPrice');
 
         initializeTotalCalculation();
 
-        setupFormValidation(form);
+        FinanceSystem.Validation.setupFormValidation(form, validateInvestmentForm);
 
         initializeCurrencyField();
     }
@@ -47,88 +48,6 @@ FinanceSystem.Pages.Investments = (function () {
         }
     }
 
-    function initializeMoneyInputs() {
-        if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
-            FinanceSystem.Modules.Financial.initializeMoneyMask('#InitialPrice');
-            FinanceSystem.Modules.Financial.initializeMoneyMask('#CurrentPrice');
-            return;
-        }
-
-        if (typeof $.fn.mask !== 'undefined') {
-            $('#InitialPrice, #CurrentPrice').mask('#.##0,00', { reverse: true });
-        } else {
-            const moneyInputs = document.querySelectorAll('#InitialPrice, #CurrentPrice');
-            moneyInputs.forEach(input => {
-                input.addEventListener('input', function () {
-                    const currency = getCurrencyFromForm();
-                    formatCurrencyInput(this, currency);
-                });
-
-                if (input.value) {
-                    const currency = getCurrencyFromForm();
-                    formatCurrencyInput(input, currency);
-                }
-            });
-        }
-    }
-
-    function getCurrencyFromForm() {
-        const currencySelect = document.getElementById('Currency');
-        return currencySelect ? currencySelect.value : 'BRL';
-    }
-
-    function formatCurrencyInput(input, currency = 'BRL') {
-        const cursorPosition = input.selectionStart;
-        const inputLength = input.value.length;
-
-        let value = input.value.replace(/[^\d.,]/g, '');
-
-        if (currency === 'BRL') {
-            value = value.replace(/\D/g, '');
-            if (value === '') {
-                input.value = '';
-                return;
-            }
-
-            value = (parseFloat(value) / 100).toFixed(2);
-            input.value = value.replace('.', ',');
-        } else {
-            value = value.replace(/,/g, '');
-            if (value === '') {
-                input.value = '';
-                return;
-            }
-
-            let parts = value.split('.');
-            if (parts.length > 2) {
-                value = parts[0] + '.' + parts.slice(1).join('');
-            }
-
-            if (!value.includes('.')) {
-                value = value.replace(/\D/g, '');
-                value = (parseFloat(value) / 100).toFixed(2);
-            } else if (value.endsWith('.')) {
-                value = parseFloat(value.replace(/\.$/, '')).toFixed(0) + '.';
-            } else {
-                let [whole, decimal] = value.split('.');
-                whole = whole.replace(/\D/g, '') || '0';
-                decimal = decimal.replace(/\D/g, '');
-                value = whole + '.' + decimal;
-                if (decimal.length > 2) {
-                    value = parseFloat(value).toFixed(2);
-                }
-            }
-
-            input.value = value;
-        }
-
-        const newLength = input.value.length;
-        const newPosition = cursorPosition + (newLength - inputLength);
-        if (newPosition >= 0) {
-            input.setSelectionRange(newPosition, newPosition);
-        }
-    }
-
     function initializeTotalCalculation() {
         const quantityInput = document.getElementById('InitialQuantity');
         const priceInput = document.getElementById('InitialPrice');
@@ -139,10 +58,10 @@ FinanceSystem.Pages.Investments = (function () {
             const calculateTotal = () => {
                 const quantity = parseFloat(quantityInput.value) || 0;
                 const currency = currencySelect ? currencySelect.value : 'BRL';
-                const price = parseCurrency(priceInput.value, currency);
+                const price = FinanceSystem.Core.parseCurrency(priceInput.value, currency);
                 const total = quantity * price;
 
-                totalValueInput.value = formatCurrency(total, currency);
+                totalValueInput.value = FinanceSystem.Core.formatCurrency(total, currency);
             };
 
             calculateTotal();
@@ -156,21 +75,6 @@ FinanceSystem.Pages.Investments = (function () {
         }
     }
 
-    function setupFormValidation(form) {
-        if (!form) return;
-
-        if (FinanceSystem.Validation && FinanceSystem.Validation.setupFormValidation) {
-            FinanceSystem.Validation.setupFormValidation(form, validateInvestmentForm);
-        } else {
-            form.addEventListener('submit', function (event) {
-                if (!validateInvestmentForm(event)) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-            });
-        }
-    }
-
     function validateInvestmentForm(event) {
         let isValid = true;
         const form = event.target;
@@ -178,19 +82,19 @@ FinanceSystem.Pages.Investments = (function () {
         const symbolInput = document.getElementById('Symbol');
         if (symbolInput && symbolInput.value.trim() === '') {
             isValid = false;
-            showFieldError(symbolInput, 'O símbolo é obrigatório');
+            FinanceSystem.Validation.showFieldError(symbolInput, 'O símbolo é obrigatório');
         }
 
         const nameInput = document.getElementById('Name');
         if (nameInput && nameInput.value.trim() === '') {
             isValid = false;
-            showFieldError(nameInput, 'O nome é obrigatório');
+            FinanceSystem.Validation.showFieldError(nameInput, 'O nome é obrigatório');
         }
 
         const typeInput = document.getElementById('InvestmentType');
         if (typeInput && typeInput.value === '') {
             isValid = false;
-            showFieldError(typeInput, 'O tipo de investimento é obrigatório');
+            FinanceSystem.Validation.showFieldError(typeInput, 'O tipo de investimento é obrigatório');
         }
 
         const quantityInput = document.getElementById('InitialQuantity');
@@ -198,118 +102,31 @@ FinanceSystem.Pages.Investments = (function () {
             const quantity = parseFloat(quantityInput.value);
             if (isNaN(quantity) || quantity <= 0) {
                 isValid = false;
-                showFieldError(quantityInput, 'A quantidade deve ser maior que zero');
+                FinanceSystem.Validation.showFieldError(quantityInput, 'A quantidade deve ser maior que zero');
             }
         }
 
         const priceInput = document.getElementById('InitialPrice');
         if (priceInput) {
-            const price = parseCurrency(priceInput.value);
+            const currency = document.getElementById('Currency')?.value || 'BRL';
+            const price = FinanceSystem.Core.parseCurrency(priceInput.value, currency);
             if (isNaN(price) || price <= 0) {
                 isValid = false;
-                showFieldError(priceInput, 'O preço deve ser maior que zero');
+                FinanceSystem.Validation.showFieldError(priceInput, 'O preço deve ser maior que zero');
             }
         }
 
         return isValid;
     }
 
-    function showFieldError(input, message) {
-        if (FinanceSystem.Validation && FinanceSystem.Validation.showFieldError) {
-            FinanceSystem.Validation.showFieldError(input, message);
-            return;
-        }
-
-        let errorElement = input.parentElement.querySelector('.text-danger');
-        if (!errorElement) {
-            errorElement = document.createElement('span');
-            errorElement.classList.add('text-danger');
-            input.parentElement.appendChild(errorElement);
-        }
-        errorElement.innerText = message;
-        input.classList.add('is-invalid');
-    }
-
     function initializeInvestmentsList() {
-        initializeInvestmentsTable();
+        FinanceSystem.Modules.Tables.initializeTable('#investments-table', {
+            order: [[8, 'desc']] 
+        });
 
         highlightPerformance();
 
         initializeActionButtons();
-    }
-
-    function initializeInvestmentsTable() {
-        if (typeof $.fn.DataTable !== 'undefined') {
-            $('#investments-table').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-                },
-                responsive: true,
-                pageLength: 10,
-                order: [[8, 'desc']], // Ordena por ganho/perda 
-                columnDefs: [
-                    { orderable: false, targets: -1 } // Desabilita ordenação na coluna de ações
-                ]
-            });
-        } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
-            FinanceSystem.Modules.Tables.initializeTableSort();
-        } else {
-            basicTableSort();
-        }
-    }
-
-    function basicTableSort() {
-        const table = document.getElementById('investments-table');
-        if (!table) return;
-
-        const headers = table.querySelectorAll('th');
-
-        headers.forEach((header, index) => {
-            if (index !== headers.length - 1) { // Skip actions column
-                header.style.cursor = 'pointer';
-                header.addEventListener('click', () => {
-                    sortTable(table, index);
-                });
-            }
-        });
-    }
-
-    function sortTable(table, columnIndex) {
-        const thead = table.querySelector('thead');
-        const tbody = table.querySelector('tbody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-
-        const header = thead.querySelectorAll('th')[columnIndex];
-        const isAscending = header.classList.contains('sorting_asc');
-
-        thead.querySelectorAll('th').forEach(th => {
-            th.classList.remove('sorting_asc', 'sorting_desc');
-        });
-
-        header.classList.add(isAscending ? 'sorting_desc' : 'sorting_asc');
-
-        rows.sort((a, b) => {
-            const aValue = a.cells[columnIndex].textContent.trim();
-            const bValue = b.cells[columnIndex].textContent.trim();
-
-            if (aValue.includes('R$') && bValue.includes('R$')) {
-                const aNum = parseCurrency(aValue);
-                const bNum = parseCurrency(bValue);
-                return isAscending ? aNum - bNum : bNum - aNum;
-            }
-
-            if (aValue.includes('%') && bValue.includes('%')) {
-                const aNum = parseFloat(aValue.replace('%', '').replace(',', '.'));
-                const bNum = parseFloat(bValue.replace('%', '').replace(',', '.'));
-                return isAscending ? aNum - bNum : bNum - aNum;
-            }
-
-            if (aValue < bValue) return isAscending ? -1 : 1;
-            if (aValue > bValue) return isAscending ? 1 : -1;
-            return 0;
-        });
-
-        rows.forEach(row => tbody.appendChild(row));
     }
 
     function highlightPerformance() {
@@ -340,9 +157,9 @@ FinanceSystem.Pages.Investments = (function () {
 
     function initializeInvestmentDetails() {
         initializePerformanceChart();
-
-        initializeTransactionsTable();
-
+        FinanceSystem.Modules.Tables.initializeTable('.transactions-table', {
+            order: [[0, 'desc']]
+        });
         initializeDetailActionButtons();
     }
 
@@ -354,11 +171,7 @@ FinanceSystem.Pages.Investments = (function () {
 
         fetchPerformanceData(investmentId)
             .then(data => {
-                if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
-                    FinanceSystem.Modules.Charts.createLineChart('performanceChart', data.labels, data.values);
-                } else if (typeof Chart !== 'undefined') {
-                    createPerformanceChart(chartCanvas, data.labels, data.values);
-                }
+                FinanceSystem.Modules.Charts.createLineChart('performanceChart', data.labels, data.values);
             })
             .catch(error => {
                 console.error('Erro ao carregar dados de desempenho:', error);
@@ -392,86 +205,11 @@ FinanceSystem.Pages.Investments = (function () {
         return data;
     }
 
-    function createPerformanceChart(canvas, labels, values) {
-        new Chart(canvas, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Valor Total (R$)',
-                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                    borderColor: 'rgba(78, 115, 223, 1)',
-                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-                    pointBorderColor: '#fff',
-                    pointHoverRadius: 5,
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
-                    data: values,
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    },
-                    y: {
-                        beginAtZero: false,
-                        ticks: {
-                            callback: function (value) {
-                                return 'R$ ' + value.toLocaleString('pt-BR');
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return 'R$ ' + context.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    function initializeTransactionsTable() {
-        if (typeof $.fn.DataTable !== 'undefined') {
-            $('.transactions-table').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-                },
-                responsive: true,
-                pageLength: 10,
-                order: [[0, 'desc']] 
-            });
-        } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
-            FinanceSystem.Modules.Tables.initializeTableSort();
-        }
-    }
-
     function initializeDetailActionButtons() {
         const addTransactionBtn = document.getElementById('add-transaction-btn');
         if (addTransactionBtn) {
             addTransactionBtn.addEventListener('click', function () {
-                const modal = document.getElementById('transactionModal');
-                if (modal) {
-                    if (FinanceSystem.UI && FinanceSystem.UI.showModal) {
-                        FinanceSystem.UI.showModal('transactionModal');
-                    } else if (typeof bootstrap !== 'undefined') {
-                        const modalInstance = new bootstrap.Modal(modal);
-                        modalInstance.show();
-                    } else {
-                        modal.style.display = 'block';
-                    }
-                }
+                FinanceSystem.UI.showModal('transactionModal');
             });
         }
     }
@@ -480,18 +218,9 @@ FinanceSystem.Pages.Investments = (function () {
         const form = document.querySelector('form[asp-action="AddTransaction"]');
         if (!form) return;
 
-        if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
-            FinanceSystem.Modules.Financial.initializeMoneyMask('#Price');
-        } else {
-            const priceInput = document.getElementById('Price');
-            if (priceInput) {
-                priceInput.addEventListener('input', function () {
-                    formatCurrencyInput(this);
-                });
-            }
-        }
+        FinanceSystem.Modules.Financial.initializeMoneyMask('#Price');
 
-        setupFormValidation(form);
+        FinanceSystem.Validation.setupFormValidation(form, validateTransactionForm);
 
         initializeTransactionTypeHandler();
     }
@@ -511,8 +240,8 @@ FinanceSystem.Pages.Investments = (function () {
             const calculateTotal = () => {
                 const type = parseInt(typeSelect.value) || 0;
                 const quantity = parseFloat(quantityInput.value) || 0;
-                const price = parseCurrency(priceInput.value);
-                const taxes = parseCurrency(taxesInput.value);
+                const price = FinanceSystem.Core.parseCurrency(priceInput.value);
+                const taxes = FinanceSystem.Core.parseCurrency(taxesInput.value);
 
                 let total = 0;
 
@@ -532,7 +261,7 @@ FinanceSystem.Pages.Investments = (function () {
                         total = quantity * price;
                 }
 
-                totalValueInput.value = formatCurrency(total);
+                totalValueInput.value = FinanceSystem.Core.formatCurrency(total);
             };
 
             updateFieldsVisibility(typeSelect.value);
@@ -551,9 +280,10 @@ FinanceSystem.Pages.Investments = (function () {
         const priceGroup = document.getElementById('Price').closest('.mb-3');
         const taxesGroup = document.getElementById('Taxes').closest('.mb-3');
 
-        quantityGroup.style.display = '';
-        priceGroup.style.display = '';
-        taxesGroup.style.display = '';
+        // Default visibility
+        FinanceSystem.UI.toggleVisibility(quantityGroup, true);
+        FinanceSystem.UI.toggleVisibility(priceGroup, true);
+        FinanceSystem.UI.toggleVisibility(taxesGroup, true);
 
         type = parseInt(type) || 0;
 
@@ -561,61 +291,72 @@ FinanceSystem.Pages.Investments = (function () {
             case 3: // Dividendo
             case 6: // JCP
             case 7: // Rendimento
-                quantityGroup.style.display = 'none';
+                FinanceSystem.UI.toggleVisibility(quantityGroup, false);
                 document.getElementById('Price').placeholder = 'Valor total recebido';
                 break;
             case 4: // Split
             case 5: // Bonificação
-                taxesGroup.style.display = 'none';
-                priceGroup.style.display = 'none';
+                FinanceSystem.UI.toggleVisibility(taxesGroup, false);
+                FinanceSystem.UI.toggleVisibility(priceGroup, false);
                 break;
             default:
                 document.getElementById('Price').placeholder = 'Preço unitário';
         }
     }
 
-    function parseCurrency(value, currency = 'BRL') {
-        if (typeof value === 'number') return value;
+    function validateTransactionForm(event) {
+        let isValid = true;
+        const form = event.target;
 
-        if (!value) return 0;
-
-        if (currency === 'BRL') {
-            value = value.toString().replace(/[R$\s.]/g, '').replace(',', '.');
-        } else {
-            value = value.toString().replace(/[$\s,]/g, '');
+        const type = form.querySelector('#InvestmentType');
+        if (!type || type.value === '') {
+            isValid = false;
+            FinanceSystem.Validation.showFieldError(type, 'O tipo de transação é obrigatório');
         }
 
-        return parseFloat(value) || 0;
-    }
-
-    function formatCurrency(value, currency = 'BRL') {
-        if (FinanceSystem.Core && FinanceSystem.Core.formatCurrency) {
-            return FinanceSystem.Core.formatCurrency(value, currency);
+        const transactionDate = form.querySelector('#TransactionDate');
+        if (transactionDate && transactionDate.value === '') {
+            isValid = false;
+            FinanceSystem.Validation.showFieldError(transactionDate, 'A data da transação é obrigatória');
         }
 
-        const locales = {
-            'BRL': 'pt-BR',
-            'USD': 'en-US',
-            'EUR': 'de-DE',
-            'GBP': 'en-GB'
-        };
+        // Conditional validation based on transaction type
+        const typeValue = parseInt(type.value) || 0;
 
-        const locale = locales[currency] || 'en-US';
+        if (typeValue === 1 || typeValue === 2) { // Buy or Sell
+            const quantity = form.querySelector('#Quantity');
+            if (quantity && (quantity.value === '' || parseFloat(quantity.value) <= 0)) {
+                isValid = false;
+                FinanceSystem.Validation.showFieldError(quantity, 'A quantidade deve ser maior que zero');
+            }
 
-        return new Intl.NumberFormat(locale, {
-            style: 'currency',
-            currency: currency
-        }).format(value);
+            const price = form.querySelector('#Price');
+            if (price && (price.value === '' || FinanceSystem.Core.parseCurrency(price.value) <= 0)) {
+                isValid = false;
+                FinanceSystem.Validation.showFieldError(price, 'O preço deve ser maior que zero');
+            }
+        } else if (typeValue === 3 || typeValue === 6 || typeValue === 7) { // Dividend, JCP, Yield
+            const price = form.querySelector('#Price');
+            if (price && (price.value === '' || FinanceSystem.Core.parseCurrency(price.value) <= 0)) {
+                isValid = false;
+                FinanceSystem.Validation.showFieldError(price, 'O valor recebido deve ser maior que zero');
+            }
+        } else if (typeValue === 4 || typeValue === 5) { // Split or Bonus
+            const quantity = form.querySelector('#Quantity');
+            if (quantity && (quantity.value === '' || parseFloat(quantity.value) <= 0)) {
+                isValid = false;
+                FinanceSystem.Validation.showFieldError(quantity, 'A quantidade deve ser maior que zero');
+            }
+        }
+
+        return isValid;
     }
-
 
     return {
         initialize: initialize,
         initializeInvestmentForm: initializeInvestmentForm,
         initializeInvestmentsList: initializeInvestmentsList,
         initializeInvestmentDetails: initializeInvestmentDetails,
-        initializeTransactionForm: initializeTransactionForm,
-        formatCurrency: formatCurrency,
-        parseCurrency: parseCurrency
+        initializeTransactionForm: initializeTransactionForm
     };
 })();

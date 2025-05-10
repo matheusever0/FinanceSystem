@@ -86,6 +86,20 @@ FinanceSystem.Core = (function () {
         return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
     }
 
+    function parseCurrency(value, currency = 'BRL') {
+        if (typeof value === 'number') return value;
+
+        if (!value) return 0;
+
+        if (currency === 'BRL') {
+            value = value.toString().replace(/[R$\s.]/g, '').replace(',', '.');
+        } else {
+            value = value.toString().replace(/[$\s,]/g, '');
+        }
+
+        return parseFloat(value) || 0;
+    }
+
     function createCustomEvent(eventName, detail = {}) {
         return new CustomEvent(eventName, {
             bubbles: true,
@@ -117,6 +131,7 @@ FinanceSystem.Core = (function () {
         formatNumber: formatNumber,
         formatCPF: formatCPF,
         formatCNPJ: formatCNPJ,
+        parseCurrency: parseCurrency,
         createCustomEvent: createCustomEvent,
         dispatchCustomEvent: dispatchCustomEvent,
         confirmDelete: confirmDelete

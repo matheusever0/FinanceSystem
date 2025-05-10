@@ -12,7 +12,7 @@ FinanceSystem.Pages.Dashboard = (function () {
         initializeDashboardStats();
         setupDashboardFilters();
         initializeCollapseSections();
-        formatCurrencyValues();
+        FinanceSystem.Modules.Financial.formatCurrencyValues();
 
         if (document.getElementById('monthlyComparisonChart') ||
             document.getElementById('incomeTypesPieChart') ||
@@ -22,16 +22,7 @@ FinanceSystem.Pages.Dashboard = (function () {
     }
 
     function cleanupDashboardCharts() {
-        if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
-            const charts = FinanceSystem.Modules.Charts;
-            if (typeof charts.destroyChartSafely === 'function') {
-                charts.destroyChartSafely('monthlyExpensesChart');
-                charts.destroyChartSafely('paymentTypesPieChart');
-                charts.destroyChartSafely('paymentStatusPieChart');
-            } else if (typeof charts.cleanupAllCharts === 'function') {
-                charts.cleanupAllCharts();
-            }
-        }
+        FinanceSystem.Modules.Charts.cleanupAllCharts();
 
         monthlyExpensesChart = null;
         paymentTypesPieChart = null;
@@ -41,7 +32,6 @@ FinanceSystem.Pages.Dashboard = (function () {
     function initializeDashboardCharts() {
         initializeMonthlyComparisonChart();
         initializeMonthlyAnnualComparisonChart();
-
         initializePaymentTypesChart();
         initializePaymentStatusChart();
         initializeCreditCardChart();
@@ -49,10 +39,8 @@ FinanceSystem.Pages.Dashboard = (function () {
 
     function initializeReportCharts() {
         initializeMonthlyReportComparisonChart();
-
         initializeIncomeTypesPieChart();
         initializeIncomeStatusPieChart();
-
         initializePaymentTypesChart();
         initializePaymentStatusChart();
     }
@@ -70,7 +58,7 @@ FinanceSystem.Pages.Dashboard = (function () {
             const incomeValues = JSON.parse(incomeValuesRaw);
             const paymentValues = JSON.parse(paymentValuesRaw);
 
-            const datasets = [
+            FinanceSystem.Modules.Charts.createGroupedBarChart('monthlyExpensesChart', labels, [
                 {
                     label: 'Receitas',
                     data: incomeValues,
@@ -81,54 +69,7 @@ FinanceSystem.Pages.Dashboard = (function () {
                     data: paymentValues,
                     color: 'rgba(231, 74, 59, 0.8)' // Vermelho para despesas
                 }
-            ];
-
-            if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
-                FinanceSystem.Modules.Charts.createGroupedBarChart('monthlyExpensesChart', labels, datasets, {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: {
-                            left: 10,
-                            right: 25,
-                            top: 25,
-                            bottom: 0
-                        }
-                    }
-                });
-            } else {
-                createMonthlyChartFallback(chartCanvas, labels, incomeValues, paymentValues);
-            }
-        } catch (error) {
-            console.error('Erro ao inicializar gráfico de comparação mensal:', error);
-        }
-    }
-
-    function createMonthlyChartFallback(canvas, labels, incomeValues, paymentValues) {
-        if (typeof Chart === 'undefined') return;
-
-        new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Receitas',
-                        data: incomeValues,
-                        backgroundColor: 'rgba(28, 200, 138, 0.8)', // Verde para receitas
-                        borderColor: 'rgba(28, 200, 138, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Despesas',
-                        data: paymentValues,
-                        backgroundColor: 'rgba(231, 74, 59, 0.8)', // Vermelho para despesas
-                        borderColor: 'rgba(231, 74, 59, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
+            ], {
                 responsive: true,
                 maintainAspectRatio: false,
                 layout: {
@@ -138,43 +79,11 @@ FinanceSystem.Pages.Dashboard = (function () {
                         top: 25,
                         bottom: 0
                     }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
-                        }
-                    },
-                    y: {
-                        ticks: {
-                            callback: function (value) {
-                                return 'R$ ' + value.toLocaleString('pt-BR');
-                            }
-                        },
-                        grid: {
-                            color: "rgb(234, 236, 244)",
-                            drawBorder: false,
-                            borderDash: [2],
-                            zeroLineBorderDash: [2]
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return `${context.dataset.label}: R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-                            }
-                        }
-                    }
                 }
-            }
-        });
+            });
+        } catch (error) {
+            console.error('Erro ao inicializar gráfico de comparação mensal:', error);
+        }
     }
 
     function initializeMonthlyAnnualComparisonChart() {
@@ -215,101 +124,13 @@ FinanceSystem.Pages.Dashboard = (function () {
                 }
             ];
 
-            if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
-                FinanceSystem.Modules.Charts.createGroupedBarChart('monthlyExpensesAnnualChart', labels, datasets, {
-                    responsive: true,
-                    maintainAspectRatio: false
-                });
-            } else {
-                createMonthlyAnnualChartFallback(chartCanvas, labels, incomeValues, paymentValues, balanceValues);
-            }
-        } catch (error) {
-            console.error('Erro ao inicializar gráfico de comparação mensal:', error);
-        }
-    }
-
-    function createMonthlyAnnualChartFallback(canvas, labels, incomeValues, paymentValues, balanceValues) {
-        if (typeof Chart === 'undefined') return;
-
-        new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Receitas',
-                        data: incomeValues,
-                        backgroundColor: 'rgba(28, 200, 138, 0.8)',
-                        borderColor: 'rgba(28, 200, 138, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Despesas',
-                        data: paymentValues,
-                        backgroundColor: 'rgba(231, 74, 59, 0.8)',
-                        borderColor: 'rgba(231, 74, 59, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Saldo',
-                        data: balanceValues,
-                        type: 'line',
-                        borderColor: 'rgba(54, 185, 204, 1)',
-                        backgroundColor: 'rgba(54, 185, 204, 0.2)',
-                        tension: 0.4,
-                        borderWidth: 2,
-                        fill: false,
-                        yAxisID: 'y'
-                    }
-                ]
-            },
-            options: {
+            FinanceSystem.Modules.Charts.createGroupedBarChart('monthlyExpensesAnnualChart', labels, datasets, {
                 responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                    padding: {
-                        left: 10,
-                        right: 25,
-                        top: 25,
-                        bottom: 0
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
-                        }
-                    },
-                    y: {
-                        ticks: {
-                            callback: function (value) {
-                                return 'R$ ' + value.toLocaleString('pt-BR');
-                            }
-                        },
-                        grid: {
-                            color: "rgb(234, 236, 244)",
-                            drawBorder: false,
-                            borderDash: [2],
-                            zeroLineBorderDash: [2]
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return `${context.dataset.label}: R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
+                maintainAspectRatio: false
+            });
+        } catch (error) {
+            console.error('Erro ao inicializar gráfico de comparação anual:', error);
+        }
     }
 
     function initializePaymentTypesChart() {
@@ -322,13 +143,9 @@ FinanceSystem.Pages.Dashboard = (function () {
         const labels = JSON.parse(labelsRaw);
         const values = JSON.parse(valuesRaw);
 
-        if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
-            FinanceSystem.Modules.Charts.createPieChart('paymentTypesPieChart', labels, values, {
-                cutout: '70%'
-            });
-        } else {
-            createPieChartFallback(chartCanvas, labels, values);
-        }
+        FinanceSystem.Modules.Charts.createPieChart('paymentTypesPieChart', labels, values, {
+            cutout: '70%'
+        });
     }
 
     function initializePaymentStatusChart() {
@@ -345,56 +162,9 @@ FinanceSystem.Pages.Dashboard = (function () {
             'rgba(133, 135, 150, 0.8)'   // Cancelado
         ];
 
-        if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
-            FinanceSystem.Modules.Charts.createPieChart('paymentStatusPieChart', labels, values, {
-                cutout: '70%',
-                colors: backgroundColors
-            });
-        } else {
-            createPieChartFallback(chartCanvas, labels, values, backgroundColors);
-        }
-    }
-
-    function createPieChartFallback(canvas, labels, values, colors) {
-        if (typeof Chart === 'undefined') return;
-
-        if (!colors) {
-            colors = generateColors(values.length);
-        }
-
-        new Chart(canvas, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: values,
-                    backgroundColor: colors,
-                    hoverBackgroundColor: colors.map(color => adjustColor(color, -20)),
-                    hoverBorderColor: 'rgba(234, 236, 244, 1)',
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        display: true
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                const label = context.label || '';
-                                const value = context.raw;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((value / total) * 100).toFixed(1);
-                                return `${label}: R$ ${value.toLocaleString('pt-BR')} (${percentage}%)`;
-                            }
-                        }
-                    }
-                }
-            }
+        FinanceSystem.Modules.Charts.createPieChart('paymentStatusPieChart', labels, values, {
+            cutout: '70%',
+            colors: backgroundColors
         });
     }
 
@@ -417,50 +187,8 @@ FinanceSystem.Pages.Dashboard = (function () {
         return 'success';
     }
 
-    function generateColors(count) {
-        const baseColors = [
-            'rgba(78, 115, 223, 0.8)',
-            'rgba(28, 200, 138, 0.8)',
-            'rgba(246, 194, 62, 0.8)',
-            'rgba(231, 74, 59, 0.8)',
-            'rgba(54, 185, 204, 0.8)',
-            'rgba(133, 135, 150, 0.8)'
-        ];
-
-        const colors = [];
-        for (let i = 0; i < count; i++) {
-            if (i < baseColors.length) {
-                colors.push(baseColors[i]);
-            } else {
-                const r = Math.floor(Math.random() * 200) + 55;
-                const g = Math.floor(Math.random() * 200) + 55;
-                const b = Math.floor(Math.random() * 200) + 55;
-                colors.push(`rgba(${r}, ${g}, ${b}, 0.8)`);
-            }
-        }
-
-        return colors;
-    }
-
-    function adjustColor(color, amount) {
-        const rgbaMatch = color.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
-        if (!rgbaMatch) return color;
-
-        let r = parseInt(rgbaMatch[1]);
-        let g = parseInt(rgbaMatch[2]);
-        let b = parseInt(rgbaMatch[3]);
-        const a = parseFloat(rgbaMatch[4]);
-
-        r = Math.max(0, Math.min(255, r + amount));
-        g = Math.max(0, Math.min(255, g + amount));
-        b = Math.max(0, Math.min(255, b + amount));
-
-        return `rgba(${r}, ${g}, ${b}, ${a})`;
-    }
-
     function initializeDashboardStats() {
         updateCounters();
-
         initializeTrends();
     }
 
@@ -485,7 +213,7 @@ FinanceSystem.Pages.Dashboard = (function () {
 
                 let formattedValue = '';
                 if (isCurrency) {
-                    formattedValue = formatCurrency(start);
+                    formattedValue = FinanceSystem.Core.formatCurrency(start);
                 } else if (isDecimal) {
                     formattedValue = start.toFixed(2).replace('.', ',');
                 } else {
@@ -495,28 +223,6 @@ FinanceSystem.Pages.Dashboard = (function () {
                 counter.textContent = formattedValue;
             }, 16);
         });
-    }
-
-    function formatCurrencyValues() {
-        const currencyElements = document.querySelectorAll('.currency-value');
-        currencyElements.forEach(element => {
-            const value = parseFloat(element.getAttribute('data-value'));
-            const currency = element.getAttribute('data-currency');
-            if (!isNaN(value) && currency) {
-                element.textContent = formatCurrency(value, currency);
-            }
-        });
-    }
-
-    function formatCurrency(value, currency = 'BRL') {
-        if (FinanceSystem.Core && FinanceSystem.Core.formatCurrency) {
-            return FinanceSystem.Core.formatCurrency(value, currency); // Pass both parameters
-        }
-
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: currency
-        }).format(value);
     }
 
     function initializeTrends() {
@@ -580,23 +286,40 @@ FinanceSystem.Pages.Dashboard = (function () {
     }
 
     function updateDashboardCharts(data) {
-        if (data.monthlyExpenses && window.monthlyExpensesChart) {
-            window.monthlyExpensesChart.data.labels = data.monthlyExpenses.labels;
-            window.monthlyExpensesChart.data.datasets[0].data = data.monthlyExpenses.incomeValues;
-            window.monthlyExpensesChart.data.datasets[1].data = data.monthlyExpenses.paymentValues;
-            window.monthlyExpensesChart.update();
+        if (data.monthlyExpenses) {
+            const monthlyChart = FinanceSystem.Modules.Charts.getChart('monthlyExpensesChart');
+            if (monthlyChart) {
+                FinanceSystem.Modules.Charts.updateChartData(
+                    monthlyChart,
+                    data.monthlyExpenses.labels,
+                    {
+                        0: data.monthlyExpenses.incomeValues,
+                        1: data.monthlyExpenses.paymentValues
+                    }
+                );
+            }
         }
 
-        if (data.paymentTypes && window.paymentTypesChart) {
-            window.paymentTypesChart.data.labels = data.paymentTypes.labels;
-            window.paymentTypesChart.data.datasets[0].data = data.paymentTypes.values;
-            window.paymentTypesChart.update();
+        if (data.paymentTypes) {
+            const typesChart = FinanceSystem.Modules.Charts.getChart('paymentTypesChart');
+            if (typesChart) {
+                FinanceSystem.Modules.Charts.updateChartData(
+                    typesChart,
+                    data.paymentTypes.labels,
+                    data.paymentTypes.values
+                );
+            }
         }
 
-        if (data.paymentStatus && window.paymentStatusChart) {
-            window.paymentStatusChart.data.labels = data.paymentStatus.labels;
-            window.paymentStatusChart.data.datasets[0].data = data.paymentStatus.values;
-            window.paymentStatusChart.update();
+        if (data.paymentStatus) {
+            const statusChart = FinanceSystem.Modules.Charts.getChart('paymentStatusChart');
+            if (statusChart) {
+                FinanceSystem.Modules.Charts.updateChartData(
+                    statusChart,
+                    data.paymentStatus.labels,
+                    data.paymentStatus.values
+                );
+            }
         }
 
         if (data.stats) {
@@ -604,7 +327,7 @@ FinanceSystem.Pages.Dashboard = (function () {
                 const statName = element.getAttribute('data-stat');
                 if (data.stats[statName] !== undefined) {
                     const value = data.stats[statName];
-                    element.textContent = formatCurrency(value);
+                    element.textContent = FinanceSystem.Core.formatCurrency(value);
                 }
             });
 
@@ -647,21 +370,9 @@ FinanceSystem.Pages.Dashboard = (function () {
                         loadSectionContent(id, url);
                     }
 
-                    if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
-                        new bootstrap.Collapse(collapseElement, {
-                            show: true
-                        });
-                    } else {
-                        collapseElement.classList.add('show');
-                    }
+                    FinanceSystem.UI.toggleCollapse(`collapse-${id}`);
                 } else {
-                    if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
-                        new bootstrap.Collapse(collapseElement, {
-                            hide: true
-                        });
-                    } else {
-                        collapseElement.classList.remove('show');
-                    }
+                    FinanceSystem.UI.toggleCollapse(`collapse-${id}`);
                 }
             });
         });
@@ -718,7 +429,7 @@ FinanceSystem.Pages.Dashboard = (function () {
                     initializeMonthlyComparisonChart();
                 }
                 else if (id === 'investment-summary') {
-                    formatCurrencyValues();
+                    FinanceSystem.Modules.Financial.formatCurrencyValues();
                 }
             })
             .catch(error => {
@@ -739,67 +450,20 @@ FinanceSystem.Pages.Dashboard = (function () {
             const incomeValues = JSON.parse(chartCanvas.getAttribute('data-income-values') || '[]');
             const expenseValues = JSON.parse(chartCanvas.getAttribute('data-payment-values') || '[]');
 
-            const datasets = [
+            FinanceSystem.Modules.Charts.createGroupedBarChart('monthlyComparisonChart', labels, [
                 {
                     label: 'Receitas',
                     data: incomeValues,
-                    color: 'rgba(28, 200, 138, 0.8)', // Verde para receitas
+                    color: 'rgba(28, 200, 138, 0.8)',
                     backgroundColor: 'rgba(28, 200, 138, 0.8)'
                 },
                 {
                     label: 'Despesas',
                     data: expenseValues,
-                    color: 'rgba(231, 74, 59, 0.8)', // Vermelho para despesas
+                    color: 'rgba(231, 74, 59, 0.8)',
                     backgroundColor: 'rgba(231, 74, 59, 0.8)'
                 }
-            ];
-
-            if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
-                FinanceSystem.Modules.Charts.createGroupedBarChart('monthlyComparisonChart', labels, datasets, {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: {
-                            left: 10,
-                            right: 25,
-                            top: 25,
-                            bottom: 0
-                        }
-                    }
-                });
-            } else {
-                createComparisonChartFallback(chartCanvas, labels, incomeValues, expenseValues);
-            }
-        } catch (error) {
-            console.error('Erro ao inicializar gráfico de comparação mensal:', error);
-        }
-    }
-
-    function createComparisonChartFallback(canvas, labels, incomeValues, expenseValues) {
-        if (typeof Chart === 'undefined') return;
-
-        new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Receitas',
-                        data: incomeValues,
-                        backgroundColor: 'rgba(28, 200, 138, 0.8)', // Verde para receitas
-                        borderColor: 'rgba(28, 200, 138, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Despesas',
-                        data: expenseValues,
-                        backgroundColor: 'rgba(231, 74, 59, 0.8)', // Vermelho para despesas
-                        borderColor: 'rgba(231, 74, 59, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
+            ], {
                 responsive: true,
                 maintainAspectRatio: false,
                 layout: {
@@ -809,43 +473,11 @@ FinanceSystem.Pages.Dashboard = (function () {
                         top: 25,
                         bottom: 0
                     }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
-                        }
-                    },
-                    y: {
-                        ticks: {
-                            callback: function (value) {
-                                return 'R$ ' + value.toLocaleString('pt-BR');
-                            }
-                        },
-                        grid: {
-                            color: "rgb(234, 236, 244)",
-                            drawBorder: false,
-                            borderDash: [2],
-                            zeroLineBorderDash: [2]
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return `${context.dataset.label}: R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-                            }
-                        }
-                    }
                 }
-            }
-        });
+            });
+        } catch (error) {
+            console.error('Erro ao inicializar gráfico de comparação mensal:', error);
+        }
     }
 
     function initializeIncomeTypesPieChart() {
@@ -861,13 +493,9 @@ FinanceSystem.Pages.Dashboard = (function () {
             const labels = JSON.parse(labelsRaw);
             const values = JSON.parse(valuesRaw);
 
-            if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
-                FinanceSystem.Modules.Charts.createPieChart('incomeTypesPieChart', labels, values, {
-                    cutout: '70%'
-                });
-            } else {
-                createPieChartFallback(chartCanvas, labels, values, backgroundColors);
-            }
+            FinanceSystem.Modules.Charts.createPieChart('incomeTypesPieChart', labels, values, {
+                cutout: '70%'
+            });
         } catch (error) {
             console.error('Erro ao inicializar gráfico de tipos de receita:', error);
         }
@@ -893,14 +521,10 @@ FinanceSystem.Pages.Dashboard = (function () {
                 'rgba(133, 135, 150, 0.8)'   // Cancelado - Cinza
             ];
 
-            if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
-                FinanceSystem.Modules.Charts.createPieChart('incomeStatusPieChart', labels, values, {
-                    cutout: '70%',
-                    colors: backgroundColors
-                });
-            } else {
-                createPieChartFallback(chartCanvas, labels, values, backgroundColors);
-            }
+            FinanceSystem.Modules.Charts.createPieChart('incomeStatusPieChart', labels, values, {
+                cutout: '70%',
+                colors: backgroundColors
+            });
         } catch (error) {
             console.error('Erro ao inicializar gráfico de status de receitas:', error);
         }
@@ -913,11 +537,6 @@ FinanceSystem.Pages.Dashboard = (function () {
         updateDashboardCharts: updateDashboardCharts,
         filterDashboardData: filterDashboardData,
         cleanupDashboardCharts: cleanupDashboardCharts,
-        initializeReportCharts: initializeReportCharts,
-        initializeIncomeTypesPieChart: initializeIncomeTypesPieChart,
-        initializeIncomeStatusPieChart: initializeIncomeStatusPieChart,
-        initializeMonthlyReportComparisonChart: initializeMonthlyReportComparisonChart,
-        initializeMonthlyAnnualComparisonChart: initializeMonthlyAnnualComparisonChart,
-        formatCurrencyValues: formatCurrencyValues
+        initializeReportCharts: initializeReportCharts
     };
 })();

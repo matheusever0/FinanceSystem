@@ -31,67 +31,60 @@ FinanceSystem.Modules.Tables = (function () {
         }
     }
 
+    // Initialize a specific table with DataTables or fallback to basic sorting
+    function initializeTable(tableSelector, options = {}) {
+        const defaultOptions = {
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+            },
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+            order: [[0, 'desc']], // Default order by first column descending
+            columnDefs: [
+                { orderable: false, targets: -1 } // Disable ordering on last column (actions)
+            ]
+        };
+
+        const mergedOptions = { ...defaultOptions, ...options };
+
+        if (typeof $.fn.DataTable !== 'undefined') {
+            const table = $(tableSelector);
+            if (table.length > 0 && !$.fn.DataTable.isDataTable(tableSelector)) {
+                table.DataTable(mergedOptions);
+            }
+        } else if (document.querySelector(tableSelector)) {
+            initializeTableSort(tableSelector);
+        }
+    }
+
     function initializeReportTables() {
-
-        var paymentsTable = $('#payments-table');
-        if (paymentsTable.length > 0 && !$.fn.DataTable.isDataTable('#payments-table')) {
-            paymentsTable.DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+        // Common configuration for report tables
+        const reportTableOptions = {
+            pageLength: 20,
+            lengthMenu: [[20, 40, 60, 80, 100, -1], [20, 40, 60, 80, 100, "Todos"]],
+            dom: '<"top"Bfl>rt<"bottom"ip>',
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel me-1"></i> Excel',
+                    className: 'btn btn-sm btn-success'
                 },
-                responsive: true,
-                pageLength: 20,
-                lengthMenu: [[20, 40, 60, 80, 100, -1], [20, 40, 60, 80, 100, "Todos"]],
-                dom: '<"top"Bfl>rt<"bottom"ip>',
-                buttons: [
-                    {
-                        extend: 'excel',
-                        text: '<i class="fas fa-file-excel me-1"></i> Excel',
-                        className: 'btn btn-sm btn-success'
-                    },
-                    {
-                        extend: 'pdf',
-                        text: '<i class="fas fa-file-pdf me-1"></i> PDF',
-                        className: 'btn btn-sm btn-danger'
-                    },
-                    {
-                        extend: 'print',
-                        text: '<i class="fas fa-print me-1"></i> Imprimir',
-                        className: 'btn btn-sm btn-primary'
-                    }
-                ]
-            });
-        }
-
-        var incomesTable = $('#incomes-table');
-        if (incomesTable.length > 0 && !$.fn.DataTable.isDataTable('#incomes-table')) {
-            incomesTable.DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+                {
+                    extend: 'pdf',
+                    text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+                    className: 'btn btn-sm btn-danger'
                 },
-                responsive: true,
-                pageLength: 20,
-                lengthMenu: [[20, 40, 60, 80, 100, -1], [20, 40, 60, 80, 100, "Todos"]],
-                dom: '<"top"Bfl>rt<"bottom"ip>',
-                buttons: [
-                    {
-                        extend: 'excel',
-                        text: '<i class="fas fa-file-excel me-1"></i> Excel',
-                        className: 'btn btn-sm btn-success'
-                    },
-                    {
-                        extend: 'pdf',
-                        text: '<i class="fas fa-file-pdf me-1"></i> PDF',
-                        className: 'btn btn-sm btn-danger'
-                    },
-                    {
-                        extend: 'print',
-                        text: '<i class="fas fa-print me-1"></i> Imprimir',
-                        className: 'btn btn-sm btn-primary'
-                    }
-                ]
-            });
-        }
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print me-1"></i> Imprimir',
+                    className: 'btn btn-sm btn-primary'
+                }
+            ]
+        };
+
+        initializeTable('#payments-table', reportTableOptions);
+        initializeTable('#incomes-table', reportTableOptions);
     }
 
     function implementBasicTableSorting() {
@@ -371,7 +364,7 @@ FinanceSystem.Modules.Tables = (function () {
     function toggleStatus(id, button) {
         const url = button.getAttribute('data-url');
         const currentStatus = button.getAttribute('data-status');
-        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
         fetch(url, {
             method: 'POST',
@@ -440,8 +433,8 @@ FinanceSystem.Modules.Tables = (function () {
             });
     }
 
-    function initializeTableSort() {
-        document.querySelectorAll('table.table-sort').forEach(table => {
+    function initializeTableSort(tableSelector = 'table.table-sort') {
+        document.querySelectorAll(tableSelector).forEach(table => {
             const headers = table.querySelectorAll('th[data-sort]');
             headers.forEach(header => {
                 header.style.cursor = 'pointer';
@@ -622,8 +615,26 @@ FinanceSystem.Modules.Tables = (function () {
         }
     }
 
+    function highlightTableRows(tableSelector, classMap = {}) {
+        const rows = document.querySelectorAll(`${tableSelector} tbody tr`);
+
+        rows.forEach(row => {
+            const statusCell = row.querySelector('.payment-status, .badge');
+            if (!statusCell) return;
+
+            const status = statusCell.textContent.trim().toLowerCase();
+
+            Object.keys(classMap).forEach(key => {
+                if (status.includes(key)) {
+                    row.classList.add(classMap[key]);
+                }
+            });
+        });
+    }
+
     return {
         initialize: initialize,
+        initializeTable: initializeTable,
         sortTable: sortTable,
         filterTable: filterTable,
         exportTableToCSV: exportTableToCSV,
@@ -632,6 +643,8 @@ FinanceSystem.Modules.Tables = (function () {
         addTableRow: addTableRow,
         removeTableRow: removeTableRow,
         clearTable: clearTable,
-        initializeTableSearch: initializeTableSearch
+        initializeTableSearch: initializeTableSearch,
+        initializeTableSort: initializeTableSort,
+        highlightTableRows: highlightTableRows
     };
 })();

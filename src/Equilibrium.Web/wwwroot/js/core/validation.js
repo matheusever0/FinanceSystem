@@ -273,6 +273,19 @@ FinanceSystem.Validation = (function () {
         return isValid;
     }
 
+    // Validate numeric range (e.g., days 1-31)
+    function validateNumericRange(field, min, max, fieldName = 'campo') {
+        const value = parseInt(field.value, 10);
+
+        if (isNaN(value) || value < min || value > max) {
+            showFieldError(field, `Por favor, insira um ${fieldName} válido (${min}-${max})`);
+            return false;
+        }
+
+        clearFieldError(field);
+        return true;
+    }
+
     return {
         initialize: initialize,
         setupFormValidation: setupFormValidation,
@@ -289,6 +302,7 @@ FinanceSystem.Validation = (function () {
         isValidUsername: isValidUsername,
         isEmpty: isEmpty,
         validateField: validateField,
-        validateForm: validateForm
+        validateForm: validateForm,
+        validateNumericRange: validateNumericRange
     };
 })();

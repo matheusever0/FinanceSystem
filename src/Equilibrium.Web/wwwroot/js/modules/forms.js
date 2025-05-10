@@ -40,22 +40,22 @@ FinanceSystem.Modules.Forms = (function () {
         const moneyInputs = document.querySelectorAll('.mask-money');
         moneyInputs.forEach(input => {
             input.addEventListener('input', function (e) {
-                formatCurrencyInput(this);
+                FinanceSystem.Modules.Financial.formatCurrencyInput(this);
             });
 
             if (input.value) {
-                formatCurrencyInput(input);
+                FinanceSystem.Modules.Financial.formatCurrencyInput(input);
             }
         });
 
         const percentInputs = document.querySelectorAll('.mask-percent');
         percentInputs.forEach(input => {
             input.addEventListener('input', function (e) {
-                formatPercentInput(this);
+                FinanceSystem.Modules.Financial.formatPercentInput(this);
             });
 
             if (input.value) {
-                formatPercentInput(input);
+                FinanceSystem.Modules.Financial.formatPercentInput(input);
             }
         });
 
@@ -102,46 +102,6 @@ FinanceSystem.Modules.Forms = (function () {
                 formatPhoneInput(input);
             }
         });
-    }
-
-    function formatCurrencyInput(input) {
-        const cursorPosition = input.selectionStart;
-        const inputLength = input.value.length;
-
-        let value = input.value.replace(/[^\d.,]/g, '');
-
-        value = value.replace(/\D/g, '');
-        if (value === '') {
-            input.value = '';
-            return;
-        }
-
-        value = (parseFloat(value) / 100).toFixed(2);
-        input.value = value.replace('.', ',');
-
-        const newLength = input.value.length;
-        const newPosition = cursorPosition + (newLength - inputLength);
-        if (newPosition >= 0) {
-            input.setSelectionRange(newPosition, newPosition);
-        }
-    }
-
-    function formatPercentInput(input) {
-        let value = input.value.replace(/[^\d.,]/g, '');
-
-        if (value.includes(',')) {
-            const parts = value.split(',');
-            if (parts[1].length > 2) {
-                parts[1] = parts[1].substring(0, 2);
-                value = parts.join(',');
-            }
-        }
-
-        if (value && !value.includes('%')) {
-            value = value + '%';
-        }
-
-        input.value = value;
     }
 
     function formatDateInput(input) {
@@ -299,105 +259,21 @@ FinanceSystem.Modules.Forms = (function () {
 
             if (element.type === 'checkbox') {
                 element.addEventListener('change', function () {
-                    toggleTargetVisibility(targets, this.checked);
+                    FinanceSystem.UI.toggleVisibility(targets, this.checked);
                 });
 
-                toggleTargetVisibility(targets, element.checked);
+                FinanceSystem.UI.toggleVisibility(targets, element.checked);
             } else if (element.tagName === 'SELECT') {
                 element.addEventListener('change', function () {
                     const showValue = element.getAttribute('data-toggle-value');
                     const isMatch = showValue === this.value;
-                    toggleTargetVisibility(targets, isMatch);
+                    FinanceSystem.UI.toggleVisibility(targets, isMatch);
                 });
 
                 const showValue = element.getAttribute('data-toggle-value');
-                toggleTargetVisibility(targets, showValue === element.value);
+                FinanceSystem.UI.toggleVisibility(targets, showValue === element.value);
             }
         });
-    }
-
-    function toggleTargetVisibility(targets, show) {
-        targets.forEach(target => {
-            if (show) {
-                target.style.display = '';
-
-                const fields = target.querySelectorAll('input, select, textarea');
-                fields.forEach(field => {
-                    field.disabled = false;
-                });
-            } else {
-                target.style.display = 'none';
-
-                const fields = target.querySelectorAll('input, select, textarea');
-                fields.forEach(field => {
-                    field.disabled = true;
-                });
-            }
-        });
-    }
-
-    function initializeMoneyMask(selector) {
-        const moneyInput = document.querySelector(selector);
-        if (!moneyInput) return;
-
-        if (typeof $.fn.mask !== 'undefined') {
-            $(moneyInput).mask('#.##0,00', { reverse: true });
-        } else {
-            moneyInput.addEventListener('input', function () {
-                formatCurrencyInput(this);
-            });
-
-            if (moneyInput.value) {
-                formatCurrencyInput(moneyInput);
-            }
-        }
-    }
-
-    function initializeRecurringToggle(form) {
-        const isRecurringSwitch = form.querySelector('#isRecurringSwitch');
-        const isRecurringLabel = form.querySelector('#isRecurringLabel');
-        const installmentsInput = form.querySelector('#NumberOfInstallments');
-
-        if (isRecurringSwitch && isRecurringLabel && installmentsInput) {
-            isRecurringSwitch.addEventListener('change', function () {
-                isRecurringLabel.textContent = this.checked ? 'Sim' : 'Não';
-                if (this.checked) {
-                    installmentsInput.value = '1';
-                    installmentsInput.disabled = true;
-                } else {
-                    installmentsInput.disabled = false;
-                }
-            });
-
-            if (isRecurringSwitch.checked) {
-                isRecurringLabel.textContent = 'Sim';
-                installmentsInput.value = '1';
-                installmentsInput.disabled = true;
-            }
-        }
-    }
-
-    function initializeStatusToggle(switchSelector, labelSelector) {
-        const statusSwitch = document.querySelector(switchSelector);
-        const statusLabel = document.querySelector(labelSelector);
-
-        if (!statusSwitch || !statusLabel) return;
-
-        function updateStatusLabel() {
-            if (statusSwitch.checked) {
-                statusLabel.classList.remove('bg-danger');
-                statusLabel.classList.add('bg-success');
-                statusLabel.textContent = 'Ativo';
-            } else {
-                statusLabel.classList.remove('bg-success');
-                statusLabel.classList.add('bg-danger');
-                statusLabel.textContent = 'Inativo';
-            }
-        }
-
-        updateStatusLabel();
-
-        statusSwitch.addEventListener('change', updateStatusLabel);
     }
 
     function clearForm(form, excludeSelectors = []) {
@@ -499,17 +375,63 @@ FinanceSystem.Modules.Forms = (function () {
         return data;
     }
 
+    // Initialize common form fields for one specific form
+    function initializeForm(form, options = {}) {
+        if (!form) return;
+
+        // Money inputs initialization
+        if (options.moneyInputs) {
+            options.moneyInputs.forEach(selector => {
+                const input = form.querySelector(selector);
+                if (input) {
+                    FinanceSystem.Modules.Financial.initializeMoneyMask(input);
+                }
+            });
+        }
+
+        // Field validations
+        if (options.validations) {
+            options.validations.forEach(validation => {
+                const field = form.querySelector(validation.selector);
+                if (field) {
+                    field.addEventListener('change', function () {
+                        switch (validation.type) {
+                            case 'range':
+                                FinanceSystem.Validation.validateNumericRange(
+                                    this,
+                                    validation.min,
+                                    validation.max,
+                                    validation.name
+                                );
+                                break;
+                            case 'custom':
+                                if (typeof validation.validator === 'function') {
+                                    validation.validator(this);
+                                }
+                                break;
+                        }
+                    });
+                }
+            });
+        }
+
+        // Setup form validation
+        if (options.validate) {
+            FinanceSystem.Validation.setupFormValidation(form, options.validate);
+        }
+    }
+
     return {
         initialize: initialize,
         initializeFormatedInputs: initializeFormatedInputs,
-        initializeMoneyMask: initializeMoneyMask,
-        initializeRecurringToggle: initializeRecurringToggle,
-        initializeStatusToggle: initializeStatusToggle,
-        formatCurrencyInput: formatCurrencyInput,
+        formatDateInput: formatDateInput,
+        formatCPFInput: formatCPFInput,
+        formatCNPJInput: formatCNPJInput,
+        formatPhoneInput: formatPhoneInput,
         populateSelect: populateSelect,
-        toggleTargetVisibility: toggleTargetVisibility,
         clearForm: clearForm,
         populateForm: populateForm,
-        getFormData: getFormData
+        getFormData: getFormData,
+        initializeForm: initializeForm
     };
 })();

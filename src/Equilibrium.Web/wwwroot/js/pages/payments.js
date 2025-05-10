@@ -34,21 +34,15 @@ FinanceSystem.Pages.Payments = (function () {
         const form = document.querySelector('form[data-page="payment"]');
         if (!form) return;
 
-        if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
-            FinanceSystem.Modules.Financial.initializeMoneyMask('#Amount');
-            FinanceSystem.Modules.Financial.initializeRecurringToggle(form);
-        } else {
-            initializeMoneyMaskFallback('#Amount');
-            initializeRecurringToggleFallback(form);
-        }
+        FinanceSystem.Modules.Financial.initializeMoneyMask('#Amount');
+
+        FinanceSystem.Modules.Financial.initializeRecurringToggle(form);
 
         initializePaymentTypeSelect();
-
         initializePaymentMethodSelect();
-
         initializeFinancingSelect();
 
-        setupFormValidation(form);
+        FinanceSystem.Validation.setupFormValidation(form, validatePaymentForm);
 
         const financingSelect = document.getElementById('FinancingId');
         if (financingSelect && financingSelect.value) {
@@ -86,34 +80,25 @@ FinanceSystem.Pages.Payments = (function () {
         const typeOption = document.querySelector(`#PaymentTypeId option[value="${typeId}"]`);
         const isFinancingType = typeOption && typeOption.getAttribute('data-is-financing-type') === 'true';
 
-        if (isFinancingType) {
-            financingSection.style.display = 'block';
+        FinanceSystem.UI.toggleVisibility(financingSection, isFinancingType);
 
-            const financingSelect = document.getElementById('FinancingId');
-            if (financingSelect) {
-                financingSelect.required = true;
+        const financingSelect = document.getElementById('FinancingId');
+        if (financingSelect) {
+            financingSelect.required = isFinancingType;
 
-                if (financingSelect.value && installmentSection) {
-                    installmentSection.style.display = 'block';
-                } else if (installmentSection) {
-                    installmentSection.style.display = 'none';
-                }
-            }
-        } else {
-            financingSection.style.display = 'none';
-            if (installmentSection) {
-                installmentSection.style.display = 'none';
+            if (isFinancingType && financingSelect.value && installmentSection) {
+                FinanceSystem.UI.toggleVisibility(installmentSection, true);
+            } else if (installmentSection) {
+                FinanceSystem.UI.toggleVisibility(installmentSection, false);
             }
 
-            const financingSelect = document.getElementById('FinancingId');
-            if (financingSelect) {
-                financingSelect.required = false;
+            if (!isFinancingType) {
                 financingSelect.value = '';
-            }
 
-            const installmentSelect = document.getElementById('FinancingInstallmentId');
-            if (installmentSelect) {
-                installmentSelect.value = '';
+                const installmentSelect = document.getElementById('FinancingInstallmentId');
+                if (installmentSelect) {
+                    installmentSelect.value = '';
+                }
             }
         }
     }
@@ -138,29 +123,27 @@ FinanceSystem.Pages.Payments = (function () {
             const methodType = selectedOption ? selectedOption.getAttribute('data-type') : null;
 
             togglePaymentMethodFields(paymentMethodSelect.value, methodType);
-        } else {
         }
     }
 
     function togglePaymentMethodFields(methodId, methodType) {
-
         const creditCardSection = document.getElementById('creditCardSection');
         const bankAccountSection = document.getElementById('bankAccountSection');
 
-        if (creditCardSection) creditCardSection.style.display = 'none';
-        if (bankAccountSection) bankAccountSection.style.display = 'none';
+        FinanceSystem.UI.toggleVisibility(creditCardSection, false);
+        FinanceSystem.UI.toggleVisibility(bankAccountSection, false);
 
         const methodTypeStr = String(methodType);
 
-        if (methodTypeStr === '2' && creditCardSection) { // Credit card
-            creditCardSection.style.display = 'block';
+        if (methodTypeStr === '2' && creditCardSection) {
+            FinanceSystem.UI.toggleVisibility(creditCardSection, true);
 
             const creditCardSelect = document.getElementById('CreditCardId');
             if (creditCardSelect) {
                 creditCardSelect.required = true;
             }
-        } else if (methodTypeStr === '4' && bankAccountSection) { // Bank transfer
-            bankAccountSection.style.display = 'block';
+        } else if (methodTypeStr === '4' && bankAccountSection) {
+            FinanceSystem.UI.toggleVisibility(bankAccountSection, true);
         }
 
         if (methodTypeStr !== '2') {
@@ -172,80 +155,6 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    function initializeMoneyMaskFallback(selector) {
-        const moneyInput = document.querySelector(selector);
-        if (!moneyInput) return;
-
-        if (typeof $.fn.mask !== 'undefined') {
-            $(moneyInput).mask('#.##0,00', { reverse: true });
-        } else {
-            moneyInput.addEventListener('input', function () {
-                formatCurrencyInput(this);
-            });
-        }
-    }
-
-    function formatCurrencyInput(input) {
-        const cursorPosition = input.selectionStart;
-        const inputLength = input.value.length;
-
-        let value = input.value.replace(/[^\d.,]/g, '');
-
-        value = value.replace(/\D/g, '');
-        if (value === '') {
-            input.value = '';
-            return;
-        }
-
-        value = (parseFloat(value) / 100).toFixed(2);
-        input.value = value.replace('.', ',');
-
-        const newLength = input.value.length;
-        const newPosition = cursorPosition + (newLength - inputLength);
-        if (newPosition >= 0) {
-            input.setSelectionRange(newPosition, newPosition);
-        }
-    }
-
-    function initializeRecurringToggleFallback(form) {
-        const isRecurringSwitch = form.querySelector('#isRecurringSwitch');
-        const isRecurringLabel = form.querySelector('#isRecurringLabel');
-        const installmentsInput = form.querySelector('#NumberOfInstallments');
-
-        if (isRecurringSwitch && isRecurringLabel && installmentsInput) {
-            isRecurringSwitch.addEventListener('change', function () {
-                isRecurringLabel.textContent = this.checked ? 'Sim' : 'Não';
-                if (this.checked) {
-                    installmentsInput.value = '1';
-                    installmentsInput.disabled = true;
-                } else {
-                    installmentsInput.disabled = false;
-                }
-            });
-
-            if (isRecurringSwitch.checked) {
-                isRecurringLabel.textContent = 'Sim';
-                installmentsInput.value = '1';
-                installmentsInput.disabled = true;
-            }
-        }
-    }
-
-    function setupFormValidation(form) {
-        if (!form) return;
-
-        if (FinanceSystem.Validation && FinanceSystem.Validation.setupFormValidation) {
-            FinanceSystem.Validation.setupFormValidation(form, validatePaymentForm);
-        } else {
-            form.addEventListener('submit', function (event) {
-                if (!validatePaymentForm(event)) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-            });
-        }
-    }
-
     function validatePaymentForm(event) {
         let isValid = true;
         const form = event.target;
@@ -253,40 +162,35 @@ FinanceSystem.Pages.Payments = (function () {
         const description = form.querySelector('#Description');
         if (description && description.value.trim() === '') {
             isValid = false;
-            showFieldError(description, 'A descrição é obrigatória');
+            FinanceSystem.Validation.showFieldError(description, 'A descrição é obrigatória');
         }
 
         const amount = form.querySelector('#Amount');
         if (amount) {
-            let rawValue = amount.value;
-            if (typeof rawValue === 'string') {
-                rawValue = rawValue.replace(/\./g, '').replace(',', '.');
-            }
-
-            const parsed = parseFloat(rawValue);
+            const parsed = FinanceSystem.Core.parseCurrency(amount.value);
 
             if (isNaN(parsed) || parsed <= 0) {
                 isValid = false;
-                showFieldError(amount, 'Informe um valor válido');
+                FinanceSystem.Validation.showFieldError(amount, 'Informe um valor válido');
             }
         }
 
         const dueDate = form.querySelector('#DueDate');
         if (dueDate && dueDate.value === '') {
             isValid = false;
-            showFieldError(dueDate, 'A data de vencimento é obrigatória');
+            FinanceSystem.Validation.showFieldError(dueDate, 'A data de vencimento é obrigatória');
         }
 
         const paymentTypeId = form.querySelector('#PaymentTypeId');
         if (paymentTypeId && paymentTypeId.value === '') {
             isValid = false;
-            showFieldError(paymentTypeId, 'O tipo de pagamento é obrigatório');
+            FinanceSystem.Validation.showFieldError(paymentTypeId, 'O tipo de pagamento é obrigatório');
         }
 
         const paymentMethodId = form.querySelector('#PaymentMethodId');
         if (paymentMethodId && paymentMethodId.value === '') {
             isValid = false;
-            showFieldError(paymentMethodId, 'O método de pagamento é obrigatório');
+            FinanceSystem.Validation.showFieldError(paymentMethodId, 'O método de pagamento é obrigatório');
         }
 
         const paymentMethodSelect = form.querySelector('#PaymentMethodId');
@@ -298,7 +202,7 @@ FinanceSystem.Pages.Payments = (function () {
 
             if (methodType === '2' && creditCardSelect.value === '') {
                 isValid = false;
-                showFieldError(creditCardSelect, 'Selecione um cartão de crédito');
+                FinanceSystem.Validation.showFieldError(creditCardSelect, 'Selecione um cartão de crédito');
             }
         }
 
@@ -311,96 +215,26 @@ FinanceSystem.Pages.Payments = (function () {
 
             if (isFinancingType && financingSelect.value === '') {
                 isValid = false;
-                showFieldError(financingSelect, 'Selecione um financiamento');
+                FinanceSystem.Validation.showFieldError(financingSelect, 'Selecione um financiamento');
             }
         }
 
         return isValid;
     }
 
-    function showFieldError(input, message) {
-        if (FinanceSystem.Validation && FinanceSystem.Validation.showFieldError) {
-            FinanceSystem.Validation.showFieldError(input, message);
-            return;
-        }
-
-        let errorElement = input.parentElement.querySelector('.text-danger');
-        if (!errorElement) {
-            errorElement = document.createElement('span');
-            errorElement.classList.add('text-danger');
-            input.parentElement.appendChild(errorElement);
-        }
-        errorElement.innerText = message;
-        input.classList.add('is-invalid');
-    }
-
     function initializePaymentList() {
-        const paymentTable = document.querySelector('.table-payments');
-        if (!paymentTable) return;
+        FinanceSystem.Modules.Tables.highlightTableRows('.table-payments', {
+            'pago': 'table-success',
+            'vencido': 'table-danger',
+            'pendente': 'table-warning',
+            'cancelado': 'table-secondary'
+        });
 
-        stylePaymentRows();
-
-        initializePaymentDataTable();
+        FinanceSystem.Modules.Tables.initializeTable('#table-payments', {
+            order: [[1, 'desc']]
+        });
 
         initializePaymentActionButtons();
-    }
-
-    function stylePaymentRows() {
-        const rows = document.querySelectorAll('.table-payments tbody tr');
-
-        rows.forEach(row => {
-            const statusCell = row.querySelector('.payment-status');
-            if (!statusCell) return;
-
-            const status = statusCell.textContent.trim().toLowerCase();
-
-            if (status.includes('pago')) {
-                row.classList.add('table-success');
-            } else if (status.includes('vencido')) {
-                row.classList.add('table-danger');
-            } else if (status.includes('pendente')) {
-                row.classList.add('table-warning');
-            } else if (status.includes('cancelado')) {
-                row.classList.add('table-secondary');
-            }
-        });
-    }
-
-    function initializePaymentDataTable() {
-        if (typeof $.fn.DataTable !== 'undefined') {
-            $('#table-payments').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-                },
-                responsive: true,
-                pageLength: 10,
-                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                order: [[1, 'desc']],
-                columnDefs: [
-                    { orderable: false, targets: -1 } 
-                ]
-            });
-        } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
-            FinanceSystem.Modules.Tables.initializeTableSort();
-        } else {
-            basicTableSort();
-        }
-    }
-
-    function basicTableSort() {
-        const table = document.getElementById('investments-table');
-        if (!table) return;
-
-        const headers = table.querySelectorAll('th');
-
-        headers.forEach((header, index) => {
-            if (index !== headers.length - 1) { 
-                header.style.cursor = 'pointer';
-                header.addEventListener('click', () => {
-                    sortTable(table, index);
-                });
-            }
-        });
     }
 
     function initializePaymentActionButtons() {
@@ -423,20 +257,10 @@ FinanceSystem.Pages.Payments = (function () {
     }
 
     function openPaymentModal(paymentId) {
-        const modal = document.getElementById('paymentModal');
         const paymentIdInput = document.getElementById('PaymentId');
-
-        if (modal && paymentIdInput) {
+        if (paymentIdInput) {
             paymentIdInput.value = paymentId;
-
-            if (FinanceSystem.UI && FinanceSystem.UI.showModal) {
-                FinanceSystem.UI.showModal('paymentModal');
-            } else if (typeof bootstrap !== 'undefined') {
-                const modalInstance = new bootstrap.Modal(modal);
-                modalInstance.show();
-            } else {
-                modal.style.display = 'block';
-            }
+            FinanceSystem.UI.showModal('paymentModal');
         }
     }
 
@@ -501,67 +325,14 @@ FinanceSystem.Pages.Payments = (function () {
     }
 
     function initializePaymentFilters() {
-        if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
-            FinanceSystem.Modules.Financial.initializeFinancialFilters();
-            return;
-        }
-
-        const filterButtons = document.querySelectorAll('.payment-filter');
-
-        filterButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-
-                this.classList.add('active');
-
-                const filterValue = this.getAttribute('data-filter');
-                filterPaymentTable(filterValue);
-            });
-        });
-
-        const searchInput = document.getElementById('payment-search');
-        if (searchInput) {
-            searchInput.addEventListener('input', function () {
-                filterTableByText(this.value);
-            });
-        }
+        FinanceSystem.Modules.Financial.initializeFinancialFilters();
     }
 
-    function filterPaymentTable(status) {
-        const rows = document.querySelectorAll('.table-payments tbody tr');
-
-        rows.forEach(row => {
-            const statusCell = row.querySelector('.payment-status');
-            if (!statusCell) return;
-
-            const rowStatus = statusCell.textContent.trim().toLowerCase();
-
-            if (status === 'all' || rowStatus.includes(status)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    }
-
-    function filterTableByText(text) {
-        const rows = document.querySelectorAll('.table-payments tbody tr');
-        text = text.toLowerCase();
-
-        rows.forEach(row => {
-            const content = row.textContent.toLowerCase();
-
-            if (content.includes(text)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    }
-
-    function initializeCollapseFilter(){
+    function initializeCollapseFilter() {
         const collapseFilters = document.getElementById('collapseFilters');
         const filterBtn = document.querySelector('[data-bs-toggle="collapse"]');
+
+        if (!filterBtn || !collapseFilters) return;
 
         filterBtn.addEventListener('click', function () {
             const icon = this.querySelector('i');
@@ -571,31 +342,6 @@ FinanceSystem.Pages.Payments = (function () {
             } else {
                 icon.classList.remove('fa-chevron-right');
                 icon.classList.add('fa-chevron-down');
-            }
-        });
-    }
-
-    function initializeFinancingSelect() {
-        const financingSelect = document.getElementById('FinancingId');
-        if (!financingSelect) return;
-
-        financingSelect.addEventListener('change', function () {
-            const financingId = this.value;
-            if (financingId) {
-                const installmentSection = document.getElementById('financingInstallmentSection');
-                if (installmentSection) {
-                    installmentSection.style.display = 'block';
-                    loadFinancingInstallments(financingId);
-                }
-            } else {
-                const installmentSection = document.getElementById('financingInstallmentSection');
-                if (installmentSection) {
-                    installmentSection.style.display = 'none';
-                    const installmentSelect = document.getElementById('FinancingInstallmentId');
-                    if (installmentSelect) {
-                        installmentSelect.innerHTML = '<option value="">Selecione a parcela</option>';
-                    }
-                }
             }
         });
     }
@@ -671,10 +417,10 @@ FinanceSystem.Pages.Payments = (function () {
 
                 if (!selectedOption || !selectedOption.value) return;
 
-                const dueDateRaw = selectedOption.getAttribute('data-due-date'); 
-                const installmentNumberRaw = selectedOption.getAttribute('data-installment-number'); 
+                const dueDateRaw = selectedOption.getAttribute('data-due-date');
+                const installmentNumberRaw = selectedOption.getAttribute('data-installment-number');
                 const dueDate = dueDateRaw ? dueDateRaw.split('T')[0] : '';
-                const installmentNumber = installmentNumberRaw ? installmentNumberRaw.split('T')[0] : '';
+                const installmentNumber = installmentNumberRaw || '';
 
                 document.getElementById('DueDate').value = dueDate;
                 document.getElementById('PaymentDate').value = dueDate;
@@ -684,10 +430,7 @@ FinanceSystem.Pages.Payments = (function () {
     }
 
     function formatCurrency(value) {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(value);
+        return FinanceSystem.Core.formatCurrency(value);
     }
 
     return {

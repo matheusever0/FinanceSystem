@@ -11,8 +11,9 @@ FinanceSystem.Modules.Financial = (function () {
     }
 
     function initializeMoneyMask(selector) {
+        const moneyInput = typeof selector === 'string' ?
+            document.querySelector(selector) : selector;
 
-        const moneyInput = document.querySelector(selector);
         if (!moneyInput) return;
 
         if (typeof $.fn.mask !== 'undefined') {
@@ -43,26 +44,74 @@ FinanceSystem.Modules.Financial = (function () {
         }
     }
 
-    function formatCurrencyInput(input) {
+    function formatCurrencyInput(input, currency = 'BRL') {
         const cursorPosition = input.selectionStart;
         const inputLength = input.value.length;
 
         let value = input.value.replace(/[^\d.,]/g, '');
 
-        value = value.replace(/\D/g, '');
-        if (value === '') {
-            input.value = '';
-            return;
-        }
+        if (currency === 'BRL') {
+            value = value.replace(/\D/g, '');
+            if (value === '') {
+                input.value = '';
+                return;
+            }
 
-        value = (parseFloat(value) / 100).toFixed(2);
-        input.value = value.replace('.', ',');
+            value = (parseFloat(value) / 100).toFixed(2);
+            input.value = value.replace('.', ',');
+        } else {
+            value = value.replace(/,/g, '');
+            if (value === '') {
+                input.value = '';
+                return;
+            }
+
+            let parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+
+            if (!value.includes('.')) {
+                value = value.replace(/\D/g, '');
+                value = (parseFloat(value) / 100).toFixed(2);
+            } else if (value.endsWith('.')) {
+                value = parseFloat(value.replace(/\.$/, '')).toFixed(0) + '.';
+            } else {
+                let [whole, decimal] = value.split('.');
+                whole = whole.replace(/\D/g, '') || '0';
+                decimal = decimal.replace(/\D/g, '');
+                value = whole + '.' + decimal;
+                if (decimal.length > 2) {
+                    value = parseFloat(value).toFixed(2);
+                }
+            }
+
+            input.value = value;
+        }
 
         const newLength = input.value.length;
         const newPosition = cursorPosition + (newLength - inputLength);
         if (newPosition >= 0) {
             input.setSelectionRange(newPosition, newPosition);
         }
+    }
+
+    function formatPercentInput(input) {
+        let value = input.value.replace(/[^\d.,]/g, '');
+
+        if (value.includes(',')) {
+            const parts = value.split(',');
+            if (parts[1].length > 2) {
+                parts[1] = parts[1].substring(0, 2);
+                value = parts.join(',');
+            }
+        }
+
+        if (!input.value.includes('%') && value) {
+            value += '%';
+        }
+
+        input.value = value;
     }
 
     function validateCurrencyInput(input) {
@@ -113,279 +162,6 @@ FinanceSystem.Modules.Financial = (function () {
                 installmentsInput.disabled = true;
             }
         }
-    }
-
-    function initializeStatusToggle(switchSelector, labelSelector) {
-        const statusSwitch = document.querySelector(switchSelector);
-        const statusLabel = document.querySelector(labelSelector);
-
-        if (!statusSwitch || !statusLabel) return;
-
-        function updateStatusLabel() {
-            if (statusSwitch.checked) {
-                statusLabel.classList.remove('bg-danger');
-                statusLabel.classList.add('bg-success');
-                statusLabel.textContent = 'Ativo';
-            } else {
-                statusLabel.classList.remove('bg-success');
-                statusLabel.classList.add('bg-danger');
-                statusLabel.textContent = 'Inativo';
-            }
-        }
-
-        updateStatusLabel();
-
-        statusSwitch.addEventListener('change', updateStatusLabel);
-    }
-
-    function calculateInstallments(totalAmount, interestRate, termMonths, system = 'PRICE') {
-        if (!totalAmount || !termMonths) {
-            return [];
-        }
-
-        const monthlyRate = interestRate > 0 ? (interestRate / 100) / 12 : 0;
-        const installments = [];
-
-        let remainingBalance = totalAmount;
-        let totalPaid = 0;
-        let totalInterest = 0;
-
-        if (system === 'PRICE') {
-            let installmentValue;
-
-            if (monthlyRate === 0) {
-                installmentValue = totalAmount / termMonths;
-            } else {
-                installmentValue = totalAmount * (monthlyRate * Math.pow(1 + monthlyRate, termMonths)) / (Math.pow(1 + monthlyRate, termMonths) - 1);
-            }
-
-            for (let i = 1; i <= termMonths; i++) {
-                const interestAmount = remainingBalance * monthlyRate;
-                const principalAmount = installmentValue - interestAmount;
-                remainingBalance -= principalAmount;
-
-                let actualInstallment = installmentValue;
-                if (i === termMonths) {
-                    actualInstallment = principalAmount + interestAmount;
-                    remainingBalance = 0;
-                }
-
-                totalPaid += actualInstallment;
-                totalInterest += interestAmount;
-
-                installments.push({
-                    number: i,
-                    value: actualInstallment,
-                    principal: principalAmount,
-                    interest: interestAmount,
-                    balance: Math.max(0, remainingBalance),
-                    totalPaid: totalPaid,
-                    totalInterest: totalInterest
-                });
-            }
-        } else if (system === 'SAC') {
-            const amortization = totalAmount / termMonths;
-
-            for (let i = 1; i <= termMonths; i++) {
-                const interestAmount = remainingBalance * monthlyRate;
-                const installmentValue = amortization + interestAmount;
-                remainingBalance -= amortization;
-
-                totalPaid += installmentValue;
-                totalInterest += interestAmount;
-
-                installments.push({
-                    number: i,
-                    value: installmentValue,
-                    principal: amortization,
-                    interest: interestAmount,
-                    balance: Math.max(0, remainingBalance),
-                    totalPaid: totalPaid,
-                    totalInterest: totalInterest
-                });
-            }
-        }
-
-        return installments;
-    }
-
-    function calculateFutureValue(presentValue, rate, periods, periodicContribution = 0, contributionAtBeginning = false) {
-        rate = rate / 100; // Converte percentual para decimal
-
-        const futureValuePV = presentValue * Math.pow(1 + rate, periods);
-
-        if (periodicContribution === 0) {
-            return futureValuePV;
-        }
-
-        let futureValuePMT;
-        if (contributionAtBeginning) {
-            futureValuePMT = periodicContribution * ((Math.pow(1 + rate, periods) - 1) / rate) * (1 + rate);
-        } else {
-            futureValuePMT = periodicContribution * ((Math.pow(1 + rate, periods) - 1) / rate);
-        }
-
-        return futureValuePV + futureValuePMT;
-    }
-
-    function calculateIRR(cashflows, guess = 0.1) {
-        if (!cashflows || cashflows.length < 2) {
-            return null;
-        }
-
-        const maxIterations = 1000;
-        const tolerance = 0.0000001;
-
-        let rate = guess;
-
-        for (let i = 0; i < maxIterations; i++) {
-            const npv = calculateNPV(cashflows, rate);
-
-            if (Math.abs(npv) < tolerance) {
-                return rate;
-            }
-
-            const derivative = calculateNPVDerivative(cashflows, rate);
-
-            if (derivative === 0) {
-                break;
-            }
-
-            const newRate = rate - npv / derivative;
-
-            if (Math.abs(newRate - rate) < tolerance) {
-                return newRate;
-            }
-
-            rate = newRate;
-        }
-
-        return null; // Não convergiu
-    }
-
-    function calculateNPV(cashflows, rate) {
-        let npv = 0;
-
-        for (let i = 0; i < cashflows.length; i++) {
-            npv += cashflows[i] / Math.pow(1 + rate, i);
-        }
-
-        return npv;
-    }
-
-    function calculateNPVDerivative(cashflows, rate) {
-        let derivative = 0;
-
-        for (let i = 1; i < cashflows.length; i++) {
-            derivative -= i * cashflows[i] / Math.pow(1 + rate, i + 1);
-        }
-
-        return derivative;
-    }
-
-    function calculatePresentValue(payment, rate, periods) {
-        rate = rate / 100; // Converte percentual para decimal
-
-        if (rate === 0) {
-            return payment * periods;
-        }
-
-        return payment * ((1 - Math.pow(1 + rate, -periods)) / rate);
-    }
-
-    function calculatePayment(principal, rate, periods) {
-        rate = rate / 100; // Converte percentual para decimal
-
-        if (rate === 0) {
-            return principal / periods;
-        }
-
-        return principal * (rate * Math.pow(1 + rate, periods)) / (Math.pow(1 + rate, periods) - 1);
-    }
-
-    function calculatePeriods(principal, payment, rate) {
-        rate = rate / 100; // Converte percentual para decimal
-
-        if (rate === 0) {
-            return principal / payment;
-        }
-
-        return Math.log(payment / (payment - principal * rate)) / Math.log(1 + rate);
-    }
-
-    function calculateRate(principal, payment, periods) {
-        if (payment * periods <= principal) {
-            return 0; // Não é possível amortizar o empréstimo com esses parâmetros
-        }
-
-        const tolerance = 0.0000001;
-        const maxIterations = 100;
-
-        let rate = 0.1; // Estimativa inicial
-
-        for (let i = 0; i < maxIterations; i++) {
-            const currentPayment = calculatePayment(principal, rate * 100, periods);
-            const diff = currentPayment - payment;
-
-            if (Math.abs(diff) < tolerance) {
-                return rate * 100;
-            }
-
-            rate = rate * (1 + diff / payment * 0.1);
-        }
-
-        return rate * 100; // Converte decimal para percentual
-    }
-
-    function calculateROI(initialInvestment, finalValue) {
-        if (initialInvestment === 0) {
-            return null; // Evita divisão por zero
-        }
-
-        return ((finalValue - initialInvestment) / initialInvestment) * 100;
-    }
-
-    function parseCurrency(value, currency = 'BRL') {
-        if (typeof value === 'number') {
-            return value;
-        }
-
-        value = value.replace(/[^\d,.-]/g, '');
-
-        if (currency === 'BRL') {
-            if (value.indexOf(',') > -1 && value.indexOf('.') > -1) {
-                value = value.replace(/\./g, '').replace(',', '.');
-            } else if (value.indexOf(',') > -1) {
-                value = value.replace(',', '.');
-            }
-        } else {
-            if (value.indexOf(',') > -1) {
-                value = value.replace(/,/g, '');
-            }
-        }
-
-        return parseFloat(value);
-    }
-
-    function formatCurrency(value, currency = 'BRL') {
-        const locales = {
-            'BRL': 'pt-BR',
-            'USD': 'en-US',
-            'EUR': 'de-DE',
-            'GBP': 'en-GB',
-            'JPY': 'ja-JP'
-        };
-
-        const locale = locales[currency] || 'en-US';
-
-        return new Intl.NumberFormat(locale, {
-            style: 'currency',
-            currency: currency
-        }).format(value);
-    }
-
-    function formatPercent(value, decimals = 2) {
-        return value.toFixed(decimals) + '%';
     }
 
     function initializeCreditCardComponents() {
@@ -552,39 +328,166 @@ FinanceSystem.Modules.Financial = (function () {
         });
     }
 
-    function clickButtonReceived() {
-        const markReceivedButtons = document.querySelectorAll('.mark-received-installment');
-        markReceivedButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                const installmentId = this.getAttribute('data-installment-id');
-                document.getElementById('installmentId').value = installmentId;
-            });
+    function calculateInstallments(totalAmount, interestRate, termMonths, system = 'PRICE') {
+        if (!totalAmount || !termMonths) {
+            return [];
+        }
+
+        const monthlyRate = interestRate > 0 ? (interestRate / 100) / 12 : 0;
+        const installments = [];
+
+        let remainingBalance = totalAmount;
+        let totalPaid = 0;
+        let totalInterest = 0;
+
+        if (system === 'PRICE') {
+            let installmentValue;
+
+            if (monthlyRate === 0) {
+                installmentValue = totalAmount / termMonths;
+            } else {
+                installmentValue = totalAmount * (monthlyRate * Math.pow(1 + monthlyRate, termMonths)) / (Math.pow(1 + monthlyRate, termMonths) - 1);
+            }
+
+            for (let i = 1; i <= termMonths; i++) {
+                const interestAmount = remainingBalance * monthlyRate;
+                const principalAmount = installmentValue - interestAmount;
+                remainingBalance -= principalAmount;
+
+                let actualInstallment = installmentValue;
+                if (i === termMonths) {
+                    actualInstallment = principalAmount + interestAmount;
+                    remainingBalance = 0;
+                }
+
+                totalPaid += actualInstallment;
+                totalInterest += interestAmount;
+
+                installments.push({
+                    number: i,
+                    value: actualInstallment,
+                    principal: principalAmount,
+                    interest: interestAmount,
+                    balance: Math.max(0, remainingBalance),
+                    totalPaid: totalPaid,
+                    totalInterest: totalInterest
+                });
+            }
+        } else if (system === 'SAC') {
+            const amortization = totalAmount / termMonths;
+
+            for (let i = 1; i <= termMonths; i++) {
+                const interestAmount = remainingBalance * monthlyRate;
+                const installmentValue = amortization + interestAmount;
+                remainingBalance -= amortization;
+
+                totalPaid += installmentValue;
+                totalInterest += interestAmount;
+
+                installments.push({
+                    number: i,
+                    value: installmentValue,
+                    principal: amortization,
+                    interest: interestAmount,
+                    balance: Math.max(0, remainingBalance),
+                    totalPaid: totalPaid,
+                    totalInterest: totalInterest
+                });
+            }
+        }
+
+        return installments;
+    }
+
+    function calculateFutureValue(presentValue, rate, periods, periodicContribution = 0, contributionAtBeginning = false) {
+        rate = rate / 100; // Converte percentual para decimal
+
+        const futureValuePV = presentValue * Math.pow(1 + rate, periods);
+
+        if (periodicContribution === 0) {
+            return futureValuePV;
+        }
+
+        let futureValuePMT;
+        if (contributionAtBeginning) {
+            futureValuePMT = periodicContribution * ((Math.pow(1 + rate, periods) - 1) / rate) * (1 + rate);
+        } else {
+            futureValuePMT = periodicContribution * ((Math.pow(1 + rate, periods) - 1) / rate);
+        }
+
+        return futureValuePV + futureValuePMT;
+    }
+
+    function parseCurrency(value, currency = 'BRL') {
+        if (typeof value === 'number') {
+            return value;
+        }
+
+        if (!value) return 0;
+
+        if (currency === 'BRL') {
+            value = value.toString().replace(/[R$\s.]/g, '').replace(',', '.');
+        } else {
+            value = value.toString().replace(/[$\s,]/g, '');
+        }
+
+        return parseFloat(value) || 0;
+    }
+
+    function formatCurrency(value, currency = 'BRL') {
+        if (FinanceSystem.Core && FinanceSystem.Core.formatCurrency) {
+            return FinanceSystem.Core.formatCurrency(value, currency);
+        }
+
+        const locales = {
+            'BRL': 'pt-BR',
+            'USD': 'en-US',
+            'EUR': 'de-DE',
+            'GBP': 'en-GB',
+            'JPY': 'ja-JP'
+        };
+
+        const locale = locales[currency] || 'en-US';
+
+        return new Intl.NumberFormat(locale, {
+            style: 'currency',
+            currency: currency
+        }).format(value);
+    }
+
+    function formatPercent(value, decimals = 2) {
+        return value.toFixed(decimals) + '%';
+    }
+
+    function formatCurrencyValues() {
+        const currencyElements = document.querySelectorAll('.currency-value');
+        currencyElements.forEach(element => {
+            const value = parseFloat(element.getAttribute('data-value'));
+            const currency = element.getAttribute('data-currency') || 'BRL';
+            if (!isNaN(value)) {
+                element.textContent = formatCurrency(value, currency);
+            }
         });
     }
 
     return {
         initialize: initialize,
         initializeMoneyMask: initializeMoneyMask,
+        formatCurrencyInput: formatCurrencyInput,
+        formatPercentInput: formatPercentInput,
+        validateCurrencyInput: validateCurrencyInput,
         initializeRecurringToggle: initializeRecurringToggle,
-        initializeStatusToggle: initializeStatusToggle,
         initializeCreditCardComponents: initializeCreditCardComponents,
+        updateLimitsDisplay: updateLimitsDisplay,
+        calculateNextDates: calculateNextDates,
         initializeFinancialFilters: initializeFinancialFilters,
+        filterFinancialTable: filterFinancialTable,
+        filterTableByText: filterTableByText,
         calculateInstallments: calculateInstallments,
         calculateFutureValue: calculateFutureValue,
-        calculateIRR: calculateIRR,
-        calculateNPV: calculateNPV,
-        calculatePresentValue: calculatePresentValue,
-        calculatePayment: calculatePayment,
-        calculatePeriods: calculatePeriods,
-        calculateRate: calculateRate,
-        calculateROI: calculateROI,
         parseCurrency: parseCurrency,
         formatCurrency: formatCurrency,
         formatPercent: formatPercent,
-        updateLimitsDisplay: updateLimitsDisplay,
-        calculateNextDates: calculateNextDates,
-        filterFinancialTable: filterFinancialTable,
-        filterTableByText: filterTableByText,
-        clickButtonReceived: clickButtonReceived
+        formatCurrencyValues: formatCurrencyValues
     };
 })();

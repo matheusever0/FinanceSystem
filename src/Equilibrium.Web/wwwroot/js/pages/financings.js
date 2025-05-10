@@ -34,117 +34,28 @@ FinanceSystem.Pages.Financings = (function () {
         const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
         if (!form) return;
 
-        initializeMoneyMasks();
-
-        initializeFieldValidations();
+        FinanceSystem.Modules.Forms.initializeForm(form, {
+            moneyInputs: ['#TotalAmount', '#InstallmentValue'],
+            validations: [
+                {
+                    selector: '#ClosingDay',
+                    type: 'range',
+                    min: 1,
+                    max: 31,
+                    name: 'dia de fechamento'
+                },
+                {
+                    selector: '#TermMonths',
+                    type: 'range',
+                    min: 1,
+                    max: 600,
+                    name: 'prazo'
+                }
+            ],
+            validate: validateFinancingForm
+        });
 
         initializeInstallmentCalculator();
-
-        setupFormValidation(form);
-    }
-
-    function initializeMoneyMasks() {
-        if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
-            FinanceSystem.Modules.Financial.initializeMoneyMask('#TotalAmount');
-            FinanceSystem.Modules.Financial.initializeMoneyMask('#InstallmentValue');
-            return;
-        }
-
-        if (typeof $.fn.mask !== 'undefined') {
-            $('#TotalAmount, #InstallmentValue').mask('#.##0,00', { reverse: true });
-            $('#InterestRate').mask('##0,00%', { reverse: true });
-        } else {
-            const moneyInputs = document.querySelectorAll('#TotalAmount, #InstallmentValue');
-            moneyInputs.forEach(input => {
-                input.addEventListener('input', function (e) {
-                    formatCurrencyInput(this);
-                });
-
-                if (input.value) {
-                    formatCurrencyInput(input);
-                }
-            });
-
-            const interestRateInput = document.getElementById('InterestRate');
-            if (interestRateInput) {
-                interestRateInput.addEventListener('input', function (e) {
-                    formatPercentInput(this);
-                });
-
-                if (interestRateInput.value) {
-                    formatPercentInput(interestRateInput);
-                }
-            }
-        }
-    }
-
-    function formatCurrencyInput(input) {
-        const cursorPosition = input.selectionStart;
-        const inputLength = input.value.length;
-
-        let value = input.value.replace(/[^\d.,]/g, '');
-
-        value = value.replace(/\D/g, '');
-        if (value === '') {
-            input.value = '';
-            return;
-        }
-
-        value = (parseFloat(value) / 100).toFixed(2);
-        input.value = value.replace('.', ',');
-
-        const newLength = input.value.length;
-        const newPosition = cursorPosition + (newLength - inputLength);
-        if (newPosition >= 0) {
-            input.setSelectionRange(newPosition, newPosition);
-        }
-    }
-
-    function formatPercentInput(input) {
-        let value = input.value.replace(/[^\d.,]/g, '');
-
-        if (value.includes(',')) {
-            const parts = value.split(',');
-            if (parts[1].length > 2) {
-                parts[1] = parts[1].substring(0, 2);
-                value = parts.join(',');
-            }
-        }
-
-        if (!input.value.includes('%') && value) {
-            value += '%';
-        }
-
-        input.value = value;
-    }
-
-    function initializeFieldValidations() {
-        const termMonthsField = document.getElementById('TermMonths');
-        if (termMonthsField) {
-            termMonthsField.addEventListener('change', function () {
-                const value = parseInt(this.value, 10);
-
-                if (isNaN(value) || value <= 0 || value > 600) {
-                    showFieldError(this, 'O prazo deve estar entre 1 e 600 meses');
-                } else {
-                    clearFieldError(this);
-                }
-            });
-        }
-
-        const interestRateField = document.getElementById('InterestRate');
-        if (interestRateField) {
-            interestRateField.addEventListener('change', function () {
-                let value = this.value.replace(/[^\d.,]/g, '').replace(',', '.');
-                const rate = parseFloat(value);
-
-                if (isNaN(rate) || rate < 0 || rate > 100) {
-                    showFieldError(this, 'A taxa de juros deve estar entre 0 e 100%');
-                } else {
-                    clearFieldError(this);
-                }
-            });
-        }
     }
 
     function initializeInstallmentCalculator() {
@@ -183,7 +94,7 @@ FinanceSystem.Pages.Financings = (function () {
 
         if (!totalAmountInput || !interestRateInput || !termMonthsInput) return;
 
-        let totalAmount = parseCurrency(totalAmountInput.value);
+        let totalAmount = FinanceSystem.Core.parseCurrency(totalAmountInput.value);
         let interestRate = parsePercent(interestRateInput.value);
         let termMonths = parseInt(termMonthsInput.value);
         let type = typeSelect ? typeSelect.value : 'PRICE';
@@ -195,78 +106,33 @@ FinanceSystem.Pages.Financings = (function () {
             return;
         }
 
-        const monthlyRate = interestRate / 12;
-        let installmentValue = 0;
-        let message = '';
+        const installments = FinanceSystem.Modules.Financial.calculateInstallments(
+            totalAmount, interestRate * 100, termMonths, type
+        );
 
-        if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
-            const installments = FinanceSystem.Modules.Financial.calculateInstallments(
-                totalAmount, interestRate * 100, termMonths, type
-            );
+        if (installments && installments.length > 0) {
+            installmentValueInput.value = formatNumber(installments[0].value);
 
-            if (installments && installments.length > 0) {
-                installmentValue = installments[0].value;
-
+            if (resultElement) {
                 if (type === 'SAC') {
-                    message = `
+                    resultElement.innerHTML = `
                         Primeira parcela: R$ ${formatNumber(installments[0].value)}<br>
                         Última parcela: R$ ${formatNumber(installments[installments.length - 1].value)}<br>
                         Amortização mensal: R$ ${formatNumber(installments[0].principal)}
                     `;
-                }
-            }
-        } else {
-            if (type === 'PRICE') {
-                if (interestRate === 0) {
-                    installmentValue = totalAmount / termMonths;
                 } else {
-                    installmentValue = totalAmount * (monthlyRate * Math.pow(1 + monthlyRate, termMonths)) / (Math.pow(1 + monthlyRate, termMonths) - 1);
+                    resultElement.textContent = `Valor da parcela: R$ ${formatNumber(installments[0].value)}`;
                 }
-            } else if (type === 'SAC') {
-                const amortization = totalAmount / termMonths;
-                const firstInterest = totalAmount * monthlyRate;
-                const firstInstallment = amortization + firstInterest;
-
-                const lastPrincipal = totalAmount - (amortization * (termMonths - 1));
-                const lastInterest = lastPrincipal * monthlyRate;
-                const lastInstallment = lastPrincipal + lastInterest;
-
-                installmentValue = firstInstallment;
-
-                message = `
-                    Primeira parcela: R$ ${formatNumber(firstInstallment)}<br>
-                    Última parcela: R$ ${formatNumber(lastInstallment)}<br>
-                    Amortização mensal: R$ ${formatNumber(amortization)}
-                `;
-            }
-        }
-
-        if (installmentValueInput) {
-            installmentValueInput.value = formatNumber(installmentValue);
-        }
-
-        if (resultElement) {
-            if (message) {
-                resultElement.innerHTML = message;
-            } else {
-                resultElement.textContent = `Valor da parcela: R$ ${formatNumber(installmentValue)}`;
             }
         }
     }
 
-    function setupFormValidation(form) {
-        if (!form) return;
+    function parsePercent(value) {
+        return FinanceSystem.Core.parseCurrency(value) / 100;
+    }
 
-        if (FinanceSystem.Validation && FinanceSystem.Validation.setupFormValidation) {
-            FinanceSystem.Validation.setupFormValidation(form, validateFinancingForm);
-        } else {
-            form.addEventListener('submit', function (event) {
-                if (!validateFinancingForm(event)) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-            });
-        }
+    function formatNumber(value) {
+        return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     function validateFinancingForm(event) {
@@ -276,15 +142,15 @@ FinanceSystem.Pages.Financings = (function () {
         const nameField = form.querySelector('#Name');
         if (nameField && nameField.value.trim() === '') {
             isValid = false;
-            showFieldError(nameField, 'O nome do financiamento é obrigatório');
+            FinanceSystem.Validation.showFieldError(nameField, 'O nome do financiamento é obrigatório');
         }
 
         const totalAmountField = form.querySelector('#TotalAmount');
         if (totalAmountField) {
-            const totalAmount = parseCurrency(totalAmountField.value);
+            const totalAmount = FinanceSystem.Core.parseCurrency(totalAmountField.value);
             if (isNaN(totalAmount) || totalAmount <= 0) {
                 isValid = false;
-                showFieldError(totalAmountField, 'Informe um valor total válido');
+                FinanceSystem.Validation.showFieldError(totalAmountField, 'Informe um valor total válido');
             }
         }
 
@@ -293,7 +159,7 @@ FinanceSystem.Pages.Financings = (function () {
             const interestRate = parsePercent(interestRateField.value);
             if (isNaN(interestRate) || interestRate < 0 || interestRate > 100) {
                 isValid = false;
-                showFieldError(interestRateField, 'A taxa de juros deve estar entre 0 e 100%');
+                FinanceSystem.Validation.showFieldError(interestRateField, 'A taxa de juros deve estar entre 0 e 100%');
             }
         }
 
@@ -302,74 +168,26 @@ FinanceSystem.Pages.Financings = (function () {
             const termMonths = parseInt(termMonthsField.value);
             if (isNaN(termMonths) || termMonths <= 0 || termMonths > 600) {
                 isValid = false;
-                showFieldError(termMonthsField, 'O prazo deve estar entre 1 e 600 meses');
+                FinanceSystem.Validation.showFieldError(termMonthsField, 'O prazo deve estar entre 1 e 600 meses');
             }
         }
 
         const typeField = form.querySelector('#Type');
         if (typeField && typeField.value === '') {
             isValid = false;
-            showFieldError(typeField, 'Selecione o tipo de financiamento');
+            FinanceSystem.Validation.showFieldError(typeField, 'Selecione o tipo de financiamento');
         }
 
         return isValid;
     }
 
-    function showFieldError(input, message) {
-        if (FinanceSystem.Validation && FinanceSystem.Validation.showFieldError) {
-            FinanceSystem.Validation.showFieldError(input, message);
-            return;
-        }
-
-        let errorElement = input.parentElement.querySelector('.text-danger');
-        if (!errorElement) {
-            errorElement = document.createElement('span');
-            errorElement.classList.add('text-danger');
-            input.parentElement.appendChild(errorElement);
-        }
-        errorElement.innerText = message;
-        input.classList.add('is-invalid');
-    }
-
-    function clearFieldError(input) {
-        if (FinanceSystem.Validation && FinanceSystem.Validation.clearFieldError) {
-            FinanceSystem.Validation.clearFieldError(input);
-            return;
-        }
-
-        const errorElement = input.parentElement.querySelector('.text-danger');
-        if (errorElement) {
-            errorElement.innerText = '';
-        }
-        input.classList.remove('is-invalid');
-    }
-
     function initializeFinancingsList() {
-        initializeFinancingsDataTable();
+        // Initialize the financings table using the Tables module
+        FinanceSystem.Modules.Tables.initializeTable('.financings-table', {
+            order: [[3, 'desc']] // Ordena por data de aquisição decrescente
+        });
 
-        initializeFinancingActionButtons();
-    }
-
-    function initializeFinancingsDataTable() {
-        if (typeof $.fn.DataTable !== 'undefined') {
-            $('.financings-table').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-                },
-                responsive: true,
-                pageLength: 10,
-                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                order: [[3, 'desc']], // Ordena por data de aquisição decrescente
-                columnDefs: [
-                    { orderable: false, targets: -1 } // Desabilita ordenação na coluna de ações
-                ]
-            });
-        } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
-            FinanceSystem.Modules.Tables.initializeTableSort();
-        }
-    }
-
-    function initializeFinancingActionButtons() {
+        // Initialize delete confirmation
         const deleteButtons = document.querySelectorAll('.btn-delete-financing');
         deleteButtons.forEach(button => {
             button.addEventListener('click', function (e) {
@@ -379,6 +197,7 @@ FinanceSystem.Pages.Financings = (function () {
             });
         });
 
+        // Initialize correction modal buttons
         const correctionButtons = document.querySelectorAll('.btn-apply-correction');
         correctionButtons.forEach(button => {
             button.addEventListener('click', function () {
@@ -389,51 +208,37 @@ FinanceSystem.Pages.Financings = (function () {
     }
 
     function openCorrectionModal(financingId) {
-        const modal = document.getElementById('correctionModal');
         const financingIdInput = document.getElementById('FinancingId');
-
-        if (modal && financingIdInput) {
+        if (financingIdInput) {
             financingIdInput.value = financingId;
-
-            if (FinanceSystem.UI && FinanceSystem.UI.showModal) {
-                FinanceSystem.UI.showModal('correctionModal');
-            } else if (typeof bootstrap !== 'undefined') {
-                const modalInstance = new bootstrap.Modal(modal);
-                modalInstance.show();
-            } else {
-                modal.style.display = 'block';
-            }
+            FinanceSystem.UI.showModal('correctionModal');
         }
     }
 
     function initializeFinancingDetails() {
-        initializeFinancingCharts();
+        initializeCharts();
 
-        const installmentsTable = document.querySelector('.installments-table');
-        if (installmentsTable) {
-            initializeInstallmentsTable();
-        }
+        // Initialize installments table
+        FinanceSystem.Modules.Tables.initializeTable('.installments-table', {
+            order: [[0, 'asc']]
+        });
 
         initializeInstallmentActions();
     }
 
-    function initializeFinancingCharts() {
+    function initializeCharts() {
         const progressChart = document.getElementById('progressChart');
         if (progressChart) {
             const percentage = parseFloat(progressChart.getAttribute('data-progress') || '0');
 
-            if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
-                FinanceSystem.Modules.Charts.createDoughnutChart('progressChart',
-                    ['Pago', 'Restante'],
-                    [percentage, 100 - percentage],
-                    {
-                        cutout: '70%',
-                        colors: ['rgba(28, 200, 138, 0.8)', 'rgba(220, 220, 220, 0.8)']
-                    }
-                );
-            } else if (typeof Chart !== 'undefined') {
-                createProgressDoughnut(progressChart, percentage);
-            }
+            FinanceSystem.Modules.Charts.createDoughnutChart('progressChart',
+                ['Pago', 'Restante'],
+                [percentage, 100 - percentage],
+                {
+                    cutout: '70%',
+                    colors: ['rgba(28, 200, 138, 0.8)', 'rgba(220, 220, 220, 0.8)']
+                }
+            );
 
             const progressLabel = document.getElementById('progressLabel');
             if (progressLabel) {
@@ -446,100 +251,13 @@ FinanceSystem.Pages.Financings = (function () {
             const principal = parseFloat(distributionChart.getAttribute('data-principal') || '0');
             const interest = parseFloat(distributionChart.getAttribute('data-interest') || '0');
 
-            if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
-                FinanceSystem.Modules.Charts.createPieChart('distributionChart',
-                    ['Principal', 'Juros'],
-                    [principal, interest],
-                    {
-                        colors: ['rgba(78, 115, 223, 0.8)', 'rgba(231, 74, 59, 0.8)']
-                    }
-                );
-            } else if (typeof Chart !== 'undefined') {
-                createDistributionPieChart(distributionChart, principal, interest);
-            }
-        }
-    }
-
-    function createProgressDoughnut(canvas, percentage) {
-        new Chart(canvas, {
-            type: 'doughnut',
-            data: {
-                datasets: [{
-                    data: [percentage, 100 - percentage],
-                    backgroundColor: [
-                        'rgba(28, 200, 138, 0.8)',
-                        'rgba(220, 220, 220, 0.8)'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        enabled: false
-                    }
+            FinanceSystem.Modules.Charts.createPieChart('distributionChart',
+                ['Principal', 'Juros'],
+                [principal, interest],
+                {
+                    colors: ['rgba(78, 115, 223, 0.8)', 'rgba(231, 74, 59, 0.8)']
                 }
-            }
-        });
-    }
-
-    function createDistributionPieChart(canvas, principal, interest) {
-        new Chart(canvas, {
-            type: 'pie',
-            data: {
-                labels: ['Principal', 'Juros'],
-                datasets: [{
-                    data: [principal, interest],
-                    backgroundColor: [
-                        'rgba(78, 115, 223, 0.8)',
-                        'rgba(231, 74, 59, 0.8)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                const value = context.raw;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((value / total) * 100).toFixed(1);
-                                return `${context.label}: R$ ${value.toLocaleString('pt-BR')} (${percentage}%)`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    function initializeInstallmentsTable() {
-        if (typeof $.fn.DataTable !== 'undefined') {
-            $('.installments-table').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-                },
-                responsive: true,
-                pageLength: 10,
-                order: [[0, 'asc']], 
-                columnDefs: [
-                    { orderable: false, targets: -1 } 
-                ]
-            });
-        } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
-            FinanceSystem.Modules.Tables.initializeTableSort();
+            );
         }
     }
 
@@ -554,25 +272,15 @@ FinanceSystem.Pages.Financings = (function () {
     }
 
     function openPayInstallmentModal(installmentId) {
-        const modal = document.getElementById('payInstallmentModal');
         const installmentIdInput = document.getElementById('InstallmentId');
-
-        if (modal && installmentIdInput) {
+        if (installmentIdInput) {
             installmentIdInput.value = installmentId;
-
-            if (FinanceSystem.UI && FinanceSystem.UI.showModal) {
-                FinanceSystem.UI.showModal('payInstallmentModal');
-            } else if (typeof bootstrap !== 'undefined') {
-                const modalInstance = new bootstrap.Modal(modal);
-                modalInstance.show();
-            } else {
-                modal.style.display = 'block';
-            }
+            FinanceSystem.UI.showModal('payInstallmentModal');
         }
     }
 
     function initializeFinancingSimulation() {
-        initializeMoneyMasks();
+        FinanceSystem.Modules.Financial.initializeMoneyMask('#TotalAmount');
 
         initializeInstallmentCalculator();
 
@@ -590,44 +298,6 @@ FinanceSystem.Pages.Financings = (function () {
             });
         }
 
-        const simulationResultsTable = document.querySelector('.simulation-results-table');
-        if (simulationResultsTable) {
-            initializeSimulationResultsTable();
-        }
-    }
-
-    function initializeSimulationResultsTable() {
-        if (typeof $.fn.DataTable !== 'undefined') {
-            $('.simulation-results-table').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-                },
-                responsive: true,
-                pageLength: 12,
-                lengthMenu: [[12, 24, 36, -1], [12, 24, 36, "Todos"]],
-                dom: 'Bfrtip',
-                buttons: [
-                    {
-                        extend: 'print',
-                        text: 'Imprimir',
-                        className: 'btn btn-sm btn-primary'
-                    },
-                    {
-                        extend: 'excel',
-                        text: 'Excel',
-                        className: 'btn btn-sm btn-success'
-                    },
-                    {
-                        extend: 'pdf',
-                        text: 'PDF',
-                        className: 'btn btn-sm btn-danger'
-                    }
-                ]
-            });
-        } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
-            FinanceSystem.Modules.Tables.initializeTableSort();
-        }
-
         initializeSimulationCharts();
     }
 
@@ -643,22 +313,18 @@ FinanceSystem.Pages.Financings = (function () {
                 const principal = JSON.parse(principalRaw);
                 const interest = JSON.parse(interestRaw);
 
-                if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
-                    FinanceSystem.Modules.Charts.createGroupedBarChart('amortizationChart', labels, [
-                        {
-                            label: 'Principal',
-                            data: principal,
-                            color: 'rgba(78, 115, 223, 0.8)'
-                        },
-                        {
-                            label: 'Juros',
-                            data: interest,
-                            color: 'rgba(231, 74, 59, 0.8)'
-                        }
-                    ]);
-                } else if (typeof Chart !== 'undefined') {
-                    createAmortizationChart(amortizationChart, labels, principal, interest);
-                }
+                FinanceSystem.Modules.Charts.createGroupedBarChart('amortizationChart', labels, [
+                    {
+                        label: 'Principal',
+                        data: principal,
+                        color: 'rgba(78, 115, 223, 0.8)'
+                    },
+                    {
+                        label: 'Juros',
+                        data: interest,
+                        color: 'rgba(231, 74, 59, 0.8)'
+                    }
+                ]);
             }
         }
 
@@ -671,151 +337,32 @@ FinanceSystem.Pages.Financings = (function () {
                 const labels = JSON.parse(labelsRaw);
                 const values = JSON.parse(valuesRaw);
 
-                if (FinanceSystem.Modules && FinanceSystem.Modules.Charts) {
-                    FinanceSystem.Modules.Charts.createLineChart('balanceChart', labels, values);
-                } else if (typeof Chart !== 'undefined') {
-                    createBalanceChart(balanceChart, labels, values);
-                }
+                FinanceSystem.Modules.Charts.createLineChart('balanceChart', labels, values);
             }
         }
-    }
 
-    function createAmortizationChart(canvas, labels, principal, interest) {
-        new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Principal',
-                        data: principal,
-                        backgroundColor: 'rgba(78, 115, 223, 0.8)',
-                        borderColor: 'rgba(78, 115, 223, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Juros',
-                        data: interest,
-                        backgroundColor: 'rgba(231, 74, 59, 0.8)',
-                        borderColor: 'rgba(231, 74, 59, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        stacked: false,
-                        grid: {
-                            display: false
-                        }
-                    },
-                    y: {
-                        stacked: false,
-                        ticks: {
-                            callback: function (value) {
-                                return 'R$ ' + value.toLocaleString('pt-BR');
-                            }
-                        }
-                    }
+        FinanceSystem.Modules.Tables.initializeTable('.simulation-results-table', {
+            pageLength: 12,
+            lengthMenu: [[12, 24, 36, -1], [12, 24, 36, "Todos"]],
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'print',
+                    text: 'Imprimir',
+                    className: 'btn btn-sm btn-primary'
                 },
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return context.dataset.label + ': R$ ' + context.raw.toLocaleString('pt-BR');
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    function createBalanceChart(canvas, labels, values) {
-        new Chart(canvas, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Saldo Devedor',
-                    data: values,
-                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                    borderColor: 'rgba(78, 115, 223, 1)',
-                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
-                    pointRadius: 3,
-                    pointHoverRadius: 5,
-                    tension: 0.3,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        ticks: {
-                            callback: function (value) {
-                                return 'R$ ' + value.toLocaleString('pt-BR');
-                            }
-                        }
-                    }
+                {
+                    extend: 'excel',
+                    text: 'Excel',
+                    className: 'btn btn-sm btn-success'
                 },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return 'Saldo: R$ ' + context.raw.toLocaleString('pt-BR');
-                            }
-                        }
-                    }
+                {
+                    extend: 'pdf',
+                    text: 'PDF',
+                    className: 'btn btn-sm btn-danger'
                 }
-            }
+            ]
         });
-    }
-
-    function parseCurrency(value) {
-        if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
-            return FinanceSystem.Modules.Financial.parseCurrency(value);
-        }
-
-        if (typeof value === 'number') {
-            return value;
-        }
-
-        value = value.replace(/[^\d,.-]/g, '');
-
-        if (value.indexOf(',') > -1 && value.indexOf('.') > -1) {
-            value = value.replace(/\./g, '').replace(',', '.');
-        } else if (value.indexOf(',') > -1) {
-            value = value.replace(',', '.');
-        }
-
-        return parseFloat(value);
-    }
-
-    function parsePercent(value) {
-        if (typeof value === 'number') {
-            return value;
-        }
-
-        value = value.replace(/[^\d,.-]/g, '');
-
-        value = value.replace(',', '.');
-
-        return parseFloat(value) / 100;
-    }
-
-    function formatNumber(value) {
-        return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     return {
