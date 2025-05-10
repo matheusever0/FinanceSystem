@@ -231,11 +231,6 @@
     border-radius: var(--border-radius-sm);
 }
 
-/* Botões com links */
-a.btn.disabled, fieldset:disabled a.btn {
-    pointer-events: none;
-}
-
 /* Botões com ícones */
 .btn i {
     vertical-align: middle;
@@ -261,6 +256,11 @@ a.btn.disabled, fieldset:disabled a.btn {
         white-space: nowrap;
         flex-grow: 1;
         text-align: center;
+    }
+
+    .btn-icon-split:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
 /* Botões em grupo */
@@ -332,11 +332,6 @@ a.btn.disabled, fieldset:disabled a.btn {
         opacity: 1;
     }
 
-/* Width 100% */
-.w-100 {
-    width: 100% !important;
-}
-
 /* Botões no login */
 .btn-login {
     background-color: var(--success-color);
@@ -356,32 +351,7 @@ a.btn.disabled, fieldset:disabled a.btn {
         box-shadow: 0 4px 8px rgba(var(--success-color-rgb), 0.3);
     }
 
-/* Espaçamento entre botões */
-.me-1 {
-    margin-right: 0.25rem !important;
-}
-
-.me-2 {
-    margin-right: 0.5rem !important;
-}
-
-.ms-1 {
-    margin-left: 0.25rem !important;
-}
-
-.ms-2 {
-    margin-left: 0.5rem !important;
-}
-
-.mb-2 {
-    margin-bottom: 0.5rem !important;
-}
-
-.mb-3 {
-    margin-bottom: 1rem !important;
-}
-
-/* Responsividade */
+/* Responsiveness */
 @media (max-width: 576px) {
     .btn {
         padding: 0.25rem 0.5rem;

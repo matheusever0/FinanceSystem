@@ -1,143 +1,163 @@
-﻿/* Income specific styles */
-.income-container {
+﻿/* Transaction styles - combined from payment.css and income.css */
+.transaction-container {
     max-width: 1200px;
     margin: 0 auto;
 }
 
-/* Income list */
-.income-list-container {
+/* Transaction lists */
+.transaction-list-container {
     margin-bottom: 2rem;
 }
 
-.income-item {
+.transaction-item {
     display: flex;
     padding: 1rem;
     border-bottom: 1px solid var(--border-color);
     transition: background-color 0.2s ease;
 }
 
-    .income-item:hover {
+    .transaction-item:hover {
         background-color: rgba(0, 0, 0, 0.01);
     }
 
-    .income-item:last-child {
+    .transaction-item:last-child {
         border-bottom: none;
     }
 
-.income-icon {
+.transaction-icon {
     font-size: 1.5rem;
     margin-right: 1rem;
     width: 40px;
     height: 40px;
-    background-color: var(--success-color);
-    color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-    .income-icon.recurring {
+    /* Payment type icons */
+    .transaction-icon.payment {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+    }
+
+    /* Income type icons */
+    .transaction-icon.income {
+        background-color: var(--success-color);
+        color: white;
+    }
+
+    .transaction-icon.recurring {
         background-color: rgba(54, 185, 204, 0.2);
         color: var(--info-color);
     }
 
-.income-details {
+.transaction-details {
     flex: 1;
 }
 
-.income-title {
+.transaction-title {
     font-weight: 500;
     margin-bottom: 0.25rem;
 }
 
-.income-subtitle {
+.transaction-subtitle {
     font-size: 0.8rem;
     color: var(--text-muted);
 }
 
-.income-amount {
+.transaction-amount {
     font-weight: 600;
     margin-left: 1rem;
     align-self: center;
-    color: var(--success-color);
 }
 
-.income-due-date {
+    .transaction-amount.income {
+        color: var(--success-color);
+    }
+
+.transaction-due-date {
     font-size: 0.85rem;
     color: var(--text-muted);
     align-self: center;
     margin-left: 1rem;
     min-width: 100px;
-    text-center: center;
+    text-align: center;
 }
 
-.income-status {
+.transaction-status {
     margin-left: 1rem;
     align-self: center;
 }
 
-.income-actions {
+.transaction-actions {
     margin-left: 1rem;
     align-self: center;
 }
 
-/* Income details page */
-.income-details-container {
+/* Transaction details page */
+.transaction-details-container {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 1.5rem;
 }
 
-.income-info-card {
+.transaction-info-card {
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
 }
 
-.income-info-header {
-    background-color: var(--success-color);
-    color: white;
+.transaction-info-header {
     padding: 1rem;
     font-weight: 600;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    color: white;
 }
 
-.income-info-body {
+    .transaction-info-header.payment {
+        background-color: var(--primary-color);
+    }
+
+    .transaction-info-header.income {
+        background-color: var(--success-color);
+    }
+
+.transaction-info-body {
     padding: 1.5rem;
 }
 
-.income-info-row {
+.transaction-info-row {
     display: flex;
     margin-bottom: 1rem;
 }
 
-.income-info-label {
+.transaction-info-label {
     font-weight: 500;
     min-width: 150px;
     color: var(--text-muted);
 }
 
-.income-info-value {
+.transaction-info-value {
     flex: 1;
 }
 
-.income-notes {
+.transaction-notes {
     background-color: #f9f9f9;
     padding: 1rem;
     border-radius: var(--border-radius);
     margin-top: 1rem;
 }
 
-.income-notes-title {
+.transaction-notes-title {
     font-weight: 500;
     margin-bottom: 0.5rem;
     color: var(--text-muted);
 }
 
-/* Income installments */
+/* Installments */
 .installment-table th,
 .installment-table td {
     text-align: center;
@@ -147,13 +167,13 @@
     width: 100px;
 }
 
-/* Income form */
-.income-form-container {
+/* Transaction form */
+.transaction-form-container {
     max-width: 800px;
     margin: 0 auto;
 }
 
-.income-section-title {
+.transaction-section-title {
     font-weight: 500;
     margin-bottom: 1rem;
 }
@@ -175,15 +195,15 @@
     text-align: center;
 }
 
-/* Income filters */
-.income-filters {
+/* Transaction filters */
+.transaction-filters {
     display: flex;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
     gap: 0.5rem;
 }
 
-.income-filter-item {
+.transaction-filter-item {
     padding: 0.5rem 1rem;
     border-radius: var(--border-radius);
     background-color: #f9f9f9;
@@ -191,17 +211,17 @@
     cursor: pointer;
 }
 
-    .income-filter-item:hover {
+    .transaction-filter-item:hover {
         background-color: var(--primary-light);
     }
 
-    .income-filter-item.active {
+    .transaction-filter-item.active {
         background-color: var(--primary-color);
         color: white;
     }
 
-/* Income types */
-.income-type-badge {
+/* Transaction types */
+.transaction-type-badge {
     display: inline-flex;
     align-items: center;
     padding: 0.5rem 0.75rem;
@@ -212,13 +232,13 @@
     background-color: var(--secondary-color);
 }
 
-.income-type-system {
+.transaction-type-system {
     background-color: rgba(54, 185, 204, 0.1);
     color: var(--info-color);
     border: 1px solid rgba(54, 185, 204, 0.2);
 }
 
-.income-type-user {
+.transaction-type-user {
     background-color: rgba(78, 115, 223, 0.1);
     color: var(--primary-color);
     border: 1px solid rgba(78, 115, 223, 0.2);
@@ -226,15 +246,15 @@
 
 /* Responsive adjustments */
 @media (max-width: 992px) {
-    .income-details-container {
+    .transaction-details-container {
         grid-template-columns: 1fr;
     }
 
-    .income-item {
+    .transaction-item {
         flex-wrap: wrap;
     }
 
-    .income-actions {
+    .transaction-actions {
         width: 100%;
         margin-left: 0;
         margin-top: 1rem;
@@ -244,17 +264,17 @@
 }
 
 @media (max-width: 768px) {
-    .income-due-date,
-    .income-status {
+    .transaction-due-date,
+    .transaction-status {
         margin-left: 0;
         margin-top: 0.5rem;
     }
 
-    .income-item {
+    .transaction-item {
         flex-direction: column;
     }
 
-    .income-amount {
+    .transaction-amount {
         margin-left: 0;
         margin-top: 0.5rem;
     }
