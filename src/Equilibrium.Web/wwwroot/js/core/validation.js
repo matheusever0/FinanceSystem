@@ -6,16 +6,10 @@
 var FinanceSystem = FinanceSystem || {};
 
 FinanceSystem.Validation = (function () {
-    /**
-     * Inicializa validação básica de formulários
-     */
     function initialize() {
         initializeFormValidation();
     }
 
-    /**
-     * Inicializa validação de formulários
-     */
     function initializeFormValidation() {
         const forms = document.querySelectorAll('form.needs-validation');
 
@@ -31,11 +25,6 @@ FinanceSystem.Validation = (function () {
         });
     }
 
-    /**
-     * Configura validação personalizada para um formulário
-     * @param {HTMLElement} form - Formulário a ser validado
-     * @param {Function} validateCallback - Função de validação customizada
-     */
     function setupFormValidation(form, validateCallback) {
         if (!form) return;
 
@@ -56,11 +45,6 @@ FinanceSystem.Validation = (function () {
         });
     }
 
-    /**
-     * Mostra mensagem de erro para um campo
-     * @param {HTMLElement} input - Campo com erro
-     * @param {string} message - Mensagem de erro
-     */
     function showFieldError(input, message) {
         let errorElement = input.parentElement.querySelector('.text-danger');
         if (!errorElement) {
@@ -72,10 +56,6 @@ FinanceSystem.Validation = (function () {
         input.classList.add('is-invalid');
     }
 
-    /**
-     * Remove mensagem de erro de um campo
-     * @param {HTMLElement} input - Campo a ser limpo
-     */
     function clearFieldError(input) {
         const errorElement = input.parentElement.querySelector('.text-danger');
         if (errorElement) {
@@ -84,21 +64,11 @@ FinanceSystem.Validation = (function () {
         input.classList.remove('is-invalid');
     }
 
-    /**
-     * Valida um email
-     * @param {string} email - Email a ser validado
-     * @returns {boolean} - Resultado da validação
-     */
     function isValidEmail(email) {
         const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return regex.test(email);
     }
 
-    /**
-     * Valida um CPF
-     * @param {string} cpf - CPF a ser validado
-     * @returns {boolean} - Resultado da validação
-     */
     function isValidCPF(cpf) {
         cpf = cpf.replace(/\D/g, '');
 
@@ -127,11 +97,6 @@ FinanceSystem.Validation = (function () {
         return true;
     }
 
-    /**
-     * Valida um CNPJ
-     * @param {string} cnpj - CNPJ a ser validado
-     * @returns {boolean} - Resultado da validação
-     */
     function isValidCNPJ(cnpj) {
         cnpj = cnpj.replace(/\D/g, '');
 
@@ -167,11 +132,6 @@ FinanceSystem.Validation = (function () {
         return true;
     }
 
-    /**
-     * Valida uma data
-     * @param {string} date - Data a ser validada (formato dd/mm/yyyy)
-     * @returns {boolean} - Resultado da validação
-     */
     function isValidDate(date) {
         if (!/^\d{2}\/\d{2}\/\d{4}$/.test(date)) return false;
 
@@ -190,42 +150,22 @@ FinanceSystem.Validation = (function () {
         return day > 0 && day <= daysInMonth[month - 1];
     }
 
-    /**
-     * Valida uma senha (mínimo 6 caracteres, pelo menos 1 letra e 1 número)
-     * @param {string} password - Senha a ser validada
-     * @returns {boolean} - Resultado da validação
-     */
     function isValidPassword(password) {
         return password.length >= 6 &&
             /[a-zA-Z]/.test(password) &&
             /\d/.test(password);
     }
 
-    /**
-     * Verifica se um valor é um número válido
-     * @param {any} value - Valor a ser verificado
-     * @returns {boolean} - Resultado da verificação
-     */
     function isValidNumber(value) {
         return !isNaN(parseFloat(value)) && isFinite(value);
     }
 
-    /**
-     * Valida se um campo de valor monetário é válido
-     * @param {string} value - Valor a ser validado
-     * @returns {boolean} - Resultado da validação
-     */
     function isValidCurrency(value) {
         value = value.replace(/\./g, '').replace(',', '.');
         const number = parseFloat(value);
         return !isNaN(number) && isFinite(number) && number >= 0;
     }
 
-    /**
-     * Valida um documento (CPF ou CNPJ)
-     * @param {string} document - Documento a ser validado
-     * @returns {boolean} - Resultado da validação
-     */
     function isValidDocument(document) {
         document = document.replace(/\D/g, '');
 
@@ -240,29 +180,14 @@ FinanceSystem.Validation = (function () {
         return false;
     }
 
-    /**
-     * Valida um nome de usuário
-     * @param {string} username - Nome de usuário a ser validado
-     * @returns {boolean} - Resultado da validação
-     */
     function isValidUsername(username) {
         return /^[a-zA-Z0-9._-]{3,30}$/.test(username);
     }
 
-    /**
-     * Verifica se uma string está vazia
-     * @param {string} value - String a ser verificada
-     * @returns {boolean} - Resultado da verificação
-     */
     function isEmpty(value) {
         return value === null || value === undefined || value.trim() === '';
     }
 
-    /**
-     * Valida um campo de acordo com seu tipo
-     * @param {HTMLElement} field - Campo a ser validado
-     * @returns {boolean} - Resultado da validação
-     */
     function validateField(field) {
         const value = field.value;
         const type = field.type;
@@ -333,11 +258,6 @@ FinanceSystem.Validation = (function () {
         return true;
     }
 
-    /**
-     * Verifica se todos os campos de um formulário são válidos
-     * @param {HTMLFormElement} form - Formulário a ser validado
-     * @returns {boolean} - Resultado da validação
-     */
     function validateForm(form) {
         if (!form) return false;
 

@@ -28,9 +28,6 @@ FinanceSystem.Modules.Charts = (function () {
         secondary: 'rgba(133, 135, 150, 0.8)'
     };
 
-    /**
-     * Inicializa o módulo de gráficos
-     */
     function initialize() {
         if (typeof Chart === 'undefined') {
             console.warn('Chart.js não está disponível. Os gráficos não serão renderizados.');
@@ -40,9 +37,6 @@ FinanceSystem.Modules.Charts = (function () {
         configureChartDefaults();
     }
 
-    /**
-     * Configura padrões globais para o Chart.js
-     */
     function configureChartDefaults() {
         if (typeof Chart === 'undefined') return;
 
@@ -59,31 +53,15 @@ FinanceSystem.Modules.Charts = (function () {
         Chart.defaults.plugins.tooltip.cornerRadius = 5;
     }
 
-    /**
-     * Register a chart instance in the registry
-     * @param {string} chartId - ID of the chart element
-     * @param {Chart} chartInstance - Chart.js instance
-     * @returns {Chart} - The registered chart instance
-     */
     function registerChart(chartId, chartInstance) {
         chartRegistry[chartId] = chartInstance;
         return chartInstance;
     }
 
-    /**
-     * Get a chart instance from the registry
-     * @param {string} chartId - ID of the chart element
-     * @returns {Chart|null} - Chart instance or null if not found
-     */
     function getChart(chartId) {
         return chartRegistry[chartId] || null;
     }
 
-    /**
-     * Destroy a chart instance and remove it from the registry
-     * @param {string} chartId - ID of the chart element
-     * @returns {boolean} - True if chart was destroyed, false if not found
-     */
     function destroyChart(chartId) {
         if (chartRegistry[chartId]) {
             chartRegistry[chartId].destroy();
@@ -93,11 +71,6 @@ FinanceSystem.Modules.Charts = (function () {
         return false;
     }
 
-    /**
-     * Safely destroy a chart instance using Chart.js API
-     * Works with both Chart.js v2 and v3+
-     * @param {string} chartId - ID of the chart element
-     */
     function destroyChartSafely(chartId) {
         if (destroyChart(chartId)) return;
 
@@ -115,12 +88,6 @@ FinanceSystem.Modules.Charts = (function () {
         }
     }
 
-    /**
-     * Inicializa um gráfico com a configuração fornecida
-     * @param {string} chartId - ID do elemento canvas
-     * @param {Object} config - Configuração para o gráfico
-     * @returns {Chart|null} - Instância do gráfico ou null
-     */
     function initializeChart(chartId, config) {
         const chartElement = document.getElementById(chartId);
         if (!chartElement || typeof Chart === 'undefined') return null;
@@ -132,14 +99,6 @@ FinanceSystem.Modules.Charts = (function () {
         return registerChart(chartId, chart);
     }
 
-    /**
-     * Cria um gráfico de tipo linha
-     * @param {string} chartId - ID do elemento canvas
-     * @param {Array} labels - Rótulos para o eixo X
-     * @param {Array} data - Dados para o gráfico
-     * @param {Object} options - Opções adicionais
-     * @returns {Chart|null} - Instância do gráfico ou null
-     */
     function createLineChart(chartId, labels, data, options = {}) {
         const defaultOptions = {
             responsive: true,
@@ -206,14 +165,6 @@ FinanceSystem.Modules.Charts = (function () {
         return initializeChart(chartId, config);
     }
 
-    /**
-     * Cria um gráfico de tipo linha com múltiplos conjuntos de dados
-     * @param {string} chartId - ID do elemento canvas
-     * @param {Array} labels - Rótulos para o eixo X
-     * @param {Array} datasets - Conjuntos de dados
-     * @param {Object} options - Opções adicionais
-     * @returns {Chart|null} - Instância do gráfico ou null
-     */
     function createMultiLineChart(chartId, labels, datasets, options = {}) {
         if (!Array.isArray(datasets) || datasets.length === 0) return null;
 
@@ -289,14 +240,6 @@ FinanceSystem.Modules.Charts = (function () {
         return initializeChart(chartId, config);
     }
 
-    /**
-     * Cria um gráfico de tipo barra
-     * @param {string} chartId - ID do elemento canvas
-     * @param {Array} labels - Rótulos para o eixo X
-     * @param {Array} data - Dados para o gráfico
-     * @param {Object} options - Opções adicionais
-     * @returns {Chart|null} - Instância do gráfico ou null
-     */
     function createBarChart(chartId, labels, data, options = {}) {
         const defaultOptions = {
             responsive: true,
@@ -356,14 +299,6 @@ FinanceSystem.Modules.Charts = (function () {
         return initializeChart(chartId, config);
     }
 
-    /**
-     * Cria um gráfico de barras agrupadas
-     * @param {string} chartId - ID do elemento canvas
-     * @param {Array} labels - Rótulos para o eixo X
-     * @param {Array} datasets - Conjuntos de dados para as barras
-     * @param {Object} options - Opções adicionais
-     * @returns {Chart|null} - Instância do gráfico ou null
-     */
     function createGroupedBarChart(chartId, labels, datasets, options = {}) {
         if (!Array.isArray(datasets) || datasets.length === 0) return null;
 
@@ -432,14 +367,6 @@ FinanceSystem.Modules.Charts = (function () {
         return initializeChart(chartId, config);
     }
 
-    /**
-     * Cria um gráfico de tipo pizza/donut
-     * @param {string} chartId - ID do elemento canvas
-     * @param {Array} labels - Rótulos para as fatias
-     * @param {Array} data - Dados para o gráfico
-     * @param {Object} options - Opções adicionais
-     * @returns {Chart|null} - Instância do gráfico ou null
-     */
     function createPieChart(chartId, labels, data, options = {}) {
         const colors = options.colors || generateColors(data.length);
 
@@ -484,14 +411,6 @@ FinanceSystem.Modules.Charts = (function () {
         return initializeChart(chartId, config);
     }
 
-    /**
-     * Cria um gráfico de tipo área polar
-     * @param {string} chartId - ID do elemento canvas
-     * @param {Array} labels - Rótulos para o eixo X
-     * @param {Array} data - Dados para o gráfico
-     * @param {Object} options - Opções adicionais
-     * @returns {Chart|null} - Instância do gráfico ou null
-     */
     function createPolarAreaChart(chartId, labels, data, options = {}) {
         const colors = generateColors(data.length);
 
@@ -540,14 +459,6 @@ FinanceSystem.Modules.Charts = (function () {
         return initializeChart(chartId, config);
     }
 
-    /**
-     * Cria um gráfico de radar
-     * @param {string} chartId - ID do elemento canvas
-     * @param {Array} labels - Rótulos para os eixos
-     * @param {Array} datasets - Conjuntos de dados
-     * @param {Object} options - Opções adicionais
-     * @returns {Chart|null} - Instância do gráfico ou null
-     */
     function createRadarChart(chartId, labels, datasets, options = {}) {
         if (!Array.isArray(datasets) || datasets.length === 0) return null;
 
@@ -603,13 +514,6 @@ FinanceSystem.Modules.Charts = (function () {
         return initializeChart(chartId, config);
     }
 
-    /**
-     * Cria um gráfico de gauge
-     * @param {string} chartId - ID do elemento canvas
-     * @param {number} value - Valor para o medidor (0-100)
-     * @param {Object} options - Opções adicionais
-     * @returns {Chart|null} - Instância do gráfico ou null
-     */
     function createGaugeChart(chartId, value, options = {}) {
         value = Math.max(0, Math.min(100, value));
 
@@ -684,11 +588,6 @@ FinanceSystem.Modules.Charts = (function () {
         return chart;
     }
 
-    /**
-     * Gera cores para conjuntos de dados
-     * @param {number} count - Número de cores a serem geradas
-     * @returns {Array} - Array de cores
-     */
     function generateColors(count) {
         const colors = [];
         for (let i = 0; i < count; i++) {
@@ -705,12 +604,6 @@ FinanceSystem.Modules.Charts = (function () {
         return colors;
     }
 
-    /**
-     * Ajusta uma cor para mais claro ou mais escuro
-     * @param {string} color - Cor em formato rgba
-     * @param {number} amount - Quantidade de ajuste (-255 a 255)
-     * @returns {string} - Cor ajustada
-     */
     function adjustColor(color, amount) {
         const rgbaMatch = color.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
         if (!rgbaMatch) return color;
@@ -727,12 +620,6 @@ FinanceSystem.Modules.Charts = (function () {
         return `rgba(${r}, ${g}, ${b}, ${a})`;
     }
 
-    /**
-     * Ajusta a opacidade de uma cor
-     * @param {string} color - Cor em formato rgba
-     * @param {number} opacity - Opacidade (0-1)
-     * @returns {string} - Cor com opacidade ajustada
-     */
     function adjustOpacity(color, opacity) {
         const rgbaMatch = color.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
         if (rgbaMatch) {
@@ -755,13 +642,6 @@ FinanceSystem.Modules.Charts = (function () {
         return color;
     }
 
-    /**
-     * Atualiza os dados de um gráfico existente
-     * @param {Chart} chart - Instância do gráfico
-     * @param {Array} labels - Novos rótulos
-     * @param {Array} data - Novos dados
-     * @param {boolean} animate - Indica se deve animar a atualização
-     */
     function updateChartData(chart, labels, data, animate = true) {
         if (!chart) return;
 
@@ -782,12 +662,6 @@ FinanceSystem.Modules.Charts = (function () {
         chart.update(animate ? undefined : 'none');
     }
 
-    /**
-     * Adiciona um novo conjunto de dados a um gráfico existente
-     * @param {Chart} chart - Instância do gráfico
-     * @param {Object} dataset - Configuração do novo dataset
-     * @param {boolean} update - Indica se deve atualizar o gráfico imediatamente
-     */
     function addDataset(chart, dataset, update = true) {
         if (!chart) return;
 
@@ -819,12 +693,6 @@ FinanceSystem.Modules.Charts = (function () {
         }
     }
 
-    /**
-     * Remove um conjunto de dados de um gráfico existente
-     * @param {Chart} chart - Instância do gráfico
-     * @param {number} index - Índice do dataset a ser removido
-     * @param {boolean} update - Indica se deve atualizar o gráfico imediatamente
-     */
     function removeDataset(chart, index, update = true) {
         if (!chart || index < 0 || index >= chart.data.datasets.length) return;
 
@@ -835,12 +703,6 @@ FinanceSystem.Modules.Charts = (function () {
         }
     }
 
-    /**
-     * Converte dados de gráfico para uma tabela HTML
-     * @param {Array} labels - Rótulos do gráfico
-     * @param {Array|Object} datasets - Conjuntos de dados do gráfico
-     * @returns {string} - Tabela HTML
-     */
     function convertChartToTable(labels, datasets) {
         let html = '<table class="table table-striped table-sm">';
         html += '<thead><tr><th>Categoria</th>';
@@ -877,9 +739,6 @@ FinanceSystem.Modules.Charts = (function () {
         return html;
     }
 
-    /**
-     * Clean up all charts - useful when navigating away from a page
-     */
     function cleanupAllCharts() {
         Object.keys(chartRegistry).forEach(chartId => {
             destroyChart(chartId);

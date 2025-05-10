@@ -7,18 +7,12 @@ var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Modules = FinanceSystem.Modules || {};
 
 FinanceSystem.Modules.Forms = (function () {
-    /**
-     * Inicializa o módulo de formulários
-     */
     function initialize() {
         initializeFormatedInputs();
         initializeSelectFields();
         initializeFormDependencies();
     }
 
-    /**
-     * Inicializa campos formatados (máscaras)
-     */
     function initializeFormatedInputs() {
         if (typeof $.fn.mask !== 'undefined') {
             $('.mask-date').mask('00/00/0000');
@@ -42,9 +36,6 @@ FinanceSystem.Modules.Forms = (function () {
         }
     }
 
-    /**
-     * Inicializa máscaras manualmente quando jQuery mask não está disponível
-     */
     function initializeManualMasks() {
         const moneyInputs = document.querySelectorAll('.mask-money');
         moneyInputs.forEach(input => {
@@ -113,10 +104,6 @@ FinanceSystem.Modules.Forms = (function () {
         });
     }
 
-    /**
-     * Formata campo de entrada monetária
-     * @param {HTMLElement} input - Campo a ser formatado
-     */
     function formatCurrencyInput(input) {
         const cursorPosition = input.selectionStart;
         const inputLength = input.value.length;
@@ -139,10 +126,6 @@ FinanceSystem.Modules.Forms = (function () {
         }
     }
 
-    /**
-     * Formata campo de entrada percentual
-     * @param {HTMLElement} input - Campo a ser formatado
-     */
     function formatPercentInput(input) {
         let value = input.value.replace(/[^\d.,]/g, '');
 
@@ -161,10 +144,6 @@ FinanceSystem.Modules.Forms = (function () {
         input.value = value;
     }
 
-    /**
-     * Formata campo de entrada de data
-     * @param {HTMLElement} input - Campo a ser formatado
-     */
     function formatDateInput(input) {
         let value = input.value.replace(/\D/g, '');
         if (value.length > 8) value = value.substring(0, 8);
@@ -178,10 +157,6 @@ FinanceSystem.Modules.Forms = (function () {
         input.value = value;
     }
 
-    /**
-     * Formata campo de entrada de CPF
-     * @param {HTMLElement} input - Campo a ser formatado
-     */
     function formatCPFInput(input) {
         let value = input.value.replace(/\D/g, '');
         if (value.length > 11) value = value.substring(0, 11);
@@ -197,10 +172,6 @@ FinanceSystem.Modules.Forms = (function () {
         input.value = value;
     }
 
-    /**
-     * Formata campo de entrada de CNPJ
-     * @param {HTMLElement} input - Campo a ser formatado
-     */
     function formatCNPJInput(input) {
         let value = input.value.replace(/\D/g, '');
         if (value.length > 14) value = value.substring(0, 14);
@@ -218,10 +189,6 @@ FinanceSystem.Modules.Forms = (function () {
         input.value = value;
     }
 
-    /**
-     * Formata campo de entrada de telefone
-     * @param {HTMLElement} input - Campo a ser formatado
-     */
     function formatPhoneInput(input) {
         let value = input.value.replace(/\D/g, '');
         if (value.length > 11) value = value.substring(0, 11);
@@ -239,9 +206,6 @@ FinanceSystem.Modules.Forms = (function () {
         input.value = value;
     }
 
-    /**
-     * Inicializa campos select
-     */
     function initializeSelectFields() {
         if (typeof $.fn.select2 !== 'undefined') {
             $('.select2').select2({
@@ -253,9 +217,6 @@ FinanceSystem.Modules.Forms = (function () {
         initializeSelectDependencies();
     }
 
-    /**
-     * Inicializa dependências entre selects
-     */
     function initializeSelectDependencies() {
         const dependentSelects = document.querySelectorAll('select[data-dependent-on]');
         dependentSelects.forEach(select => {
@@ -274,11 +235,6 @@ FinanceSystem.Modules.Forms = (function () {
         });
     }
 
-    /**
-     * Atualiza select dependente com base no valor do select pai
-     * @param {HTMLSelectElement} select - Select dependente
-     * @param {string} parentValue - Valor do select pai
-     */
     function updateDependentSelect(select, parentValue) {
         const dataUrl = select.getAttribute('data-url');
         const filterAttribute = select.getAttribute('data-filter-attribute') || 'data-parent';
@@ -307,11 +263,6 @@ FinanceSystem.Modules.Forms = (function () {
         }
     }
 
-    /**
-     * Preenche um select com opções
-     * @param {HTMLSelectElement} select - Select a ser preenchido
-     * @param {Array} data - Array de dados para as opções
-     */
     function populateSelect(select, data) {
         select.innerHTML = '';
 
@@ -339,9 +290,6 @@ FinanceSystem.Modules.Forms = (function () {
         }
     }
 
-    /**
-     * Inicializa dependências entre campos de formulário
-     */
     function initializeFormDependencies() {
         const triggerElements = document.querySelectorAll('[data-toggle-target]');
 
@@ -368,11 +316,6 @@ FinanceSystem.Modules.Forms = (function () {
         });
     }
 
-    /**
-     * Alterna a visibilidade dos elementos alvo
-     * @param {NodeList} targets - Elementos alvo
-     * @param {boolean} show - Indica se deve mostrar ou esconder
-     */
     function toggleTargetVisibility(targets, show) {
         targets.forEach(target => {
             if (show) {
@@ -393,10 +336,6 @@ FinanceSystem.Modules.Forms = (function () {
         });
     }
 
-    /**
-     * Inicializa uma máscara de moeda em um campo específico
-     * @param {string} selector - Seletor do campo
-     */
     function initializeMoneyMask(selector) {
         const moneyInput = document.querySelector(selector);
         if (!moneyInput) return;
@@ -414,10 +353,6 @@ FinanceSystem.Modules.Forms = (function () {
         }
     }
 
-    /**
-     * Inicializa um toggle para recorrência (usado em formulários de pagamento/receita)
-     * @param {HTMLElement} form - Formulário contendo o toggle
-     */
     function initializeRecurringToggle(form) {
         const isRecurringSwitch = form.querySelector('#isRecurringSwitch');
         const isRecurringLabel = form.querySelector('#isRecurringLabel');
@@ -442,11 +377,6 @@ FinanceSystem.Modules.Forms = (function () {
         }
     }
 
-    /**
-     * Inicializa um toggle de status (ativo/inativo)
-     * @param {string} switchSelector - Seletor do switch
-     * @param {string} labelSelector - Seletor do label
-     */
     function initializeStatusToggle(switchSelector, labelSelector) {
         const statusSwitch = document.querySelector(switchSelector);
         const statusLabel = document.querySelector(labelSelector);
@@ -470,11 +400,6 @@ FinanceSystem.Modules.Forms = (function () {
         statusSwitch.addEventListener('change', updateStatusLabel);
     }
 
-    /**
-     * Limpa os campos de um formulário
-     * @param {HTMLFormElement} form - Formulário a ser limpo
-     * @param {Array} excludeSelectors - Array de seletores para campos que não devem ser limpos
-     */
     function clearForm(form, excludeSelectors = []) {
         if (!form) return;
 
@@ -518,11 +443,6 @@ FinanceSystem.Modules.Forms = (function () {
         form.classList.remove('was-validated');
     }
 
-    /**
-     * Preenche um formulário com dados
-     * @param {HTMLFormElement} form - Formulário a ser preenchido
-     * @param {Object} data - Objeto com os dados para preenchimento
-     */
     function populateForm(form, data) {
         if (!form || !data) return;
 
@@ -559,11 +479,6 @@ FinanceSystem.Modules.Forms = (function () {
         });
     }
 
-    /**
-     * Coleta os dados de um formulário em um objeto
-     * @param {HTMLFormElement} form - Formulário a ser processado
-     * @returns {Object} - Objeto com os dados do formulário
-     */
     function getFormData(form) {
         if (!form) return {};
 

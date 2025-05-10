@@ -8,9 +8,6 @@ var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Pages = FinanceSystem.Pages || {};
 
 FinanceSystem.Pages.Investments = (function () {
-    /**
-     * Inicializa a página de investimentos
-     */
     function initialize() {
 
         initializeInvestmentForm();
@@ -20,9 +17,6 @@ FinanceSystem.Pages.Investments = (function () {
 
     }
 
-    /**
-     * Inicializa formulário de investimento
-     */
     function initializeInvestmentForm() {
         const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
         initializeMoneyInputs();
@@ -34,9 +28,6 @@ FinanceSystem.Pages.Investments = (function () {
         initializeCurrencyField();
     }
 
-    /**
- * Inicializa o campo de seleção de moeda
- */
     function initializeCurrencyField() {
         const typeSelect = document.getElementById('Type');
         const currencySelect = document.getElementById('Currency');
@@ -56,9 +47,6 @@ FinanceSystem.Pages.Investments = (function () {
         }
     }
 
-    /**
-     * Inicializa campos monetários
-     */
     function initializeMoneyInputs() {
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
             FinanceSystem.Modules.Financial.initializeMoneyMask('#InitialPrice');
@@ -84,20 +72,11 @@ FinanceSystem.Pages.Investments = (function () {
         }
     }
 
-    /**
- * Obtém a moeda selecionada no formulário
- * @returns {string} - Código da moeda (BRL, USD, etc.)
- */
     function getCurrencyFromForm() {
         const currencySelect = document.getElementById('Currency');
         return currencySelect ? currencySelect.value : 'BRL';
     }
 
-    /**
-     * Formata campo de entrada monetária
-     * @param {HTMLElement} input - Campo a ser formatado
-     * @param {string} currency - Código da moeda (BRL, USD, etc.)
-     */
     function formatCurrencyInput(input, currency = 'BRL') {
         const cursorPosition = input.selectionStart;
         const inputLength = input.value.length;
@@ -150,9 +129,6 @@ FinanceSystem.Pages.Investments = (function () {
         }
     }
 
-    /**
-     * Inicializa cálculo de valor total
-     */
     function initializeTotalCalculation() {
         const quantityInput = document.getElementById('InitialQuantity');
         const priceInput = document.getElementById('InitialPrice');
@@ -180,10 +156,6 @@ FinanceSystem.Pages.Investments = (function () {
         }
     }
 
-    /**
-     * Configura validação do formulário
-     * @param {HTMLFormElement} form - Formulário
-     */
     function setupFormValidation(form) {
         if (!form) return;
 
@@ -199,11 +171,6 @@ FinanceSystem.Pages.Investments = (function () {
         }
     }
 
-    /**
-     * Valida o formulário de investimento
-     * @param {Event} event - Evento de submissão
-     * @returns {boolean} - Resultado da validação
-     */
     function validateInvestmentForm(event) {
         let isValid = true;
         const form = event.target;
@@ -247,11 +214,6 @@ FinanceSystem.Pages.Investments = (function () {
         return isValid;
     }
 
-    /**
-     * Mostra mensagem de erro para um campo
-     * @param {HTMLElement} input - Campo com erro
-     * @param {string} message - Mensagem de erro
-     */
     function showFieldError(input, message) {
         if (FinanceSystem.Validation && FinanceSystem.Validation.showFieldError) {
             FinanceSystem.Validation.showFieldError(input, message);
@@ -268,9 +230,6 @@ FinanceSystem.Pages.Investments = (function () {
         input.classList.add('is-invalid');
     }
 
-    /**
-     * Inicializa a lista de investimentos
-     */
     function initializeInvestmentsList() {
         initializeInvestmentsTable();
 
@@ -279,9 +238,6 @@ FinanceSystem.Pages.Investments = (function () {
         initializeActionButtons();
     }
 
-    /**
-     * Inicializa DataTables para a tabela de investimentos
-     */
     function initializeInvestmentsTable() {
         if (typeof $.fn.DataTable !== 'undefined') {
             $('#investments-table').DataTable({
@@ -302,9 +258,6 @@ FinanceSystem.Pages.Investments = (function () {
         }
     }
 
-    /**
-     * Implementa ordenação básica para tabelas
-     */
     function basicTableSort() {
         const table = document.getElementById('investments-table');
         if (!table) return;
@@ -321,11 +274,6 @@ FinanceSystem.Pages.Investments = (function () {
         });
     }
 
-    /**
-     * Ordena tabela por coluna
-     * @param {HTMLTableElement} table - Tabela 
-     * @param {number} columnIndex - Índice da coluna
-     */
     function sortTable(table, columnIndex) {
         const thead = table.querySelector('thead');
         const tbody = table.querySelector('tbody');
@@ -364,9 +312,6 @@ FinanceSystem.Pages.Investments = (function () {
         rows.forEach(row => tbody.appendChild(row));
     }
 
-    /**
-     * Destaca ganhos e perdas na tabela
-     */
     function highlightPerformance() {
         const performanceCells = document.querySelectorAll('.performance-value');
 
@@ -382,9 +327,6 @@ FinanceSystem.Pages.Investments = (function () {
         });
     }
 
-    /**
-     * Inicializa botões de ação
-     */
     function initializeActionButtons() {
         const deleteButtons = document.querySelectorAll('.btn-delete-investment');
         deleteButtons.forEach(button => {
@@ -396,9 +338,6 @@ FinanceSystem.Pages.Investments = (function () {
         });
     }
 
-    /**
-     * Inicializa detalhes do investimento
-     */
     function initializeInvestmentDetails() {
         initializePerformanceChart();
 
@@ -407,9 +346,6 @@ FinanceSystem.Pages.Investments = (function () {
         initializeDetailActionButtons();
     }
 
-    /**
-     * Inicializa gráfico de desempenho
-     */
     function initializePerformanceChart() {
         const chartCanvas = document.getElementById('performanceChart');
         if (!chartCanvas) return;
@@ -429,11 +365,6 @@ FinanceSystem.Pages.Investments = (function () {
             });
     }
 
-    /**
-     * Busca dados de desempenho do investimento
-     * @param {string} investmentId - ID do investimento
-     * @returns {Promise} - Promise com os dados
-     */
     function fetchPerformanceData(investmentId) {
         return new Promise((resolve) => {
             setTimeout(() => {
@@ -449,10 +380,6 @@ FinanceSystem.Pages.Investments = (function () {
         });
     }
 
-    /**
-     * Gera dados de exemplo para o gráfico
-     * @returns {Array} - Array de valores
-     */
     function generateMockData() {
         const data = [];
         let value = 5000 + Math.random() * 2000;
@@ -465,12 +392,6 @@ FinanceSystem.Pages.Investments = (function () {
         return data;
     }
 
-    /**
-     * Cria gráfico de desempenho (fallback)
-     * @param {HTMLCanvasElement} canvas - Elemento canvas
-     * @param {Array} labels - Rótulos dos meses
-     * @param {Array} values - Valores do investimento
-     */
     function createPerformanceChart(canvas, labels, values) {
         new Chart(canvas, {
             type: 'line',
@@ -521,9 +442,6 @@ FinanceSystem.Pages.Investments = (function () {
         });
     }
 
-    /**
-     * Inicializa tabela de transações
-     */
     function initializeTransactionsTable() {
         if (typeof $.fn.DataTable !== 'undefined') {
             $('.transactions-table').DataTable({
@@ -532,16 +450,13 @@ FinanceSystem.Pages.Investments = (function () {
                 },
                 responsive: true,
                 pageLength: 10,
-                order: [[0, 'desc']] // Ordena por data decrescente
+                order: [[0, 'desc']] 
             });
         } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
             FinanceSystem.Modules.Tables.initializeTableSort();
         }
     }
 
-    /**
-     * Inicializa botões de ação da página de detalhes
-     */
     function initializeDetailActionButtons() {
         const addTransactionBtn = document.getElementById('add-transaction-btn');
         if (addTransactionBtn) {
@@ -561,9 +476,6 @@ FinanceSystem.Pages.Investments = (function () {
         }
     }
 
-    /**
-     * Inicializa formulário de transação
-     */
     function initializeTransactionForm() {
         const form = document.querySelector('form[asp-action="AddTransaction"]');
         if (!form) return;
@@ -584,9 +496,6 @@ FinanceSystem.Pages.Investments = (function () {
         initializeTransactionTypeHandler();
     }
 
-    /**
-     * Inicializa handler para tipo de transação
-     */
     function initializeTransactionTypeHandler() {
         const typeSelect = document.getElementById('InvestmentType');
         const quantityInput = document.getElementById('Quantity');
@@ -637,10 +546,6 @@ FinanceSystem.Pages.Investments = (function () {
         }
     }
 
-    /**
-     * Atualiza visibilidade dos campos baseado no tipo de transação
-     * @param {string} type - Tipo de transação
-     */
     function updateFieldsVisibility(type) {
         const quantityGroup = document.getElementById('Quantity').closest('.mb-3');
         const priceGroup = document.getElementById('Price').closest('.mb-3');
@@ -669,12 +574,6 @@ FinanceSystem.Pages.Investments = (function () {
         }
     }
 
-    /**
-     * Converte valor monetário para número
-     * @param {string|number} value - Valor em formato monetário
-     * @param {string} currency - Código da moeda (BRL, USD, etc.)
-     * @returns {number} - Valor numérico
-     */
     function parseCurrency(value, currency = 'BRL') {
         if (typeof value === 'number') return value;
 
@@ -689,12 +588,6 @@ FinanceSystem.Pages.Investments = (function () {
         return parseFloat(value) || 0;
     }
 
-    /**
-     * Formata um valor como moeda
-     * @param {number} value - Valor a ser formatado
-     * @param {string} currency - Código da moeda (BRL, USD, etc.)
-     * @returns {string} - Valor formatado
-     */
     function formatCurrency(value, currency = 'BRL') {
         if (FinanceSystem.Core && FinanceSystem.Core.formatCurrency) {
             return FinanceSystem.Core.formatCurrency(value, currency);

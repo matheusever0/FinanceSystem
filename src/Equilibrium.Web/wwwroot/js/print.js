@@ -5,9 +5,6 @@
 var FinanceSystem = FinanceSystem || {};
 
 FinanceSystem.Print = (function () {
-    /**
-     * Inicializa funcionalidades de impressão
-     */
     function initialize() {
         if (document.body.classList.contains('print-page')) {
             setTimeout(function () {

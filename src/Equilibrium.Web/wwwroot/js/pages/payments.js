@@ -7,9 +7,6 @@ var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Pages = FinanceSystem.Pages || {};
 
 FinanceSystem.Pages.Payments = (function () {
-    /**
-     * Inicializa a página de pagamentos
-     */
     function initialize() {
         const isFormView = document.querySelector('form[data-page="payment"]');
         const isListView = document.querySelector('.table-payments');
@@ -33,9 +30,6 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    /**
-     * Inicializa formulário de pagamento
-     */
     function initializePaymentForm() {
         const form = document.querySelector('form[data-page="payment"]');
         if (!form) return;
@@ -70,9 +64,6 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    /**
-     * Inicializa seletor de tipo de pagamento
-     */
     function initializePaymentTypeSelect() {
         const paymentTypeSelect = document.getElementById('PaymentTypeId');
         if (!paymentTypeSelect) return;
@@ -86,10 +77,6 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    /**
-     * Alterna a visibilidade da seção de financiamento
-     * @param {string} typeId - ID do tipo de pagamento
-     */
     function toggleFinancingSection(typeId) {
         const financingSection = document.getElementById('financingSection');
         const installmentSection = document.getElementById('financingInstallmentSection');
@@ -185,10 +172,6 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    /**
-     * Inicializa máscara de moeda para um campo (fallback)
-     * @param {string} selector - Seletor do campo
-     */
     function initializeMoneyMaskFallback(selector) {
         const moneyInput = document.querySelector(selector);
         if (!moneyInput) return;
@@ -202,10 +185,6 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    /**
-     * Formata campo de entrada monetária
-     * @param {HTMLElement} input - Campo a ser formatado
-     */
     function formatCurrencyInput(input) {
         const cursorPosition = input.selectionStart;
         const inputLength = input.value.length;
@@ -228,10 +207,6 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    /**
-     * Inicializa o toggle de recorrente (fallback)
-     * @param {HTMLElement} form - Formulário
-     */
     function initializeRecurringToggleFallback(form) {
         const isRecurringSwitch = form.querySelector('#isRecurringSwitch');
         const isRecurringLabel = form.querySelector('#isRecurringLabel');
@@ -256,10 +231,6 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    /**
-     * Configura validação personalizada para o formulário
-     * @param {HTMLFormElement} form - Formulário
-     */
     function setupFormValidation(form) {
         if (!form) return;
 
@@ -275,11 +246,6 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    /**
-     * Valida o formulário de pagamento
-     * @param {Event} event - Evento de submissão
-     * @returns {boolean} - Resultado da validação
-     */
     function validatePaymentForm(event) {
         let isValid = true;
         const form = event.target;
@@ -352,11 +318,6 @@ FinanceSystem.Pages.Payments = (function () {
         return isValid;
     }
 
-    /**
-     * Mostra mensagem de erro para um campo
-     * @param {HTMLElement} input - Campo com erro
-     * @param {string} message - Mensagem de erro
-     */
     function showFieldError(input, message) {
         if (FinanceSystem.Validation && FinanceSystem.Validation.showFieldError) {
             FinanceSystem.Validation.showFieldError(input, message);
@@ -373,9 +334,6 @@ FinanceSystem.Pages.Payments = (function () {
         input.classList.add('is-invalid');
     }
 
-    /**
-     * Inicializa a lista de pagamentos
-     */
     function initializePaymentList() {
         const paymentTable = document.querySelector('.table-payments');
         if (!paymentTable) return;
@@ -387,9 +345,6 @@ FinanceSystem.Pages.Payments = (function () {
         initializePaymentActionButtons();
     }
 
-    /**
-     * Estiliza linhas de pagamento de acordo com status
-     */
     function stylePaymentRows() {
         const rows = document.querySelectorAll('.table-payments tbody tr');
 
@@ -411,9 +366,6 @@ FinanceSystem.Pages.Payments = (function () {
         });
     }
 
-    /**
-     * Inicializa DataTables para a tabela de pagamentos
-     */
     function initializePaymentDataTable() {
         if (typeof $.fn.DataTable !== 'undefined') {
             $('#table-payments').DataTable({
@@ -423,9 +375,9 @@ FinanceSystem.Pages.Payments = (function () {
                 responsive: true,
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                order: [[1, 'desc']], // Ordena por data de vencimento decrescente
+                order: [[1, 'desc']],
                 columnDefs: [
-                    { orderable: false, targets: -1 } // Desabilita ordenação na coluna de ações
+                    { orderable: false, targets: -1 } 
                 ]
             });
         } else if (FinanceSystem.Modules && FinanceSystem.Modules.Tables) {
@@ -435,9 +387,6 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    /**
-     * Implementa ordenação básica para tabelas
-     */
     function basicTableSort() {
         const table = document.getElementById('investments-table');
         if (!table) return;
@@ -445,7 +394,7 @@ FinanceSystem.Pages.Payments = (function () {
         const headers = table.querySelectorAll('th');
 
         headers.forEach((header, index) => {
-            if (index !== headers.length - 1) { // Skip actions column
+            if (index !== headers.length - 1) { 
                 header.style.cursor = 'pointer';
                 header.addEventListener('click', () => {
                     sortTable(table, index);
@@ -454,9 +403,6 @@ FinanceSystem.Pages.Payments = (function () {
         });
     }
 
-    /**
-     * Inicializa botões de ação para pagamentos
-     */
     function initializePaymentActionButtons() {
         const deleteButtons = document.querySelectorAll('.btn-delete-payment');
         deleteButtons.forEach(button => {
@@ -476,10 +422,6 @@ FinanceSystem.Pages.Payments = (function () {
         });
     }
 
-    /**
-     * Abre modal para confirmação de pagamento
-     * @param {string} paymentId - ID do pagamento
-     */
     function openPaymentModal(paymentId) {
         const modal = document.getElementById('paymentModal');
         const paymentIdInput = document.getElementById('PaymentId');
@@ -498,9 +440,6 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    /**
-     * Inicializa detalhes de pagamento
-     */
     function initializePaymentDetails() {
         initializeInstallmentActions();
 
@@ -510,9 +449,6 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    /**
-     * Inicializa ações em parcelas
-     */
     function initializeInstallmentActions() {
         const markPaidButtons = document.querySelectorAll('.mark-installment-paid');
         markPaidButtons.forEach(button => {
@@ -535,9 +471,6 @@ FinanceSystem.Pages.Payments = (function () {
         });
     }
 
-    /**
-     * Inicializa gerenciamento de anexos
-     */
     function initializeAttachments() {
         const uploadButton = document.getElementById('upload-attachment');
         const fileInput = document.getElementById('attachment-file');
@@ -567,9 +500,6 @@ FinanceSystem.Pages.Payments = (function () {
         });
     }
 
-    /**
-     * Inicializa filtros de pagamento
-     */
     function initializePaymentFilters() {
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
             FinanceSystem.Modules.Financial.initializeFinancialFilters();
@@ -597,10 +527,6 @@ FinanceSystem.Pages.Payments = (function () {
         }
     }
 
-    /**
-     * Filtra tabela de pagamentos por status
-     * @param {string} status - Status para filtro
-     */
     function filterPaymentTable(status) {
         const rows = document.querySelectorAll('.table-payments tbody tr');
 
@@ -618,10 +544,6 @@ FinanceSystem.Pages.Payments = (function () {
         });
     }
 
-    /**
-     * Filtra tabela por texto
-     * @param {string} text - Texto para filtro
-     */
     function filterTableByText(text) {
         const rows = document.querySelectorAll('.table-payments tbody tr');
         text = text.toLowerCase();

@@ -6,9 +6,7 @@
 var FinanceSystem = FinanceSystem || {};
 
 FinanceSystem.UI = (function () {
-    /**
-     * Inicializa todos os componentes de UI
-     */
+
     function initialize() {
         initializeSidebar();
         setupMobileBackdrop();
@@ -17,9 +15,6 @@ FinanceSystem.UI = (function () {
         initializeTooltips();
     }
 
-    /**
- * Inicializa a funcionalidade do sidebar
- */
     function initializeSidebar() {
         const menuToggle = document.getElementById('menu-toggle');
         const sidebar = document.getElementById('sidebar');
@@ -75,9 +70,6 @@ FinanceSystem.UI = (function () {
         highlightActiveMenuItem();
     }
 
-    /**
-     * Inicializa os submenus expandíveis
-     */
     function initializeSubmenus() {
         const submenus = document.querySelectorAll('.sidebar-menu-link[data-bs-toggle="collapse"]');
 
@@ -131,9 +123,6 @@ FinanceSystem.UI = (function () {
         }
     }
 
-    /**
-     * Marca o item de menu ativo com base na URL atual
-     */
     function highlightActiveMenuItem() {
         const currentPath = window.location.pathname;
 
@@ -166,9 +155,6 @@ FinanceSystem.UI = (function () {
         });
     }
 
-    /**
-     * Inicializa o auto-fechamento dos alertas
-     */
     function initializeAlerts() {
         const alerts = document.querySelectorAll('.alert-dismissible');
 
@@ -186,9 +172,6 @@ FinanceSystem.UI = (function () {
         }
     }
 
-    /**
-     * Inicializa os dropdowns do Bootstrap
-     */
     function initializeDropdowns() {
         if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
             const dropdownElements = document.querySelectorAll('[data-bs-toggle="dropdown"]');
@@ -220,9 +203,6 @@ FinanceSystem.UI = (function () {
         }
     }
 
-    /**
-     * Inicializa tooltips do Bootstrap
-     */
     function initializeTooltips() {
         if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -232,11 +212,6 @@ FinanceSystem.UI = (function () {
         }
     }
 
-    /**
-     * Inicializa um modal do Bootstrap
-     * @param {string} modalId - ID do elemento modal
-     * @returns {object|null} - Instância do modal ou null
-     */
     function initializeModal(modalId) {
         const modalElement = document.getElementById(modalId);
         if (!modalElement) return null;
@@ -247,10 +222,6 @@ FinanceSystem.UI = (function () {
         return null;
     }
 
-    /**
-     * Mostra um modal do Bootstrap
-     * @param {string} modalId - ID do elemento modal
-     */
     function showModal(modalId) {
         const modal = initializeModal(modalId);
         if (modal) {
@@ -258,10 +229,6 @@ FinanceSystem.UI = (function () {
         }
     }
 
-    /**
-     * Esconde um modal do Bootstrap
-     * @param {string} modalId - ID do elemento modal
-     */
     function hideModal(modalId) {
         const modal = initializeModal(modalId);
         if (modal) {
@@ -269,13 +236,6 @@ FinanceSystem.UI = (function () {
         }
     }
 
-    /**
-     * Mostra uma mensagem de alerta
-     * @param {string} message - Mensagem a ser exibida
-     * @param {string} type - Tipo de alerta (success, danger, warning, info)
-     * @param {string} containerId - ID do elemento onde o alerta será inserido
-     * @param {number} timeout - Tempo em ms para o alerta desaparecer (0 para não desaparecer)
-     */
     function showAlert(message, type = 'info', containerId = 'alert-container', timeout = 15000) {
         const container = document.getElementById(containerId);
         if (!container) return;
@@ -308,10 +268,6 @@ FinanceSystem.UI = (function () {
         }
     }
 
-    /**
-     * Alterna o estado de elemento collapsible
-     * @param {string} elementId - ID do elemento collapsible
-     */
     function toggleCollapse(elementId) {
         const element = document.getElementById(elementId);
         if (!element) return;

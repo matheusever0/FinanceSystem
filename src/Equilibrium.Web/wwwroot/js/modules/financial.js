@@ -7,16 +7,9 @@ var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Modules = FinanceSystem.Modules || {};
 
 FinanceSystem.Modules.Financial = (function () {
-    /**
-     * Inicializa o módulo financeiro
-     */
     function initialize() {
     }
 
-    /**
-     * Inicializa uma máscara de moeda em um campo
-     * @param {string} selector - Seletor do campo
-     */
     function initializeMoneyMask(selector) {
 
         const moneyInput = document.querySelector(selector);
@@ -50,10 +43,6 @@ FinanceSystem.Modules.Financial = (function () {
         }
     }
 
-    /**
-     * Formata um campo de entrada como moeda
-     * @param {HTMLElement} input - Campo a ser formatado
-     */
     function formatCurrencyInput(input) {
         const cursorPosition = input.selectionStart;
         const inputLength = input.value.length;
@@ -76,11 +65,6 @@ FinanceSystem.Modules.Financial = (function () {
         }
     }
 
-    /**
-     * Valida um campo de entrada de moeda
-     * @param {HTMLElement} input - Campo a ser validado
-     * @returns {boolean} - Resultado da validação
-     */
     function validateCurrencyInput(input) {
         let value = input.value;
         value = value.replace(/\./g, '').replace(',', '.');
@@ -107,10 +91,6 @@ FinanceSystem.Modules.Financial = (function () {
         }
     }
 
-    /**
-     * Inicializa o toggle de recorrente
-     * @param {HTMLElement} form - Formulário
-     */
     function initializeRecurringToggle(form) {
         const isRecurringSwitch = form.querySelector('#isRecurringSwitch');
         const isRecurringLabel = form.querySelector('#isRecurringLabel');
@@ -135,11 +115,6 @@ FinanceSystem.Modules.Financial = (function () {
         }
     }
 
-    /**
-     * Inicializa o toggle de status
-     * @param {string} switchSelector - Seletor do switch
-     * @param {string} labelSelector - Seletor do label
-     */
     function initializeStatusToggle(switchSelector, labelSelector) {
         const statusSwitch = document.querySelector(switchSelector);
         const statusLabel = document.querySelector(labelSelector);
@@ -163,14 +138,6 @@ FinanceSystem.Modules.Financial = (function () {
         statusSwitch.addEventListener('change', updateStatusLabel);
     }
 
-    /**
-     * Calcula parcelas para um financiamento
-     * @param {number} totalAmount - Valor total do financiamento
-     * @param {number} interestRate - Taxa de juros (anual)
-     * @param {number} termMonths - Prazo em meses
-     * @param {string} system - Sistema de amortização (PRICE, SAC)
-     * @returns {Array} - Array de objetos com informações das parcelas
-     */
     function calculateInstallments(totalAmount, interestRate, termMonths, system = 'PRICE') {
         if (!totalAmount || !termMonths) {
             return [];
@@ -242,15 +209,6 @@ FinanceSystem.Modules.Financial = (function () {
         return installments;
     }
 
-    /**
-     * Calcula o valor futuro de um investimento
-     * @param {number} presentValue - Valor presente (investimento inicial)
-     * @param {number} rate - Taxa de juros (por período)
-     * @param {number} periods - Número de períodos
-     * @param {number} periodicContribution - Contribuição periódica (opcional)
-     * @param {boolean} contributionAtBeginning - Indica se a contribuição é feita no início do período
-     * @returns {number} - Valor futuro
-     */
     function calculateFutureValue(presentValue, rate, periods, periodicContribution = 0, contributionAtBeginning = false) {
         rate = rate / 100; // Converte percentual para decimal
 
@@ -270,12 +228,6 @@ FinanceSystem.Modules.Financial = (function () {
         return futureValuePV + futureValuePMT;
     }
 
-    /**
-     * Calcula a taxa interna de retorno
-     * @param {Array} cashflows - Array de fluxos de caixa (o primeiro é o investimento inicial, negativo)
-     * @param {number} guess - Estimativa inicial (opcional)
-     * @returns {number} - Taxa interna de retorno
-     */
     function calculateIRR(cashflows, guess = 0.1) {
         if (!cashflows || cashflows.length < 2) {
             return null;
@@ -311,12 +263,6 @@ FinanceSystem.Modules.Financial = (function () {
         return null; // Não convergiu
     }
 
-    /**
-     * Calcula o valor presente líquido
-     * @param {Array} cashflows - Array de fluxos de caixa (o primeiro é o investimento inicial, negativo)
-     * @param {number} rate - Taxa de desconto
-     * @returns {number} - Valor presente líquido
-     */
     function calculateNPV(cashflows, rate) {
         let npv = 0;
 
@@ -327,12 +273,6 @@ FinanceSystem.Modules.Financial = (function () {
         return npv;
     }
 
-    /**
-     * Calcula a derivada do valor presente líquido (para cálculo da TIR)
-     * @param {Array} cashflows - Array de fluxos de caixa
-     * @param {number} rate - Taxa de desconto
-     * @returns {number} - Derivada do NPV
-     */
     function calculateNPVDerivative(cashflows, rate) {
         let derivative = 0;
 
@@ -343,13 +283,6 @@ FinanceSystem.Modules.Financial = (function () {
         return derivative;
     }
 
-    /**
-     * Calcula o valor presente de uma série de pagamentos futuros
-     * @param {number} payment - Valor do pagamento periódico
-     * @param {number} rate - Taxa de juros por período
-     * @param {number} periods - Número de períodos
-     * @returns {number} - Valor presente
-     */
     function calculatePresentValue(payment, rate, periods) {
         rate = rate / 100; // Converte percentual para decimal
 
@@ -360,13 +293,6 @@ FinanceSystem.Modules.Financial = (function () {
         return payment * ((1 - Math.pow(1 + rate, -periods)) / rate);
     }
 
-    /**
-     * Calcula o pagamento periódico para amortizar um empréstimo
-     * @param {number} principal - Valor principal (valor do empréstimo)
-     * @param {number} rate - Taxa de juros por período
-     * @param {number} periods - Número de períodos
-     * @returns {number} - Valor do pagamento periódico
-     */
     function calculatePayment(principal, rate, periods) {
         rate = rate / 100; // Converte percentual para decimal
 
@@ -377,13 +303,6 @@ FinanceSystem.Modules.Financial = (function () {
         return principal * (rate * Math.pow(1 + rate, periods)) / (Math.pow(1 + rate, periods) - 1);
     }
 
-    /**
-     * Calcula o número de períodos necessários para amortizar um empréstimo
-     * @param {number} principal - Valor principal (valor do empréstimo)
-     * @param {number} payment - Valor do pagamento periódico
-     * @param {number} rate - Taxa de juros por período
-     * @returns {number} - Número de períodos
-     */
     function calculatePeriods(principal, payment, rate) {
         rate = rate / 100; // Converte percentual para decimal
 
@@ -394,13 +313,6 @@ FinanceSystem.Modules.Financial = (function () {
         return Math.log(payment / (payment - principal * rate)) / Math.log(1 + rate);
     }
 
-    /**
-     * Calcula a taxa de juros necessária para amortizar um empréstimo
-     * @param {number} principal - Valor principal (valor do empréstimo)
-     * @param {number} payment - Valor do pagamento periódico
-     * @param {number} periods - Número de períodos
-     * @returns {number} - Taxa de juros por período
-     */
     function calculateRate(principal, payment, periods) {
         if (payment * periods <= principal) {
             return 0; // Não é possível amortizar o empréstimo com esses parâmetros
@@ -425,12 +337,6 @@ FinanceSystem.Modules.Financial = (function () {
         return rate * 100; // Converte decimal para percentual
     }
 
-    /**
-     * Calcula o retorno sobre investimento (ROI)
-     * @param {number} initialInvestment - Investimento inicial
-     * @param {number} finalValue - Valor final
-     * @returns {number} - ROI em percentual
-     */
     function calculateROI(initialInvestment, finalValue) {
         if (initialInvestment === 0) {
             return null; // Evita divisão por zero
@@ -439,12 +345,6 @@ FinanceSystem.Modules.Financial = (function () {
         return ((finalValue - initialInvestment) / initialInvestment) * 100;
     }
 
-    /**
-     * Converte um valor monetário para número
-     * @param {string} value - Valor em formato monetário (ex: "R$ 1.234,56", "$1,234.56")
-     * @param {string} currency - Código da moeda (ex: 'BRL', 'USD')
-     * @returns {number} - Valor numérico
-     */
     function parseCurrency(value, currency = 'BRL') {
         if (typeof value === 'number') {
             return value;
@@ -467,12 +367,6 @@ FinanceSystem.Modules.Financial = (function () {
         return parseFloat(value);
     }
 
-    /**
-     * Formata um valor como moeda
-     * @param {number} value - Valor a ser formatado
-     * @param {string} currency - Código da moeda (ex: 'BRL', 'USD')
-     * @returns {string} - Valor formatado
-     */
     function formatCurrency(value, currency = 'BRL') {
         const locales = {
             'BRL': 'pt-BR',
@@ -490,19 +384,10 @@ FinanceSystem.Modules.Financial = (function () {
         }).format(value);
     }
 
-    /**
-     * Formata uma porcentagem
-     * @param {number} value - Valor a ser formatado
-     * @param {number} decimals - Número de casas decimais
-     * @returns {string} - Valor formatado
-     */
     function formatPercent(value, decimals = 2) {
         return value.toFixed(decimals) + '%';
     }
 
-    /**
-     * Inicializa componentes para cartões de crédito
-     */
     function initializeCreditCardComponents() {
         const progressBars = document.querySelectorAll('.credit-card-progress');
 
@@ -525,9 +410,6 @@ FinanceSystem.Modules.Financial = (function () {
         updateLimitsDisplay();
     }
 
-    /**
-     * Atualiza exibição de limites de cartões de crédito
-     */
     function updateLimitsDisplay() {
         const limitDisplays = document.querySelectorAll('.limit-display');
 
@@ -566,9 +448,6 @@ FinanceSystem.Modules.Financial = (function () {
         });
     }
 
-    /**
-     * Calcula próximas datas de fechamento e vencimento de cartões de crédito
-     */
     function calculateNextDates() {
         const cardElements = document.querySelectorAll('.credit-card-dates');
 
@@ -615,18 +494,10 @@ FinanceSystem.Modules.Financial = (function () {
         });
     }
 
-    /**
-     * Formata uma data no padrão brasileiro
-     * @param {Date} date - Data a ser formatada
-     * @returns {string} - Data formatada
-     */
     function formatDate(date) {
         return date.toLocaleDateString('pt-BR');
     }
 
-    /**
-     * Inicializa filtros financeiros
-     */
     function initializeFinancialFilters() {
         const filterButtons = document.querySelectorAll('.payment-filter, .income-filter');
 
@@ -649,10 +520,6 @@ FinanceSystem.Modules.Financial = (function () {
         }
     }
 
-    /**
-     * Filtra tabela financeira por status
-     * @param {string} status - Status para filtro
-     */
     function filterFinancialTable(status) {
         const rows = document.querySelectorAll('.table-payments tbody tr, .table-incomes tbody tr');
 
@@ -670,10 +537,6 @@ FinanceSystem.Modules.Financial = (function () {
         });
     }
 
-    /**
-     * Filtra tabela por texto
-     * @param {string} text - Texto para filtro
-     */
     function filterTableByText(text) {
         const rows = document.querySelectorAll('.table-payments tbody tr, .table-incomes tbody tr');
         text = text.toLowerCase();

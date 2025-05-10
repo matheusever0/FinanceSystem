@@ -7,9 +7,6 @@ var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Modules = FinanceSystem.Modules || {};
 
 FinanceSystem.Modules.Tables = (function () {
-    /**
-     * Inicializa o módulo de tabelas
-     */
     function initialize() {
         initializeDataTables();
         initializeTableFilters();
@@ -19,9 +16,6 @@ FinanceSystem.Modules.Tables = (function () {
         initializeReportTables();
     }
 
-    /**
-     * Inicializa DataTables
-     */
     function initializeDataTables() {
         if (typeof $.fn.DataTable !== 'undefined') {
             $('.datatable').DataTable({
@@ -37,9 +31,6 @@ FinanceSystem.Modules.Tables = (function () {
         }
     }
 
-    /**
-     * Inicializa tabelas específicas dos relatórios
-     */
     function initializeReportTables() {
 
         var paymentsTable = $('#payments-table');
@@ -103,9 +94,6 @@ FinanceSystem.Modules.Tables = (function () {
         }
     }
 
-    /**
-     * Implementa ordenação básica para tabelas sem DataTables
-     */
     function implementBasicTableSorting() {
         const tables = document.querySelectorAll('table.sortable');
 
@@ -128,11 +116,6 @@ FinanceSystem.Modules.Tables = (function () {
         });
     }
 
-    /**
-     * Ordena uma tabela com base na coluna selecionada
-     * @param {HTMLTableElement} table - Tabela a ser ordenada
-     * @param {number} columnIndex - Índice da coluna para ordenação
-     */
     function sortTable(table, columnIndex) {
         const tbody = table.querySelector('tbody');
         const rows = Array.from(tbody.querySelectorAll('tr'));
@@ -171,37 +154,19 @@ FinanceSystem.Modules.Tables = (function () {
         });
     }
 
-    /**
-     * Verifica se um valor é uma data
-     * @param {string} value - Valor a ser verificado
-     * @returns {boolean} - Resultado da verificação
-     */
     function isDate(value) {
         return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value);
     }
 
-    /**
-     * Converte uma string de data para objeto Date
-     * @param {string} dateStr - String de data
-     * @returns {Date} - Objeto Date
-     */
     function parseDate(dateStr) {
         const parts = dateStr.split('/');
         return new Date(parts[2], parts[1] - 1, parts[0]);
     }
 
-    /**
-     * Verifica se um valor é um número
-     * @param {string} value - Valor a ser verificado
-     * @returns {boolean} - Resultado da verificação
-     */
     function isNumber(value) {
         return /^[R$\s]*[\d.,]+%?$/.test(value);
     }
 
-    /**
-     * Inicializa filtros de tabela
-     */
     function initializeTableFilters() {
         const filterInputs = document.querySelectorAll('.table-filter');
 
@@ -225,9 +190,6 @@ FinanceSystem.Modules.Tables = (function () {
         initializeColumnFilters();
     }
 
-    /**
-     * Inicializa filtros por coluna
-     */
     function initializeColumnFilters() {
         const columnFilters = document.querySelectorAll('.column-filter');
 
@@ -258,9 +220,6 @@ FinanceSystem.Modules.Tables = (function () {
         });
     }
 
-    /**
-     * Inicializa exportação de tabela
-     */
     function initializeTableExport() {
         const exportButtons = document.querySelectorAll('.export-table');
 
@@ -283,11 +242,6 @@ FinanceSystem.Modules.Tables = (function () {
         });
     }
 
-    /**
-     * Exporta tabela para CSV
-     * @param {HTMLTableElement} table - Tabela a ser exportada
-     * @param {string} filename - Nome do arquivo
-     */
     function exportTableToCSV(table, filename) {
         const rows = table.querySelectorAll('tr');
         let csv = [];
@@ -309,11 +263,6 @@ FinanceSystem.Modules.Tables = (function () {
         downloadCSV(csv.join('\n'), filename);
     }
 
-    /**
-     * Realiza o download do arquivo CSV
-     * @param {string} csv - Conteúdo CSV
-     * @param {string} filename - Nome do arquivo
-     */
     function downloadCSV(csv, filename) {
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
@@ -328,11 +277,6 @@ FinanceSystem.Modules.Tables = (function () {
         document.body.removeChild(link);
     }
 
-    /**
-     * Exporta tabela para Excel
-     * @param {HTMLTableElement} table - Tabela a ser exportada
-     * @param {string} filename - Nome do arquivo
-     */
     function exportTableToExcel(table, filename) {
         if (typeof $(table).tableExport === 'function') {
             $(table).tableExport({
@@ -345,11 +289,6 @@ FinanceSystem.Modules.Tables = (function () {
         }
     }
 
-    /**
-     * Exporta tabela para PDF
-     * @param {HTMLTableElement} table - Tabela a ser exportada
-     * @param {string} filename - Nome do arquivo
-     */
     function exportTableToPDF(table, filename) {
         if (typeof jsPDF !== 'undefined' && typeof jsPDF.autoTable !== 'undefined') {
             const doc = new jsPDF();
@@ -364,9 +303,6 @@ FinanceSystem.Modules.Tables = (function () {
         }
     }
 
-    /**
-     * Inicializa ações de tabela
-     */
     function initializeTableActions() {
         const actionButtons = document.querySelectorAll('.table-action-btn');
 
@@ -392,9 +328,6 @@ FinanceSystem.Modules.Tables = (function () {
         initializeBulkActions();
     }
 
-    /**
-     * Inicializa checkbox para selecionar/deselecionar todos
-     */
     function initializeSelectAll() {
         const selectAllCheckbox = document.getElementById('select-all');
         if (selectAllCheckbox) {
@@ -407,9 +340,6 @@ FinanceSystem.Modules.Tables = (function () {
         }
     }
 
-    /**
-     * Inicializa ações em massa
-     */
     function initializeBulkActions() {
         const bulkActionButton = document.getElementById('bulk-action-btn');
         if (bulkActionButton) {
@@ -438,11 +368,6 @@ FinanceSystem.Modules.Tables = (function () {
         }
     }
 
-    /**
-     * Alterna o status de um item
-     * @param {string} id - ID do item
-     * @param {HTMLElement} button - Botão de toggle
-     */
     function toggleStatus(id, button) {
         const url = button.getAttribute('data-url');
         const currentStatus = button.getAttribute('data-status');
@@ -489,11 +414,6 @@ FinanceSystem.Modules.Tables = (function () {
             });
     }
 
-    /**
-     * Executa uma ação em massa
-     * @param {string} action - Ação a ser executada
-     * @param {Array} ids - IDs dos itens selecionados
-     */
     function executeBulkAction(action, ids) {
         const url = document.getElementById('bulk-action-form').getAttribute('data-url');
         const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
@@ -520,9 +440,6 @@ FinanceSystem.Modules.Tables = (function () {
             });
     }
 
-    /**
-     * Inicializa ordenação de tabelas
-     */
     function initializeTableSort() {
         document.querySelectorAll('table.table-sort').forEach(table => {
             const headers = table.querySelectorAll('th[data-sort]');
@@ -553,12 +470,6 @@ FinanceSystem.Modules.Tables = (function () {
         });
     }
 
-    /**
-     * Ordena tabela por coluna específica
-     * @param {HTMLTableElement} table - Tabela a ser ordenada
-     * @param {string} column - Nome da coluna para ordenação
-     * @param {string} direction - Direção da ordenação (asc, desc)
-     */
     function sortTableByColumn(table, column, direction) {
         const tbody = table.querySelector('tbody');
         const rows = Array.from(tbody.querySelectorAll('tr'));
@@ -587,12 +498,6 @@ FinanceSystem.Modules.Tables = (function () {
         rows.forEach(row => tbody.appendChild(row));
     }
 
-    /**
-     * Filtra tabela com base em valores de filtro
-     * @param {string} tableId - ID da tabela
-     * @param {string} filterValue - Valor do filtro
-     * @param {number|string} columnIndex - Índice ou nome da coluna (opcional)
-     */
     function filterTable(tableId, filterValue, columnIndex) {
         const table = document.getElementById(tableId);
         if (!table) return;
@@ -622,12 +527,6 @@ FinanceSystem.Modules.Tables = (function () {
         });
     }
 
-    /**
-     * Inicializa pesquisa em tabela
-     * @param {string} inputSelector - Seletor do campo de pesquisa
-     * @param {string} tableId - ID da tabela
-     * @param {number|string} columnIndex - Índice ou nome da coluna (opcional)
-     */
     function initializeTableSearch(inputSelector, tableId, columnIndex) {
         const searchInput = document.querySelector(inputSelector);
         if (!searchInput) return;
@@ -637,13 +536,6 @@ FinanceSystem.Modules.Tables = (function () {
         });
     }
 
-    /**
-     * Adiciona linha à tabela
-     * @param {string} tableId - ID da tabela
-     * @param {Array} cells - Array de células da linha
-     * @param {Object} options - Opções adicionais (classes, atributos, etc.)
-     * @returns {HTMLTableRowElement} - Elemento da linha adicionada
-     */
     function addTableRow(tableId, cells, options = {}) {
         const table = document.getElementById(tableId);
         if (!table) return null;
@@ -698,13 +590,6 @@ FinanceSystem.Modules.Tables = (function () {
         return row;
     }
 
-    /**
-     * Remove uma linha da tabela
-     * @param {HTMLElement} row - Elemento da linha ou botão dentro da linha
-     * @param {boolean} withConfirmation - Indica se deve pedir confirmação
-     * @param {string} message - Mensagem de confirmação
-     * @returns {boolean} - Indica se a linha foi removida
-     */
     function removeTableRow(row, withConfirmation = true, message = 'Tem certeza que deseja remover este item?') {
         if (!row.tagName || row.tagName.toLowerCase() !== 'tr') {
             row = row.closest('tr');
@@ -720,11 +605,6 @@ FinanceSystem.Modules.Tables = (function () {
         return true;
     }
 
-    /**
-     * Limpa todas as linhas de uma tabela
-     * @param {string} tableId - ID da tabela
-     * @param {boolean} keepHeader - Indica se deve manter o cabeçalho
-     */
     function clearTable(tableId, keepHeader = true) {
         const table = document.getElementById(tableId);
         if (!table) return;

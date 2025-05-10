@@ -7,20 +7,15 @@ var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Pages = FinanceSystem.Pages || {};
 
 FinanceSystem.Pages.Users = (function () {
-    /**
-     * Inicializa a página de usuários
-     */
     function initialize() {
 
         initializeUserForm();
         initializeUsersList();
         initializeUserDetails();
+        initEmailAssistant();
 
     }
 
-    /**
-     * Inicializa formulário de usuário
-     */
     function initializeUserForm() {
         const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
 
@@ -31,9 +26,6 @@ FinanceSystem.Pages.Users = (function () {
         setupFormValidation(form);
     }
 
-    /**
-     * Inicializa o gerenciador de perfis (roles)
-     */
     function initializeRoleManager() {
         const container = document.querySelector('.card-body[data-is-read-only]');
 
@@ -123,9 +115,6 @@ FinanceSystem.Pages.Users = (function () {
         updateRoleSelector();
     }
 
-    /**
-     * Atualiza o seletor de perfis para esconder as opções já selecionadas
-     */
     function updateRoleSelector() {
         const roleSelector = document.getElementById('roleSelector');
         if (!roleSelector) return;
@@ -142,9 +131,6 @@ FinanceSystem.Pages.Users = (function () {
         });
     }
 
-    /**
-     * Inicializa o toggle de status (ativo/inativo)
-     */
     function initializeStatusToggle() {
         const statusSwitch = document.getElementById('IsActive');
         if (!statusSwitch) return;
@@ -169,10 +155,6 @@ FinanceSystem.Pages.Users = (function () {
         statusSwitch.addEventListener('change', updateStatusLabel);
     }
 
-    /**
-     * Configura validação personalizada para o formulário
-     * @param {HTMLFormElement} form - Formulário
-     */
     function setupFormValidation(form) {
         if (!form) return;
 
@@ -234,10 +216,6 @@ FinanceSystem.Pages.Users = (function () {
         });
     }
 
-    /**
-     * Valida o nome de usuário
-     * @param {HTMLElement} field - Campo a ser validado
-     */
     function validateUsername(field) {
         const value = field.value.trim();
 
@@ -253,10 +231,6 @@ FinanceSystem.Pages.Users = (function () {
         }
     }
 
-    /**
-     * Valida o email
-     * @param {HTMLElement} field - Campo a ser validado
-     */
     function validateEmail(field) {
         const value = field.value.trim();
         const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -270,10 +244,6 @@ FinanceSystem.Pages.Users = (function () {
         }
     }
 
-    /**
-     * Valida a senha
-     * @param {HTMLElement} field - Campo a ser validado
-     */
     function validatePassword(field) {
         const isEditMode = field.closest('form').getAttribute('asp-action') === 'Edit';
         if (isEditMode && field.value === '') {
@@ -294,11 +264,6 @@ FinanceSystem.Pages.Users = (function () {
         }
     }
 
-    /**
-     * Mostra mensagem de erro para um campo
-     * @param {HTMLElement} input - Campo com erro
-     * @param {string} message - Mensagem de erro
-     */
     function showFieldError(input, message) {
         if (FinanceSystem.Validation && FinanceSystem.Validation.showFieldError) {
             FinanceSystem.Validation.showFieldError(input, message);
@@ -315,10 +280,6 @@ FinanceSystem.Pages.Users = (function () {
         input.classList.add('is-invalid');
     }
 
-    /**
-     * Remove mensagem de erro de um campo
-     * @param {HTMLElement} input - Campo
-     */
     function clearFieldError(input) {
         if (FinanceSystem.Validation && FinanceSystem.Validation.clearFieldError) {
             FinanceSystem.Validation.clearFieldError(input);
@@ -332,9 +293,6 @@ FinanceSystem.Pages.Users = (function () {
         input.classList.remove('is-invalid');
     }
 
-    /**
-     * Inicializa a lista de usuários
-     */
     function initializeUsersList() {
         const usersList = document.querySelector('.table-users');
         if (!usersList) return;
@@ -352,9 +310,6 @@ FinanceSystem.Pages.Users = (function () {
         initializeUserActionButtons();
     }
 
-    /**
-     * Inicializa DataTables para a tabela de usuários
-     */
     function initializeUsersDataTable() {
         if (typeof $.fn.DataTable !== 'undefined') {
             $('.table-users').DataTable({
@@ -373,9 +328,6 @@ FinanceSystem.Pages.Users = (function () {
         }
     }
 
-    /**
-     * Inicializa botões de ação para usuários
-     */
     function initializeUserActionButtons() {
         const deleteButtons = document.querySelectorAll('.btn-delete-user');
         deleteButtons.forEach(button => {
@@ -397,12 +349,6 @@ FinanceSystem.Pages.Users = (function () {
         });
     }
 
-    /**
-     * Alterna o status de um usuário
-     * @param {string} userId - ID do usuário
-     * @param {string} currentStatus - Status atual
-     * @param {HTMLElement} button - Botão de toggle
-     */
     function toggleUserStatus(userId, currentStatus, button) {
         const url = button.getAttribute('data-url');
         if (!url) return;
@@ -460,18 +406,12 @@ FinanceSystem.Pages.Users = (function () {
             });
     }
 
-    /**
-     * Inicializa a página de detalhes do usuário
-     */
     function initializeUserDetails() {
         initializeUserTabs();
 
         initializeActivityLog();
     }
 
-    /**
-     * Inicializa abas na página de detalhes
-     */
     function initializeUserTabs() {
         const tabLinks = document.querySelectorAll('.user-tab-link');
         if (tabLinks.length === 0) return;
@@ -500,9 +440,6 @@ FinanceSystem.Pages.Users = (function () {
         }
     }
 
-    /**
-     * Inicializa histórico de atividades
-     */
     function initializeActivityLog() {
         const activityLog = document.querySelector('.activity-log');
         if (!activityLog) return;
@@ -515,9 +452,6 @@ FinanceSystem.Pages.Users = (function () {
         }
     }
 
-    /**
-     * Carrega mais atividades no histórico
-     */
     function loadMoreActivities() {
         const activityLog = document.querySelector('.activity-log');
         const loadMoreBtn = document.getElementById('load-more-activities');
@@ -553,6 +487,85 @@ FinanceSystem.Pages.Users = (function () {
             });
     }
 
+    function initEmailAssistant() {
+        const commonProviders = [
+            '@gmail.com',
+            '@hotmail.com',
+            '@outlook.com',
+            '@yahoo.com',
+            '@icloud.com',
+            '@protonmail.com',
+            '@live.com',
+            '@uol.com.br',
+            '@bol.com.br',
+            '@terra.com.br'
+        ];
+
+        const emailFields = document.querySelectorAll('input[type="email"], input[id*="Email"], input[name*="Email"]');
+
+        emailFields.forEach(field => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'email-field-wrapper position-relative';
+
+            field.parentNode.insertBefore(wrapper, field);
+            wrapper.appendChild(field);
+
+            const dropdownBtn = document.createElement('button');
+            dropdownBtn.className = 'btn btn-sm btn-outline-secondary dropdown-toggle email-provider-toggle';
+            dropdownBtn.type = 'button';
+            dropdownBtn.innerHTML = '<i class="fas fa-at"></i>';
+            dropdownBtn.setAttribute('data-bs-toggle', 'dropdown');
+            dropdownBtn.setAttribute('aria-expanded', 'false');
+
+            const dropdown = document.createElement('ul');
+            dropdown.className = 'dropdown-menu email-providers-dropdown';
+
+            commonProviders.forEach(provider => {
+                const item = document.createElement('li');
+                const link = document.createElement('a');
+                link.className = 'dropdown-item';
+                link.href = '#';
+                link.textContent = provider;
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    let username = field.value;
+                    if (username.includes('@')) {
+                        username = username.split('@')[0];
+                    }
+
+                    field.value = username + provider;
+
+                    const event = new Event('change');
+                    field.dispatchEvent(event);
+                });
+
+                item.appendChild(link);
+                dropdown.appendChild(item);
+            });
+
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'input-group';
+
+            field.parentNode.insertBefore(inputGroup, field);
+            inputGroup.appendChild(field);
+            inputGroup.appendChild(dropdownBtn);
+            inputGroup.appendChild(dropdown);
+
+            const style = document.createElement('style');
+            style.textContent = `
+            .email-field-wrapper {
+                position: relative;
+            }
+            .email-providers-dropdown {
+                width: auto;
+                min-width: 120px;
+            }
+        `;
+            document.head.appendChild(style);
+        });
+    }
+
     return {
         initialize: initialize,
         initializeUserForm: initializeUserForm,
@@ -560,6 +573,7 @@ FinanceSystem.Pages.Users = (function () {
         initializeUserDetails: initializeUserDetails,
         updateRoleSelector: updateRoleSelector,
         initializeStatusToggle: initializeStatusToggle,
-        initializeRoleManager: initializeRoleManager
+        initializeRoleManager: initializeRoleManager,
+        initEmailAssistant: initEmailAssistant
     };
 })();

@@ -7,18 +7,13 @@ var FinanceSystem = FinanceSystem || {};
 FinanceSystem.Pages = FinanceSystem.Pages || {};
 
 FinanceSystem.Pages.CreditCards = (function () {
-    /**
-     * Inicializa a página de cartões de crédito
-     */
+
     function initialize() {
             initializeCreditCardForm();
             initializeCreditCardsList();
             initializeCreditCardDetails();
     }
 
-    /**
-     * Inicializa formulário de cartão de crédito
-     */
     function initializeCreditCardForm() {
         const cardForm = document.getElementById('credit-card-form');
 
@@ -27,9 +22,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         initializeFieldValidations();
     }
 
-    /**
-     * Inicializa máscaras para valores monetários
-     */
     function initializeMoneyMasks() {
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
             FinanceSystem.Modules.Financial.initializeMoneyMask('#Limit');
@@ -53,10 +45,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         }
     }
 
-    /**
-     * Formata campo de entrada monetária
-     * @param {HTMLElement} input - Campo a ser formatado
-     */
     function formatCurrencyInput(input) {
         const cursorPosition = input.selectionStart;
         const inputLength = input.value.length;
@@ -79,9 +67,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         }
     }
 
-    /**
-     * Inicializa validações de campos específicos
-     */
     function initializeFieldValidations() {
         const closingDayField = document.getElementById('ClosingDay');
         const dueDayField = document.getElementById('DueDay');
@@ -132,11 +117,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         setupFormValidation();
     }
 
-    /**
-     * Valida um campo de dia do mês
-     * @param {HTMLElement} field - Campo a ser validado
-     * @param {string} fieldName - Nome do campo para mensagem de erro
-     */
     function validateDayField(field, fieldName) {
         const value = parseInt(field.value, 10);
 
@@ -151,16 +131,10 @@ FinanceSystem.Pages.CreditCards = (function () {
         }
     }
 
-    /**
-     * Exibe mensagem de erro quando o limite disponível é maior que o limite total
-     */
     function showLimitError() {
         alert('O limite disponível não pode ser maior que o limite total');
     }
 
-    /**
-     * Configura validação do formulário
-     */
     function setupFormValidation() {
         const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"]');
 
@@ -176,11 +150,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         }
     }
 
-    /**
-     * Valida o formulário de cartão de crédito
-     * @param {Event} event - Evento de submissão
-     * @returns {boolean} - Resultado da validação
-     */
     function validateCreditCardForm(event) {
         let isValid = true;
         const form = event.target;
@@ -243,11 +212,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         return isValid;
     }
 
-    /**
-     * Mostra mensagem de erro para um campo
-     * @param {HTMLElement} input - Campo com erro
-     * @param {string} message - Mensagem de erro
-     */
     function showFieldError(input, message) {
         if (FinanceSystem.Validation && FinanceSystem.Validation.showFieldError) {
             FinanceSystem.Validation.showFieldError(input, message);
@@ -264,9 +228,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         input.classList.add('is-invalid');
     }
 
-    /**
-     * Inicializa a lista de cartões de crédito
-     */
     function initializeCreditCardsList() {
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
             FinanceSystem.Modules.Financial.initializeCreditCardComponents();
@@ -278,9 +239,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         initializeActionButtons();
     }
 
-    /**
-     * Inicializa barras de progresso para cartões
-     */
     function initializeProgressBars() {
         const progressBars = document.querySelectorAll('.credit-card-progress');
 
@@ -301,9 +259,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         });
     }
 
-    /**
-     * Atualiza exibição de limites
-     */
     function updateLimitsDisplay() {
         const limitDisplays = document.querySelectorAll('.limit-display');
 
@@ -342,9 +297,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         });
     }
 
-    /**
-     * Inicializa botões de ação para cartões
-     */
     function initializeActionButtons() {
         const deleteButtons = document.querySelectorAll('.delete-card-btn');
 
@@ -357,11 +309,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         });
     }
 
-    /**
-     * Formata um valor como moeda brasileira
-     * @param {number} value - Valor a ser formatado
-     * @returns {string} - Valor formatado
-     */
     function formatCurrency(value) {
         if (FinanceSystem.Core && FinanceSystem.Core.formatCurrency) {
             return FinanceSystem.Core.formatCurrency(value);
@@ -373,9 +320,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         }).format(value);
     }
 
-    /**
-     * Inicializa a página de detalhes do cartão de crédito
-     */
     function initializeCreditCardDetails() {
         calculateNextDates();
 
@@ -387,9 +331,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         }
     }
 
-    /**
-     * Calcula próximas datas de fechamento e vencimento
-     */
     function calculateNextDates() {
         if (FinanceSystem.Modules && FinanceSystem.Modules.Financial) {
             FinanceSystem.Modules.Financial.calculateNextDates();
@@ -441,11 +382,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         });
     }
 
-    /**
-     * Formata uma data no padrão brasileiro
-     * @param {Date} date - Data a ser formatada
-     * @returns {string} - Data formatada
-     */
     function formatDate(date) {
         if (FinanceSystem.Core && FinanceSystem.Core.formatDate) {
             return FinanceSystem.Core.formatDate(date);
@@ -454,9 +390,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         return date.toLocaleDateString('pt-BR');
     }
 
-    /**
-     * Inicializa gráficos na página de detalhes
-     */
     function initializeCharts() {
         const usageChartCanvas = document.getElementById('usageChart');
         if (usageChartCanvas) {
@@ -491,12 +424,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         }
     }
 
-    /**
-     * Cria gráfico de pizza para uso do limite (fallback)
-     * @param {HTMLCanvasElement} canvas - Elemento canvas
-     * @param {number} usedLimit - Valor utilizado
-     * @param {number} availableLimit - Valor disponível
-     */
     function createUsagePieChart(canvas, usedLimit, availableLimit) {
         new Chart(canvas, {
             type: 'doughnut',
@@ -538,12 +465,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         });
     }
 
-    /**
-     * Cria gráfico de pizza para categorias (fallback)
-     * @param {HTMLCanvasElement} canvas - Elemento canvas
-     * @param {Array} labels - Rótulos das categorias
-     * @param {Array} values - Valores por categoria
-     */
     function createCategoryPieChart(canvas, labels, values) {
         new Chart(canvas, {
             type: 'doughnut',
@@ -584,9 +505,6 @@ FinanceSystem.Pages.CreditCards = (function () {
         });
     }
 
-    /**
-     * Inicializa tabela de transações do cartão
-     */
     function initializeTransactionsTable() {
         if (typeof $.fn.DataTable !== 'undefined') {
             $('.transactions-table').DataTable({
