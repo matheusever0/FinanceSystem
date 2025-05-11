@@ -1,143 +1,119 @@
-﻿@model Equilibrium.Web.Models.Income.UpdateIncomeModel
+﻿@model UpdateIncomeModel
+@using Equilibrium.Web.Models.Income
 @{
     ViewData["Title"] = "Editar Receita";
+    var incomeTypes = ViewBag.IncomeTypes as IEnumerable<Equilibrium.Web.Models.IncomeType.IncomeTypeModel>;
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/pages/income.css" asp-append-version="true">
-}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between mb-3">
+        <partial name="_Partials/_BackButton" model='(Action: "Details", Controller: "Incomes", Text: "Voltar")' />
+    </div>
 
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <partial name="_Partials/_CardHeader" model='(Title: "Editar Receita", BadgeText: "", BadgeClass: "")' />
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
 
-<div class="d-flex justify-content-end mb-3">
-    <a asp-action="Details" asp-route-id="@ViewContext.RouteData.Values["id"]" class="btn btn-sm btn-secondary">
-        <i class="fas fa-arrow-left"></i> Voltar
-    </a>
-</div>
-
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Informações da Receita</h6>
-            </div>
-            <div class="card-body">
-                <form asp-action="Edit" asp-route-id="@Model.Id" method="post" data-page="income">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <input type="hidden" name="id" value="@ViewContext.RouteData.Values["id"]" />
-
-                    <div class="row mb-3">
-                        <div class="col-md-8">
-                            <div class="form-group">
-                                <label asp-for="Description" class="control-label"></label>
-                                <input asp-for="Description" class="form-control" />
-                                <span asp-validation-for="Description" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label asp-for="Amount" class="control-label"></label>
-                                <div class="input-group">
-                                    <span class="input-group-text">R$</span>
-                                    <input asp-for="Amount" class="form-control money" />
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Description" class="form-label"></label>
+                                    <input asp-for="Description" class="form-control" />
+                                    <span asp-validation-for="Description" class="text-danger"></span>
                                 </div>
-                                <span asp-validation-for="Amount" class="text-danger"></span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="DueDate" class="control-label"></label>
-                                <input asp-for="DueDate" class="form-control" type="date" />
-                                <span asp-validation-for="DueDate" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="ReceivedDate" class="control-label"></label>
-                                <input asp-for="ReceivedDate" class="form-control" type="date" />
-                                <span asp-validation-for="ReceivedDate" class="text-danger"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="IncomeTypeId" class="control-label"></label>
-                                <select asp-for="IncomeTypeId" class="form-select" asp-items="@(new SelectList(ViewBag.IncomeTypes, "Id", "Name"))">
-                                    <option value="">Selecione um tipo...</option>
-                                </select>
-                                <span asp-validation-for="IncomeTypeId" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="IsRecurring" class="control-label"></label>
-                                <div class="form-check form-switch mt-2">
-                                    <input asp-for="IsRecurring" class="form-check-input" type="checkbox" id="isRecurringSwitch" />
-                                    <label class="form-check-label" for="isRecurringSwitch" id="isRecurringLabel">Não</label>
+                                <div class="mb-3">
+                                    <label asp-for="Amount" class="form-label"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input asp-for="Amount" class="form-control money-input" type="text" />
+                                    </div>
+                                    <span asp-validation-for="Amount" class="text-danger"></span>
                                 </div>
-                                <span asp-validation-for="IsRecurring" class="text-danger"></span>
+
+                                <div class="mb-3">
+                                    <label asp-for="IncomeTypeId" class="form-label"></label>
+                                    <select asp-for="IncomeTypeId" class="form-select">
+                                        <option value="">Selecione o tipo de receita</option>
+                                        @if (incomeTypes != null)
+                                        {
+                                            @foreach (var type in incomeTypes)
+                                            {
+                                                <option value="@type.Id">@type.Name</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="IncomeTypeId" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="DueDate" class="form-label"></label>
+                                    <input asp-for="DueDate" class="form-control" type="date" />
+                                    <span asp-validation-for="DueDate" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="ReceivedDate" class="form-label"></label>
+                                    <input asp-for="ReceivedDate" class="form-control" type="date" />
+                                    <span asp-validation-for="ReceivedDate" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Status" class="form-label"></label>
+                                    <select asp-for="Status" class="form-select">
+                                        <option value="1">Pendente</option>
+                                        <option value="2">Recebido</option>
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="IsRecurring" class="form-label d-block"></label>
+                                    <div class="form-check form-switch">
+                                        <input asp-for="IsRecurring" class="form-check-input" type="checkbox" />
+                                        <label class="form-check-label" for="IsRecurring">Repetir mensalmente</label>
+                                    </div>
+                                    <span asp-validation-for="IsRecurring" class="text-danger"></span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="Status" class="control-label"></label>
-                                <select asp-for="Status" class="form-select">
-                                    <option value="1">Pendente</option>
-                                    <option value="2">Recebido</option>
-                                    <option value="3">Cancelado</option>
-                                </select>
-                                <span asp-validation-for="Status" class="text-danger"></span>
-                            </div>
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label"></label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
                         </div>
-                    </div>
 
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <div class="form-group">
-                                <label asp-for="Notes" class="control-label"></label>
-                                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
-                                <span asp-validation-for="Notes" class="text-danger"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Salvar
-                        </button>
-                        <a asp-action="Details" asp-route-id="@ViewContext.RouteData.Values["id"]" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Cancelar
-                        </a>
-                    </div>
-                </form>
+                        <partial name="_Partials/_FormActions" model='(CancelAction: "Details", CancelController: "Incomes", IsEdit: true)' />
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-lg-4">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Informações</h6>
-            </div>
-            <div class="card-body">
-                <p>Atualize os dados da sua receita:</p>
-                <ul>
-                    <li><strong>Descrição:</strong> Um nome ou identificação para sua receita.</li>
-                    <li><strong>Valor:</strong> O valor da receita.</li>
-                    <li><strong>Data de Vencimento:</strong> A data em que você espera receber.</li>
-                    <li><strong>Data de Recebimento:</strong> Caso já tenha recebido, informe a data.</li>
-                    <li><strong>Tipo de Receita:</strong> Categorize sua receita.</li>
-                    <li><strong>Recorrente:</strong> Marque se esta receita se repete regularmente.</li>
-                    <li><strong>Status:</strong> Situação atual da receita.</li>
-                </ul>
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle"></i> Atenção: Não é possível alterar o número de parcelas de uma receita já criada.
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <partial name="_Partials/_CardHeader" model='(Title: "Informações", BadgeText: "", BadgeClass: "")' />
+                <div class="card-body">
+                    <p>Altere os dados da sua receita:</p>
+                    <ul>
+                        <li><strong>Descrição:</strong> Nome ou identificação da receita.</li>
+                        <li><strong>Valor:</strong> Valor a ser recebido.</li>
+                        <li><strong>Tipo de Receita:</strong> Categoria da receita.</li>
+                        <li><strong>Data de Vencimento:</strong> Data prevista para recebimento.</li>
+                        <li><strong>Data de Recebimento:</strong> Preencha se já foi recebida.</li>
+                        <li><strong>Status:</strong> Situação atual da receita.</li>
+                        <li><strong>Recorrente:</strong> Marque se esta receita se repete mensalmente.</li>
+                        <li><strong>Observações:</strong> Informações adicionais sobre a receita.</li>
+                    </ul>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Atenção: Alterar o valor ou a data de uma receita já recebida pode exigir ajustes manuais em seus registros financeiros.
+                    </div>
                 </div>
             </div>
         </div>

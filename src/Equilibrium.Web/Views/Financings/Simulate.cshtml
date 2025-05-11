@@ -10,17 +10,13 @@
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between mb-3">
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Voltar
-        </a>
+        <partial name="_Partials/_BackButton" model='(Action: "Index", Controller: "Financings", Text: "Voltar")' />
     </div>
 
     <div class="row">
         <div class="col-lg-8">
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Parâmetros da Simulação</h6>
-                </div>
+                <partial name="_Partials/_CardHeader" model='(Title: "Parâmetros da Simulação", BadgeText: "", BadgeClass: "")' />
                 <div class="card-body">
                     <form asp-action="Simulate" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -81,9 +77,7 @@
         </div>
         <div class="col-lg-4">
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Informações</h6>
-                </div>
+                <partial name="_Partials/_CardHeader" model='(Title: "Informações", BadgeText: "", BadgeClass: "")' />
                 <div class="card-body">
                     <p>Simule um financiamento para avaliar os resultados:</p>
                     <ul>
