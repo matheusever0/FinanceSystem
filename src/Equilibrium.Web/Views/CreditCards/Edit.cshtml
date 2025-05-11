@@ -6,15 +6,11 @@
 
 <div class="container-fluid">
     <div class="d-flex justify-content-end mb-3">
-        <a asp-action="Details" asp-route-id="@ViewContext.RouteData.Values["id"]" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Voltar
-        </a>
+        <partial name="_Partials/_BackButton" model='(Action: "Details", Controller: "CreditCards", Text: "Voltar")' />
     </div>
 
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Informações do Cartão</h6>
-        </div>
+        <partial name="_Partials/_CardHeader" model='(Title: "Informações do Cartão", BadgeText: "", BadgeClass: "")' />
         <div class="card-body">
             <form asp-action="Edit" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -60,12 +56,7 @@
                     Alguns detalhes como bandeira, últimos 4 dígitos e método de pagamento não podem ser alterados após a criação do cartão.
                 </div>
 
-                <div class="mb-3">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i> Salvar
-                    </button>
-                    <a asp-action="Details" asp-route-id="@ViewContext.RouteData.Values["id"]" class="btn btn-secondary">Cancelar</a>
-                </div>
+                <partial name="_Partials/_FormActions" model='(CancelAction: "Details", CancelController: "CreditCards", IsEdit: true)' />
             </form>
         </div>
     </div>

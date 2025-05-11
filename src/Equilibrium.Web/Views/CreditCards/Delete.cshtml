@@ -4,13 +4,12 @@
 @{
     ViewData["Title"] = "Excluir Cartão de Crédito";
     var paymentsWithCard = ViewBag.PaymentsWithCard as IEnumerable<PaymentModel> ?? new List<PaymentModel>();
-    var hasPendingPayments = paymentsWithCard.Any(p => p.Status == 1 || p.Status == 3); }
+    var hasPendingPayments = paymentsWithCard.Any(p => p.Status == 1 || p.Status == 3);
+}
 
 <div class="container-fluid">
     <div class="d-flex justify-content-end mb-3">
-        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Voltar
-        </a>
+        <partial name="_Partials/_BackButton" model='(Action: "Details", Controller: "CreditCards", Text: "Voltar")' />
     </div>
 
     <div class="alert alert-danger mb-4">
@@ -23,39 +22,20 @@
     <div class="row">
         <div class="col-md-6">
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Detalhes do Cartão</h6>
-                </div>
+                <partial name="_Partials/_CardHeader" model='(Title: "Detalhes do Cartão", BadgeText: "", BadgeClass: "")' />
                 <div class="card-body">
-                    <div class="mb-3">
-                        <h6 class="small font-weight-bold text-muted">Nome</h6>
-                        <p>@Model.Name</p>
-                    </div>
-                    <div class="mb-3">
-                        <h6 class="small font-weight-bold text-muted">Bandeira</h6>
-                        <p>@Model.CardBrand (*@Model.LastFourDigits)</p>
-                    </div>
-                    <div class="mb-3">
-                        <h6 class="small font-weight-bold text-muted">Limite</h6>
-                        <p>@Model.GetFormattedLimit()</p>
-                    </div>
-                    <div class="mb-3">
-                        <h6 class="small font-weight-bold text-muted">Disponível</h6>
-                        <p>@Model.GetFormattedAvailableLimit()</p>
-                    </div>
-                    <div class="mb-3">
-                        <h6 class="small font-weight-bold text-muted">Fechamento / Vencimento</h6>
-                        <p>Fecha dia @Model.ClosingDay / Vence dia @Model.DueDay</p>
-                    </div>
+                    <partial name="_Partials/_FinancialDataItem" model='(Label: "Nome", Value: Model.Name, SecondaryText: "")' />
+                    <partial name="_Partials/_FinancialDataItem" model='(Label: "Bandeira", Value: Model.CardBrand + " (*" + Model.LastFourDigits + ")", SecondaryText: "")' />
+                    <partial name="_Partials/_FinancialDataItem" model='(Label: "Limite", Value: Model.GetFormattedLimit(), SecondaryText: "")' />
+                    <partial name="_Partials/_FinancialDataItem" model='(Label: "Disponível", Value: Model.GetFormattedAvailableLimit(), SecondaryText: "")' />
+                    <partial name="_Partials/_FinancialDataItem" model='(Label: "Fechamento / Vencimento", Value: "Fecha dia " + Model.ClosingDay + " / Vence dia " + Model.DueDay, SecondaryText: "")' />
                 </div>
             </div>
         </div>
 
         <div class="col-md-6">
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-danger">Confirmar Exclusão</h6>
-                </div>
+                <partial name="_Partials/_CardHeader" model='(Title: "Confirmar Exclusão", BadgeText: "", BadgeClass: "bg-danger")' />
                 <div class="card-body">
                     @if (hasPendingPayments)
                     {

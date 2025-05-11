@@ -16,9 +16,7 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-end mb-3">
         <div>
-            <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Voltar
-            </a>
+            <partial name="_Partials/_BackButton" model='(Action: "Index", Controller: "CreditCards", Text: "Voltar")' />
             @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.edit"))
             {
                 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
@@ -32,47 +30,20 @@
         <!-- Informações do Cartão -->
         <div class="col-lg-6">
             <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Informações do Cartão</h6>
-                    <span class="badge bg-primary">@Model.CardBrand</span>
-                </div>
+                <partial name="_Partials/_CardHeader" model='(Title: "Informações do Cartão", BadgeText: Model.CardBrand, BadgeClass: "bg-primary")' />
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Nome</h5>
-                                <p>@Model.Name</p>
-                            </div>
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Últimos 4 Dígitos</h5>
-                                <p>@Model.LastFourDigits</p>
-                            </div>
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Dia de Fechamento</h5>
-                                <p>@Model.ClosingDay</p>
-                            </div>
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Dia de Vencimento</h5>
-                                <p>@Model.DueDay</p>
-                            </div>
+                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Nome", Value: Model.Name, SecondaryText: "")' />
+                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Últimos 4 Dígitos", Value: Model.LastFourDigits, SecondaryText: "")' />
+                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Dia de Fechamento", Value: Model.ClosingDay.ToString(), SecondaryText: "")' />
+                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Dia de Vencimento", Value: Model.DueDay.ToString(), SecondaryText: "")' />
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Limite Total</h5>
-                                <p>@Model.GetFormattedLimit()</p>
-                            </div>
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Limite Disponível</h5>
-                                <p>@Model.GetFormattedAvailableLimit()</p>
-                            </div>
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Limite Utilizado</h5>
-                                <p>@Model.GetFormattedUsedLimit() (@Model.GetFormattedUsedPercentage())</p>
-                            </div>
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Data de Criação</h5>
-                                <p>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
-                            </div>
+                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Limite Total", Value: Model.GetFormattedLimit(), SecondaryText: "")' />
+                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Limite Disponível", Value: Model.GetFormattedAvailableLimit(), SecondaryText: "")' />
+                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Limite Utilizado", Value: Model.GetFormattedUsedLimit() + " (" + Model.GetFormattedUsedPercentage() + ")", SecondaryText: "")' />
+                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Data de Criação", Value: Model.CreatedAt.ToString("dd/MM/yyyy HH:mm"), SecondaryText: "")' />
                         </div>
                     </div>
 
@@ -90,9 +61,7 @@
         <!-- Ações -->
         <div class="col-lg-6">
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Ações</h6>
-                </div>
+                <partial name="_Partials/_CardHeader" model='(Title: "Ações", BadgeText: "", BadgeClass: "")' />
                 <div class="card-body">
                     <a asp-controller="Payments" asp-action="Create" asp-route-paymentMethodId="@Model.PaymentMethodId" asp-route-creditCardId="@Model.Id" class="btn btn-success w-100 mb-3">
                         <i class="fas fa-plus me-1"></i> Criar Novo Pagamento com Este Cartão
@@ -119,9 +88,7 @@
             </div>
 
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Data de Pagamento da Fatura</h6>
-                </div>
+                <partial name="_Partials/_CardHeader" model='(Title: "Data de Pagamento da Fatura", BadgeText: "", BadgeClass: "")' />
                 <div class="card-body">
                     <div class="text-center">
                         @{
@@ -132,7 +99,7 @@
                             DateTime nextClosingDate;
                             DateTime nextDueDate;
 
-                                                        if (today.Day <= closingDay)
+                            if (today.Day <= closingDay)
                             {
                                 nextClosingDate = new DateTime(today.Year, today.Month, closingDay);
                             }
@@ -142,7 +109,7 @@
                                 nextClosingDate = new DateTime(nextClosingDate.Year, nextClosingDate.Month, closingDay);
                             }
 
-                                                        if (today.Day <= dueDay)
+                            if (today.Day <= dueDay)
                             {
                                 nextDueDate = new DateTime(today.Year, today.Month, dueDay);
                             }
@@ -152,7 +119,7 @@
                                 nextDueDate = new DateTime(nextDueDate.Year, nextDueDate.Month, dueDay);
                             }
 
-                                                        var daysToClosing = (nextClosingDate - today).Days;
+                            var daysToClosing = (nextClosingDate - today).Days;
                             var daysToDue = (nextDueDate - today).Days;
                         }
 
@@ -200,9 +167,7 @@
     @if (paymentsWithCard.Any())
     {
         <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Pagamentos Recentes com Este Cartão</h6>
-            </div>
+            <partial name="_Partials/_CardHeader" model='(Title: "Pagamentos Recentes com Este Cartão", BadgeText: "", BadgeClass: "")' />
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-striped mb-0">
@@ -225,7 +190,7 @@
                                     <td>@payment.DueDate.ToString("dd/MM/yyyy")</td>
                                     <td class="text-end">@payment.GetFormattedAmount()</td>
                                     <td class="text-center">
-                                        <span class="badge @payment.StatusBadgeClass">@payment.StatusDescription</span>
+                                        <partial name="_Partials/_StatusBadge" model="(BadgeClass: payment.StatusBadgeClass, Description: payment.StatusDescription)" />
                                     </td>
                                     <td class="text-center">
                                         <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id" class="btn btn-sm btn-info">

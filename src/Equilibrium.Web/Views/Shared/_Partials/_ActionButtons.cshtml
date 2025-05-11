@@ -1,4 +1,4 @@
-﻿@model (Guid Id, bool CanView, bool CanEdit, bool CanDelete, string ControllerName)
+﻿@model (string Id, bool CanView, bool CanEdit, bool CanDelete, string ControllerName)
 @{
     var controller = Model.ControllerName ?? ViewContext.RouteData.Values["Controller"].ToString();
 }
