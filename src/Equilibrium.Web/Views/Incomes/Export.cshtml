@@ -4,16 +4,22 @@
 
 <div class="container-fluid">
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Exportar/Importar Receitas</h6>
-        </div>
+        <partial name="_Partials/Commons/_CardHeader" model='(
+            Title: "Exportar/Importar Receitas",
+            BadgeText: "",
+            BadgeClass: "",
+            Icon: "fa-file-export",
+            CollapseTarget: "")' />
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
                     <div class="card mb-4">
-                        <div class="card-header">
-                            <h6 class="m-0 font-weight-bold text-primary">Exportar Modelo</h6>
-                        </div>
+                        <partial name="_Partials/Commons/_CardHeader" model='(
+                            Title: "Exportar Modelo",
+                            BadgeText: "",
+                            BadgeClass: "",
+                            Icon: "fa-download",
+                            CollapseTarget: "")' />
                         <div class="card-body">
                             <p>Baixe o modelo de CSV para criar receitas em lote:</p>
                             <a asp-action="DownloadTemplate" asp-controller="Incomes" class="btn btn-primary">
@@ -29,9 +35,12 @@
                 </div>
                 <div class="col-md-6">
                     <div class="card">
-                        <div class="card-header">
-                            <h6 class="m-0 font-weight-bold text-primary">Importar Receitas</h6>
-                        </div>
+                        <partial name="_Partials/Commons/_CardHeader" model='(
+                            Title: "Importar Receitas",
+                            BadgeText: "",
+                            BadgeClass: "",
+                            Icon: "fa-upload",
+                            CollapseTarget: "")' />
                         <div class="card-body">
                             <p>Importe seu arquivo CSV para criar receitas em lote:</p>
                             <form asp-action="ImportFromCSV" asp-controller="Incomes" method="post" enctype="multipart/form-data">
@@ -56,9 +65,12 @@
             <div class="row mt-4">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-header">
-                            <h6 class="m-0 font-weight-bold text-primary">Instruções</h6>
-                        </div>
+                        <partial name="_Partials/Commons/_CardHeader" model='(
+                            Title: "Instruções",
+                            BadgeText: "",
+                            BadgeClass: "",
+                            Icon: "fa-info-circle",
+                            CollapseTarget: "")' />
                         <div class="card-body">
                             <h5>Como usar o modelo CSV:</h5>
                             <p>O arquivo CSV deve conter as seguintes colunas:</p>

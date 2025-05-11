@@ -21,7 +21,12 @@
     </div>
 
     <div class="card shadow mb-4">
-        <partial name="_Partials/Commons/_CardHeader" model='(Title: "Filtros", BadgeText: "", BadgeClass: "")' />
+        <partial name="_Partials/Commons/_CardHeader" model='(
+            Title: "Filtros",
+            BadgeText: "",
+            BadgeClass: "",
+            Icon: "fa-filter",
+            CollapseTarget: "collapseFilters")' />
         <div class="card-body collapse show" id="collapseFilters">
             <div class="row">
                 <div class="col-12 mb-3">
@@ -40,14 +45,23 @@
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i> Nenhum financiamento encontrado.
-        </div>
+        <partial name="_Partials/Commons/_EmptyState" model='(
+            Message: "Nenhum financiamento encontrado.",
+            Icon: "fa-calculator",
+            ButtonText: await PermissionHelper.HasPermissionAsync(Context, "financings.create") ? "Criar Financiamento" : "",
+            ButtonUrl: Url.Action("Create"),
+            ButtonIcon: "fa-plus",
+            IsAlert: true)' />
     }
     else
     {
         <div class="card shadow mb-4">
-            <partial name="_Partials/Commons/_CardHeader" model='(Title: "Seus Financiamentos", BadgeText: "", BadgeClass: "")' />
+            <partial name="_Partials/Commons/_CardHeader" model='(
+                Title: "Seus Financiamentos",
+                BadgeText: "",
+                BadgeClass: "",
+                Icon: "fa-money-bill-wave",
+                CollapseTarget: "")' />
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover datatable">
@@ -80,9 +94,12 @@
                                         <partial name="_Partials/Commons/_StatusBadge" model='(BadgeClass: GetStatusBadgeClass(item.Status), Description: item.StatusDescription)' />
                                     </td>
                                     <td class="text-center">
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
+                                        <partial name="_Partials/Commons/_ActionButtons" model='(
+                                            Id: item.Id,
+                                            CanView: true,
+                                            CanEdit: false,
+                                            CanDelete: false,
+                                            ControllerName: "Financings")' />
                                     </td>
                                 </tr>
                             }

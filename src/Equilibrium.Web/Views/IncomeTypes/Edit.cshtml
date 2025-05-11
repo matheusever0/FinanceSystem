@@ -16,7 +16,9 @@
             <partial name="_Partials/Commons/_CardHeader" model='(
                 Title: "Informações do Tipo de Receita",
                 BadgeText: "",
-                BadgeClass: "")' />
+                BadgeClass: "",
+                Icon: "fa-tag",
+                CollapseTarget: "")' />
             <div class="card-body">
                 <form asp-action="Edit" method="post" data-page="income">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -55,7 +57,9 @@
             <partial name="_Partials/Commons/_CardHeader" model='(
                 Title: "Informações",
                 BadgeText: "",
-                BadgeClass: "")' />
+                BadgeClass: "",
+                Icon: "fa-info-circle",
+                CollapseTarget: "")' />
             <div class="card-body">
                 <p>Atualize os dados do tipo de receita:</p>
                 <ul>

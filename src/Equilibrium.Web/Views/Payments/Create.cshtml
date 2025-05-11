@@ -9,22 +9,22 @@
     var creditCards = ViewBag.CreditCards as IEnumerable<CreditCardModel>;
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/pages/payment.css" asp-append-version="true">
-}
-
 <div class="container-fluid">
     <div class="d-flex justify-content-end mb-3">
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Voltar
-        </a>
+        <partial name="_Partials/Commons/_BackButton" model='(
+            Action: "Index",
+            Controller: "Payments",
+            Text: "Voltar")' />
     </div>
     <div class="row">
         <div class="col-lg-8">
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Informações do Pagamento</h6>
-                </div>
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Informações do Pagamento",
+                    BadgeText: "",
+                    BadgeClass: "",
+                    Icon: "fa-file-invoice-dollar",
+                    CollapseTarget: "")' />
                 <div class="card-body">
                     <form asp-action="Create" method="post" id="payment-form" data-page="payment">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -153,21 +153,22 @@
                             <span asp-validation-for="Notes" class="text-danger"></span>
                         </div>
 
-                        <div class="mb-3">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i> Salvar
-                            </button>
-                            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-                        </div>
+                        <partial name="_Partials/Commons/_FormActions" model='(
+                            CancelAction: "Index",
+                            CancelController: "Payments",
+                            IsEdit: false)' />
                     </form>
                 </div>
             </div>
         </div>
         <div class="col-lg-4">
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Informações</h6>
-                </div>
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Informações",
+                    BadgeText: "",
+                    BadgeClass: "",
+                    Icon: "fa-info-circle",
+                    CollapseTarget: "")' />
                 <div class="card-body">
                     <p>Preencha os dados do seu pagamento:</p>
                     <ul>

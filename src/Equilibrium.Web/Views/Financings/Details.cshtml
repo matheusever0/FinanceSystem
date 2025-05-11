@@ -16,23 +16,25 @@
         <!-- Informações do Financiamento -->
         <div class="col-lg-8">
             <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Informações do Financiamento</h6>
-                    <partial name="_Partials/Commons/_StatusBadge" model='(BadgeClass: GetStatusBadgeClass(Model.Status), Description: Model.StatusDescription)' />
-                </div>
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Informações do Financiamento",
+                    BadgeText: Model.StatusDescription,
+                    BadgeClass: GetStatusBadgeClass(Model.Status),
+                    Icon: "fa-money-bill-wave",
+                    CollapseTarget: "")' />
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Descrição", Value: Model.Description, SecondaryText: "")' />
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Valor Total", Value: Model.GetFormattedTotalAmount(), SecondaryText: "")' />
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Taxa de Juros", Value: Model.InterestRate.ToString("F2") + "% ao ano", SecondaryText: "")' />
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Prazo", Value: Model.TermMonths + " meses", SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Descrição", Value: Model.Description, SecondaryText: "", ValueClass: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Valor Total", Value: Model.GetFormattedTotalAmount(), SecondaryText: "", ValueClass: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Taxa de Juros", Value: Model.InterestRate.ToString("F2") + "% ao ano", SecondaryText: "", ValueClass: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Prazo", Value: Model.TermMonths + " meses", SecondaryText: "", ValueClass: "")' />
                         </div>
                         <div class="col-md-6">
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Tipo", Value: Model.TypeDescription, SecondaryText: "")' />
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Índice de Correção", Value: Model.CorrectionIndexDescription, SecondaryText: "")' />
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Data de Início", Value: Model.StartDate.ToString("dd/MM/yyyy"), SecondaryText: "")' />
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Data de Término", Value: Model.EndDate?.ToString("dd/MM/yyyy") ?? "Em andamento", SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Tipo", Value: Model.TypeDescription, SecondaryText: "", ValueClass: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Índice de Correção", Value: Model.CorrectionIndexDescription, SecondaryText: "", ValueClass: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Data de Início", Value: Model.StartDate.ToString("dd/MM/yyyy"), SecondaryText: "", ValueClass: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Data de Término", Value: Model.EndDate?.ToString("dd/MM/yyyy") ?? "Em andamento", SecondaryText: "", ValueClass: "")' />
                         </div>
                     </div>
 
@@ -40,24 +42,30 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Dívida Restante", Value: "<span class=\"text-danger fw-bold\">" + Model.RemainingDebt.ToString("C2") + "</span>", SecondaryText: "")' />
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Total Pago", Value: "<span class=\"text-success fw-bold\">" + Model.TotalPaid.ToString("C2") + "</span>", SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_MetricCard" model='(
+                                Title: "Dívida Restante",
+                                Value: Model.RemainingDebt.ToString("C2"),
+                                Icon: "fa-money-bill-wave",
+                                Color: "danger",
+                                SubValue: "",
+                                ShowProgress: false)' />
+
+                            <partial name="_Partials/Commons/_MetricCard" model='(
+                                Title: "Total Pago",
+                                Value: Model.TotalPaid.ToString("C2"),
+                                Icon: "fa-money-check",
+                                Color: "success",
+                                SubValue: "",
+                                ShowProgress: false)' />
                         </div>
                         <div class="col-md-6">
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Parcelas Pagas", Value: Model.InstallmentsPaid + " de " + (Model.InstallmentsPaid + Model.InstallmentsRemaining), SecondaryText: "")' />
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Progresso</h5>
-                                <div class="progress">
-                                    <div class="progress-bar @GetProgressBarClass(Model.ProgressPercentage)"
-                                         role="progressbar"
-                                         style="width: @(Model.ProgressPercentage)%"
-                                         aria-valuenow="@(Model.ProgressPercentage)"
-                                         aria-valuemin="0"
-                                         aria-valuemax="100">
-                                        @((Model.ProgressPercentage).ToString("F0"))%
-                                    </div>
-                                </div>
-                            </div>
+                            <partial name="_Partials/Commons/_MetricCard" model='(
+                                Title: "Progresso",
+                                Value: Model.ProgressPercentage.ToString("F0") + "%",
+                                Icon: "fa-tasks",
+                                Color: GetProgressBarClass(Model.ProgressPercentage),
+                                SubValue: Model.InstallmentsPaid + " de " + (Model.InstallmentsPaid + Model.InstallmentsRemaining) + " parcelas",
+                                ShowProgress: true)' />
                         </div>
                     </div>
 
@@ -81,7 +89,7 @@
         <!-- Ações -->
         <div class="col-lg-4">
             <div class="card shadow mb-4">
-                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Ações", BadgeText: "", BadgeClass: "")' />
+                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Ações", BadgeText: "", BadgeClass: "", Icon: "fa-tools", CollapseTarget: "")' />
                 <div class="card-body">
                     @if (Model.Status == 1)
                     {
@@ -126,10 +134,12 @@
     @if (Model.Installments != null && Model.Installments.Any())
     {
         <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">Parcelas</h6>
-                <span class="badge bg-primary">@Model.Installments.Count() parcelas</span>
-            </div>
+            <partial name="_Partials/Commons/_CardHeader" model='(
+                Title: "Parcelas",
+                BadgeText: Model.Installments.Count() + " parcelas",
+                BadgeClass: "bg-primary",
+                Icon: "fa-list-ol",
+                CollapseTarget: "")' />
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover" id="payments-table">
@@ -187,10 +197,12 @@
     @if (Model.Payments != null && Model.Payments.Any())
     {
         <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">Pagamentos</h6>
-                <span class="badge bg-primary">@Model.Payments.Count() pagamentos</span>
-            </div>
+            <partial name="_Partials/Commons/_CardHeader" model='(
+                Title: "Pagamentos",
+                BadgeText: Model.Payments.Count() + " pagamentos",
+                BadgeClass: "bg-primary",
+                Icon: "fa-money-bill-wave",
+                CollapseTarget: "")' />
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover" id="incomes-table">
@@ -216,9 +228,12 @@
                                         <partial name="_Partials/Commons/_StatusBadge" model='(BadgeClass: GetPaymentStatusBadgeClass(payment.Status), Description: payment.StatusDescription)' />
                                     </td>
                                     <td class="text-center">
-                                        <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
+                                        <partial name="_Partials/Commons/_ActionButtons" model='(
+                                            Id: payment.Id,
+                                            CanView: true,
+                                            CanEdit: false,
+                                            CanDelete: false,
+                                            ControllerName: "Payments")' />
                                     </td>
                                 </tr>
                             }
@@ -227,6 +242,16 @@
                 </div>
             </div>
         </div>
+    }
+    else
+    {
+        <partial name="_Partials/Commons/_EmptyState" model='(
+            Message: "Nenhum pagamento registrado para este financiamento.",
+            Icon: "fa-money-bill-wave",
+            ButtonText: await PermissionHelper.HasPermissionAsync(Context, "payments.create") && Model.Status == 1 ? "Registrar Pagamento" : "",
+            ButtonUrl: Url.Action("CreateWithFinancing", "Payments", new { financingId = Model.Id }),
+            ButtonIcon: "fa-plus",
+            IsAlert: true)' />
     }
 </div>
 
@@ -244,10 +269,10 @@
 
     string GetProgressBarClass(decimal percentage)
     {
-        if (percentage >= 0.9m) return "bg-success";
-        if (percentage >= 0.6m) return "bg-info";
-        if (percentage >= 0.3m) return "bg-warning";
-        return "bg-danger";
+        if (percentage >= 0.9m) return "success";
+        if (percentage >= 0.6m) return "info";
+        if (percentage >= 0.3m) return "warning";
+        return "danger";
     }
 
     string GetInstallmentStatusBadgeClass(int status)

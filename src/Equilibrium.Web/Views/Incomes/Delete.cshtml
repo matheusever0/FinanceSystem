@@ -19,13 +19,18 @@
     <div class="row">
         <div class="col-md-6">
             <div class="card shadow mb-4">
-                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Detalhes", BadgeText: "", BadgeClass: "")' />
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Detalhes",
+                    BadgeText: "",
+                    BadgeClass: "",
+                    Icon: "fa-info-circle",
+                    CollapseTarget: "")' />
                 <div class="card-body">
-                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Descrição", Value: Model.Description, SecondaryText: "")' />
-                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Valor", Value: Model.GetFormattedAmount(), SecondaryText: "")' />
-                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Data de Vencimento", Value: Model.GetFormattedDueDate(), SecondaryText: "")' />
-                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Tipo", Value: Model.IncomeTypeName, SecondaryText: "")' />
-                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Status", Value: "<span class=\"badge " + Model.StatusBadgeClass + "\">" + Model.StatusDescription + "</span>", SecondaryText: "")' />
+                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Descrição", Value: Model.Description, SecondaryText: "", ValueClass: "")' />
+                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Valor", Value: Model.GetFormattedAmount(), SecondaryText: "", ValueClass: "")' />
+                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Data de Vencimento", Value: Model.GetFormattedDueDate(), SecondaryText: "", ValueClass: "")' />
+                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Tipo", Value: Model.IncomeTypeName, SecondaryText: "", ValueClass: "")' />
+                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Status", Value: "<span class=\"badge " + Model.StatusBadgeClass + "\">" + Model.StatusDescription + "</span>", SecondaryText: "", ValueClass: "")' />
 
                     @if (Model.ReceivedDate.HasValue)
                     {
@@ -46,18 +51,18 @@
 
         <div class="col-md-6">
             <div class="card shadow mb-4">
-                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Confirmar Exclusão", BadgeText: "", BadgeClass: "bg-danger")' />
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Confirmar Exclusão",
+                    BadgeText: "",
+                    BadgeClass: "bg-danger",
+                    Icon: "fa-trash",
+                    CollapseTarget: "")' />
                 <div class="card-body">
                     <form asp-action="Delete" method="post">
                         @Html.AntiForgeryToken()
                         <p>Ao confirmar esta operação, você está excluindo permanentemente esta receita.</p>
 
-                        <div class="mb-3">
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash me-1"></i> Confirmar Exclusão
-                            </button>
-                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancelar</a>
-                        </div>
+                        <partial name="_Partials/Commons/_FormActions" model='(CancelAction: "Details", CancelController: "Incomes", IsEdit: false)' />
                     </form>
                 </div>
             </div>

@@ -29,21 +29,23 @@
     <div class="row">
         <div class="col-lg-8">
             <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Informações da Receita</h6>
-                    <partial name="_Partials/Commons/_StatusBadge" model='(BadgeClass: Model.StatusBadgeClass, Description: Model.StatusDescription)' />
-                </div>
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Informações da Receita",
+                    BadgeText: Model.StatusDescription,
+                    BadgeClass: Model.StatusBadgeClass,
+                    Icon: "fa-money-bill-alt",
+                    CollapseTarget: "")' />
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Descrição", Value: Model.Description, SecondaryText: "")' />
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Valor", Value: $"<span class=\"fw-bold text-success\">{Model.GetFormattedAmount()}</span>", SecondaryText: "")' />
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Tipo de Receita", Value: Model.IncomeTypeName, SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Descrição", Value: Model.Description, SecondaryText: "", ValueClass: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Valor", Value: $"<span class=\"fw-bold text-success\">{Model.GetFormattedAmount()}</span>", SecondaryText: "", ValueClass: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Tipo de Receita", Value: Model.IncomeTypeName, SecondaryText: "", ValueClass: "")' />
                         </div>
                         <div class="col-md-6">
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Data de Vencimento", Value: Model.GetFormattedDueDate(), SecondaryText: "")' />
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Data de Recebimento", Value: Model.GetFormattedReceivedDate(), SecondaryText: "")' />
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Recorrente", Value: Model.IsRecurring ? "Sim" : "Não", SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Data de Vencimento", Value: Model.GetFormattedDueDate(), SecondaryText: "", ValueClass: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Data de Recebimento", Value: Model.GetFormattedReceivedDate(), SecondaryText: "", ValueClass: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Recorrente", Value: Model.IsRecurring ? "Sim" : "Não", SecondaryText: "", ValueClass: "")' />
                         </div>
                     </div>
 
@@ -62,7 +64,7 @@
 
         <div class="col-lg-4">
             <div class="card shadow mb-4">
-                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Ações", BadgeText: "", BadgeClass: "")' />
+                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Ações", BadgeText: "", BadgeClass: "", Icon: "fa-tools", CollapseTarget: "")' />
                 <div class="card-body">
                     @if (Model.Status == 1)
                     {
@@ -110,7 +112,12 @@
             @if (Model.Installments != null && Model.Installments.Any())
             {
                 <div class="card shadow mb-4">
-                    <partial name="_Partials/Commons/_CardHeader" model='(Title: "Parcelas", BadgeText: Model.Installments.Count() + " parcelas", BadgeClass: "bg-info")' />
+                    <partial name="_Partials/Commons/_CardHeader" model='(
+                        Title: "Parcelas",
+                        BadgeText: Model.Installments.Count() + " parcelas",
+                        BadgeClass: "bg-info",
+                        Icon: "fa-list-ol",
+                        CollapseTarget: "")' />
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered mb-0">

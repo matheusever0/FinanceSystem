@@ -16,7 +16,12 @@
     </div>
 
     <div class="card shadow mb-4">
-        <partial name="_Partials/Commons/_CardHeader" model='(Title: "Filtros", BadgeText: "", BadgeClass: "")' />
+        <partial name="_Partials/Commons/_CardHeader" model='(
+            Title: "Filtros", 
+            BadgeText: "", 
+            BadgeClass: "", 
+            Icon: "fa-filter", 
+            CollapseTarget: "collapseFilters")' />
         <div class="card-body collapse show" id="collapseFilters">
             <div class="row">
                 <div class="col-12 mb-3">
@@ -38,14 +43,49 @@
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i> Nenhuma receita encontrada.
-        </div>
+        <partial name="_Partials/Commons/_EmptyState" model='(
+            Message: "Nenhuma receita encontrada.", 
+            Icon: "fa-money-bill-alt", 
+            ButtonText: await PermissionHelper.HasPermissionAsync(Context, "incomes.create") ? "Criar Nova Receita" : "", 
+            ButtonUrl: Url.Action("Create"), 
+            ButtonIcon: "fa-plus", 
+            IsAlert: true)' />
     }
     else
     {
+        <div class="row">
+            <partial name="_Partials/Commons/_MetricCard" model='(
+                Title: "Total de Receitas", 
+                Value: Model.Sum(i => i.Amount).ToString("C2"), 
+                Icon: "fa-money-bill-alt", 
+                Color: "primary", 
+                SubValue: Model.Count() + " receitas", 
+                ShowProgress: false)' />
+                
+            <partial name="_Partials/Commons/_MetricCard" model='(
+                Title: "Total Recebido", 
+                Value: Model.Where(i => i.Status == 2).Sum(i => i.Amount).ToString("C2"), 
+                Icon: "fa-check-circle", 
+                Color: "success", 
+                SubValue: Model.Count(i => i.Status == 2) + " recebidas", 
+                ShowProgress: false)' />
+                
+            <partial name="_Partials/Commons/_MetricCard" model='(
+                Title: "Total Pendente", 
+                Value: Model.Where(i => i.Status == 1).Sum(i => i.Amount).ToString("C2"), 
+                Icon: "fa-clock", 
+                Color: "warning", 
+                SubValue: Model.Count(i => i.Status == 1) + " pendentes", 
+                ShowProgress: false)' />
+        </div>
+
         <div class="card shadow mb-4">
-            <partial name="_Partials/Commons/_CardHeader" model='(Title: "Suas Receitas", BadgeText: "", BadgeClass: "")' />
+            <partial name="_Partials/Commons/_CardHeader" model='(
+                Title: "Suas Receitas", 
+                BadgeText: "", 
+                BadgeClass: "", 
+                Icon: "fa-money-bill-alt", 
+                CollapseTarget: "")' />
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover datatable">
@@ -81,7 +121,12 @@
                                         <partial name="_Partials/Commons/_StatusBadge" model='(BadgeClass: item.StatusBadgeClass, Description: item.StatusDescription)' />
                                     </td>
                                     <td class="text-center">
-                                        <partial name="_Partials/Commons/_ActionButtons" model='(Id: item.Id, CanView: true, CanEdit: (item.Status != 3 && await PermissionHelper.HasPermissionAsync(Context, "incomes.edit")), CanDelete: (item.Status != 3 && await PermissionHelper.HasPermissionAsync(Context, "incomes.delete")), ControllerName: "Incomes")' />
+                                        <partial name="_Partials/Commons/_ActionButtons" model='(
+                                            Id: item.Id,
+                                            CanView: true,
+                                            CanEdit: (item.Status != 3 && await PermissionHelper.HasPermissionAsync(Context, "incomes.edit")),
+                                            CanDelete: (item.Status != 3 && await PermissionHelper.HasPermissionAsync(Context, "incomes.delete")),
+                                            ControllerName: "Incomes")' />
                                     </td>
                                 </tr>
                             }

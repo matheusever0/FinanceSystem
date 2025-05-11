@@ -20,20 +20,24 @@
     <partial name="_Partials/Commons/_CardHeader" model='(
         Title: "Informações do Tipo de Receita",
         BadgeText: Model.IsSystem ? "Sistema" : "Personalizado",
-        BadgeClass: Model.IsSystem ? "bg-info" : "bg-primary")' />
+        BadgeClass: Model.IsSystem ? "bg-info" : "bg-primary",
+        Icon: "fa-tag",
+        CollapseTarget: "")' />
     <div class="card-body">
         <div class="row mb-3">
             <div class="col-md-6">
                 <partial name="_Partials/Commons/_FinancialDataItem" model='(
                     Label: "Nome",
                     Value: Model.Name,
-                    SecondaryText: "")' />
+                    SecondaryText: "",
+                    ValueClass: "")' />
             </div>
             <div class="col-md-6">
                 <partial name="_Partials/Commons/_FinancialDataItem" model='(
                     Label: "Data de Criação",
                     Value: Model.CreatedAt.ToString("dd/MM/yyyy HH:mm"),
-                    SecondaryText: "")' />
+                    SecondaryText: "",
+                    ValueClass: "")' />
             </div>
         </div>
 
@@ -44,7 +48,8 @@
                     <partial name="_Partials/Commons/_FinancialDataItem" model='(
                         Label: "Descrição",
                         Value: Model.Description,
-                        SecondaryText: "")' />
+                        SecondaryText: "",
+                        ValueClass: "")' />
                 </div>
             </div>
         }

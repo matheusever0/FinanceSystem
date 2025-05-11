@@ -21,14 +21,13 @@
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i> Nenhum cartão de crédito cadastrado.
-            @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.create"))
-            {
-                <a asp-action="Create" class="alert-link">Clique aqui para adicionar seu primeiro cartão.</a>
-
-            }
-        </div>
+        <partial name="_Partials/Commons/_EmptyState" model='(
+            Message: "Nenhum cartão de crédito cadastrado.",
+            Icon: "fa-credit-card",
+            ButtonText: await PermissionHelper.HasPermissionAsync(Context, "creditcards.create") ? "Adicionar Cartão de Crédito" : "",
+            ButtonUrl: Url.Action("Create"),
+            ButtonIcon: "fa-plus",
+            IsAlert: true)' />
     }
     else
     {
@@ -40,10 +39,12 @@
 
                 <div class="col-xl-4 col-md-6 mb-4">
                     <div class="card shadow h-100 border-left-primary">
-                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">@card.Name</h6>
-                            <span class="badge bg-primary">@card.CardBrand</span>
-                        </div>
+                        <partial name="_Partials/Commons/_CardHeader" model='(
+                            Title: card.Name,
+                            BadgeText: card.CardBrand,
+                            BadgeClass: "bg-primary",
+                            Icon: "fa-credit-card",
+                            CollapseTarget: "")' />
                         <div class="card-body">
                             <div class="row no-gutters align-items-center mb-3">
                                 <div class="col">
@@ -55,16 +56,13 @@
                                 </div>
                             </div>
 
-                            <div class="mb-2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="small">Limite Utilizado</div>
-                                    <div class="small font-weight-bold">@string.Format("{0:0}%", usedPercentage)</div>
-                                </div>
-                                <div class="progress mb-2">
-                                    <div class="progress-bar bg-@colorClass" role="progressbar" style="width: @string.Format("{0:0}%", usedPercentage)"
-                                         aria-valuenow="@string.Format("{0:0}", usedPercentage)" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
+                            <partial name="_Partials/Commons/_MetricCard" model='(
+                                Title: "Limite Utilizado",
+                                Value: string.Format("{0:0}%", usedPercentage),
+                                Icon: "fa-percentage",
+                                Color: colorClass,
+                                SubValue: card.GetFormattedUsedLimit(),
+                                ShowProgress: true)' />
 
                             <div class="row mb-3">
                                 <div class="col-6">
@@ -78,7 +76,12 @@
                             </div>
 
                             <div class="d-flex justify-content-center mt-3">
-                                <partial name="_Partials/Commons/_ActionButtons" model='(Id: card.Id, CanView: true, CanEdit: await PermissionHelper.HasPermissionAsync(Context, "creditcards.edit"), CanDelete: await PermissionHelper.HasPermissionAsync(Context, "creditcards.delete"), ControllerName: "CreditCards")' />
+                                <partial name="_Partials/Commons/_ActionButtons" model='(
+                                    Id: card.Id,
+                                    CanView: true,
+                                    CanEdit: await PermissionHelper.HasPermissionAsync(Context, "creditcards.edit"),
+                                    CanDelete: await PermissionHelper.HasPermissionAsync(Context, "creditcards.delete"),
+                                    ControllerName: "CreditCards")' />
                             </div>
                         </div>
                     </div>

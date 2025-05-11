@@ -5,16 +5,14 @@
     ViewData["Title"] = "Detalhes do Pagamento";
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/pages/payment.css" asp-append-version="true">
-}
-
 <div class="container-fluid">
     <div class="d-flex justify-content-end mb-3">
         <div>
-            <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Voltar
-            </a>
+            <partial name="_Partials/Commons/_BackButton" model='(
+                Action: "Index",
+                Controller: "Payments",
+                Text: "Voltar")' />
+
             @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
             {
                 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
@@ -28,47 +26,63 @@
         <!-- Informações do Pagamento -->
         <div class="col-lg-8">
             <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Informações do Pagamento</h6>
-                    <span class="badge @Model.StatusBadgeClass">@Model.StatusDescription</span>
-                </div>
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Informações do Pagamento",
+                    BadgeText: Model.StatusDescription,
+                    BadgeClass: Model.StatusBadgeClass,
+                    Icon: "fa-file-invoice-dollar",
+                    CollapseTarget: "")' />
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Descrição</h5>
-                                <p>@Model.Description</p>
-                            </div>
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Valor</h5>
-                                <p class="fw-bold">@Model.GetFormattedAmount()</p>
-                            </div>
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Data de Vencimento</h5>
-                                <p>@Model.GetFormattedDueDate()</p>
-                            </div>
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Data de Pagamento</h5>
-                                <p>@Model.GetFormattedPaymentDate()</p>
-                            </div>
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                                Label: "Descrição",
+                                Value: Model.Description,
+                                SecondaryText: "",
+                                ValueClass: "")' />
+
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                                Label: "Valor",
+                                Value: Model.GetFormattedAmount(),
+                                SecondaryText: "",
+                                ValueClass: "fw-bold")' />
+
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                                Label: "Data de Vencimento",
+                                Value: Model.GetFormattedDueDate(),
+                                SecondaryText: "",
+                                ValueClass: "")' />
+
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                                Label: "Data de Pagamento",
+                                Value: Model.GetFormattedPaymentDate(),
+                                SecondaryText: "",
+                                ValueClass: "")' />
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Tipo de Pagamento</h5>
-                                <p><a asp-controller="PaymentTypes" asp-action="Details" asp-route-id="@Model.PaymentTypeId">@Model.PaymentTypeName</a></p>
-                            </div>
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Método de Pagamento</h5>
-                                <p><a asp-controller="PaymentMethods" asp-action="Details" asp-route-id="@Model.PaymentMethodId">@Model.PaymentMethodName</a></p>
-                            </div>
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Recorrente</h5>
-                                <p>@(Model.IsRecurring ? "Sim" : "Não")</p>
-                            </div>
-                            <div class="mb-3">
-                                <h5 class="small font-weight-bold text-muted">Data de Criação</h5>
-                                <p>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
-                            </div>
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                                Label: "Tipo de Pagamento",
+                                Value: "<a asp-controller=\"PaymentTypes\" asp-action=\"Details\" asp-route-id=\"" + Model.PaymentTypeId + "\">" + Model.PaymentTypeName + "</a>",
+                                SecondaryText: "",
+                                ValueClass: "")' />
+
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                                Label: "Método de Pagamento",
+                                Value: "<a asp-controller=\"PaymentMethods\" asp-action=\"Details\" asp-route-id=\"" + Model.PaymentMethodId + "\">" + Model.PaymentMethodName + "</a>",
+                                SecondaryText: "",
+                                ValueClass: "")' />
+
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                                Label: "Recorrente",
+                                Value: Model.IsRecurring ? "Sim" : "Não",
+                                SecondaryText: "",
+                                ValueClass: "")' />
+
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                                Label: "Data de Criação",
+                                Value: Model.CreatedAt.ToString("dd/MM/yyyy HH:mm"),
+                                SecondaryText: "",
+                                ValueClass: "")' />
                         </div>
                     </div>
 
@@ -92,9 +106,12 @@
         <!-- Ações -->
         <div class="col-lg-4">
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Ações</h6>
-                </div>
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Ações",
+                    BadgeText: "",
+                    BadgeClass: "",
+                    Icon: "fa-tools",
+                    CollapseTarget: "")' />
                 <div class="card-body">
                     @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
                     {
@@ -158,9 +175,12 @@
     @if (Model.Installments != null && Model.Installments.Any())
     {
         <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Parcelas</h6>
-            </div>
+            <partial name="_Partials/Commons/_CardHeader" model='(
+                Title: "Parcelas",
+                BadgeText: Model.Installments.Count + " parcelas",
+                BadgeClass: "bg-info",
+                Icon: "fa-list-ol",
+                CollapseTarget: "")' />
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover datatable">
@@ -183,7 +203,9 @@
                                     <td>@installment.GetFormattedDueDate()</td>
                                     <td>@installment.GetFormattedPaymentDate()</td>
                                     <td>
-                                        <span class="badge @installment.StatusBadgeClass">@installment.StatusDescription</span>
+                                        <partial name="_Partials/Commons/_StatusBadge" model='(
+                                            BadgeClass: installment.StatusBadgeClass,
+                                            Description: installment.StatusDescription)' />
                                     </td>
                                     <td>
                                         @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))

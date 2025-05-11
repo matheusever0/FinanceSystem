@@ -19,7 +19,9 @@
     <partial name="_Partials/Commons/_CardHeader" model='(
         Title: "Filtros",
         BadgeText: "",
-        BadgeClass: "")' />
+        BadgeClass: "",
+        Icon: "fa-filter",
+        CollapseTarget: "collapseFilters")' />
     <div class="card-body collapse show" id="collapseFilters">
         <div class="row">
             <div class="col-md-6 mb-3">
@@ -43,7 +45,9 @@
     <partial name="_Partials/Commons/_CardHeader" model='(
         Title: "Tipos de Receita",
         BadgeText: "",
-        BadgeClass: "")' />
+        BadgeClass: "",
+        Icon: "fa-tags",
+        CollapseTarget: "")' />
     <div class="card-body">
         @if (Model != null && Model.Any())
         {
@@ -90,9 +94,13 @@
         }
         else
         {
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> Nenhum tipo de receita encontrado.
-            </div>
+            <partial name="_Partials/Commons/_EmptyState" model='(
+                Message: "Nenhum tipo de receita encontrado.",
+                Icon: "fa-tags",
+                ButtonText: await PermissionHelper.HasPermissionAsync(Context, "incomes.create") ? "Criar Novo Tipo" : "",
+                ButtonUrl: Url.Action("Create"),
+                ButtonIcon: "fa-plus",
+                IsAlert: true)' />
         }
     </div>
 </div>

@@ -22,20 +22,20 @@
     <div class="row">
         <div class="col-md-6">
             <div class="card shadow mb-4">
-                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Detalhes do Cartão", BadgeText: "", BadgeClass: "")' />
+                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Detalhes do Cartão", BadgeText: "", BadgeClass: "", Icon: "fa-credit-card", CollapseTarget: "")' />
                 <div class="card-body">
-                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Nome", Value: Model.Name, SecondaryText: "")' />
-                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Bandeira", Value: Model.CardBrand + " (*" + Model.LastFourDigits + ")", SecondaryText: "")' />
-                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Limite", Value: Model.GetFormattedLimit(), SecondaryText: "")' />
-                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Disponível", Value: Model.GetFormattedAvailableLimit(), SecondaryText: "")' />
-                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Fechamento / Vencimento", Value: "Fecha dia " + Model.ClosingDay + " / Vence dia " + Model.DueDay, SecondaryText: "")' />
+                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Nome", Value: Model.Name, SecondaryText: "", ValueClass: "")' />
+                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Bandeira", Value: Model.CardBrand + " (*" + Model.LastFourDigits + ")", SecondaryText: "", ValueClass: "")' />
+                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Limite", Value: Model.GetFormattedLimit(), SecondaryText: "", ValueClass: "")' />
+                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Disponível", Value: Model.GetFormattedAvailableLimit(), SecondaryText: "", ValueClass: "")' />
+                    <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Fechamento / Vencimento", Value: "Fecha dia " + Model.ClosingDay + " / Vence dia " + Model.DueDay, SecondaryText: "", ValueClass: "")' />
                 </div>
             </div>
         </div>
 
         <div class="col-md-6">
             <div class="card shadow mb-4">
-                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Confirmar Exclusão", BadgeText: "", BadgeClass: "bg-danger")' />
+                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Confirmar Exclusão", BadgeText: "", BadgeClass: "bg-danger", Icon: "fa-trash", CollapseTarget: "")' />
                 <div class="card-body">
                     @if (hasPendingPayments)
                     {
@@ -66,12 +66,7 @@
                                 </div>
                             }
 
-                            <div class="mb-3">
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="fas fa-trash me-1"></i> Confirmar Exclusão
-                                </button>
-                                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancelar</a>
-                            </div>
+                            <partial name="_Partials/Commons/_FormActions" model='(CancelAction: "Details", CancelController: "CreditCards", IsEdit: false)' />
                         </form>
                     }
                 </div>

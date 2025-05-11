@@ -16,7 +16,12 @@
     <div class="row">
         <div class="col-lg-8">
             <div class="card shadow mb-4">
-                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Parâmetros da Simulação", BadgeText: "", BadgeClass: "")' />
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Parâmetros da Simulação",
+                    BadgeText: "",
+                    BadgeClass: "",
+                    Icon: "fa-calculator",
+                    CollapseTarget: "")' />
                 <div class="card-body">
                     <form asp-action="Simulate" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -65,19 +70,19 @@
                             <span asp-validation-for="StartDate" class="text-danger"></span>
                         </div>
 
-                        <div class="mb-3">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-calculator me-1"></i> Simular
-                            </button>
-                            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-                        </div>
+                        <partial name="_Partials/Commons/_FormActions" model='(CancelAction: "Index", CancelController: "Financings", IsEdit: false)' />
                     </form>
                 </div>
             </div>
         </div>
         <div class="col-lg-4">
             <div class="card shadow mb-4">
-                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Informações", BadgeText: "", BadgeClass: "")' />
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Informações",
+                    BadgeText: "",
+                    BadgeClass: "",
+                    Icon: "fa-info-circle",
+                    CollapseTarget: "")' />
                 <div class="card-body">
                     <p>Simule um financiamento para avaliar os resultados:</p>
                     <ul>
@@ -126,36 +131,40 @@
                     <div class="card-body">
                         <div class="row mb-4">
                             <div class="col-md-3">
-                                <div class="card bg-primary text-white mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Valor Total</h5>
-                                        <h4 class="card-text">@simulation.TotalAmount.ToString("C2")</h4>
-                                    </div>
-                                </div>
+                                <partial name="_Partials/Commons/_MetricCard" model='(
+                                    Title: "Valor Total",
+                                    Value: simulation.TotalAmount.ToString("C2"),
+                                    Icon: "fa-money-bill-wave",
+                                    Color: "primary",
+                                    SubValue: "",
+                                    ShowProgress: false)' />
                             </div>
                             <div class="col-md-3">
-                                <div class="card bg-info text-white mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Total de Juros</h5>
-                                        <h4 class="card-text">@simulation.TotalInterest.ToString("C2")</h4>
-                                    </div>
-                                </div>
+                                <partial name="_Partials/Commons/_MetricCard" model='(
+                                    Title: "Total de Juros",
+                                    Value: simulation.TotalInterest.ToString("C2"),
+                                    Icon: "fa-percentage",
+                                    Color: "info",
+                                    SubValue: "",
+                                    ShowProgress: false)' />
                             </div>
                             <div class="col-md-3">
-                                <div class="card bg-success text-white mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Valor Final</h5>
-                                        <h4 class="card-text">@simulation.TotalCost.ToString("C2")</h4>
-                                    </div>
-                                </div>
+                                <partial name="_Partials/Commons/_MetricCard" model='(
+                                    Title: "Valor Final",
+                                    Value: simulation.TotalCost.ToString("C2"),
+                                    Icon: "fa-file-invoice-dollar",
+                                    Color: "success",
+                                    SubValue: "",
+                                    ShowProgress: false)' />
                             </div>
                             <div class="col-md-3">
-                                <div class="card bg-warning text-white mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Valor da Parcela</h5>
-                                        <h4 class="card-text">@simulation.FirstInstallmentAmount.ToString("C2")@(simulation.Type == 2 ? "*" : "")</h4>
-                                    </div>
-                                </div>
+                                <partial name="_Partials/Commons/_MetricCard" model='(
+                                    Title: "Valor da Parcela",
+                                    Value: simulation.FirstInstallmentAmount.ToString("C2"),
+                                    Icon: "fa-money-check-alt",
+                                    Color: "warning",
+                                    SubValue: simulation.Type == 2 ? "*Parcela inicial" : "",
+                                    ShowProgress: false)' />
                             </div>
                         </div>
 
