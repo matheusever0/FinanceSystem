@@ -20,7 +20,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo todos os financiamentos");
                 return await _apiService.GetAsync<IEnumerable<FinancingModel>>("/api/Financings", token);
             }
             catch (Exception ex)
@@ -34,7 +33,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo financiamentos ativos");
                 return await _apiService.GetAsync<IEnumerable<FinancingModel>>("/api/Financings/active", token);
             }
             catch (Exception ex)
@@ -48,7 +46,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo financiamento com ID: {FinancingId}", id);
                 return await _apiService.GetAsync<FinancingModel>($"/api/Financings/{id}", token);
             }
             catch (Exception ex)
@@ -62,7 +59,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo detalhes do financiamento com ID: {FinancingId}", id);
                 return await _apiService.GetAsync<FinancingDetailModel>($"/api/Financings/{id}/details", token);
             }
             catch (Exception ex)
@@ -76,7 +72,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo parcelas do financiamento: {FinancingId}", financingId);
                 return await _apiService.GetAsync<IEnumerable<FinancingInstallmentModel>>($"/api/FinancingInstallments/financing/{financingId}", token);
             }
             catch (Exception ex)
@@ -90,7 +85,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Criando novo financiamento: {Description}", model.Description);
                 return await _apiService.PostAsync<FinancingModel>("/api/Financings", model, token);
             }
             catch (Exception ex)
@@ -104,7 +98,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Atualizando financiamento com ID: {FinancingId}", id);
                 return await _apiService.PutAsync<FinancingModel>($"/api/Financings/{id}", model, token);
             }
             catch (Exception ex)
@@ -118,7 +111,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Cancelando financiamento: {FinancingId}", id);
                 return await _apiService.PostAsync<bool>($"/api/Financings/{id}/cancel", null, token);
             }
             catch (Exception ex)
@@ -132,7 +124,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Marcando financiamento como concluído: {FinancingId}", id);
                 return await _apiService.PostAsync<bool>($"/api/Financings/{id}/complete", null, token);
             }
             catch (Exception ex)
@@ -146,8 +137,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Simulando financiamento: {TotalAmount} em {TermMonths} meses",
-                    model.TotalAmount, model.TermMonths);
                 return await _apiService.PostAsync<FinancingSimulationModel>("/api/Financings/simulate", model, token);
             }
             catch (Exception ex)
@@ -160,7 +149,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo registros filtrados");
                 return await _apiService.GetFilteredAsync<PagedResult<FinancingModel>>("/api/Financings/filter", filter, token);
             }
             catch (Exception ex)

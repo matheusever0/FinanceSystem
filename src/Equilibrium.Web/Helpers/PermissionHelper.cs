@@ -33,13 +33,6 @@ namespace Equilibrium.Web.Helpers
 
                 var hasPermission = permissions.Any(p => p.SystemName == permissionSystemName);
 
-                logger?.LogInformation(
-                    "Verificação de permissão para usuário {User}: {Permission} = {HasPermission}",
-                    userIdClaim.Value,
-                    permissionSystemName,
-                    hasPermission
-                );
-
                 return hasPermission;
             }
             catch (Exception ex)

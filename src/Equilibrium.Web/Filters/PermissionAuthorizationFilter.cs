@@ -23,7 +23,6 @@ namespace Equilibrium.Web.Filters
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            _logger.LogInformation("Verificando permissão: {Permission}", _permissionSystemName);
 
             if (!context.HttpContext.IsUserAuthenticated())
             {
@@ -51,9 +50,6 @@ namespace Equilibrium.Web.Filters
                 context.Result = new RedirectToActionResult("AccessDenied", "Account", null);
                 return;
             }
-
-            _logger.LogInformation("Acesso concedido: usuário {User} possui ao menos uma das permissões: {Permission}",
-                context.HttpContext.GetUserName(), _permissionSystemName);
         }
     }
 }

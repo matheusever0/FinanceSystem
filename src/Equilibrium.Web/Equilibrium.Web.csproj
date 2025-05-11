@@ -6,6 +6,10 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<PreserveCompilationContext>true</PreserveCompilationContext>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Remove="Views\_ViewImports.cshtml" />
+	</ItemGroup>
 	
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.0" />

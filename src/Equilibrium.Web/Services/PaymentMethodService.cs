@@ -20,7 +20,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo todos os métodos de pagamento");
                 return await _apiService.GetAsync<IEnumerable<PaymentMethodModel>>("/api/PaymentMethods", token);
             }
             catch (Exception ex)
@@ -34,7 +33,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo métodos de pagamento do sistema");
                 return await _apiService.GetAsync<IEnumerable<PaymentMethodModel>>("/api/PaymentMethods/system", token);
             }
             catch (Exception ex)
@@ -48,7 +46,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo métodos de pagamento do usuário");
                 return await _apiService.GetAsync<IEnumerable<PaymentMethodModel>>("/api/PaymentMethods/user", token);
             }
             catch (Exception ex)
@@ -62,7 +59,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo métodos de pagamento por tipo: {Type}", type);
                 return await _apiService.GetAsync<IEnumerable<PaymentMethodModel>>($"/api/PaymentMethods/type/{type}", token);
             }
             catch (Exception ex)
@@ -76,7 +72,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo método de pagamento com ID: {MethodId}", id);
                 return await _apiService.GetAsync<PaymentMethodModel>($"/api/PaymentMethods/{id}", token);
             }
             catch (Exception ex)
@@ -90,7 +85,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Criando novo método de pagamento: {Name}", model.Name);
                 return await _apiService.PostAsync<PaymentMethodModel>("/api/PaymentMethods", model, token);
             }
             catch (Exception ex)
@@ -104,7 +98,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Atualizando método de pagamento com ID: {MethodId}", id);
                 return await _apiService.PutAsync<PaymentMethodModel>($"/api/PaymentMethods/{id}", model, token);
             }
             catch (Exception ex)
@@ -118,7 +111,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Excluindo método de pagamento com ID: {MethodId}", id);
                 await _apiService.DeleteAsync($"/api/PaymentMethods/{id}", token);
             }
             catch (Exception ex)
@@ -131,7 +123,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo registros filtrados");
                 return await _apiService.GetFilteredAsync<PagedResult<PaymentMethodModel>>("/api/PaymentMethods/filter", filter, token);
             }
             catch (Exception ex)

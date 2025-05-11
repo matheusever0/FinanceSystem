@@ -112,7 +112,7 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo registros filtrados");
+                
                 return await _apiService.GetFilteredAsync<PagedResult<PermissionModel>>("/api/Permissions/filter", filter, token);
             }
             catch (Exception ex)

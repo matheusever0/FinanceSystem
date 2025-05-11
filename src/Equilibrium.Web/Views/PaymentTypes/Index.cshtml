@@ -1,113 +1,112 @@
-﻿@model IEnumerable<Equilibrium.Web.Models.PaymentTypeModel>
-@using Equilibrium.Web.Helpers
+﻿@using Equilibrium.Web.Helpers
+@model IEnumerable<Equilibrium.Web.Models.PaymentTypeModel>
 @{
     ViewData["Title"] = ViewBag.Title ?? "Tipos de Pagamento";
-    var isSystemView = ViewBag.IsSystemView ?? false;
-    var isUserView = ViewBag.IsUserView ?? false;
 }
 
-<div class="container-fluid">
-    <div class="d-flex justify-content-end mb-3">
-        @if (!isSystemView && await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.create"))
+<div class="d-flex justify-content-end mb-3">
+    <div>
+        @if (await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.create"))
         {
             <a asp-action="Create" class="btn btn-primary">
                 <i class="fas fa-plus me-1"></i> Novo Tipo de Pagamento
             </a>
         }
     </div>
+</div>
 
-    <!-- Filtros -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
-            <a data-bs-toggle="collapse" href="#collapseFilters" role="button" aria-expanded="true" aria-controls="collapseFilters">
-                <i class="fas fa-chevron-down"></i>
-            </a>
-        </div>
-        <div class="card-body collapse show" id="collapseFilters">
-            <div class="row">
-                <div class="col-md-12 mb-3">
-                    <div class="d-flex gap-2">
-                        <a asp-action="Index" class="btn btn-outline-primary @(ViewContext.RouteData.Values["action"].ToString() == "Index" && !isSystemView && !isUserView ? "active" : "")">
-                            <i class="fas fa-list"></i> Todos
-                        </a>
-                        <a asp-action="System" class="btn btn-outline-success @(isSystemView ? "active" : "")">
-                            <i class="fas fa-cog"></i> Sistema
-                        </a>
-                        <a asp-action="User" class="btn btn-outline-info @(isUserView ? "active" : "")">
-                            <i class="fas fa-user"></i> Meus Tipos
-                        </a>
-                    </div>
+<div class="card shadow mb-4">
+    <partial name="_Partials/Commons/_CardHeader" model='(
+        Title: "Filtros",
+        BadgeText: "",
+        BadgeClass: "",
+        Icon: "fa-filter",
+        CollapseTarget: "collapseFilters")' />
+    <div class="card-body collapse show" id="collapseFilters">
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <div class="d-flex gap-2">
+                    <a asp-action="Index" class="btn btn-outline-primary btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewBag.IsSystemView == null && ViewBag.IsUserView == null ? "active" : "")">
+                        <i class="fas fa-list"></i> Todos
+                    </a>
+                    <a asp-action="System" class="btn btn-outline-success btn-sm @(ViewBag.IsSystemView == true ? "active" : "")">
+                        <i class="fas fa-cog"></i> Sistema
+                    </a>
+                    <a asp-action="User" class="btn btn-outline-info btn-sm @(ViewBag.IsUserView == true ? "active" : "")">
+                        <i class="fas fa-user"></i> Meus Tipos
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i> Nenhum tipo de pagamento encontrado.
-        </div>
-    }
-    else
-    {
-        <div class="card shadow mb-4">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover datatable">
-                        <thead class="bg-light">
+<div class="card shadow mb-4">
+    <partial name="_Partials/Commons/_CardHeader" model='(
+        Title: "Tipos de Pagamento",
+        BadgeText: "",
+        BadgeClass: "",
+        Icon: "fa-tags",
+        CollapseTarget: "")' />
+    <div class="card-body">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover datatable">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Descrição</th>
+                            <th class="text-center">Origem</th>
+                            <th class="text-center">Financiamento</th>
+                            <th class="text-center">Data de Criação</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderBy(e => e.Name))
+                        {
                             <tr>
-                                <th>Nome</th>
-                                <th>Descrição</th>
-                                <th class="text-center">Origem</th>
-                                <th class="text-center">Data de Criação</th>
-                                <th class="text-center">Ações</th>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@item.Id">
+                                        @item.Name
+                                    </a>
+                                </td>
+                                <td>@(string.IsNullOrEmpty(item.Description) ? "-" : item.Description)</td>
+                                <td class="text-center">
+                                    <partial name="_Partials/Commons/_StatusBadge" model='(
+                                        BadgeClass: item.IsSystem ? "bg-info" : "bg-primary",
+                                        Description: item.IsSystem ? "Sistema" : "Personalizado")' />
+                                </td>
+                                <td class="text-center">
+                                    <partial name="_Partials/Commons/_StatusBadge" model='(
+                                        BadgeClass: item.IsFinancingType ? "bg-success" : "bg-secondary",
+                                        Description: item.IsFinancingType ? "Sim" : "Não")' />
+                                </td>
+                                <td class="text-center">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-center">
+                                    <partial name="_Partials/Commons/_ActionButtons" model='(
+                                        Id: item.Id,
+                                        CanView: true,
+                                        CanEdit: !item.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.edit"),
+                                        CanDelete: !item.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.delete"),
+                                        ControllerName: "PaymentTypes")' />
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.OrderBy(e => e.Name))
-                            {
-                                <tr>
-                                    <td>
-                                        <div class="fw-medium">@item.Name</div>
-                                    </td>
-                                    <td>@(string.IsNullOrEmpty(item.Description) ? "-" : item.Description)</td>
-                                    <td class="text-center">
-                                        @if (item.IsSystem)
-                                        {
-                                            <span class="badge bg-success">Sistema</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-info">Personalizado</span>
-                                        }
-                                    </td>
-                                    <td class="text-center">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            @if (!item.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.edit"))
-                                            {
-                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                            }
-                                            @if (!item.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.delete"))
-                                            {
-                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                    </tbody>
+                </table>
             </div>
-        </div>
-    }
+        }
+        else
+        {
+            <partial name="_Partials/Commons/_EmptyState" model='(
+                Message: "Nenhum tipo de pagamento encontrado.",
+                Icon: "fa-tags",
+                ButtonText: await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.create") ? "Criar Novo Tipo" : "",
+                ButtonUrl: Url.Action("Create"),
+                ButtonIcon: "fa-plus",
+                IsAlert: true)' />
+        }
+    </div>
 </div>

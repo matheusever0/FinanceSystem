@@ -18,7 +18,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo transações do investimento com ID: {InvestmentId}", investmentId);
                 return await _apiService.GetAsync<IEnumerable<InvestmentTransactionModel>>($"/api/InvestmentTransactions/investment/{investmentId}", token);
             }
             catch (Exception ex)
@@ -32,7 +31,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo transação com ID: {TransactionId}", id);
                 return await _apiService.GetAsync<InvestmentTransactionModel>($"/api/InvestmentTransactions/{id}", token);
             }
             catch (Exception ex)
@@ -46,7 +44,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Criando nova transação para o investimento com ID: {InvestmentId}", investmentId);
                 return await _apiService.PostAsync<InvestmentTransactionModel>($"/api/InvestmentTransactions/investment/{investmentId}", model, token);
             }
             catch (Exception ex)
@@ -60,7 +57,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Excluindo transação com ID: {TransactionId}", id);
                 await _apiService.DeleteAsync($"/api/InvestmentTransactions/{id}", token);
             }
             catch (Exception ex)

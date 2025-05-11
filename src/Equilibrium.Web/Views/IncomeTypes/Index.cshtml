@@ -2,6 +2,8 @@
 @model IEnumerable<Equilibrium.Web.Models.IncomeType.IncomeTypeModel>
 @{
     ViewData["Title"] = ViewBag.Title ?? "Tipos de Receita";
+    var isSystemView = ViewBag.IsSystemView ?? false;
+    var isUserView = ViewBag.IsUserView ?? false;
 }
 
 <div class="d-flex justify-content-end mb-3">
@@ -26,14 +28,14 @@
         <div class="row">
             <div class="col-md-6 mb-3">
                 <div class="d-flex gap-2">
-                    <a asp-action="Index" class="btn btn-outline-primary @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewBag.Title == null ? "active" : "")">
+                    <a asp-action="Index" class="btn btn-outline-primary btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "Index" && !isSystemView && !isUserView ? "active" : "")">
                         <i class="fas fa-list"></i> Todos
                     </a>
-                    <a asp-action="Index" class="btn btn-outline-primary @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewBag.Title == null ? "active" : "")">
+                    <a asp-action="System" class="btn btn-outline-success btn-sm @(isSystemView ? "active" : "")">
                         <i class="fas fa-cog"></i> Sistema
                     </a>
-                    <a asp-action="Index" class="btn btn-outline-primary @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewBag.Title == null ? "active" : "")">
-                        <i class="fas fa-user"></i> Meus
+                    <a asp-action="User" class="btn btn-outline-info btn-sm @(isUserView ? "active" : "")">
+                        <i class="fas fa-user"></i> Minhas Receitas
                     </a>
                 </div>
             </div>

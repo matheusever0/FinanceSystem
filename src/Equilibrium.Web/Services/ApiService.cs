@@ -60,7 +60,6 @@ namespace Equilibrium.Web.Services
         private async Task<string> HandleResponse(HttpResponseMessage response)
         {
             var content = await response.Content.ReadAsStringAsync();
-            _logger.LogInformation("Resposta completa: {Content}", content);
 
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
@@ -133,11 +132,9 @@ namespace Equilibrium.Web.Services
         {
             var client = CreateClient(token);
             var json = data != null ? JsonSerializer.Serialize(data) : "";
-            _logger.LogInformation("Enviando requisição para {Endpoint}: {Json}", endpoint, json);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await client.PostAsync(endpoint, content);
             var responseContent = await HandleResponse(response);
-            _logger.LogInformation("Resposta do endpoint {Endpoint}: {ResponseContent}", endpoint, responseContent);
 
             return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions)!;
         }

@@ -21,8 +21,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation($"Tentando login via API para usuário: {model.Username}");
-
                 var response = await _apiService.PostAsync<LoginResponseModel>("/api/Auth/login", model);
 
                 if (response == null)
@@ -73,7 +71,7 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo registros filtrados");
+                
                 return await _apiService.GetFilteredAsync<PagedResult<UserModel>>("/api/Users/filter", filter, token);
             }
             catch (Exception ex)

@@ -9,9 +9,18 @@
     var rolePermissions = ViewBag.RolePermissions as List<string>;
 }
 
-<h4>Perfil: @role?.Name</h4>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="m-0">Perfil: @role?.Name</h4>
+    <partial name="_Partials/Commons/_BackButton" model='(Action: "Details", Controller: "Roles", Text: "Voltar")' />
+</div>
 
-<div class="card">
+<div class="card shadow">
+    <partial name="_Partials/Commons/_CardHeader" model='(
+        Title: "Gerenciar Permissões",
+        BadgeText: "",
+        BadgeClass: "",
+        Icon: "fa-key",
+        CollapseTarget: "")' />
     <div class="card-body">
         <form asp-action="ManagePermissions" method="post">
             <input type="hidden" name="id" value="@role?.Id" />
@@ -38,20 +47,20 @@
                         <tbody>
                             @foreach (var permission in allPermissions!.OrderBy(e => e.SystemName))
                             {
-                                    <tr>
-                                        <td>
-                                            <div class="form-check">
-                                                <input type="checkbox" 
-                                                       name="selectedPermissions" 
-                                                       value="@permission.Id" 
-                                                       class="form-check-input permission-checkbox" 
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input type="checkbox"
+                                                   name="selectedPermissions"
+                                                   value="@permission.Id"
+                                                   class="form-check-input permission-checkbox"
                                             @(rolePermissions!.Contains(permission.Id) ? "checked" : "") />
-                                            </div>
-                                        </td>
-                                        <td>@permission.Name</td>
-                                        <td><code>@permission.SystemName</code></td>
-                                        <td>@(string.IsNullOrEmpty(permission.Description) ? "-" : permission.Description)</td>
-                                    </tr>
+                                        </div>
+                                    </td>
+                                    <td>@permission.Name</td>
+                                    <td><code>@permission.SystemName</code></td>
+                                    <td>@(string.IsNullOrEmpty(permission.Description) ? "-" : permission.Description)</td>
+                                </tr>
                             }
                         </tbody>
                     </table>
@@ -59,7 +68,9 @@
             </div>
 
             <div class="mb-3">
-                <button type="submit" class="btn btn-primary">Salvar Permissões</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Salvar Permissões
+                </button>
                 <a asp-action="Details" asp-route-id="@role?.Id" class="btn btn-secondary">Cancelar</a>
             </div>
         </form>
@@ -67,23 +78,23 @@
 </div>
 
 @section Scripts {
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const selectAllBtn = document.getElementById('selectAll');
-                const deselectAllBtn = document.getElementById('deselectAll');
-                const checkboxes = document.querySelectorAll('.permission-checkbox');
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectAllBtn = document.getElementById('selectAll');
+            const deselectAllBtn = document.getElementById('deselectAll');
+            const checkboxes = document.querySelectorAll('.permission-checkbox');
 
-                selectAllBtn.addEventListener('click', function () {
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = true;
-                    });
-                });
-
-                deselectAllBtn.addEventListener('click', function () {
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = false;
-                    });
+            selectAllBtn.addEventListener('click', function () {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true;
                 });
             });
-        </script>
+
+            deselectAllBtn.addEventListener('click', function () {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            });
+        });
+    </script>
 }

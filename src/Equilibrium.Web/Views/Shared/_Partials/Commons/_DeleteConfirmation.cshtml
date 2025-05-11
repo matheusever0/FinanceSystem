@@ -1,5 +1,5 @@
-﻿@using Microsoft.AspNetCore.Components
-@model (string EntityName, Guid Id, RenderFragment EntityDetails)
+﻿@using Microsoft.AspNetCore.Html
+@model (string EntityName, Guid Id, IHtmlContent EntityDetails)
 <div class="alert alert-danger mb-4">
     <h4 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i> Confirmação de Exclusão</h4>
     <p>Tem certeza de que deseja excluir este @Model.EntityName?</p>

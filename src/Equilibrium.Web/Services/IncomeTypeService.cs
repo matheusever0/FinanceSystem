@@ -20,7 +20,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo todos os tipos de receita");
                 return await _apiService.GetAsync<IEnumerable<IncomeTypeModel>>("/api/IncomeTypes", token);
             }
             catch (Exception ex)
@@ -34,7 +33,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo tipos de receita do sistema");
                 return await _apiService.GetAsync<IEnumerable<IncomeTypeModel>>("/api/IncomeTypes/system", token);
             }
             catch (Exception ex)
@@ -48,7 +46,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo tipos de receita do usuário");
                 return await _apiService.GetAsync<IEnumerable<IncomeTypeModel>>("/api/IncomeTypes/user", token);
             }
             catch (Exception ex)
@@ -62,7 +59,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo tipo de receita com ID: {TypeId}", id);
                 return await _apiService.GetAsync<IncomeTypeModel>($"/api/IncomeTypes/{id}", token);
             }
             catch (Exception ex)
@@ -76,7 +72,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Criando novo tipo de receita: {Name}", model.Name);
                 return await _apiService.PostAsync<IncomeTypeModel>("/api/IncomeTypes", model, token);
             }
             catch (Exception ex)
@@ -90,7 +85,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Atualizando tipo de receita com ID: {TypeId}", id);
                 return await _apiService.PutAsync<IncomeTypeModel>($"/api/IncomeTypes/{id}", model, token);
             }
             catch (Exception ex)
@@ -104,7 +98,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Excluindo tipo de receita com ID: {TypeId}", id);
                 await _apiService.DeleteAsync($"/api/IncomeTypes/{id}", token);
             }
             catch (Exception ex)
@@ -117,7 +110,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo registros filtrados");
                 return await _apiService.GetFilteredAsync<PagedResult<IncomeTypeModel>>("/api/IncomeTypes/filter", filter, token);
             }
             catch (Exception ex)

@@ -49,13 +49,6 @@ namespace Equilibrium.Web.Services
                 var permissions = await _permissionService.GetPermissionsByUserIdAsync(userIdClaim.Value, token);
                 var hasPermission = permissions.Any(p => p.SystemName == permissionSystemName);
 
-                _logger.LogInformation(
-                    "Verificação de permissão para usuário {User}: {PermissionName} = {HasPermission}",
-                    context.GetUserName(),
-                    permissionSystemName,
-                    hasPermission
-                );
-
                 return hasPermission;
             }
             catch (Exception ex)

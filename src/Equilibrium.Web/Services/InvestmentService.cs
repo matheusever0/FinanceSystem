@@ -20,7 +20,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo todos os investimentos");
                 return await _apiService.GetAsync<IEnumerable<InvestmentModel>>("/api/Investments", token);
             }
             catch (Exception ex)
@@ -34,7 +33,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo investimento com ID: {InvestmentId}", id);
                 return await _apiService.GetAsync<InvestmentModel>($"/api/Investments/{id}", token);
             }
             catch (Exception ex)
@@ -48,7 +46,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo investimentos por tipo: {Type}", type);
                 return await _apiService.GetAsync<IEnumerable<InvestmentModel>>($"/api/Investments/type/{type}", token);
             }
             catch (Exception ex)
@@ -62,7 +59,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Criando novo investimento: {Symbol}", model.Symbol);
                 return await _apiService.PostAsync<InvestmentModel>("/api/Investments", model, token);
             }
             catch (Exception ex)
@@ -76,7 +72,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Excluindo investimento com ID: {InvestmentId}", id);
                 await _apiService.DeleteAsync($"/api/Investments/{id}", token);
             }
             catch (Exception ex)
@@ -90,7 +85,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Atualizando preço do investimento com ID: {InvestmentId}", id);
                 return await _apiService.PostAsync<InvestmentModel>($"/api/Investments/{id}/refresh", null, token);
             }
             catch (Exception ex)
@@ -104,7 +98,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Atualizando preços de todos os investimentos");
                 return await _apiService.PostAsync<IEnumerable<InvestmentModel>>("/api/Investments/refresh-all", null, token);
             }
             catch (Exception ex)
@@ -117,7 +110,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo registros filtrados");
                 return await _apiService.GetFilteredAsync<PagedResult<Models.Investment.InvestmentModel>>("/api/Investments/filter", filter, token);
             }
             catch (Exception ex)

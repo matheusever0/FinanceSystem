@@ -1,58 +1,56 @@
-﻿@using Microsoft.AspNetCore.Components
+﻿@using Microsoft.AspNetCore.Html
 @using Equilibrium.Web.Models.Investment
 @model InvestmentModel
 
 @{
     ViewData["Title"] = "Excluir Investimento";
 
-    RenderFragment entityDetails = @<text>
-        <div class="mb-3">
-            <partial name="_Partials/Commons/_FinancialDataItem" model='(
-                Label: "Símbolo",
-                Value: Model.Symbol,
-                SecondaryText: "",
-                ValueClass: "")' />
-        </div>
-        <div class="mb-3">
-            <partial name="_Partials/Commons/_FinancialDataItem" model='(
-                Label: "Nome",
-                Value: Model.Name,
-                SecondaryText: "",
-                ValueClass: "")' />
-        </div>
-        <div class="mb-3">
-            <partial name="_Partials/Commons/_FinancialDataItem" model='(
-                Label: "Tipo",
-                Value: Model.Type switch
-                {
-                    1 => "Ações",
-                    2 => "Fundos Imobiliários",
-                    3 => "ETFs",
-                    4 => "Ações Estrangeiras",
-                    5 => "Renda Fixa",
-                    _ => "Não Categorizado"
-                },
-                SecondaryText: "",
-                ValueClass: "")' />
-        </div>
-        <div class="mb-3">
-            <partial name="_Partials/Commons/_FinancialDataItem" model='(
-                Label: "Total Investido",
-                Value: string.Format("{0:C2}", Model.TotalInvested),
-                SecondaryText: "",
-                ValueClass: "fw-bold")' />
-        </div>
+    var htmlBuilder = new System.Text.StringBuilder();
 
-        @if (Model.Transactions != null && Model.Transactions.Any())
+    htmlBuilder.AppendLine("<div class='mb-3'>");
+    htmlBuilder.AppendLine($"<h6 class='small font-weight-bold text-muted'>Símbolo</h6>");
+    htmlBuilder.AppendLine($"<p>{Model.Symbol}</p>");
+    htmlBuilder.AppendLine("</div>");
+
+    htmlBuilder.AppendLine("<div class='mb-3'>");
+    htmlBuilder.AppendLine($"<h6 class='small font-weight-bold text-muted'>Nome</h6>");
+    htmlBuilder.AppendLine($"<p>{Model.Name}</p>");
+    htmlBuilder.AppendLine("</div>");
+
+    var typeDescription = Model.Type switch
     {
-        <div class="alert alert-warning">
-            <i class="fas fa-exclamation-triangle me-2"></i> Este investimento possui @Model.Transactions.Count transações que também serão excluídas.
-        </div>
+        1 => "Ações",
+        2 => "Fundos Imobiliários",
+        3 => "ETFs",
+        4 => "Ações Estrangeiras",
+        5 => "Renda Fixa",
+        _ => "Não Categorizado"
+    };
+
+    htmlBuilder.AppendLine("<div class='mb-3'>");
+    htmlBuilder.AppendLine($"<h6 class='small font-weight-bold text-muted'>Tipo</h6>");
+    htmlBuilder.AppendLine($"<p>{typeDescription}</p>");
+    htmlBuilder.AppendLine("</div>");
+
+    htmlBuilder.AppendLine("<div class='mb-3'>");
+    htmlBuilder.AppendLine($"<h6 class='small font-weight-bold text-muted'>Total Investido</h6>");
+    htmlBuilder.AppendLine($"<p class='fw-bold'>{string.Format("{0:C2}", Model.TotalInvested)}</p>");
+    htmlBuilder.AppendLine("</div>");
+
+    if (Model.Transactions != null && Model.Transactions.Any())
+    {
+        htmlBuilder.AppendLine("<div class='alert alert-warning'>");
+        htmlBuilder.AppendLine("<i class='fas fa-exclamation-triangle me-2'></i>");
+        htmlBuilder.AppendLine($"Este investimento possui {Model.Transactions.Count} transações que também serão excluídas.");
+        htmlBuilder.AppendLine("</div>");
     }
-    </text>;
+
+    // Converte o HTML gerado para IHtmlContent
+    IHtmlContent entityDetails = new HtmlString(htmlBuilder.ToString());
 }
 
 <div class="container-fluid">
+    <!-- Botão Voltar -->
     <div class="d-flex justify-content-end mb-3">
         <partial name="_Partials/Commons/_BackButton" model='(
             Action: "Index",
@@ -60,6 +58,7 @@
             Text: "Voltar")' />
     </div>
 
+    <!-- Confirmação de Exclusão -->
     <partial name="_Partials/Commons/_DeleteConfirmation" model='(
         EntityName: "investimento",
         Id: Guid.Parse(Model.Id),

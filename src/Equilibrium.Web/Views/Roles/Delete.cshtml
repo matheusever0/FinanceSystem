@@ -1,30 +1,40 @@
-﻿@using Equilibrium.Web.Models.Role
-<!-- src/Equilibrium.Web/Views/Roles/Delete.cshtml -->
+﻿@using Microsoft.AspNetCore.Html
+@using Equilibrium.Web.Models.Role
 @model RoleModel
 
 @{
     ViewData["Title"] = "Excluir Perfil";
+
+    var htmlBuilder = new System.Text.StringBuilder();
+
+    htmlBuilder.AppendLine("<dl class='row'>");
+    htmlBuilder.AppendLine($"<dt class='col-sm-3'>Nome</dt>");
+    htmlBuilder.AppendLine($"<dd class='col-sm-9'>{Model.Name}</dd>");
+
+    if (!string.IsNullOrEmpty(Model.Description))
+    {
+        htmlBuilder.AppendLine($"<dt class='col-sm-3'>Descrição</dt>");
+        htmlBuilder.AppendLine($"<dd class='col-sm-9'>{Model.Description}</dd>");
+    }
+
+    htmlBuilder.AppendLine($"<dt class='col-sm-3'>Data de Criação</dt>");
+    htmlBuilder.AppendLine($"<dd class='col-sm-9'>{Model.CreatedAt:dd/MM/yyyy HH:mm}</dd>");
+    htmlBuilder.AppendLine("</dl>");
+
+    htmlBuilder.AppendLine(@"
+        <div class='alert alert-warning mt-3'>
+            <i class='fas fa-exclamation-circle'></i>
+            Se houver usuários atribuídos a este perfil, a exclusão não será permitida.
+        </div>");
+
+    IHtmlContent entityDetails = new HtmlString(htmlBuilder.ToString());
 }
 
-<div class="alert alert-danger">
-    <h3>Tem certeza que deseja excluir este perfil?</h3>
-    <p>Esta ação não poderá ser desfeita.</p>
+<div class="d-flex justify-content-end mb-3">
+    <partial name="_Partials/Commons/_BackButton" model='(Action: "Details", Controller: "Roles", Text: "Voltar")' />
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <dl class="row">
-            <dt class="col-sm-3">Nome</dt>
-            <dd class="col-sm-9">@Model.Name</dd>
-
-            <dt class="col-sm-3">Descrição</dt>
-            <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.Description) ? "-" : Model.Description)</dd>
-        </dl>
-
-        <form asp-action="Delete">
-            <input type="hidden" name="id" value="@Model.Id" />
-            <button type="submit" class="btn btn-danger">Excluir</button>
-            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-        </form>
-    </div>
-</div>
+<partial name="_Partials/Commons/_DeleteConfirmation" model='(
+    EntityName: "perfil",
+    Id: Guid.Parse(Model.Id),
+    EntityDetails: entityDetails)' />

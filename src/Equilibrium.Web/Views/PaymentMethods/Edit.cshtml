@@ -4,50 +4,75 @@
     ViewData["Title"] = "Editar Método de Pagamento";
 }
 
-<div class="container-fluid">
-    <div class="d-flex justify-content-end mb-3">
-        <a asp-action="Details" asp-route-id="@ViewContext.RouteData.Values["id"]" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Voltar
-        </a>
-    </div>
+<div class="d-flex justify-content-end mb-3">
+    <partial name="_Partials/Commons/_BackButton" model='(
+        Action: "Details",
+        Controller: "PaymentMethods",
+        Text: "Voltar")' />
+</div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Informações do Método de Pagamento</h6>
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <partial name="_Partials/Commons/_CardHeader" model='(
+                Title: "Informações do Método de Pagamento",
+                BadgeText: "",
+                BadgeClass: "",
+                Icon: "fa-wallet",
+                CollapseTarget: "")' />
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" name="id" value="@ViewContext.RouteData.Values["id"]" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Name" class="form-label"></label>
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Description" class="form-label"></label>
+                                <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        O tipo do método de pagamento não pode ser alterado após a criação.
+                    </div>
+
+                    <partial name="_Partials/Commons/_FormActions" model='(
+                        CancelAction: "Details",
+                        CancelController: "PaymentMethods",
+                        IsEdit: true)' />
+                </form>
+            </div>
         </div>
-        <div class="card-body">
-            <form asp-action="Edit" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label asp-for="Name" class="form-label"></label>
-                            <input asp-for="Name" class="form-control" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label asp-for="Description" class="form-label"></label>
-                            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
-                            <span asp-validation-for="Description" class="text-danger"></span>
-                        </div>
-                    </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow mb-4">
+            <partial name="_Partials/Commons/_CardHeader" model='(
+                Title: "Informações",
+                BadgeText: "",
+                BadgeClass: "",
+                Icon: "fa-info-circle",
+                CollapseTarget: "")' />
+            <div class="card-body">
+                <p>Atualize os dados do método de pagamento:</p>
+                <ul>
+                    <li><strong>Nome:</strong> Um nome para identificar o método de pagamento (ex: Cartão Nubank, Pix, Boleto Bancário).</li>
+                    <li><strong>Descrição:</strong> Uma breve descrição do método de pagamento.</li>
+                </ul>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Você está editando um método de pagamento personalizado.
                 </div>
-
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    O tipo do método de pagamento não pode ser alterado após a criação.
-                </div>
-
-                <div class="mb-3">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i> Salvar
-                    </button>
-                    <a asp-action="Details" asp-route-id="@ViewContext.RouteData.Values["id"]" class="btn btn-secondary">Cancelar</a>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>

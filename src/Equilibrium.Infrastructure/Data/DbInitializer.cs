@@ -26,9 +26,7 @@ namespace Equilibrium.Infrastructure.Data
         {
             try
             {
-                _logger.LogInformation("Applying database migrations...");
                 await _context.Database.MigrateAsync();
-                _logger.LogInformation("Database migrations applied successfully");
             }
             catch (Exception ex)
             {
@@ -43,7 +41,6 @@ namespace Equilibrium.Infrastructure.Data
             {
                 if (!await _context.Permissions.AnyAsync())
                 {
-                    _logger.LogInformation("Creating default permissions...");
 
                     var viewUsersPermission = new Permission("View Users", "users.view", "Permission to view users");
                     var createUsersPermission = new Permission("Create Users", "users.create", "Permission to create users");
@@ -99,22 +96,15 @@ namespace Equilibrium.Infrastructure.Data
                     await _context.Permissions.AddRangeAsync(viewIncomesPermission, createIncomesPermission, updateIncomesPermission, deleteIncomesPermission);
                     await _context.SaveChangesAsync();
 
-                    _logger.LogInformation("Default permissions created successfully");
                 }
 
                 if (!await _context.Roles.AnyAsync())
                 {
-                    _logger.LogInformation("Creating default roles...");
-
                     var adminRole = new Role("Admin", "Administrator role with full access");
                     var userRole = new Role("User", "Standard user role with minimal access");
 
                     await _context.Roles.AddRangeAsync(adminRole, userRole);
                     await _context.SaveChangesAsync();
-
-                    _logger.LogInformation("Default roles created successfully");
-
-                    _logger.LogInformation("Assigning permissions to roles...");
 
                     var allPermissions = await _context.Permissions.ToListAsync();
 
@@ -137,17 +127,14 @@ namespace Equilibrium.Infrastructure.Data
                     }
 
                     await _context.SaveChangesAsync();
-                    _logger.LogInformation("Permissions assigned to roles successfully");
                 }
 
                 if (!await _context.Users.AnyAsync())
                 {
-                    _logger.LogInformation("Creating default admin user...");
 
                     var adminRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Admin");
                     if (adminRole == null)
                     {
-                        _logger.LogError("Admin role not found. Cannot create admin user.");
                         return;
                     }
 
@@ -162,8 +149,6 @@ namespace Equilibrium.Infrastructure.Data
 
                 if (!await _context.PaymentTypes.AnyAsync())
                 {
-                    _logger.LogInformation("Creating default payment types...");
-
                     var paymentTypes = new List<PaymentType>
                     {
                         new("Alimentação", "Gastos com alimentação, restaurantes, mercado, etc."),
@@ -181,13 +166,10 @@ namespace Equilibrium.Infrastructure.Data
 
                     await _context.PaymentTypes.AddRangeAsync(paymentTypes);
                     await _context.SaveChangesAsync();
-
-                    _logger.LogInformation("Default payment types created successfully");
                 }
 
                 if (!await _context.PaymentMethods.AnyAsync())
                 {
-                    _logger.LogInformation("Creating default payment methods...");
 
                     var paymentMethods = new List<PaymentMethod>
                     {
@@ -209,7 +191,6 @@ namespace Equilibrium.Infrastructure.Data
                     await _context.PaymentMethods.AddRangeAsync(paymentMethods);
                     await _context.SaveChangesAsync();
 
-                    _logger.LogInformation("Default payment methods created successfully");
                 }
             }
             catch (Exception ex)

@@ -20,7 +20,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo todos os cartões de crédito");
                 return await _apiService.GetAsync<IEnumerable<CreditCardModel>>("/api/CreditCards", token);
             }
             catch (Exception ex)
@@ -34,7 +33,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo cartão de crédito com ID: {CardId}", id);
                 return await _apiService.GetAsync<CreditCardModel>($"/api/CreditCards/{id}", token);
             }
             catch (Exception ex)
@@ -48,7 +46,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Criando novo cartão de crédito: {Name}", model.Name);
                 return await _apiService.PostAsync<CreditCardModel>("/api/CreditCards", model, token);
             }
             catch (Exception ex)
@@ -62,7 +59,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Atualizando cartão de crédito com ID: {CardId}", id);
                 return await _apiService.PutAsync<CreditCardModel>($"/api/CreditCards/{id}", model, token);
             }
             catch (Exception ex)
@@ -76,7 +72,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Excluindo cartão de crédito com ID: {CardId}", id);
                 await _apiService.DeleteAsync($"/api/CreditCards/{id}", token);
             }
             catch (Exception ex)
@@ -89,7 +84,6 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                _logger.LogInformation("Obtendo registros filtrados");
                 return await _apiService.GetFilteredAsync<PagedResult<CreditCardModel>>("/api/CreditCards/filter", filter, token);
             }
             catch (Exception ex)

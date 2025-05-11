@@ -5,7 +5,17 @@
     ViewData["Title"] = "Criar Perfil";
 }
 
-<div class="card">
+<div class="d-flex justify-content-end mb-3">
+    <partial name="_Partials/Commons/_BackButton" model='(Action: "Index", Controller: "Roles", Text: "Voltar")' />
+</div>
+
+<div class="card shadow mb-4">
+    <partial name="_Partials/Commons/_CardHeader" model='(
+        Title: "Informações do Perfil",
+        BadgeText: "",
+        BadgeClass: "",
+        Icon: "fa-user-tag",
+        CollapseTarget: "")' />
     <div class="card-body">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -22,10 +32,7 @@
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
-            <div class="mb-3">
-                <button type="submit" class="btn btn-primary">Salvar</button>
-                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-            </div>
+            <partial name="_Partials/Commons/_FormActions" model='(CancelAction: "Index", CancelController: "Roles", IsEdit: false)' />
         </form>
     </div>
 </div>

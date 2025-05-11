@@ -7,31 +7,65 @@
     var permissions = ViewBag.Permissions as IEnumerable<PermissionModel>;
 }
 
-<div class="card mb-4">
-    <div class="card-body">
-        <dl class="row">
-            <dt class="col-sm-3">Nome</dt>
-            <dd class="col-sm-9">@Model.Name</dd>
-
-            <dt class="col-sm-3">Descrição</dt>
-            <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.Description) ? "-" : Model.Description)</dd>
-
-            <dt class="col-sm-3">Data de Criação</dt>
-            <dd class="col-sm-9">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
-        </dl>
-
-        <div>
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
-            <a asp-action="ManagePermissions" asp-route-id="@Model.Id" class="btn btn-success">Gerenciar Permissões</a>
-            <a asp-action="Index" class="btn btn-secondary">Voltar</a>
-        </div>
+<div class="d-flex justify-content-end mb-3">
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+            <i class="fas fa-edit me-1"></i> Editar
+        </a>
+        <a asp-action="ManagePermissions" asp-route-id="@Model.Id" class="btn btn-success">
+            <i class="fas fa-key me-1"></i> Gerenciar Permissões
+        </a>
+        <partial name="_Partials/Commons/_BackButton" model='(Action: "Index", Controller: "Roles", Text: "Voltar")' />
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Permissões</h5>
+<div class="card shadow mb-4">
+    <partial name="_Partials/Commons/_CardHeader" model='(
+        Title: "Informações do Perfil",
+        BadgeText: "",
+        BadgeClass: "",
+        Icon: "fa-user-tag",
+        CollapseTarget: "")' />
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                    Label: "Nome",
+                    Value: Model.Name,
+                    SecondaryText: "",
+                    ValueClass: "")' />
+            </div>
+            <div class="col-md-6">
+                <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                    Label: "Data de Criação",
+                    Value: Model.CreatedAt.ToString("dd/MM/yyyy HH:mm"),
+                    SecondaryText: "",
+                    ValueClass: "")' />
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <div class="row mb-3">
+                <div class="col-12">
+                    <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                        Label: "Descrição",
+                        Value: Model.Description,
+                        SecondaryText: "",
+                        ValueClass: "")' />
+                </div>
+            </div>
+        }
     </div>
+</div>
+
+<div class="card shadow">
+    <partial name="_Partials/Commons/_CardHeader" model='(
+        Title: "Permissões",
+        BadgeText: "",
+        BadgeClass: "",
+        Icon: "fa-key",
+        CollapseTarget: "")' />
     <div class="card-body">
         @if (permissions != null && permissions.Any())
         {
@@ -59,11 +93,13 @@
         }
         else
         {
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                Este perfil não possui permissões atribuídas.
-                <a asp-action="ManagePermissions" asp-route-id="@Model.Id" class="alert-link">Clique aqui</a> para gerenciar permissões.
-            </div>
+            <partial name="_Partials/Commons/_EmptyState" model='(
+                Message: "Este perfil não possui permissões atribuídas.",
+                Icon: "fa-key",
+                ButtonText: "Gerenciar Permissões",
+                ButtonUrl: Url.Action("ManagePermissions", new { id = Model.Id }),
+                ButtonIcon: "fa-key",
+                IsAlert: true)' />
         }
     </div>
 </div>

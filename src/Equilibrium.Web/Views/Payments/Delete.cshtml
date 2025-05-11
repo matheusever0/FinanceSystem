@@ -1,38 +1,46 @@
-﻿@using Microsoft.AspNetCore.Components
+﻿@using Microsoft.AspNetCore.Html
 @using Equilibrium.Web.Models.Payment
 @model PaymentModel
+
 @{
     ViewData["Title"] = "Excluir Pagamento";
 
-    RenderFragment entityDetails = @<text>
-        <div class="mb-3">
-            <h6 class="small font-weight-bold text-muted">Descrição</h6>
-            <p>@Model.Description</p>
-        </div>
-        <div class="mb-3">
-            <h6 class="small font-weight-bold text-muted">Valor</h6>
-            <p class="fw-bold">@Model.GetFormattedAmount()</p>
-        </div>
-        <div class="mb-3">
-            <h6 class="small font-weight-bold text-muted">Data de Vencimento</h6>
-            <p>@Model.GetFormattedDueDate()</p>
-        </div>
-        <div class="mb-3">
-            <h6 class="small font-weight-bold text-muted">Tipo de Pagamento</h6>
-            <p>@Model.PaymentTypeName</p>
-        </div>
-        <div class="mb-3">
-            <h6 class="small font-weight-bold text-muted">Status</h6>
-            <p><span class="badge @Model.StatusBadgeClass">@Model.StatusDescription</span></p>
-        </div>
+    var htmlBuilder = new System.Text.StringBuilder();
 
-        @if (Model.Installments != null && Model.Installments.Any())
+    htmlBuilder.AppendLine("<div class='mb-3'>");
+    htmlBuilder.AppendLine("<h6 class='small font-weight-bold text-muted'>Descrição</h6>");
+    htmlBuilder.AppendLine($"<p>{Model.Description}</p>");
+    htmlBuilder.AppendLine("</div>");
+
+    htmlBuilder.AppendLine("<div class='mb-3'>");
+    htmlBuilder.AppendLine("<h6 class='small font-weight-bold text-muted'>Valor</h6>");
+    htmlBuilder.AppendLine($"<p class='fw-bold'>{Model.GetFormattedAmount()}</p>");
+    htmlBuilder.AppendLine("</div>");
+
+    htmlBuilder.AppendLine("<div class='mb-3'>");
+    htmlBuilder.AppendLine("<h6 class='small font-weight-bold text-muted'>Data de Vencimento</h6>");
+    htmlBuilder.AppendLine($"<p>{Model.GetFormattedDueDate()}</p>");
+    htmlBuilder.AppendLine("</div>");
+
+    htmlBuilder.AppendLine("<div class='mb-3'>");
+    htmlBuilder.AppendLine("<h6 class='small font-weight-bold text-muted'>Tipo de Pagamento</h6>");
+    htmlBuilder.AppendLine($"<p>{Model.PaymentTypeName}</p>");
+    htmlBuilder.AppendLine("</div>");
+
+    htmlBuilder.AppendLine("<div class='mb-3'>");
+    htmlBuilder.AppendLine("<h6 class='small font-weight-bold text-muted'>Status</h6>");
+    htmlBuilder.AppendLine($"<p><span class='badge {Model.StatusBadgeClass}'>{Model.StatusDescription}</span></p>");
+    htmlBuilder.AppendLine("</div>");
+
+    if (Model.Installments != null && Model.Installments.Any())
     {
-        <div class="alert alert-warning">
-            <i class="fas fa-exclamation-triangle me-2"></i> Este pagamento possui @Model.Installments.Count parcelas que também serão excluídas.
-        </div>
+        htmlBuilder.AppendLine("<div class='alert alert-warning'>");
+        htmlBuilder.AppendLine("<i class='fas fa-exclamation-triangle me-2'></i>");
+        htmlBuilder.AppendLine($" Este pagamento possui {Model.Installments.Count} parcelas que também serão excluídas.");
+        htmlBuilder.AppendLine("</div>");
     }
-    </text>;
+
+    IHtmlContent entityDetails = new HtmlString(htmlBuilder.ToString());
 }
 
 <div class="container-fluid">

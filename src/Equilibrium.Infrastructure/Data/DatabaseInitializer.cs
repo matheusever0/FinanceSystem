@@ -19,8 +19,6 @@ namespace Equilibrium.Infrastructure.Data
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Starting database initialization...");
-
             using var scope = _serviceProvider.CreateScope();
             var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
 
@@ -29,7 +27,6 @@ namespace Equilibrium.Infrastructure.Data
                 await dbInitializer.Initialize();
                 await dbInitializer.SeedData();
 
-                _logger.LogInformation("Database initialization completed successfully");
             }
             catch (Exception ex)
             {
