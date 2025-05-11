@@ -9,21 +9,6 @@
     <div class="d-flex justify-content-between mb-3">
         <div>
             <partial name="_Partials/_BackButton" model='(Action: "Index", Controller: "Financings", Text: "Voltar")' />
-            @if (Model.Status == 1)
-            {
-                @if (await PermissionHelper.HasPermissionAsync(Context, "financings.forecast"))
-                {
-                    <a asp-action="Forecast" asp-route-id="@Model.Id" class="btn btn-primary">
-                        <i class="fas fa-chart-line me-1"></i> Previsão
-                    </a>
-                }
-                @if (await PermissionHelper.HasPermissionAsync(Context, "financings.apply-correction"))
-                {
-                    <a asp-action="ApplyCorrection" asp-route-id="@Model.Id" class="btn btn-warning">
-                        <i class="fas fa-sync-alt me-1"></i> Aplicar Correção
-                    </a>
-                }
-            }
         </div>
     </div>
 
