@@ -1,8 +1,22 @@
-﻿@model (string Title, string BadgeText, string BadgeClass)
+﻿@model (string Title, string BadgeText, string BadgeClass, string Icon, string CollapseTarget)
 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-    <h6 class="m-0 font-weight-bold text-primary">@Model.Title</h6>
-    @if (!string.IsNullOrEmpty(Model.BadgeText))
-    {
-        <span class="badge @Model.BadgeClass">@Model.BadgeText</span>
-    }
+    <h6 class="m-0 font-weight-bold text-primary">
+        @if (!string.IsNullOrEmpty(Model.Icon))
+        {
+            <i class="fas @Model.Icon me-2"></i>
+        }
+        @Model.Title
+    </h6>
+    <div>
+        @if (!string.IsNullOrEmpty(Model.BadgeText))
+        {
+            <span class="badge @Model.BadgeClass">@Model.BadgeText</span>
+        }
+        @if (!string.IsNullOrEmpty(Model.CollapseTarget))
+        {
+            <a data-bs-toggle="collapse" href="#@Model.CollapseTarget" role="button" aria-expanded="true" aria-controls="@Model.CollapseTarget">
+                <i class="fas fa-chevron-down"></i>
+            </a>
+        }
+    </div>
 </div>

@@ -1,7 +1,7 @@
-﻿@model (string Label, string Value, string SecondaryText)
+﻿@model (string Label, string Value, string SecondaryText, string ValueClass)
 <div class="mb-3">
     <h5 class="small font-weight-bold text-muted">@Model.Label</h5>
-    <p>@Html.Raw(Model.Value)</p>
+    <p class="@Model.ValueClass">@Html.Raw(Model.Value)</p>
     @if (!string.IsNullOrEmpty(Model.SecondaryText))
     {
         <div class="secondary">@Model.SecondaryText</div>

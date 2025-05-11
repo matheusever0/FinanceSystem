@@ -1,0 +1,31 @@
+﻿@model (string Title, string Value, string Icon, string Color, string SubValue, bool ShowProgress)
+<div class="col-xl-4 col-md-6 mb-4">
+    <div class="card border-left-@Model.Color shadow h-100 py-2">
+        <div class="card-body">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-@Model.Color text-uppercase mb-1">
+                        @Model.Title
+                    </div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Html.Raw(Model.Value)</div>
+
+                    @if (!string.IsNullOrEmpty(Model.SubValue))
+                    {
+                        <div class="text-xs text-muted mt-1">@Model.SubValue</div>
+                    }
+
+                    @if (Model.ShowProgress && decimal.TryParse(Model.Value.Replace("%", "").Replace("R$", "").Replace(".", "").Replace(",", "."), out decimal percent))
+                    {
+                        <div class="progress mt-2" style="height: 6px;">
+                            <div class="progress-bar bg-@Model.Color" role="progressbar"
+                                 style="width: @Math.Min(100, Math.Max(0, percent))%"></div>
+                        </div>
+                    }
+                </div>
+                <div class="col-auto">
+                    <i class="fas @Model.Icon fa-2x text-gray-300"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

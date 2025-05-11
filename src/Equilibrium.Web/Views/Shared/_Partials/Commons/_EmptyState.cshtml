@@ -1,0 +1,26 @@
+﻿@model (string Message, string Icon, string ButtonText, string ButtonUrl, string ButtonIcon, bool IsAlert)
+@if (Model.IsAlert)
+{
+    <div class="alert alert-info">
+        <i class="fas @(string.IsNullOrEmpty(Model.Icon) ? "fa-info-circle" : Model.Icon) me-2"></i> @Model.Message
+    </div>
+}
+else
+{
+    <div class="text-center my-5">
+        <div class="mb-3">
+            <i class="fas @(string.IsNullOrEmpty(Model.Icon) ? "fa-info-circle" : Model.Icon) fa-3x text-muted"></i>
+        </div>
+        <p class="lead">@Model.Message</p>
+        @if (!string.IsNullOrEmpty(Model.ButtonText))
+        {
+            <a href="@Model.ButtonUrl" class="btn btn-primary mt-3">
+                @if (!string.IsNullOrEmpty(Model.ButtonIcon))
+                {
+                    <i class="fas @Model.ButtonIcon me-1"></i>
+                }
+                @Model.ButtonText
+            </a>
+        }
+    </div>
+}
