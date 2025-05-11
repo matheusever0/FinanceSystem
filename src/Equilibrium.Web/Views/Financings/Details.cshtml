@@ -8,7 +8,7 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between mb-3">
         <div>
-            <partial name="_Partials/_BackButton" model='(Action: "Index", Controller: "Financings", Text: "Voltar")' />
+            <partial name="_Partials/Commons/_BackButton" model='(Action: "Index", Controller: "Financings", Text: "Voltar")' />
         </div>
     </div>
 
@@ -18,21 +18,21 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">Informações do Financiamento</h6>
-                    <partial name="_Partials/_StatusBadge" model='(BadgeClass: GetStatusBadgeClass(Model.Status), Description: Model.StatusDescription)' />
+                    <partial name="_Partials/Commons/_StatusBadge" model='(BadgeClass: GetStatusBadgeClass(Model.Status), Description: Model.StatusDescription)' />
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Descrição", Value: Model.Description, SecondaryText: "")' />
-                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Valor Total", Value: Model.GetFormattedTotalAmount(), SecondaryText: "")' />
-                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Taxa de Juros", Value: Model.InterestRate.ToString("F2") + "% ao ano", SecondaryText: "")' />
-                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Prazo", Value: Model.TermMonths + " meses", SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Descrição", Value: Model.Description, SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Valor Total", Value: Model.GetFormattedTotalAmount(), SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Taxa de Juros", Value: Model.InterestRate.ToString("F2") + "% ao ano", SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Prazo", Value: Model.TermMonths + " meses", SecondaryText: "")' />
                         </div>
                         <div class="col-md-6">
-                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Tipo", Value: Model.TypeDescription, SecondaryText: "")' />
-                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Índice de Correção", Value: Model.CorrectionIndexDescription, SecondaryText: "")' />
-                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Data de Início", Value: Model.StartDate.ToString("dd/MM/yyyy"), SecondaryText: "")' />
-                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Data de Término", Value: Model.EndDate?.ToString("dd/MM/yyyy") ?? "Em andamento", SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Tipo", Value: Model.TypeDescription, SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Índice de Correção", Value: Model.CorrectionIndexDescription, SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Data de Início", Value: Model.StartDate.ToString("dd/MM/yyyy"), SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Data de Término", Value: Model.EndDate?.ToString("dd/MM/yyyy") ?? "Em andamento", SecondaryText: "")' />
                         </div>
                     </div>
 
@@ -40,11 +40,11 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Dívida Restante", Value: "<span class=\"text-danger fw-bold\">" + Model.RemainingDebt.ToString("C2") + "</span>", SecondaryText: "")' />
-                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Total Pago", Value: "<span class=\"text-success fw-bold\">" + Model.TotalPaid.ToString("C2") + "</span>", SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Dívida Restante", Value: "<span class=\"text-danger fw-bold\">" + Model.RemainingDebt.ToString("C2") + "</span>", SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Total Pago", Value: "<span class=\"text-success fw-bold\">" + Model.TotalPaid.ToString("C2") + "</span>", SecondaryText: "")' />
                         </div>
                         <div class="col-md-6">
-                            <partial name="_Partials/_FinancialDataItem" model='(Label: "Parcelas Pagas", Value: Model.InstallmentsPaid + " de " + (Model.InstallmentsPaid + Model.InstallmentsRemaining), SecondaryText: "")' />
+                            <partial name="_Partials/Commons/_FinancialDataItem" model='(Label: "Parcelas Pagas", Value: Model.InstallmentsPaid + " de " + (Model.InstallmentsPaid + Model.InstallmentsRemaining), SecondaryText: "")' />
                             <div class="mb-3">
                                 <h5 class="small font-weight-bold text-muted">Progresso</h5>
                                 <div class="progress">
@@ -81,7 +81,7 @@
         <!-- Ações -->
         <div class="col-lg-4">
             <div class="card shadow mb-4">
-                <partial name="_Partials/_CardHeader" model='(Title: "Ações", BadgeText: "", BadgeClass: "")' />
+                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Ações", BadgeText: "", BadgeClass: "")' />
                 <div class="card-body">
                     @if (Model.Status == 1)
                     {
@@ -172,7 +172,7 @@
                                     <td class="text-center">@installment.DueDate.ToString("dd/MM/yyyy")</td>
                                     <td class="text-center">@(installment.PaymentDate?.ToString("dd/MM/yyyy") ?? "-")</td>
                                     <td class="text-center">
-                                        <partial name="_Partials/_StatusBadge" model='(BadgeClass: GetInstallmentStatusBadgeClass(installment.Status), Description: installment.StatusDescription)' />
+                                        <partial name="_Partials/Commons/_StatusBadge" model='(BadgeClass: GetInstallmentStatusBadgeClass(installment.Status), Description: installment.StatusDescription)' />
                                     </td>
                                 </tr>
                             }
@@ -213,7 +213,7 @@
                                     <td class="text-end">@payment.Amount.ToString("C2")</td>
                                     <td>@payment.PaymentMethodName</td>
                                     <td class="text-center">
-                                        <partial name="_Partials/_StatusBadge" model='(BadgeClass: GetPaymentStatusBadgeClass(payment.Status), Description: payment.StatusDescription)' />
+                                        <partial name="_Partials/Commons/_StatusBadge" model='(BadgeClass: GetPaymentStatusBadgeClass(payment.Status), Description: payment.StatusDescription)' />
                                     </td>
                                     <td class="text-center">
                                         <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id" class="btn btn-sm btn-info">

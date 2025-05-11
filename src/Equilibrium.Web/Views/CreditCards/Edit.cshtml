@@ -6,11 +6,11 @@
 
 <div class="container-fluid">
     <div class="d-flex justify-content-end mb-3">
-        <partial name="_Partials/_BackButton" model='(Action: "Details", Controller: "CreditCards", Text: "Voltar")' />
+        <partial name="_Partials/Commons/_BackButton" model='(Action: "Details", Controller: "CreditCards", Text: "Voltar")' />
     </div>
 
     <div class="card shadow mb-4">
-        <partial name="_Partials/_CardHeader" model='(Title: "Informações do Cartão", BadgeText: "", BadgeClass: "")' />
+        <partial name="_Partials/Commons/_CardHeader" model='(Title: "Informações do Cartão", BadgeText: "", BadgeClass: "")' />
         <div class="card-body">
             <form asp-action="Edit" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -56,7 +56,7 @@
                     Alguns detalhes como bandeira, últimos 4 dígitos e método de pagamento não podem ser alterados após a criação do cartão.
                 </div>
 
-                <partial name="_Partials/_FormActions" model='(CancelAction: "Details", CancelController: "CreditCards", IsEdit: true)' />
+                <partial name="_Partials/Commons/_FormActions" model='(CancelAction: "Details", CancelController: "CreditCards", IsEdit: true)' />
             </form>
         </div>
     </div>

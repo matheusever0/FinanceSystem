@@ -16,7 +16,7 @@
     </div>
 
     <div class="card shadow mb-4">
-        <partial name="_Partials/_CardHeader" model='(Title: "Filtros", BadgeText: "", BadgeClass: "")' />
+        <partial name="_Partials/Commons/_CardHeader" model='(Title: "Filtros", BadgeText: "", BadgeClass: "")' />
         <div class="card-body collapse show" id="collapseFilters">
             <div class="row">
                 <div class="col-12 mb-3">
@@ -45,7 +45,7 @@
     else
     {
         <div class="card shadow mb-4">
-            <partial name="_Partials/_CardHeader" model='(Title: "Suas Receitas", BadgeText: "", BadgeClass: "")' />
+            <partial name="_Partials/Commons/_CardHeader" model='(Title: "Suas Receitas", BadgeText: "", BadgeClass: "")' />
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover datatable">
@@ -78,10 +78,10 @@
                                     <td class="text-center">@item.GetFormattedReceivedDate()</td>
                                     <td>@item.IncomeTypeName</td>
                                     <td class="text-center">
-                                        <partial name="_Partials/_StatusBadge" model='(BadgeClass: item.StatusBadgeClass, Description: item.StatusDescription)' />
+                                        <partial name="_Partials/Commons/_StatusBadge" model='(BadgeClass: item.StatusBadgeClass, Description: item.StatusDescription)' />
                                     </td>
                                     <td class="text-center">
-                                        <partial name="_Partials/_ActionButtons" model='(Id: item.Id, CanView: true, CanEdit: (item.Status != 3 && await PermissionHelper.HasPermissionAsync(Context, "incomes.edit")), CanDelete: (item.Status != 3 && await PermissionHelper.HasPermissionAsync(Context, "incomes.delete")), ControllerName: "Incomes")' />
+                                        <partial name="_Partials/Commons/_ActionButtons" model='(Id: item.Id, CanView: true, CanEdit: (item.Status != 3 && await PermissionHelper.HasPermissionAsync(Context, "incomes.edit")), CanDelete: (item.Status != 3 && await PermissionHelper.HasPermissionAsync(Context, "incomes.delete")), ControllerName: "Incomes")' />
                                     </td>
                                 </tr>
                             }

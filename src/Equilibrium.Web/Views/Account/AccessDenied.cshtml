@@ -5,7 +5,7 @@
 <link href="~/css/login.css" rel="stylesheet" asp-append-version="true">
 
 <div class="card shadow mb-4">
-    <partial name="_Partials/_CardHeader" model='(Title: "Acesso Negado", BadgeText: "", BadgeClass: "")' />
+    <partial name="_Partials/Commons/_CardHeader" model='(Title: "Acesso Negado", BadgeText: "", BadgeClass: "")' />
     <div class="card-body">
         <div class="text-center my-5">
             <div class="error-icon mb-4">
@@ -24,7 +24,7 @@
             </p>
 
             <div class="mt-5">
-                <partial name="_Partials/_BackButton" model='(Action: "Index", Controller: "Home", Text: "Voltar para a página inicial")' />
+                <partial name="_Partials/Commons/_BackButton" model='(Action: "Index", Controller: "Home", Text: "Voltar para a página inicial")' />
             </div>
         </div>
     </div>

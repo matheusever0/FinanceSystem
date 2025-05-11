@@ -3,22 +3,14 @@
     ViewData["Title"] = "Novo Tipo de Receita";
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/pages/income.css" asp-append-version="true">
-}
-
 <div class="d-flex justify-content-end mb-3">
-    <a asp-action="Index" class="btn btn-sm btn-secondary">
-        <i class="fas fa-arrow-left"></i> Voltar
-    </a>
+    <partial name="_Partials/Commons/_BackButton" model='(Action: "Index", Controller: "IncomeTypes", Text: "Voltar")' />
 </div>
 
 <div class="row">
     <div class="col-lg-8">
         <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Informações do Tipo de Receita</h6>
-            </div>
+            <partial name="_Partials/Commons/_CardHeader" model='(Title: "Informações do Tipo de Receita", BadgeText: "", BadgeClass: "")' />
             <div class="card-body">
                 <form asp-action="Create" method="post" data-page="income">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -43,23 +35,14 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Salvar
-                        </button>
-                        <a asp-action="Index" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Cancelar
-                        </a>
-                    </div>
+                    <partial name="_Partials/Commons/_FormActions" model='(CancelAction: "Index", CancelController: "IncomeTypes", IsEdit: false)' />
                 </form>
             </div>
         </div>
     </div>
     <div class="col-lg-4">
         <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Informações</h6>
-            </div>
+            <partial name="_Partials/Commons/_CardHeader" model='(Title: "Informações", BadgeText: "", BadgeClass: "")' />
             <div class="card-body">
                 <p>Preencha os dados do novo tipo de receita:</p>
                 <ul>

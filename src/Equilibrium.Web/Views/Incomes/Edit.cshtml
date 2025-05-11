@@ -7,13 +7,13 @@
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between mb-3">
-        <partial name="_Partials/_BackButton" model='(Action: "Details", Controller: "Incomes", Text: "Voltar")' />
+        <partial name="_Partials/Commons/_BackButton" model='(Action: "Details", Controller: "Incomes", Text: "Voltar")' />
     </div>
 
     <div class="row">
         <div class="col-lg-8">
             <div class="card shadow mb-4">
-                <partial name="_Partials/_CardHeader" model='(Title: "Editar Receita", BadgeText: "", BadgeClass: "")' />
+                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Editar Receita", BadgeText: "", BadgeClass: "")' />
                 <div class="card-body">
                     <form asp-action="Edit" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -91,14 +91,14 @@
                             <span asp-validation-for="Notes" class="text-danger"></span>
                         </div>
 
-                        <partial name="_Partials/_FormActions" model='(CancelAction: "Details", CancelController: "Incomes", IsEdit: true)' />
+                        <partial name="_Partials/Commons/_FormActions" model='(CancelAction: "Details", CancelController: "Incomes", IsEdit: true)' />
                     </form>
                 </div>
             </div>
         </div>
         <div class="col-lg-4">
             <div class="card shadow mb-4">
-                <partial name="_Partials/_CardHeader" model='(Title: "Informações", BadgeText: "", BadgeClass: "")' />
+                <partial name="_Partials/Commons/_CardHeader" model='(Title: "Informações", BadgeText: "", BadgeClass: "")' />
                 <div class="card-body">
                     <p>Altere os dados da sua receita:</p>
                     <ul>

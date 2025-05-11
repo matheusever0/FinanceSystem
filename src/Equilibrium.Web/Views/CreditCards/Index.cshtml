@@ -78,7 +78,7 @@
                             </div>
 
                             <div class="d-flex justify-content-center mt-3">
-                                <partial name="_Partials/_ActionButtons" model='(Id: card.Id, CanView: true, CanEdit: await PermissionHelper.HasPermissionAsync(Context, "creditcards.edit"), CanDelete: await PermissionHelper.HasPermissionAsync(Context, "creditcards.delete"), ControllerName: "CreditCards")' />
+                                <partial name="_Partials/Commons/_ActionButtons" model='(Id: card.Id, CanView: true, CanEdit: await PermissionHelper.HasPermissionAsync(Context, "creditcards.edit"), CanDelete: await PermissionHelper.HasPermissionAsync(Context, "creditcards.delete"), ControllerName: "CreditCards")' />
                             </div>
                         </div>
                     </div>

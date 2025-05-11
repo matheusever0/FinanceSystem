@@ -21,7 +21,7 @@
     </div>
 
     <div class="card shadow mb-4">
-        <partial name="_Partials/_CardHeader" model='(Title: "Filtros", BadgeText: "", BadgeClass: "")' />
+        <partial name="_Partials/Commons/_CardHeader" model='(Title: "Filtros", BadgeText: "", BadgeClass: "")' />
         <div class="card-body collapse show" id="collapseFilters">
             <div class="row">
                 <div class="col-12 mb-3">
@@ -47,7 +47,7 @@
     else
     {
         <div class="card shadow mb-4">
-            <partial name="_Partials/_CardHeader" model='(Title: "Seus Financiamentos", BadgeText: "", BadgeClass: "")' />
+            <partial name="_Partials/Commons/_CardHeader" model='(Title: "Seus Financiamentos", BadgeText: "", BadgeClass: "")' />
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover datatable">
@@ -77,7 +77,7 @@
                                     <td class="text-center">@item.TermMonths meses</td>
                                     <td class="text-center">@item.StartDate.ToString("dd/MM/yyyy")</td>
                                     <td class="text-center">
-                                        <partial name="_Partials/_StatusBadge" model='(BadgeClass: GetStatusBadgeClass(item.Status), Description: item.StatusDescription)' />
+                                        <partial name="_Partials/Commons/_StatusBadge" model='(BadgeClass: GetStatusBadgeClass(item.Status), Description: item.StatusDescription)' />
                                     </td>
                                     <td class="text-center">
                                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
