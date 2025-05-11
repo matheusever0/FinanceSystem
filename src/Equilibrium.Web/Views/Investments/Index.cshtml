@@ -45,12 +45,12 @@
     </div>
 
     <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
-            <a data-bs-toggle="collapse" href="#collapseFilters" role="button" aria-expanded="true" aria-controls="collapseFilters">
-                <i class="fas fa-chevron-down"></i>
-            </a>
-        </div>
+        <partial name="_Partials/Commons/_CardHeader" model='(
+            Title: "Filtros",
+            BadgeText: "",
+            BadgeClass: "",
+            Icon: "fa-filter",
+            CollapseTarget: "collapseFilters")' />
         <div class="card-body collapse show" id="collapseFilters">
             <div class="row">
                 <div class="col-12 mb-3">
@@ -78,26 +78,76 @@
             </div>
         </div>
     </div>
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Seus Investimentos</h6>
-        </div>
-        <div class="card-body">
-            @if (!Model.Any())
-            {
-                <div class="text-center my-5">
-                    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
-                    <p>Nenhum investimento encontrado.</p>
-                    @if (await PermissionHelper.HasPermissionAsync(Context, "investments.create"))
-                    {
-                        <a asp-action="Create" class="btn btn-primary mt-2">
-                            <i class="fas fa-plus me-1"></i>Adicionar seu primeiro investimento
-                        </a>
-                    }
+
+    @if (!Model.Any())
+    {
+        <partial name="_Partials/Commons/_EmptyState" model='(
+            Message: "Nenhum investimento encontrado.",
+            Icon: "fa-chart-line",
+            ButtonText: await PermissionHelper.HasPermissionAsync(Context, "investments.create") ? "Adicionar seu primeiro investimento" : "",
+            ButtonUrl: Url.Action("Create"),
+            ButtonIcon: "fa-plus",
+            IsAlert: false)' />
+    }
+    else
+    {
+        <!-- Resumo do Portfólio - Agora apresentado ANTES da tabela de investimentos -->
+        @foreach (var group in investmentsByGroup)
+        {
+            <div class="card shadow mb-4">
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Resumo - Investimentos em " + group.Key,
+                    BadgeText: "",
+                    BadgeClass: "",
+                    Icon: "fa-chart-pie",
+                    CollapseTarget: "")' />
+                <div class="card-body">
+                    <div class="row">
+                        <partial name="_Partials/Commons/_MetricCard" model='(
+                            Title: "Total Investido",
+                            Value: FormatCurrency(group.Sum(i => i.TotalInvested), group.Key),
+                            Icon: "fa-wallet",
+                            Color: "primary",
+                            SubValue: "",
+                            ShowProgress: false)' />
+
+                        <partial name="_Partials/Commons/_MetricCard" model='(
+                            Title: "Valor Atual",
+                            Value: FormatCurrency(group.Sum(i => i.CurrentTotal), group.Key),
+                            Icon: "fa-chart-line",
+                            Color: "info",
+                            SubValue: "",
+                            ShowProgress: false)' />
+
+                        @{
+                            var totalGain = group.Sum(i => i.GainLossValue);
+                            var totalInvested = group.Sum(i => i.TotalInvested);
+                            var totalPercentage = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
+                            var cardClass = totalGain > 0 ? "success" : totalGain < 0 ? "danger" : "secondary";
+                            var iconArrow = totalGain > 0 ? "fa-arrow-up" : totalGain < 0 ? "fa-arrow-down" : "";
+                        }
+
+                        <partial name="_Partials/Commons/_MetricCard" model='(
+                            Title: "Ganho/Perda Total",
+                            Value: $"{(totalGain > 0 ? "<i class=\"fas " + iconArrow + " me-1\"></i>" : totalGain < 0 ? "<i class=\"fas " + iconArrow + " me-1\"></i>" : "")}{FormatCurrency(totalGain, group.Key)} ({totalPercentage.ToString("N2")}%)",
+                            Icon: "fa-percentage",
+                            Color: cardClass,
+                            SubValue: "",
+                            ShowProgress: false)' />
+                    </div>
                 </div>
-            }
-            else
-            {
+            </div>
+        }
+
+        <!-- Tabela de Investimentos -->
+        <div class="card shadow mb-4">
+            <partial name="_Partials/Commons/_CardHeader" model='(
+                Title: "Seus Investimentos",
+                BadgeText: "",
+                BadgeClass: "",
+                Icon: "fa-chart-line",
+                CollapseTarget: "")' />
+            <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover datatable">
                         <thead class="bg-light">
@@ -164,72 +214,19 @@
                                         }
                                     </td>
                                     <td class="text-center">
-                                        <div class="btn-group">
-                                            <a asp-action="Details" asp-route-id="@investment.Id" class="btn btn-sm btn-info">
-                                                <i class="fas fa-info-circle me-1"></i>Detalhes
-                                            </a>
-                                            @if (await PermissionHelper.HasPermissionAsync(Context, "investments.delete"))
-                                            {
-                                                <a asp-action="Delete" asp-route-id="@investment.Id" class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-trash me-1"></i>Excluir
-                                                </a>
-                                            }
-                                        </div>
+                                        <partial name="_Partials/Commons/_ActionButtons" model='(
+                                            Id: investment.Id,
+                                            CanView: true,
+                                            CanEdit: false,
+                                            CanDelete: await PermissionHelper.HasPermissionAsync(Context, "investments.delete"),
+                                            ControllerName: "Investments")' />
                                     </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
                 </div>
-
-                <div class="mt-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h6 class="m-0 font-weight-bold text-primary">Resumo do Portfólio</h6>
-                        </div>
-                        <div class="card-body">
-                            <!-- Resumo agrupado por moeda -->
-                            @foreach (var group in investmentsByGroup)
-                            {
-                                <h5 class="mt-3 mb-3">Investimentos em @group.Key</h5>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="card mb-3">
-                                            <div class="card-body text-center">
-                                                <h5 class="text-muted">Total Investido</h5>
-                                                <h3 class="font-weight-bold">@FormatCurrency(group.Sum(i => i.TotalInvested), group.Key)</h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="card mb-3">
-                                            <div class="card-body text-center">
-                                                <h5 class="text-muted">Valor Atual</h5>
-                                                <h3 class="font-weight-bold">@FormatCurrency(group.Sum(i => i.CurrentTotal), group.Key)</h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="card mb-3">
-                                            <div class="card-body text-center">
-                                                <h5 class="text-muted">Ganho/Perda Total</h5>
-                                                @{
-                                                    var totalGain = group.Sum(i => i.GainLossValue);
-                                                    var totalInvested = group.Sum(i => i.TotalInvested);
-                                                    var totalPercentage = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
-                                                }
-                                                <h3 class="font-weight-bold @(totalGain > 0 ? "text-success" : totalGain < 0 ? "text-danger" : "text-muted")">
-                                                    @FormatCurrency(totalGain, group.Key) (@totalPercentage.ToString("N2")%)
-                                                </h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
+            </div>
         </div>
-    </div>
+    }
 </div>

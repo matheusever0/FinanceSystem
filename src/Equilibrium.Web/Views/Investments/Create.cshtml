@@ -5,122 +5,166 @@
     ViewData["Title"] = "Novo Investimento";
 }
 
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Dados do Investimento</h6>
+<div class="container-fluid">
+    <div class="d-flex justify-content-end mb-3">
+        <partial name="_Partials/Commons/_BackButton" model='(
+            Action: "Index",
+            Controller: "Investments",
+            Text: "Voltar")' />
     </div>
-    <div class="card-body">
-        <form asp-action="Create" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label asp-for="Symbol" class="form-label">Símbolo</label>
-                        <input asp-for="Symbol" class="form-control" required />
-                        <span asp-validation-for="Symbol" class="text-danger"></span>
-                        <small class="form-text text-muted">
-                            Para ações e FIIs, use o código de negociação (ex: PETR4, HGLG11).
-                            Para ações estrangeiras, use o ticker (ex: AAPL, MSFT).
-                        </small>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label asp-for="Broker" class="form-label">Corretora</label>
-                        <input asp-for="Broker" class="form-control" />
-                        <span asp-validation-for="Broker" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label asp-for="Type" class="form-label">Tipo</label>
-                        <select asp-for="Type" class="form-select" required>
-                            <option value="">Selecione...</option>
-                            <option value="1">Ações</option>
-                            <option value="2">Fundos Imobiliários</option>
-                            <option value="3">ETFs</option>
-                            <option value="4">Ações Estrangeiras</option>
-                            <option value="5">Renda Fixa</option>
-                        </select>
-                        <span asp-validation-for="Type" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Dados do Investimento",
+                    BadgeText: "",
+                    BadgeClass: "",
+                    Icon: "fa-chart-line",
+                    CollapseTarget: "")' />
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label asp-for="Currency" class="form-label">Moeda</label>
-                        <select asp-for="Currency" class="form-select" required>
-                            <option value="BRL">Real (BRL)</option>
-                            <option value="USD">Dólar (USD)</option>
-                            <option value="EUR">Euro (EUR)</option>
-                            <option value="GBP">Libra (GBP)</option>
-                        </select>
-                        <span asp-validation-for="Currency" class="text-danger"></span>
-                        <small class="form-text text-muted">
-                            A moeda será definida automaticamente com base no tipo de investimento selecionado.
-                        </small>
-                    </div>
-                </div>
-            </div>
-
-            <h5 class="mt-4 mb-3">Transação Inicial</h5>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label asp-for="TransactionDate" class="form-label">Data da Compra</label>
-                        <input asp-for="TransactionDate" type="date" class="form-control" required />
-                        <span asp-validation-for="TransactionDate" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label asp-for="InitialQuantity" class="form-label">Quantidade</label>
-                        <input asp-for="InitialQuantity" type="number" step="0.000001" min="0.000001" class="form-control" required />
-                        <span asp-validation-for="InitialQuantity" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label asp-for="InitialPrice" class="form-label">Preço Unitário</label>
-                        <div class="input-group">
-                            <span class="input-group-text currency-symbol">R$</span>
-                            <input asp-for="InitialPrice" type="text" class="form-control" required />
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Symbol" class="form-label">Símbolo</label>
+                                    <input asp-for="Symbol" class="form-control" required />
+                                    <span asp-validation-for="Symbol" class="text-danger"></span>
+                                    <small class="form-text text-muted">
+                                        Para ações e FIIs, use o código de negociação (ex: PETR4, HGLG11).
+                                        Para ações estrangeiras, use o ticker (ex: AAPL, MSFT).
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Broker" class="form-label">Corretora</label>
+                                    <input asp-for="Broker" class="form-control" />
+                                    <span asp-validation-for="Broker" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Type" class="form-label">Tipo</label>
+                                    <select asp-for="Type" class="form-select" required>
+                                        <option value="">Selecione...</option>
+                                        <option value="1">Ações</option>
+                                        <option value="2">Fundos Imobiliários</option>
+                                        <option value="3">ETFs</option>
+                                        <option value="4">Ações Estrangeiras</option>
+                                        <option value="5">Renda Fixa</option>
+                                    </select>
+                                    <span asp-validation-for="Type" class="text-danger"></span>
+                                </div>
+                            </div>
                         </div>
-                        <span asp-validation-for="InitialPrice" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label">Valor Total</label>
-                        <div class="input-group">
-                            <span class="input-group-text currency-symbol">R$</span>
-                            <input type="text" id="totalValue" class="form-control" readonly />
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="d-flex justify-content-between mt-4">
-                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-                <button type="submit" class="btn btn-primary">Salvar</button>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Currency" class="form-label">Moeda</label>
+                                    <select asp-for="Currency" class="form-select" required>
+                                        <option value="BRL">Real (BRL)</option>
+                                        <option value="USD">Dólar (USD)</option>
+                                        <option value="EUR">Euro (EUR)</option>
+                                        <option value="GBP">Libra (GBP)</option>
+                                    </select>
+                                    <span asp-validation-for="Currency" class="text-danger"></span>
+                                    <small class="form-text text-muted">
+                                        A moeda será definida automaticamente com base no tipo de investimento selecionado.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4 mb-3">Transação Inicial</h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="TransactionDate" class="form-label">Data da Compra</label>
+                                    <input asp-for="TransactionDate" type="date" class="form-control" required />
+                                    <span asp-validation-for="TransactionDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="InitialQuantity" class="form-label">Quantidade</label>
+                                    <input asp-for="InitialQuantity" type="number" step="0.000001" min="0.000001" class="form-control" required />
+                                    <span asp-validation-for="InitialQuantity" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="InitialPrice" class="form-label">Preço Unitário</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text currency-symbol">R$</span>
+                                        <input asp-for="InitialPrice" type="text" class="form-control" required />
+                                    </div>
+                                    <span asp-validation-for="InitialPrice" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Valor Total</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text currency-symbol">R$</span>
+                                        <input type="text" id="totalValue" class="form-control" readonly />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <partial name="_Partials/Commons/_FormActions" model='(
+                            CancelAction: "Index",
+                            CancelController: "Investments",
+                            IsEdit: false)' />
+                    </form>
+                </div>
             </div>
-        </form>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Informações",
+                    BadgeText: "",
+                    BadgeClass: "",
+                    Icon: "fa-info-circle",
+                    CollapseTarget: "")' />
+                <div class="card-body">
+                    <p>Preencha os dados do seu novo investimento:</p>
+                    <ul>
+                        <li><strong>Símbolo:</strong> Código da ação ou fundo na bolsa.</li>
+                        <li><strong>Corretora:</strong> Onde o investimento foi realizado.</li>
+                        <li><strong>Tipo:</strong> Categoria do investimento.</li>
+                        <li><strong>Moeda:</strong> Moeda utilizada na negociação.</li>
+                        <li><strong>Data da Compra:</strong> Quando o investimento foi feito.</li>
+                        <li><strong>Quantidade:</strong> Número de ações/cotas adquiridas.</li>
+                        <li><strong>Preço Unitário:</strong> Valor pago por cada ação/cota.</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Após criar o investimento, você poderá registrar
+                        novas transações como compras, vendas, dividendos, etc.
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        // Script para atualizar o símbolo da moeda
         document.addEventListener('DOMContentLoaded', function () {
             const currencySelect = document.getElementById('Currency');
             const currencySymbols = document.querySelectorAll('.currency-symbol');
+            const initialQuantityInput = document.getElementById('InitialQuantity');
+            const initialPriceInput = document.getElementById('InitialPrice');
+            const totalValueInput = document.getElementById('totalValue');
 
             function updateCurrencySymbol(currency) {
                 const symbol = currency === 'BRL' ? 'R$' :
@@ -133,13 +177,33 @@
                 });
             }
 
+            function calculateTotal() {
+                const quantity = parseFloat(initialQuantityInput.value) || 0;
+                const price = parseFloat(initialPriceInput.value.replace(',', '.')) || 0;
+                const total = quantity * price;
+
+                // Format based on currency
+                const currency = currencySelect.value;
+                if (currency === 'BRL' || currency === 'EUR') {
+                    totalValueInput.value = total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                } else {
+                    totalValueInput.value = total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+            }
+
             if (currencySelect) {
                 currencySelect.addEventListener('change', function() {
                     updateCurrencySymbol(this.value);
+                    calculateTotal();
                 });
 
                 // Inicializar com o valor atual
                 updateCurrencySymbol(currencySelect.value);
+            }
+
+            if (initialQuantityInput && initialPriceInput) {
+                initialQuantityInput.addEventListener('input', calculateTotal);
+                initialPriceInput.addEventListener('input', calculateTotal);
             }
         });
     </script>

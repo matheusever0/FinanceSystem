@@ -1,85 +1,67 @@
-﻿@using Equilibrium.Web.Models.Investment
+﻿@using Microsoft.AspNetCore.Components
+@using Equilibrium.Web.Models.Investment
 @model InvestmentModel
 
 @{
     ViewData["Title"] = "Excluir Investimento";
+
+    RenderFragment entityDetails = @<text>
+        <div class="mb-3">
+            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                Label: "Símbolo",
+                Value: Model.Symbol,
+                SecondaryText: "",
+                ValueClass: "")' />
+        </div>
+        <div class="mb-3">
+            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                Label: "Nome",
+                Value: Model.Name,
+                SecondaryText: "",
+                ValueClass: "")' />
+        </div>
+        <div class="mb-3">
+            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                Label: "Tipo",
+                Value: Model.Type switch
+                {
+                    1 => "Ações",
+                    2 => "Fundos Imobiliários",
+                    3 => "ETFs",
+                    4 => "Ações Estrangeiras",
+                    5 => "Renda Fixa",
+                    _ => "Não Categorizado"
+                },
+                SecondaryText: "",
+                ValueClass: "")' />
+        </div>
+        <div class="mb-3">
+            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                Label: "Total Investido",
+                Value: string.Format("{0:C2}", Model.TotalInvested),
+                SecondaryText: "",
+                ValueClass: "fw-bold")' />
+        </div>
+
+        @if (Model.Transactions != null && Model.Transactions.Any())
+    {
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i> Este investimento possui @Model.Transactions.Count transações que também serão excluídas.
+        </div>
+    }
+    </text>;
 }
 
-<div class="alert alert-danger mb-4">
-    <h3>
-        <i class="fas fa-exclamation-triangle me-2"></i>
-        Tem certeza que deseja excluir este investimento?
-    </h3>
-    <p>Esta ação também excluirá todas as transações associadas e não poderá ser desfeita.</p>
-</div>
-
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Dados do Investimento</h6>
+<div class="container-fluid">
+    <div class="d-flex justify-content-end mb-3">
+        <partial name="_Partials/Commons/_BackButton" model='(
+            Action: "Index",
+            Controller: "Investments",
+            Text: "Voltar")' />
     </div>
-    <div class="card-body">
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <div class="financial-data">
-                    <div class="label">Símbolo</div>
-                    <div class="value">@Model.Symbol</div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="financial-data">
-                    <div class="label">Nome</div>
-                    <div class="value">@Model.Name</div>
-                </div>
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <div class="financial-data">
-                    <div class="label">Tipo</div>
-                    <div class="value">
-                        @{
-                            var typeDescription = Model.Type switch
-                            {
-                                1 => "Ações",
-                                2 => "Fundos Imobiliários",
-                                3 => "ETFs",
-                                4 => "Ações Estrangeiras",
-                                5 => "Renda Fixa",
-                                _ => "Não Categorizado"
-                            };
-                        }
-                        @typeDescription
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="financial-data">
-                    <div class="label">Quantidade Total</div>
-                    <div class="value">@Model.TotalQuantity.ToString("N2")</div>
-                </div>
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <div class="financial-data">
-                    <div class="label">Total Investido</div>
-                    <div class="value">@string.Format("{0:C2}", Model.TotalInvested)</div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="financial-data">
-                    <div class="label">Valor Atual</div>
-                    <div class="value">@string.Format("{0:C2}", Model.CurrentTotal)</div>
-                </div>
-            </div>
-        </div>
 
-        <form asp-action="Delete" method="post">
-            <input type="hidden" name="id" value="@Model.Id" />
-            <div class="d-flex justify-content-between mt-4">
-                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-                <button type="submit" class="btn btn-danger">Excluir</button>
-            </div>
-        </form>
-    </div>
+    <partial name="_Partials/Commons/_DeleteConfirmation" model='(
+        EntityName: "investimento",
+        Id: Guid.Parse(Model.Id),
+        EntityDetails: entityDetails)' />
 </div>
