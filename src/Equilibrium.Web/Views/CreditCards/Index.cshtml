@@ -39,49 +39,48 @@
 
                 <div class="col-xl-4 col-md-6 mb-4">
                     <div class="card shadow h-100 border-left-primary">
-                        <partial name="_Partials/Commons/_CardHeader" model='(
-                            Title: card.Name,
-                            BadgeText: card.CardBrand,
-                            BadgeClass: "bg-primary",
-                            Icon: "fa-credit-card",
-                            CollapseTarget: "")' />
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-credit-card me-2"></i>@card.Name
+                            </h6>
+                            <span class="badge bg-primary">@card.CardBrand</span>
+                        </div>
                         <div class="card-body">
-                            <div class="row no-gutters align-items-center mb-3">
-                                <div class="col">
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">Terminado em @card.LastFourDigits</div>
-                                    <div class="text-xs text-muted mt-1">Fecha dia @card.ClosingDay / Vence dia @card.DueDay</div>
+                            <div class="d-flex flex-column h-100">
+                                <div class="mb-3">
+                                    <div class="text-xs font-weight-bold text-muted mb-1">Terminado em @card.LastFourDigits</div>
+                                    <div class="text-xs text-muted">Fecha dia @card.ClosingDay / Vence dia @card.DueDay</div>
                                 </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-credit-card fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
 
-                            <partial name="_Partials/Commons/_MetricCard" model='(
-                                Title: "Limite Utilizado",
-                                Value: string.Format("{0:0}%", usedPercentage),
-                                Icon: "fa-percentage",
-                                Color: colorClass,
-                                SubValue: card.GetFormattedUsedLimit(),
-                                ShowProgress: true)' />
-
-                            <div class="row mb-3">
-                                <div class="col-6">
-                                    <div class="small text-muted">Limite Total</div>
-                                    <div class="font-weight-bold">@card.GetFormattedLimit()</div>
+                                <div class="mb-3">
+                                    <div class="text-xs font-weight-bold text-@colorClass text-uppercase mb-1">
+                                        Limite Utilizado (@usedPercentage.ToString("0")%)
+                                    </div>
+                                    <div class="progress mb-1" style="height: 8px;">
+                                        <div class="progress-bar bg-@colorClass" style="width: @usedPercentage.ToString("0")%"></div>
+                                    </div>
+                                    <div class="text-xs text-muted mt-1">@card.GetFormattedUsedLimit()</div>
                                 </div>
-                                <div class="col-6">
-                                    <div class="small text-muted">Disponível</div>
-                                    <div class="font-weight-bold">@card.GetFormattedAvailableLimit()</div>
-                                </div>
-                            </div>
 
-                            <div class="d-flex justify-content-center mt-3">
-                                <partial name="_Partials/Commons/_ActionButtons" model='(
-                                    Id: card.Id,
-                                    CanView: true,
-                                    CanEdit: await PermissionHelper.HasPermissionAsync(Context, "creditcards.edit"),
-                                    CanDelete: await PermissionHelper.HasPermissionAsync(Context, "creditcards.delete"),
-                                    ControllerName: "CreditCards")' />
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <div class="small text-muted">Limite Total</div>
+                                        <div class="font-weight-bold">@card.GetFormattedLimit()</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="small text-muted">Disponível</div>
+                                        <div class="font-weight-bold">@card.GetFormattedAvailableLimit()</div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center mt-auto">
+                                    <partial name="_Partials/Commons/_ActionButtons" model='(
+                                        Id: card.Id,
+                                        CanView: true,
+                                        CanEdit: await PermissionHelper.HasPermissionAsync(Context, "creditcards.edit"),
+                                        CanDelete: await PermissionHelper.HasPermissionAsync(Context, "creditcards.delete"),
+                                        ControllerName: "CreditCards")' />
+                                </div>
                             </div>
                         </div>
                     </div>

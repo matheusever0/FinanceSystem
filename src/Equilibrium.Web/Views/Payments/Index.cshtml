@@ -79,6 +79,30 @@
     }
     else
     {
+        <div class="row">
+                <partial name="_Partials/Commons/_MetricCard" model='(
+                    Title: "Total Geral",
+                    Value: Model.Sum(p => p.Amount).ToString("C2"),
+                    Icon: "fa-dollar-sign",
+                    Color: "primary",
+                    SubValue: Model.Count() + " pagamentos",
+                    ShowProgress: false)' />
+                <partial name="_Partials/Commons/_MetricCard" model='(
+                    Title: "Total Pago",
+                    Value: Model.Where(p => p.Status == 2).Sum(p => p.Amount).ToString("C2"),
+                    Icon: "fa-check-circle",
+                    Color: "success",
+                    SubValue: Model.Count(p => p.Status == 2) + " pagos",
+                    ShowProgress: false)' />
+                <partial name="_Partials/Commons/_MetricCard" model='(
+                    Title: "Total Pendente",
+                    Value: Model.Where(p => p.Status == 1 || p.Status == 3).Sum(p => p.Amount).ToString("C2"),
+                    Icon: "fa-exclamation-circle",
+                    Color: "warning",
+                    SubValue: Model.Count(p => p.Status == 1 || p.Status == 3) + " pendentes",
+                    ShowProgress: false)' />
+        </div>
+
         <div class="card shadow mb-4">
             <partial name="_Partials/Commons/_CardHeader" model='(
                 Title: "Seus Pagamentos",
@@ -92,9 +116,9 @@
                         <thead class="bg-light">
                             <tr>
                                 <th>Descrição</th>
-                                <th class="text-center dt-date">Vencimento</th>
-                                <th class="text-end dt-money">Valor</th>
-                                <th class="text-center dt-status">Status</th>
+                                <th class="text-center">Vencimento</th>
+                                <th class="text-end">Valor</th>
+                                <th class="text-center">Status</th>
                                 <th>Tipo</th>
                                 <th>Método</th>
                                 <th class="text-center">Ações</th>
@@ -112,7 +136,8 @@
                                                     <span class="badge bg-info me-2" title="Pagamento Recorrente">
                                                         <i class="fas fa-sync-alt"></i>
                                                     </span>
-                                                }@item.Description
+                                                }
+                                                @item.Description
                                             </div>
                                             <div class="small text-muted">
                                                 @(item.Installments.Any() ? $"Parcelado ({item.Installments.Count}x)" : "Pagamento Único")
@@ -142,33 +167,6 @@
                     </table>
                 </div>
             </div>
-        </div>
-
-        <!-- Resumo -->
-        <div class="row">
-            <partial name="_Partials/Commons/_MetricCard" model='(
-                Title: "Total Geral",
-                Value: Model.Sum(p => p.Amount).ToString("C2"),
-                Icon: "fa-dollar-sign",
-                Color: "primary",
-                SubValue: "",
-                ShowProgress: false)' />
-
-            <partial name="_Partials/Commons/_MetricCard" model='(
-                Title: "Total Pago",
-                Value: Model.Where(p => p.Status == 2).Sum(p => p.Amount).ToString("C2"),
-                Icon: "fa-check-circle",
-                Color: "success",
-                SubValue: "",
-                ShowProgress: false)' />
-
-            <partial name="_Partials/Commons/_MetricCard" model='(
-                Title: "Total Pendente",
-                Value: Model.Where(p => p.Status == 1 || p.Status == 3).Sum(p => p.Amount).ToString("C2"),
-                Icon: "fa-exclamation-circle",
-                Color: "warning",
-                SubValue: "",
-                ShowProgress: false)' />
         </div>
     }
 </div>
