@@ -1,0 +1,8 @@
+﻿@model (string Title, string BadgeText, string BadgeClass)
+<div class="card-header py-3 d-flex justify-content-between align-items-center">
+    <h6 class="m-0 font-weight-bold text-primary">@Model.Title</h6>
+    @if (!string.IsNullOrEmpty(Model.BadgeText))
+    {
+        <span class="badge @Model.BadgeClass">@Model.BadgeText</span>
+    }
+</div>

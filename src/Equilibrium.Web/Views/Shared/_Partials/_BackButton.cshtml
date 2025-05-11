@@ -1,0 +1,10 @@
+﻿@model (string Action, string Controller, string Text)
+@{
+    var text = Model.Text ?? "Voltar";
+    var action = Model.Action ?? "Index";
+    var controller = Model.Controller ?? ViewContext.RouteData.Values["Controller"].ToString();
+}
+
+<a asp-controller="@controller" asp-action="@action" class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i> @text
+</a>

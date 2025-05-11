@@ -1,0 +1,13 @@
+﻿@using Microsoft.AspNetCore.Components
+@model RenderFragment
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
+        <a data-bs-toggle="collapse" href="#collapseFilters" role="button" aria-expanded="true" aria-controls="collapseFilters">
+            <i class="fas fa-chevron-down"></i>
+        </a>
+    </div>
+    <div class="card-body collapse show" id="collapseFilters">
+        @Model
+    </div>
+</div>
