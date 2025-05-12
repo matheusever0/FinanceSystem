@@ -20,15 +20,7 @@
             {
                     <a asp-controller="Payments" asp-action="Index" class="sidebar-menu-link @(controllerName == "Payments" && actionName == "Index" ? "active" : "")">
                         <span class="sidebar-menu-icon ps-2"><i class="fas fa-list"></i></span>
-                        <span>Todos Pagamentos</span>
-                    </a>
-                    <a asp-controller="Payments" asp-action="Pending" class="sidebar-menu-link @(controllerName == "Payments" && actionName == "Pending" ? "active" : "")">
-                        <span class="sidebar-menu-icon ps-2"><i class="fas fa-clock"></i></span>
-                        <span>Pendentes</span>
-                    </a>
-                    <a asp-controller="Payments" asp-action="Overdue" class="sidebar-menu-link @(controllerName == "Payments" && actionName == "Overdue" ? "active" : "")">
-                        <span class="sidebar-menu-icon ps-2"><i class="fas fa-exclamation-circle"></i></span>
-                        <span>Vencidos</span>
+                        <span>Consultar Pagamentos</span>
                     </a>
             }
             @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "paymenttypes.view"))

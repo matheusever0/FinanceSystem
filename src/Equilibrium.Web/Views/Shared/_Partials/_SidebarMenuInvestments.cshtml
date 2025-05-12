@@ -20,15 +20,7 @@
             <div class="bg-dark py-2">
                 <a asp-controller="Investments" asp-action="Index" class="sidebar-menu-link @(controllerName == "Investments" && actionName == "Index" ? "active" : "")">
                     <span class="sidebar-menu-icon ps-2"><i class="fas fa-list"></i></span>
-                    <span>Todos Investimentos</span>
-                </a>
-                <a asp-controller="Investments" asp-action="ByType" asp-route-type="1" class="sidebar-menu-link @(controllerName == "Investments" && actionName == "ByType" && ViewBag.Type == 1 ? "active" : "")">
-                    <span class="sidebar-menu-icon ps-2"><i class="fas fa-landmark"></i></span>
-                    <span>Ações</span>
-                </a>
-                <a asp-controller="Investments" asp-action="ByType" asp-route-type="2" class="sidebar-menu-link @(controllerName == "Investments" && actionName == "ByType" && ViewBag.Type == 2 ? "active" : "")">
-                    <span class="sidebar-menu-icon ps-2"><i class="fas fa-building"></i></span>
-                    <span>Fundos Imobiliários</span>
+                    <span>Consultar Investimentos</span>
                 </a>
                 @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "investments.create"))
                 {

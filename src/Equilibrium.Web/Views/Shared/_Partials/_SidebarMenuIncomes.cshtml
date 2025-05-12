@@ -18,15 +18,7 @@
             {
                 <a asp-controller="Incomes" asp-action="Index" class="sidebar-menu-link @(controllerName == "Incomes" && actionName == "Index" ? "active" : "")">
                     <span class="sidebar-menu-icon ps-2"><i class="fas fa-list"></i></span>
-                    <span>Todas Receitas</span>
-                </a>
-                <a asp-controller="Incomes" asp-action="Pending" class="sidebar-menu-link @(controllerName == "Incomes" && actionName == "Pending" ? "active" : "")">
-                    <span class="sidebar-menu-icon ps-2"><i class="fas fa-clock"></i></span>
-                    <span>Pendentes</span>
-                </a>
-                <a asp-controller="Incomes" asp-action="Received" class="sidebar-menu-link @(controllerName == "Incomes" && actionName == "Received" ? "active" : "")">
-                    <span class="sidebar-menu-icon ps-2"><i class="fas fa-check-circle"></i></span>
-                    <span>Recebidas</span>
+                    <span>Consultar Receitas</span>
                 </a>
                 <a asp-controller="IncomeTypes" asp-action="Index" class="sidebar-menu-link @(controllerName == "IncomeTypes" ? "active" : "")">
                     <span class="sidebar-menu-icon ps-2"><i class="fas fa-tags"></i></span>

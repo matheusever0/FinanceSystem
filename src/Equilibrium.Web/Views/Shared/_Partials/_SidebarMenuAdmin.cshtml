@@ -2,39 +2,54 @@
 
 @{
     var controllerName = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var isGestaoActive = controllerName == "Users" ||
+                          controllerName == "Permissions" ||
+                          controllerName == "Roles";
 }
 
 @if (await PermissionHelper.UserHasAnyPermissionAsync(ViewContext.HttpContext, new[] { "users.view", "roles.view" }))
 {
-    <div class="sidebar-menu-header">Gerenciamento</div>
+    <div class="sidebar-menu-item">
+        <a href="#" class="sidebar-menu-link @(isGestaoActive ? "active" : "")"
+           data-bs-toggle="collapse" data-bs-target="#collapseAdmin"
+           aria-expanded="@(isGestaoActive ? "true" : "false")"
+           aria-controls="collapseAdmin">
+            <span class="sidebar-menu-icon"><i class="fas fa-cogs"></i></span>
+            <span>Administração</span>
+            <i class="fas fa-angle-down ms-auto"></i>
+        </a>
+        <div id="collapseAdmin" class="collapse @(isGestaoActive ? "show" : "")">
+            <div class="bg-dark py-2">
+                @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "users.view"))
+                {
+                    <div class="sidebar-menu-item">
+                        <a asp-controller="Users" asp-action="Index" class="sidebar-menu-link @(controllerName == "Users" ? "active" : "")">
+                            <span class="sidebar-menu-icon"><i class="fas fa-users"></i></span>
+                            <span>Usuários</span>
+                        </a>
+                    </div>
+                }
 
-    @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "users.view"))
-    {
-        <div class="sidebar-menu-item">
-            <a asp-controller="Users" asp-action="Index" class="sidebar-menu-link @(controllerName == "Users" ? "active" : "")">
-                <span class="sidebar-menu-icon"><i class="fas fa-users"></i></span>
-                <span>Usuários</span>
-            </a>
-        </div>
-    }
+                @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "roles.view"))
+                {
+                    <div class="sidebar-menu-item">
+                        <a asp-controller="Roles" asp-action="Index" class="sidebar-menu-link @(controllerName == "Roles" ? "active" : "")">
+                            <span class="sidebar-menu-icon"><i class="fas fa-user-tag"></i></span>
+                            <span>Perfis</span>
+                        </a>
+                    </div>
+                }
 
-    @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "roles.view"))
-    {
-        <div class="sidebar-menu-item">
-            <a asp-controller="Roles" asp-action="Index" class="sidebar-menu-link @(controllerName == "Roles" ? "active" : "")">
-                <span class="sidebar-menu-icon"><i class="fas fa-user-tag"></i></span>
-                <span>Perfis</span>
-            </a>
+                @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "permissions.manage"))
+                {
+                    <div class="sidebar-menu-item">
+                        <a asp-controller="Permissions" asp-action="Index" class="sidebar-menu-link @(controllerName == "Permissions" ? "active" : "")">
+                            <span class="sidebar-menu-icon"><i class="fas fa-key"></i></span>
+                            <span>Permissões</span>
+                        </a>
+                    </div>
+                }
+            </div>
         </div>
-    }
-
-    @if (await PermissionHelper.HasPermissionAsync(ViewContext.HttpContext, "permissions.manage"))
-    {
-        <div class="sidebar-menu-item">
-            <a asp-controller="Permissions" asp-action="Index" class="sidebar-menu-link @(controllerName == "Permissions" ? "active" : "")">
-                <span class="sidebar-menu-icon"><i class="fas fa-key"></i></span>
-                <span>Permissões</span>
-            </a>
-        </div>
-    }
+    </div>
 }

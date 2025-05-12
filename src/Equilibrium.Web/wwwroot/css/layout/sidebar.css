@@ -243,3 +243,11 @@
         display: block;
     }
 }
+
+.sidebar .bg-dark .sidebar-menu-item {
+    margin-left: 0.5rem;
+}
+
+.sidebar .bg-dark .sidebar-menu-link {
+    padding-left: 1.75rem;
+}

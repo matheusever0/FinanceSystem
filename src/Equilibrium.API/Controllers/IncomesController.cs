@@ -22,7 +22,7 @@ namespace Equilibrium.API.Controllers
             return Ok(incomes);
         }
 
-                [HttpGet("filter")]
+        [HttpGet("filter")]
         public async Task<ActionResult<PagedResult<IncomeDto>>> GetFiltered([FromQuery] IncomeFilter filter)
         {
             if (filter == null)

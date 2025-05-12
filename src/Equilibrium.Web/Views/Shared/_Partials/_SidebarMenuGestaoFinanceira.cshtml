@@ -1,0 +1,27 @@
+﻿@using Equilibrium.Web.Helpers
+@{
+    var controllerName = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var isGestaoActive = controllerName == "Incomes" ||
+                          controllerName == "Payments" ||
+                          controllerName == "Investments" ||
+                          controllerName == "Financings";
+}
+
+<div class="sidebar-menu-item">
+    <a href="#" class="sidebar-menu-link @(isGestaoActive ? "active" : "")"
+       data-bs-toggle="collapse" data-bs-target="#collapseGestao"
+       aria-expanded="@(isGestaoActive ? "true" : "false")"
+       aria-controls="collapseGestao">
+        <span class="sidebar-menu-icon"><i class="fas fa-cogs"></i></span>
+        <span>Gestão Financeira</span>
+        <i class="fas fa-angle-down ms-auto"></i>
+    </a>
+    <div id="collapseGestao" class="collapse @(isGestaoActive ? "show" : "")">
+        <div class="bg-dark py-2">
+            @await Html.PartialAsync("_Partials/_SidebarMenuIncomes")
+            @await Html.PartialAsync("_Partials/_SidebarMenuPayments")
+            @await Html.PartialAsync("_Partials/_SidebarMenuInvestments")
+            @await Html.PartialAsync("_Partials/_SidebarMenuFinancings")
+        </div>
+    </div>
+</div>
