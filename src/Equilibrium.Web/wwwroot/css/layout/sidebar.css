@@ -170,6 +170,17 @@
     .sidebar.collapsed .sidebar-menu-item span:not(.sidebar-menu-icon) {
         display: none;
     }
+
+    /* NOVA REGRA: Esconder todos os submenus quando colapsado */
+    .sidebar.collapsed .collapse {
+        display: none !important;
+    }
+
+    /* NOVA REGRA: Esconder os indicadores de dropdown quando colapsado */
+    .sidebar.collapsed .sidebar-menu-link .fa-angle-down,
+    .sidebar.collapsed .sidebar-menu-link .fa-angle-right {
+        display: none;
+    }
 }
 
 /* Submenu */

@@ -66,12 +66,12 @@ FinanceSystem.UI = (function () {
         }
 
         initializeSubmenus();
-
         highlightActiveMenuItem();
     }
 
     function initializeSubmenus() {
         const submenus = document.querySelectorAll('.sidebar-menu-link[data-bs-toggle="collapse"]');
+        const sidebar = document.getElementById('sidebar');
 
         if (submenus.length > 0) {
             submenus.forEach(function (menuItem) {
@@ -88,12 +88,40 @@ FinanceSystem.UI = (function () {
 
                             menuItem.addEventListener('click', function (e) {
                                 e.preventDefault();
-                                bsCollapse.toggle();
+                                
+                                // NOVA LÓGICA: Verifica se o sidebar está colapsado
+                                if (sidebar && sidebar.classList.contains('collapsed') && window.innerWidth >= 992) {
+                                    // Primeiro expande o sidebar
+                                    sidebar.classList.remove('collapsed');
+                                    if (document.getElementById('topbar')) {
+                                        document.getElementById('topbar').classList.remove('expanded');
+                                    }
+                                    if (document.getElementById('main-content')) {
+                                        document.getElementById('main-content').classList.remove('expanded');
+                                    }
+                                    
+                                    // Atualiza o localStorage
+                                    localStorage.setItem('sidebarCollapsed', 'false');
+                                    
+                                    // Após um pequeno delay para animação, abre o submenu
+                                    setTimeout(() => {
+                                        bsCollapse.show();
+                                        
+                                        const icon = this.querySelector('.fa-angle-down, .fa-angle-right');
+                                        if (icon) {
+                                            icon.classList.remove('fa-angle-right');
+                                            icon.classList.add('fa-angle-down');
+                                        }
+                                    }, 300);
+                                } else {
+                                    // Comportamento normal para sidebar expandido
+                                    bsCollapse.toggle();
 
-                                const icon = this.querySelector('.fa-angle-down, .fa-angle-right');
-                                if (icon) {
-                                    icon.classList.toggle('fa-angle-down');
-                                    icon.classList.toggle('fa-angle-right');
+                                    const icon = this.querySelector('.fa-angle-down, .fa-angle-right');
+                                    if (icon) {
+                                        icon.classList.toggle('fa-angle-down');
+                                        icon.classList.toggle('fa-angle-right');
+                                    }
                                 }
                             });
                         }
@@ -102,18 +130,51 @@ FinanceSystem.UI = (function () {
                     menuItem.addEventListener('click', function (e) {
                         e.preventDefault();
 
-                        const targetId = this.getAttribute('data-bs-target') ||
-                            this.getAttribute('href');
+                        // NOVA LÓGICA: Verifica se o sidebar está colapsado
+                        if (sidebar && sidebar.classList.contains('collapsed') && window.innerWidth >= 992) {
+                            // Primeiro expande o sidebar
+                            sidebar.classList.remove('collapsed');
+                            if (document.getElementById('topbar')) {
+                                document.getElementById('topbar').classList.remove('expanded');
+                            }
+                            if (document.getElementById('main-content')) {
+                                document.getElementById('main-content').classList.remove('expanded');
+                            }
+                            
+                            // Atualiza o localStorage
+                            localStorage.setItem('sidebarCollapsed', 'false');
+                            
+                            const targetId = this.getAttribute('data-bs-target') || this.getAttribute('href');
+                            
+                            // Após um pequeno delay para animação, abre o submenu
+                            setTimeout(() => {
+                                if (targetId) {
+                                    const targetElement = document.querySelector(targetId);
+                                    if (targetElement) {
+                                        targetElement.classList.add('show');
 
-                        if (targetId) {
-                            const targetElement = document.querySelector(targetId);
-                            if (targetElement) {
-                                targetElement.classList.toggle('show');
+                                        const icon = this.querySelector('.fa-angle-down, .fa-angle-right');
+                                        if (icon) {
+                                            icon.classList.remove('fa-angle-right');
+                                            icon.classList.add('fa-angle-down');
+                                        }
+                                    }
+                                }
+                            }, 300);
+                        } else {
+                            // Comportamento normal para sidebar expandido
+                            const targetId = this.getAttribute('data-bs-target') || this.getAttribute('href');
 
-                                const icon = this.querySelector('.fa-angle-down, .fa-angle-right');
-                                if (icon) {
-                                    icon.classList.toggle('fa-angle-down');
-                                    icon.classList.toggle('fa-angle-right');
+                            if (targetId) {
+                                const targetElement = document.querySelector(targetId);
+                                if (targetElement) {
+                                    targetElement.classList.toggle('show');
+
+                                    const icon = this.querySelector('.fa-angle-down, .fa-angle-right');
+                                    if (icon) {
+                                        icon.classList.toggle('fa-angle-down');
+                                        icon.classList.toggle('fa-angle-right');
+                                    }
                                 }
                             }
                         }
