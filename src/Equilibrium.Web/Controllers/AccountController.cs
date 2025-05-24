@@ -13,13 +13,16 @@ namespace Equilibrium.Web.Controllers
     {
         private readonly IUserService _userService;
         private readonly IApiService _apiService;
+        private readonly ILogger<AccountController> _logger;
 
         public AccountController(
             IUserService userService,
-            IApiService apiService)
+            IApiService apiService,
+            ILogger<AccountController> logger)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet]
@@ -70,6 +73,7 @@ namespace Equilibrium.Web.Controllers
                     ModelState.AddModelError(string.Empty, ResourceFinanceWeb.Error_InvalidToken);
                     return View(model);
                 }
+
                 HttpContext.SetJwtTokenCookie(result.Token);
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
@@ -84,6 +88,7 @@ namespace Equilibrium.Web.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro durante o login para usuário: {Username}", model.Username);
                 ModelState.AddModelError("CustomError", ex.Message);
                 return View(model);
             }
@@ -97,12 +102,98 @@ namespace Equilibrium.Web.Controllers
             {
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 HttpContext.Session.Clear();
+                HttpContext.Response.Cookies.Delete("JWToken");
                 return RedirectToAction(nameof(Login));
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro durante logout");
                 TempData["ErrorMessage"] = string.Format(ResourceFinanceWeb.Error_Logout, ex.Message);
                 return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VerifyToken()
+        {
+            try
+            {
+                if (!HttpContext.IsUserAuthenticated())
+                {
+                    return Unauthorized();
+                }
+
+                var token = HttpContext.GetJwtToken();
+                if (string.IsNullOrEmpty(token))
+                {
+                    return Unauthorized();
+                }
+
+                var authResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                if (!authResult.Succeeded || authResult.Properties?.ExpiresUtc == null)
+                {
+                    return Unauthorized();
+                }
+
+                return Ok(new
+                {
+                    authenticated = true,
+                    expiresAt = authResult.Properties.ExpiresUtc.Value,
+                    user = HttpContext.GetUserName()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao verificar token");
+                return Unauthorized();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RenewToken()
+        {
+            try
+            {
+                if (!HttpContext.IsUserAuthenticated())
+                {
+                    return Unauthorized(new { success = false, message = "Usuário não autenticado" });
+                }
+
+                var token = HttpContext.GetJwtToken();
+                if (string.IsNullOrEmpty(token))
+                {
+                    return Unauthorized(new { success = false, message = "Token não encontrado" });
+                }
+
+                // Renovar o cookie de autenticação
+                var authResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                if (authResult.Succeeded)
+                {
+                    var newProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
+                    };
+
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        authResult.Principal,
+                        newProperties);
+
+                    // Renovar o cookie JWT
+                    HttpContext.SetJwtTokenCookie(token);
+
+                    _logger.LogInformation("Token renovado com sucesso para usuário: {User}", HttpContext.GetUserName());
+                    return Ok(new { success = true, message = "Token renovado com sucesso" });
+                }
+
+                return Unauthorized(new { success = false, message = "Falha na renovação" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao renovar token para usuário: {User}", HttpContext.GetUserName());
+                return StatusCode(500, new { success = false, message = "Erro interno do servidor" });
             }
         }
 

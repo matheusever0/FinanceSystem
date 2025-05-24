@@ -20,6 +20,7 @@ namespace Equilibrium.Web.Configuration
             services.AddScoped<IIncomeService, IncomeService>();
             services.AddScoped<IIncomeTypeService, IncomeTypeService>();
             services.AddScoped<IFinancingService, FinancingService>();
+            services.AddScoped<ITokenManagerService, TokenManagerService>();
 
             return services;
         }
