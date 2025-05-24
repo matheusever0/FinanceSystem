@@ -19,8 +19,6 @@ namespace Equilibrium.Infrastructure
         private IIncomeRepository? _incomeRepository;
         private IIncomeTypeRepository? _incomeTypeRepository;
         private IIncomeInstallmentRepository? _incomeInstallmentRepository;
-        private IInvestmentRepository? _investmentRepository;
-        private IInvestmentTransactionRepository? _investmentTransactionRepository;
         private IFinancingRepository? _financingRepository;
         private IFinancingInstallmentRepository? _financingInstallmentRepository;
 
@@ -52,9 +50,6 @@ namespace Equilibrium.Infrastructure
         public IIncomeTypeRepository IncomeTypes => _incomeTypeRepository ??= new IncomeTypeRepository(_context);
 
         public IIncomeInstallmentRepository IncomeInstallments => _incomeInstallmentRepository ??= new IncomeInstallmentRepository(_context);
-
-        public IInvestmentRepository Investments => _investmentRepository ??= new InvestmentRepository(_context);
-        public IInvestmentTransactionRepository InvestmentTransactions => _investmentTransactionRepository ??= new InvestmentTransactionRepository(_context);
 
         public IFinancingRepository Financings => _financingRepository ??= new FinancingRepository(_context);
 

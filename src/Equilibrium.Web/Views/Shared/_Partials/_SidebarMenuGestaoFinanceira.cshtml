@@ -3,7 +3,6 @@
     var controllerName = ViewContext.RouteData.Values["Controller"]?.ToString();
     var isGestaoActive = controllerName == "Incomes" ||
                           controllerName == "Payments" ||
-                          controllerName == "Investments" ||
                           controllerName == "Financings";
 }
 
@@ -20,7 +19,6 @@
         <div class="bg-dark py-2">
             @await Html.PartialAsync("_Partials/_SidebarMenuIncomes")
             @await Html.PartialAsync("_Partials/_SidebarMenuPayments")
-            @await Html.PartialAsync("_Partials/_SidebarMenuInvestments")
             @await Html.PartialAsync("_Partials/_SidebarMenuFinancings")
         </div>
     </div>

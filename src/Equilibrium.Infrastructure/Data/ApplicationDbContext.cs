@@ -23,8 +23,6 @@ namespace Equilibrium.Infrastructure.Data
         public DbSet<Income> Incomes { get; set; }
         public DbSet<IncomeInstallment> IncomeInstallments { get; set; }
         public DbSet<IncomeType> IncomeTypes { get; set; }
-        public DbSet<Investment> Investments { get; set; }
-        public DbSet<InvestmentTransaction> InvestmentTransactions { get; set; }
         public DbSet<Financing> Financings { get; set; }
         public DbSet<FinancingInstallment> FinancingInstallments { get; set; }
 
@@ -76,14 +74,6 @@ namespace Equilibrium.Infrastructure.Data
                 .HasDefaultValueSql("NEWSEQUENTIALID()");
 
             modelBuilder.Entity<IncomeType>()
-                .Property(e => e.Id)
-                .HasDefaultValueSql("NEWSEQUENTIALID()");
-
-            modelBuilder.Entity<Investment>()
-                 .Property(e => e.Id)
-                 .HasDefaultValueSql("NEWSEQUENTIALID()");
-
-            modelBuilder.Entity<InvestmentTransaction>()
                 .Property(e => e.Id)
                 .HasDefaultValueSql("NEWSEQUENTIALID()");
 
@@ -203,18 +193,6 @@ namespace Equilibrium.Infrastructure.Data
                 .HasForeignKey(i => i.IncomeTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Investment>()
-                .HasOne(i => i.User)
-                .WithMany()
-                .HasForeignKey(i => i.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<InvestmentTransaction>()
-                .HasOne(t => t.Investment)
-                .WithMany(i => i.Transactions)
-                .HasForeignKey(t => t.InvestmentId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             modelBuilder.Entity<Financing>()
                 .HasOne(f => f.User)
                 .WithMany()
@@ -242,16 +220,6 @@ namespace Equilibrium.Infrastructure.Data
             modelBuilder.Entity<PaymentType>()
                 .Property(pt => pt.IsFinancingType)
                 .HasDefaultValue(false);
-
-            modelBuilder.Entity<Investment>()
-                .Property(pt => pt.Currency)
-                .HasColumnType("varchar(50)");
-
-            modelBuilder.Entity<Investment>()
-                .Property(e => e.TotalQuantity)
-                .HasPrecision(18, 9);
-
-
         }
     }
 }

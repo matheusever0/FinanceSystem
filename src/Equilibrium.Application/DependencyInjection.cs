@@ -24,9 +24,6 @@ namespace Equilibrium.Application
             services.AddScoped<IIncomeInstallmentService, IncomeInstallmentService>();
             services.AddScoped<IIncomeService, IncomeService>();
             services.AddScoped<IIncomeTypeService, IncomeTypeService>();
-            services.AddScoped<IInvestmentService, InvestmentService>();
-            services.AddScoped<IInvestmentTransactionService, InvestmentTransactionService>();
-            services.AddScoped<IStockPriceService, StockPriceService>();
             services.AddScoped<IFinancingService, FinancingService>();
             services.AddScoped<IFinancingInstallmentService, FinancingInstallmentService>();
 

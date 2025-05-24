@@ -4,8 +4,6 @@ using Equilibrium.Application.DTOs.Financing;
 using Equilibrium.Application.DTOs.Income;
 using Equilibrium.Application.DTOs.IncomeInstallment;
 using Equilibrium.Application.DTOs.IncomeType;
-using Equilibrium.Application.DTOs.Investment;
-using Equilibrium.Application.DTOs.InvestmentTransaction;
 using Equilibrium.Application.DTOs.Payment;
 using Equilibrium.Application.DTOs.PaymentInstallment;
 using Equilibrium.Application.DTOs.PaymentMethod;
@@ -51,13 +49,6 @@ namespace Equilibrium.Application.Mappings
             CreateMap<IncomeType, IncomeTypeDto>();
 
             CreateMap<IncomeInstallment, IncomeInstallmentDto>();
-
-            CreateMap<Investment, InvestmentDto>()
-                .ForMember(dest => dest.Transactions, opt => opt.MapFrom(src => src.Transactions))
-                .ForMember(dest => dest.TypeDescription, opt => opt.MapFrom(src => src.Type.ToString()));
-
-            CreateMap<InvestmentTransaction, InvestmentTransactionDto>()
-                .ForMember(dest => dest.TypeDescription, opt => opt.MapFrom(src => src.Type.ToString()));
 
             CreateMap<Financing, FinancingDto>()
                 .ForMember(dest => dest.TotalPaid, opt => opt.Ignore())

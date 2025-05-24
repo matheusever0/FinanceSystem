@@ -149,21 +149,6 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetInvestmentSummary()
-        {
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                await LoadInvestmentSummaryData(token);
-                return PartialView("_Partials/_InvestmentSummary");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, MessageHelper.GetLoadingErrorMessage(EntityNames.Dashboard, ex));
-            }
-        }
-
         private async Task LoadFinancialSummaryData(string token)
         {
             var currentDate = DateTime.Now;
@@ -213,40 +198,6 @@ namespace Equilibrium.Web.Controllers
             ViewBag.PaymentsOverdue = overduePayments;
             ViewBag.PendingIncomes = pendingIncomes;
             ViewBag.OverdueIncomes = overdueIncomes;
-        }
-
-        private async Task LoadInvestmentSummaryData(string token)
-        {
-            var investmentService = HttpContext.RequestServices.GetService<IInvestmentService>();
-            var investments = (await investmentService!.GetAllInvestmentsAsync(token)).ToArray();
-
-            var investmentsByCurrency = investments.GroupBy(i => i.Currency).ToDictionary(g => g.Key, g => g.ToList());
-
-            var totalInvestedByCurrency = investmentsByCurrency.ToDictionary(
-                g => g.Key,
-                g => g.Value.Sum(i => i.TotalInvested)
-            );
-
-            var currentValueByCurrency = investmentsByCurrency.ToDictionary(
-                g => g.Key,
-                g => g.Value.Sum(i => i.CurrentTotal)
-            );
-
-            var gainLossByCurrency = investmentsByCurrency.ToDictionary(
-                g => g.Key,
-                g => g.Value.Sum(i => i.GainLossValue)
-            );
-
-            ViewBag.InvestmentsByCurrency = investmentsByCurrency;
-            ViewBag.TotalInvestedByCurrency = totalInvestedByCurrency;
-            ViewBag.CurrentValueByCurrency = currentValueByCurrency;
-            ViewBag.GainLossByCurrency = gainLossByCurrency;
-
-            ViewBag.TopPerformingInvestmentsByCurrency = investmentsByCurrency
-                .ToDictionary(g => g.Key, g => g.Value
-                    .OrderByDescending(i => i.GainLossPercentage)
-                    .Take(3)
-                    .ToList());
         }
 
         public IActionResult Privacy()

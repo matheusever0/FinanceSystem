@@ -31,7 +31,6 @@ function initializePageModules() {
             'Payments',
             'CreditCards',
             'Financings',
-            'Investments',
             'Users'
         ];
 

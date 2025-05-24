@@ -19,8 +19,6 @@ namespace Equilibrium.Web.Configuration
             services.AddScoped<ICreditCardService, CreditCardService>();
             services.AddScoped<IIncomeService, IncomeService>();
             services.AddScoped<IIncomeTypeService, IncomeTypeService>();
-            services.AddScoped<IInvestmentService, InvestmentService>();
-            services.AddScoped<IInvestmentTransactionService, InvestmentTransactionService>();
             services.AddScoped<IFinancingService, FinancingService>();
 
             return services;
