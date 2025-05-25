@@ -11,13 +11,19 @@ namespace Equilibrium.Web.Filters
     public class TokenCheckAttribute : ActionFilterAttribute
     {
         private static readonly ConcurrentDictionary<string, DateTime> _validatedTokens = new();
-
         private static readonly Timer _cacheCleanupTimer = new Timer(CleanupExpiredTokens, null,
             TimeSpan.FromHours(1), TimeSpan.FromHours(1));
 
         public override async void OnActionExecuting(ActionExecutingContext context)
         {
             var httpContext = context.HttpContext;
+
+            // Pular verificação para endpoints que não precisam de autenticação
+            if (ShouldSkipTokenCheck(httpContext))
+            {
+                base.OnActionExecuting(context);
+                return;
+            }
 
             if (httpContext.IsUserAuthenticated())
             {
@@ -37,16 +43,15 @@ namespace Equilibrium.Web.Filters
                 }
 
                 // Verificar se o cookie de autenticação ainda é válido
-                if (!IsAuthenticationCookieValid(httpContext))
+                if (!await IsAuthenticationCookieValidAsync(httpContext))
                 {
                     await SignOutAndRedirect(context);
                     return;
                 }
 
-                // Check cache first - mas com validação mais rigorosa
+                // Verificar cache (com validação mais rigorosa)
                 if (_validatedTokens.TryGetValue(token, out var cachedExpiryTime))
                 {
-                    // Verificar se o token ainda é válido no cache E se não expirou
                     if (cachedExpiryTime > DateTime.UtcNow)
                     {
                         base.OnActionExecuting(context);
@@ -56,9 +61,17 @@ namespace Equilibrium.Web.Filters
                     _validatedTokens.TryRemove(token, out _);
                 }
 
-                // Validar e cachear apenas se passou em todas as verificações
-                var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-                _validatedTokens.TryAdd(token, jwtToken.ValidTo);
+                // Validar e cachear se passou em todas as verificações
+                try
+                {
+                    var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+                    _validatedTokens.TryAdd(token, jwtToken.ValidTo);
+                }
+                catch
+                {
+                    await SignOutAndRedirect(context);
+                    return;
+                }
 
                 base.OnActionExecuting(context);
                 return;
@@ -67,34 +80,70 @@ namespace Equilibrium.Web.Filters
             base.OnActionExecuting(context);
         }
 
+        private static bool ShouldSkipTokenCheck(HttpContext httpContext)
+        {
+            var path = httpContext.Request.Path.Value?.ToLower() ?? "";
+
+            // Endpoints que não precisam de verificação de token
+            var skipPaths = new[]
+            {
+                "/account/login",
+                "/account/logout",
+                "/account/accessdenied",
+                "/account/verifytoken",
+                "/css/",
+                "/js/",
+                "/images/",
+                "/lib/",
+                "/favicon.ico"
+            };
+
+            return skipPaths.Any(skipPath => path.Contains(skipPath));
+        }
+
         private async Task SignOutAndRedirect(ActionExecutingContext context)
         {
             var httpContext = context.HttpContext;
-            await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            httpContext.Session.Clear();
-            httpContext.Response.Cookies.Delete("JWToken");
+            var logger = httpContext.RequestServices.GetService<ILogger<TokenCheckAttribute>>();
 
-            // Limpar token do cache se existir
-            var token = httpContext.GetJwtToken();
-            if (!string.IsNullOrEmpty(token))
+            try
             {
-                _validatedTokens.TryRemove(token, out _);
-            }
+                await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                httpContext.Session.Clear();
+                httpContext.ClearJwtToken();
 
-            context.Result = new RedirectToActionResult("Login", "Account", new { expired = true });
+                logger?.LogInformation("Usuário deslogado devido a token/cookie inválido");
+
+                // Limpar token do cache se existir
+                var token = httpContext.GetJwtToken();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    _validatedTokens.TryRemove(token, out _);
+                }
+
+                context.Result = new RedirectToActionResult("Login", "Account", new { expired = true });
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, "Erro ao fazer logout automático");
+                context.Result = new RedirectToActionResult("Login", "Account", new { expired = true });
+            }
         }
 
         private static bool IsTokenValid(string token)
         {
             try
             {
+                if (string.IsNullOrEmpty(token))
+                    return false;
+
                 var tokenHandler = new JwtSecurityTokenHandler();
                 if (!tokenHandler.CanReadToken(token))
                     return false;
 
                 var jwtToken = tokenHandler.ReadJwtToken(token);
 
-                // Verificação mais rigorosa - sem margem de erro
+                // Verificar se o token ainda não expirou
                 return jwtToken.ValidTo > DateTime.UtcNow;
             }
             catch
@@ -103,11 +152,11 @@ namespace Equilibrium.Web.Filters
             }
         }
 
-        private static bool IsAuthenticationCookieValid(HttpContext httpContext)
+        private static async Task<bool> IsAuthenticationCookieValidAsync(HttpContext httpContext)
         {
             try
             {
-                var authResult = httpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme).Result;
+                var authResult = await httpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
                 if (!authResult.Succeeded || authResult.Properties?.ExpiresUtc == null)
                     return false;
@@ -123,15 +172,27 @@ namespace Equilibrium.Web.Filters
 
         private static void CleanupExpiredTokens(object state)
         {
-            var now = DateTime.UtcNow;
-            var expiredTokens = _validatedTokens
-                .Where(kvp => kvp.Value <= now)
-                .Select(kvp => kvp.Key)
-                .ToList();
-
-            foreach (var expiredToken in expiredTokens)
+            try
             {
-                _validatedTokens.TryRemove(expiredToken, out _);
+                var now = DateTime.UtcNow;
+                var expiredTokens = _validatedTokens
+                    .Where(kvp => kvp.Value <= now)
+                    .Select(kvp => kvp.Key)
+                    .ToList();
+
+                foreach (var expiredToken in expiredTokens)
+                {
+                    _validatedTokens.TryRemove(expiredToken, out _);
+                }
+
+                if (expiredTokens.Count > 0)
+                {
+                    Console.WriteLine($"Limpeza de cache: {expiredTokens.Count} tokens expirados removidos");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro na limpeza de cache de tokens: {ex.Message}");
             }
         }
     }

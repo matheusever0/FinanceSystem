@@ -36,7 +36,6 @@ function initializePageModules() {
 
         pageModules.forEach(module => {
             if (FinanceSystem.Pages[module] && typeof FinanceSystem.Pages[module].initialize === 'function') {
-                console.log(`Inicializando módulo: ${module}`);
                 FinanceSystem.Pages[module].initialize();
             }
         });

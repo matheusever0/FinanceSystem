@@ -7,32 +7,71 @@ var FinanceSystem = FinanceSystem || {};
 
 FinanceSystem.Core = (function () {
 
+    let originalFetch;
+    let isInterceptorActive = false;
+
     function initialize() {
         initializeAjaxInterceptors();
     }
 
     function initializeAjaxInterceptors() {
+        // jQuery Ajax Error Handler
         if (typeof $ !== 'undefined' && $.ajaxError) {
             $(document).ajaxError(function (event, jqXHR, settings, thrownError) {
-                if (jqXHR.status === 401) {
+                if (jqXHR.status === 401 && !isAuthEndpoint(settings.url)) {
+                    console.log('Ajax 401 - Redirecionando para login');
                     window.location.href = '/Account/Login?expired=true';
                 }
             });
         }
 
-        const originalFetch = window.fetch;
-        if (originalFetch) {
+        // Fetch Interceptor - Mais cuidadoso
+        if (window.fetch && !originalFetch) {
+            originalFetch = window.fetch;
+
             window.fetch = function (url, options) {
+                // Não interceptar chamadas de autenticação para evitar loops
+                if (isAuthEndpoint(url) || isInterceptorActive) {
+                    return originalFetch(url, options);
+                }
+
+                isInterceptorActive = true;
+
                 return originalFetch(url, options)
                     .then(response => {
+                        isInterceptorActive = false;
+
                         if (response.status === 401) {
-                            window.location.href = '/Account/Login?expired=true';
-                            return Promise.reject('Unauthorized');
+                            console.log('Fetch 401 - Redirecionando para login');
+                            setTimeout(() => {
+                                window.location.href = '/Account/Login?expired=true';
+                            }, 100);
                         }
                         return response;
+                    })
+                    .catch(error => {
+                        isInterceptorActive = false;
+                        throw error;
                     });
             };
         }
+    }
+
+    function isAuthEndpoint(url) {
+        if (!url) return false;
+
+        const authEndpoints = [
+            '/Account/Login',
+            '/Account/Logout',
+            '/Account/VerifyToken',
+            '/Account/RenewToken',
+            '/Account/AccessDenied'
+        ];
+
+        return authEndpoints.some(endpoint =>
+            url.includes(endpoint) ||
+            (typeof url === 'string' && url.endsWith(endpoint))
+        );
     }
 
     function formatCurrency(value, currency = 'BRL') {
@@ -134,6 +173,7 @@ FinanceSystem.Core = (function () {
         parseCurrency: parseCurrency,
         createCustomEvent: createCustomEvent,
         dispatchCustomEvent: dispatchCustomEvent,
-        confirmDelete: confirmDelete
+        confirmDelete: confirmDelete,
+        isAuthEndpoint: isAuthEndpoint
     };
 })();

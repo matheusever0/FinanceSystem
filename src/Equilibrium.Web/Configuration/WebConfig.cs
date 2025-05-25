@@ -9,13 +9,16 @@ namespace Equilibrium.Web.Configuration
         {
             services.AddHttpContextAccessor();
             services.AddDistributedMemoryCache();
+
+            // Configuração de sessão alinhada com os cookies de autenticação (24 horas)
             services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromDays(1); 
+                options.IdleTimeout = TimeSpan.FromDays(1); // 24 horas
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
-                options.Cookie.MaxAge = TimeSpan.FromDays(1);
+                options.Cookie.MaxAge = TimeSpan.FromDays(1); // 24 horas
                 options.Cookie.SameSite = SameSiteMode.Strict;
+                options.Cookie.Name = "EquilibriumSession";
             });
 
             services.AddControllersWithViews(options =>
@@ -41,6 +44,7 @@ namespace Equilibrium.Web.Configuration
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
+
             app.UseSession();
             app.UseAuthentication();
             app.UseAuthenticationMiddleware();

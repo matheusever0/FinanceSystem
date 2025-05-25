@@ -1,5 +1,5 @@
 ﻿/**
- * Finance System - Authentication Monitor (Versão Simplificada)
+ * Finance System - Authentication Monitor (Versão Corrigida)
  * Monitora a autenticação e renova automaticamente quando necessário
  */
 
@@ -8,13 +8,15 @@ var FinanceSystem = FinanceSystem || {};
 FinanceSystem.AuthMonitor = (function () {
     let authCheckInterval;
     let warningShown = false;
-    const CHECK_INTERVAL = 10 * 60 * 1000; // 10 minutos
+    let isCheckingAuth = false;
+
+    const CHECK_INTERVAL = 15 * 60 * 1000; // 15 minutos
     const WARNING_THRESHOLD = 30 * 60 * 1000; // 30 minutos antes de expirar
+    const SESSION_EXTEND_THRESHOLD = 2 * 60 * 60 * 1000; // 2 horas antes de expirar
 
     function initialize() {
         // Iniciar monitoramento apenas se o usuário estiver autenticado
         if (isUserAuthenticated()) {
-            console.log('Iniciando monitoramento de autenticação...');
             startAuthenticationMonitoring();
         }
     }
@@ -26,67 +28,93 @@ FinanceSystem.AuthMonitor = (function () {
     }
 
     function startAuthenticationMonitoring() {
-        // Verificar imediatamente
         checkAuthenticationStatus();
-
-        // Configurar verificação periódica
         authCheckInterval = setInterval(checkAuthenticationStatus, CHECK_INTERVAL);
-
-        // Verificar quando a aba volta ao foco
-        document.addEventListener('visibilitychange', function () {
-            if (!document.hidden) {
-                console.log('Aba voltou ao foco, verificando autenticação...');
-                checkAuthenticationStatus();
-            }
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        ['click', 'keypress', 'scroll', 'mousemove'].forEach(event => {
+            document.addEventListener(event, throttle(checkAuthenticationStatus, 5 * 60 * 1000), { passive: true });
         });
     }
 
+    function handleVisibilityChange() {
+        if (!document.hidden && isUserAuthenticated()) {
+            setTimeout(checkAuthenticationStatus, 1000);
+        }
+    }
+
     function checkAuthenticationStatus() {
-        fetch('/Account/VerifyToken', {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-            .then(response => {
-                if (response.status === 401) {
-                    console.log('Token inválido, redirecionando para login...');
+        if (isCheckingAuth) {
+            return;
+        }
+
+        isCheckingAuth = true;
+
+        // Usar XMLHttpRequest para evitar conflitos com o interceptor do fetch
+        const xhr = new XMLHttpRequest();
+
+        xhr.open('GET', '/Account/VerifyToken', true);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.setRequestHeader('Cache-Control', 'no-cache');
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                isCheckingAuth = false;
+
+                if (xhr.status === 401) {
                     handleAuthenticationExpired();
-                    return null;
+                    return;
                 }
 
-                if (response.ok) {
-                    return response.json();
-                }
-
-                throw new Error(`Erro HTTP: ${response.status}`);
-            })
-            .then(data => {
-                if (data && data.expiresAt) {
-                    const expirationTime = new Date(data.expiresAt);
-                    const now = new Date();
-                    const timeUntilExpiration = expirationTime.getTime() - now.getTime();
-
-                    console.log(`Autenticação expira em: ${Math.round(timeUntilExpiration / (1000 * 60))} minutos`);
-
-                    // Mostrar aviso se estiver próximo da expiração
-                    if (timeUntilExpiration <= WARNING_THRESHOLD && timeUntilExpiration > 0 && !warningShown) {
-                        showExpirationWarning(Math.round(timeUntilExpiration / (1000 * 60)));
+                if (xhr.status === 200) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        handleAuthenticationValid(data);
+                    } catch (e) {
+                        console.error('❌ Erro ao processar resposta:', e);
+                        scheduleNextCheck();
                     }
-
-                    // Redirecionar se expirou
-                    if (timeUntilExpiration <= 0) {
-                        console.log('Autenticação expirada');
-                        handleAuthenticationExpired();
-                    }
+                } else {
+                    console.warn('⚠️ Erro na verificação de autenticação:', xhr.status);
+                    scheduleNextCheck();
                 }
-            })
-            .catch(error => {
-                console.error('Erro ao verificar status de autenticação:', error);
-                // Em caso de erro, verificar novamente em 2 minutos
-                setTimeout(checkAuthenticationStatus, 2 * 60 * 1000);
-            });
+            }
+        };
+
+        xhr.onerror = function () {
+            isCheckingAuth = false;
+            console.error('❌ Erro de rede na verificação de autenticação');
+            scheduleNextCheck();
+        };
+
+        xhr.send();
+    }
+
+    function handleAuthenticationValid(data) {
+        if (data && data.expiresAt) {
+            const expirationTime = new Date(data.expiresAt);
+            const now = new Date();
+            const timeUntilExpiration = expirationTime.getTime() - now.getTime();
+
+            if (timeUntilExpiration <= SESSION_EXTEND_THRESHOLD && timeUntilExpiration > WARNING_THRESHOLD) {
+                attemptTokenRenewal();
+                return;
+            }
+
+            if (timeUntilExpiration <= WARNING_THRESHOLD && timeUntilExpiration > 0 && !warningShown) {
+                showExpirationWarning(Math.round(timeUntilExpiration / (1000 * 60)));
+                return;
+            }
+
+            if (timeUntilExpiration <= 0) {
+                handleAuthenticationExpired();
+                return;
+            }
+        }
+    }
+
+    function scheduleNextCheck() {
+        // Verificar novamente em 2 minutos em caso de erro
+        setTimeout(checkAuthenticationStatus, 2 * 60 * 1000);
     }
 
     function showExpirationWarning(minutesRemaining) {
@@ -94,12 +122,12 @@ FinanceSystem.AuthMonitor = (function () {
 
         warningShown = true;
 
-        const message = `Sua sessão expirará em ${minutesRemaining} minutos. Clique OK para renovar automaticamente.`;
+        const message = `Sua sessão expirará em ${minutesRemaining} minutos. Deseja renovar automaticamente?`;
 
         if (confirm(message)) {
             attemptTokenRenewal();
         } else {
-            // Usuário optou por não renovar, avisar novamente em 5 minutos
+            // Usuário optou por não renovar, avisar novamente em 5 minutos se ainda estiver logado
             setTimeout(() => {
                 warningShown = false;
             }, 5 * 60 * 1000);
@@ -107,112 +135,99 @@ FinanceSystem.AuthMonitor = (function () {
     }
 
     function attemptTokenRenewal() {
-        console.log('Tentando renovar autenticação...');
 
-        const token = getAntiForgeToken();
+        const xhr = new XMLHttpRequest();
         const formData = new FormData();
+
+        // Adicionar token anti-forgery se disponível
+        const token = getAntiForgeToken();
         if (token) {
             formData.append('__RequestVerificationToken', token);
         }
 
-        fetch('/Account/RenewToken', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData
-        })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                }
+        xhr.open('POST', '/Account/RenewToken', true);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-                if (response.status === 401) {
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data && data.success) {
+                            warningShown = false;
+                            showSuccessMessage('Sessão renovada automaticamente');
+                        } else {
+                            handleRenewalFailure();
+                        }
+                    } catch (e) {
+                        handleRenewalFailure();
+                    }
+                } else if (xhr.status === 401) {
                     handleAuthenticationExpired();
-                    return null;
+                } else {
+                    handleRenewalFailure();
                 }
+            }
+        };
 
-                throw new Error(`Erro HTTP: ${response.status}`);
-            })
-            .then(data => {
-                if (data && data.success) {
-                    console.log('Autenticação renovada com sucesso');
-                    warningShown = false; // Reset warning flag
-                    showSuccessMessage('Sessão renovada automaticamente');
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao renovar autenticação:', error);
-                showErrorMessage('Erro ao renovar sessão. Você será redirecionado para o login em breve.');
-                // Se falhou a renovação, redirecionar em 30 segundos
-                setTimeout(handleAuthenticationExpired, 30000);
-            });
+        xhr.onerror = function () {
+            handleRenewalFailure();
+        };
+
+        xhr.send(formData);
+    }
+
+    function handleRenewalFailure() {
+        console.error('❌ Erro ao renovar autenticação');
+        showErrorMessage('Erro ao renovar sessão. Você será redirecionado para o login em breve.');
+        setTimeout(handleAuthenticationExpired, 30000);
     }
 
     function showSuccessMessage(message) {
-        console.log('Sucesso:', message);
-
-        // Criar e mostrar um toast/alerta simples
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
-        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-        alertDiv.innerHTML = `
-            <i class="fas fa-check-circle me-2"></i>${message}
-            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
-        `;
-
-        document.body.appendChild(alertDiv);
-
-        // Remover automaticamente após 5 segundos
-        setTimeout(() => {
-            if (alertDiv.parentElement) {
-                alertDiv.remove();
-            }
-        }, 5000);
+        showAlert(message, 'success');
     }
 
     function showErrorMessage(message) {
-        console.error('Erro:', message);
+        console.error('❌ Erro:', message);
+        showAlert(message, 'warning');
+    }
 
-        // Criar e mostrar um alerta de erro simples
+    function showAlert(message, type) {
+        // Remover alertas anteriores
+        const existingAlerts = document.querySelectorAll('.auth-alert');
+        existingAlerts.forEach(alert => alert.remove());
+
         const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-warning alert-dismissible fade show position-fixed';
-        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed auth-alert`;
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; max-width: 400px;';
+
+        const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
         alertDiv.innerHTML = `
-            <i class="fas fa-exclamation-triangle me-2"></i>${message}
+            <i class="fas ${iconClass} me-2"></i>${message}
             <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
         `;
 
         document.body.appendChild(alertDiv);
 
-        // Remover automaticamente após 10 segundos
+        // Auto-remover
         setTimeout(() => {
             if (alertDiv.parentElement) {
                 alertDiv.remove();
             }
-        }, 10000);
+        }, type === 'success' ? 5000 : 10000);
     }
 
     function handleAuthenticationExpired() {
-        console.log('Autenticação expirada, redirecionando para login...');
+        stopMonitoring();
 
-        // Parar monitoramento
-        if (authCheckInterval) {
-            clearInterval(authCheckInterval);
-            authCheckInterval = null;
-        }
-
-        // Limpar dados da sessão se possível
         try {
             if (typeof sessionStorage !== 'undefined') {
                 sessionStorage.clear();
             }
         } catch (e) {
-            console.warn('Não foi possível limpar sessionStorage:', e);
+            console.warn('⚠️ Não foi possível limpar sessionStorage:', e);
         }
 
-        // Mostrar mensagem e redirecionar
         showErrorMessage('Sua sessão expirou. Redirecionando para o login...');
 
         setTimeout(() => {
@@ -230,10 +245,22 @@ FinanceSystem.AuthMonitor = (function () {
             clearInterval(authCheckInterval);
             authCheckInterval = null;
         }
-        console.log('Monitoramento de autenticação parado');
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
     }
 
-    // Expor métodos públicos
+    function throttle(func, limit) {
+        let inThrottle;
+        return function () {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    }
+
     return {
         initialize: initialize,
         checkAuthenticationStatus: checkAuthenticationStatus,
@@ -242,7 +269,6 @@ FinanceSystem.AuthMonitor = (function () {
     };
 })();
 
-// Inicializar quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', function () {
     if (FinanceSystem.AuthMonitor) {
         FinanceSystem.AuthMonitor.initialize();

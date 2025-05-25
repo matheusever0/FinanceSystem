@@ -74,15 +74,26 @@ namespace Equilibrium.Web.Controllers
                     return View(model);
                 }
 
+                // Configurar as propriedades de autenticação com 24 horas
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1), // 24 horas
+                    AllowRefresh = true,
+                    IssuedUtc = DateTimeOffset.UtcNow
+                };
+
+                // Definir cookie httpOnly com JWT
                 HttpContext.SetJwtTokenCookie(result.Token);
+
+                // Autenticar com cookie
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     principal,
-                    new AuthenticationProperties
-                    {
-                        IsPersistent = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
-                    });
+                    authProperties);
+
+                _logger.LogInformation("Login realizado com sucesso para usuário: {Username}. Token expira em: {Expiration}",
+                    model.Username, authProperties.ExpiresUtc);
 
                 return RedirectToLocal(returnUrl);
             }
@@ -100,9 +111,19 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
+                var username = HttpContext.GetUserName();
+
+                // Limpar autenticação
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                // Limpar session
                 HttpContext.Session.Clear();
-                HttpContext.Response.Cookies.Delete("JWToken");
+
+                // Limpar cookie JWT
+                HttpContext.ClearJwtToken();
+
+                _logger.LogInformation("Logout realizado com sucesso para usuário: {Username}", username);
+
                 return RedirectToAction(nameof(Login));
             }
             catch (Exception ex)
@@ -120,18 +141,36 @@ namespace Equilibrium.Web.Controllers
             {
                 if (!HttpContext.IsUserAuthenticated())
                 {
+                    _logger.LogWarning("Usuário não autenticado tentando verificar token");
                     return Unauthorized();
                 }
 
                 var token = HttpContext.GetJwtToken();
                 if (string.IsNullOrEmpty(token))
                 {
+                    _logger.LogWarning("Token JWT não encontrado para usuário autenticado");
+                    return Unauthorized();
+                }
+
+                // Verificar se o token ainda é válido na API
+                var isValid = await _apiService.VerifyTokenAsync(token);
+                if (!isValid)
+                {
+                    _logger.LogWarning("Token JWT inválido para usuário: {User}", HttpContext.GetUserName());
                     return Unauthorized();
                 }
 
                 var authResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 if (!authResult.Succeeded || authResult.Properties?.ExpiresUtc == null)
                 {
+                    _logger.LogWarning("Cookie de autenticação inválido para usuário: {User}", HttpContext.GetUserName());
+                    return Unauthorized();
+                }
+
+                // Verificar se ainda está dentro do prazo
+                if (authResult.Properties.ExpiresUtc <= DateTimeOffset.UtcNow)
+                {
+                    _logger.LogWarning("Cookie de autenticação expirado para usuário: {User}", HttpContext.GetUserName());
                     return Unauthorized();
                 }
 
@@ -139,12 +178,13 @@ namespace Equilibrium.Web.Controllers
                 {
                     authenticated = true,
                     expiresAt = authResult.Properties.ExpiresUtc.Value,
-                    user = HttpContext.GetUserName()
+                    user = HttpContext.GetUserName(),
+                    timeRemaining = (authResult.Properties.ExpiresUtc.Value - DateTimeOffset.UtcNow).TotalMinutes
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao verificar token");
+                _logger.LogError(ex, "Erro ao verificar token para usuário: {User}", HttpContext.GetUserName());
                 return Unauthorized();
             }
         }
@@ -166,26 +206,44 @@ namespace Equilibrium.Web.Controllers
                     return Unauthorized(new { success = false, message = "Token não encontrado" });
                 }
 
+                // Verificar se o token ainda é válido
+                var isValid = await _apiService.VerifyTokenAsync(token);
+                if (!isValid)
+                {
+                    return Unauthorized(new { success = false, message = "Token inválido" });
+                }
+
                 // Renovar o cookie de autenticação
                 var authResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 if (authResult.Succeeded)
                 {
+                    // Criar novas propriedades com 24 horas a partir de agora
                     var newProperties = new AuthenticationProperties
                     {
                         IsPersistent = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1), // Renovar por mais 24 horas
+                        AllowRefresh = true,
+                        IssuedUtc = DateTimeOffset.UtcNow
                     };
 
+                    // Re-autenticar com novo tempo
                     await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         authResult.Principal,
                         newProperties);
 
-                    // Renovar o cookie JWT
+                    // Renovar cookie JWT também (mesmo token, nova expiração)
                     HttpContext.SetJwtTokenCookie(token);
 
-                    _logger.LogInformation("Token renovado com sucesso para usuário: {User}", HttpContext.GetUserName());
-                    return Ok(new { success = true, message = "Token renovado com sucesso" });
+                    _logger.LogInformation("Token renovado com sucesso para usuário: {User}. Nova expiração: {Expiration}",
+                        HttpContext.GetUserName(), newProperties.ExpiresUtc);
+
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Token renovado com sucesso",
+                        expiresAt = newProperties.ExpiresUtc
+                    });
                 }
 
                 return Unauthorized(new { success = false, message = "Falha na renovação" });
@@ -204,7 +262,9 @@ namespace Equilibrium.Web.Controllers
 
         private IActionResult RedirectToLocal(string returnUrl)
         {
-            return !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl) ? Redirect(returnUrl) : RedirectToAction("Index", "Home");
+            return !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl) ?
+                Redirect(returnUrl) :
+                RedirectToAction("Index", "Home");
         }
     }
 }
