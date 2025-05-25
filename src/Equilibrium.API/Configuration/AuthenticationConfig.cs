@@ -31,7 +31,7 @@ namespace Equilibrium.API.Configuration
                     ValidateAudience = true,
                     ValidIssuer = jwtSettings.Issuer,
                     ValidAudience = jwtSettings.Audience,
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.FromMinutes(5)
                 };
             });
 

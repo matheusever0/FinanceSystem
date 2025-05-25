@@ -2,7 +2,6 @@
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Interfaces.Services;
 using Equilibrium.Resources;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
@@ -27,13 +26,6 @@ namespace Equilibrium.API.Controllers
             }
         }
 
-        [HttpGet("test-auth")]
-        [Authorize]
-        public IActionResult TestAuth()
-        {
-            return Ok(new { message = "Você está autenticado!" });
-        }
-
         [HttpGet("verify-token")]
         public IActionResult VerifyToken()
         {
@@ -41,11 +33,37 @@ namespace Equilibrium.API.Controllers
 
             if (identity is null || !identity.IsAuthenticated)
             {
+                Console.WriteLine("Token inválido ou usuário não autenticado");
                 return Unauthorized(ResourceFinanceApi.Auth_TokenInvalid);
             }
 
+            var expiryClaim = User.FindFirst("exp");
+            if (expiryClaim != null)
+            {
+                var expiryUnix = long.Parse(expiryClaim.Value);
+                var expiryDateTime = DateTimeOffset.FromUnixTimeSeconds(expiryUnix).DateTime;
+                Console.WriteLine($"Token expira em: {expiryDateTime}");
+                Console.WriteLine($"Hora atual: {DateTime.UtcNow}");
+            }
+
             var username = User.Identity?.Name;
-            return Ok(new { username });
+            return Ok(new { username, authenticated = true, expires = expiryClaim?.Value });
+        }
+
+        [HttpGet("debug-token")]
+        public IActionResult DebugToken()
+        {
+            var claims = User.Claims.Select(c => new {
+                c.Type,
+                c.Value
+            }).ToList();
+
+            return Ok(new
+            {
+                Claims = claims,
+                User.Identity.IsAuthenticated,
+                ServerTime = DateTime.UtcNow
+            });
         }
     }
 }

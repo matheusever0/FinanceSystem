@@ -22,6 +22,12 @@ namespace Equilibrium.Infrastructure.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration["JwtSettings:Secret"]!);
 
+            var now = DateTime.UtcNow;
+            var expires = now.AddDays(1);
+
+            Console.WriteLine($"Token criado em: {now}");
+            Console.WriteLine($"Token expira em: {expires}");
+
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -36,12 +42,10 @@ namespace Equilibrium.Infrastructure.Services
                     .Select(userRole => new Claim(ClaimTypes.Role, userRole.Role.Name)));
             }
 
-            Console.WriteLine(DateTime.Now);
-
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(double.Parse("1")),
+                Expires = expires,
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature
