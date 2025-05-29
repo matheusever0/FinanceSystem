@@ -3,9 +3,6 @@ using Equilibrium.Application.DTOs.IncomeInstallment;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Application.Services;
 using Equilibrium.Domain.Interfaces.Services;
-using Equilibrium.Application.DTOs.Common;
-using Equilibrium.Domain.DTOs.Filters;
-using Equilibrium.Application.Validations.Filters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
@@ -14,30 +11,7 @@ namespace Equilibrium.API.Controllers
         IncomeInstallmentService service,
         IIncomeService incomeService) : AuthenticatedController<IncomeInstallmentService>(unitOfWork, service)
     {
-                [HttpGet("filter")]
-        public async Task<ActionResult<PagedResult<IncomeInstallmentDto>>> GetFiltered([FromQuery] IncomeInstallmentFilter filter)
-        {
-            if (filter == null)
-                filter = new IncomeInstallmentFilter();
-                
-            var validator = new IncomeInstallmentFilterValidator();
-            var validationResult = await validator.ValidateAsync(filter);
-            
-            if (!validationResult.IsValid)
-                return BadRequest(validationResult.Errors);
-                
-            var userId = HttpContext.GetCurrentUserId();
-            var pagedResult = await _service.GetFilteredAsync(filter, userId);
-            
-            // Add pagination headers
-            Response.Headers.Add("X-Pagination-Total", pagedResult.TotalCount.ToString());
-            Response.Headers.Add("X-Pagination-Pages", pagedResult.TotalPages.ToString());
-            Response.Headers.Add("X-Pagination-Page", pagedResult.PageNumber.ToString());
-            Response.Headers.Add("X-Pagination-Size", pagedResult.PageSize.ToString());
-            
-            return Ok(pagedResult);
-        }
-        [HttpGet("income/{incomeId}")]
+       [HttpGet("income/{incomeId}")]
         public async Task<ActionResult<IEnumerable<IncomeInstallmentDto>>> GetByIncome(Guid incomeId)
         {
             try
