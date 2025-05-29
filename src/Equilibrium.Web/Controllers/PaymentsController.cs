@@ -4,7 +4,6 @@ using Equilibrium.Resources.Web.Helpers;
 using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
-using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Payment;
 using Equilibrium.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -1084,68 +1083,6 @@ namespace Equilibrium.Web.Controllers
                 ViewBag.PaymentMethods = new List<object>();
                 ViewBag.CreditCards = new List<object>();
                 ViewBag.Financings = new List<object>();
-            }
-        }
-
-        [HttpGet("filter")]
-        [RequirePermission("payments.view")]
-        public async Task<IActionResult> Filter(PaymentFilter filter = null)
-        {
-            if (filter == null)
-                filter = new PaymentFilter();
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var result = await _paymentService.GetFilteredAsync(filter, token);
-
-                // Add pagination headers
-                Response.Headers.Add("X-Pagination-Total", result.TotalCount.ToString());
-                Response.Headers.Add("X-Pagination-Pages", result.TotalPages.ToString());
-                Response.Headers.Add("X-Pagination-Page", result.PageNumber.ToString());
-                Response.Headers.Add("X-Pagination-Size", result.PageSize.ToString());
-
-                ViewBag.Filter = filter;
-                ViewBag.TotalCount = result.TotalCount;
-                ViewBag.TotalPages = result.TotalPages;
-                ViewBag.CurrentPage = result.PageNumber;
-                ViewBag.PageSize = result.PageSize;
-
-                return View("Index", result.Items);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Payments, ex);
-                return RedirectToAction("Index", "Home");
-            }
-        }
-
-        [HttpGet("api/filter")]
-        [RequirePermission("payments.view")]
-        public async Task<IActionResult> FilterJson([FromQuery] PaymentFilter filter)
-        {
-            if (filter == null)
-                filter = new PaymentFilter();
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var result = await _paymentService.GetFilteredAsync(filter, token);
-
-                return Json(new
-                {
-                    items = result.Items,
-                    totalCount = result.TotalCount,
-                    pageNumber = result.PageNumber,
-                    pageSize = result.PageSize,
-                    totalPages = result.TotalPages,
-                    hasPreviousPage = result.HasPreviousPage,
-                    hasNextPage = result.HasNextPage
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
             }
         }
     }

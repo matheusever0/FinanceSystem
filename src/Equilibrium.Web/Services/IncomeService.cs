@@ -1,5 +1,4 @@
 using Equilibrium.Web.Interfaces;
-using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Income;
 
@@ -217,18 +216,6 @@ namespace Equilibrium.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter receitas vencidas");
-                throw;
-            }
-        }
-        public async Task<PagedResult<IncomeModel>> GetFilteredAsync(IncomeFilter filter, string token)
-        {
-            try
-            {
-                return await _apiService.GetFilteredAsync<PagedResult<IncomeModel>>("/api/Incomes/filter", filter, token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao obter registros filtrados");
                 throw;
             }
         }

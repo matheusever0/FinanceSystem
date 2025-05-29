@@ -1,7 +1,5 @@
-using Equilibrium.Web.Models.Role;
-
-using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Generics;
+using Equilibrium.Web.Models.Role;
 
 namespace Equilibrium.Web.Services
 {
@@ -14,7 +12,6 @@ namespace Equilibrium.Web.Services
         Task DeleteRoleAsync(string id, string token);
         Task<bool> HasPermissionAsync(string roleId, string permissionSystemName, string token);
         Task<RoleModel> UpdateRolePermissionsAsync(string roleId, List<string> permissionIds, string token);
-        Task<PagedResult<RoleModel>> GetFilteredAsync(RoleFilter filter, string token);
     }
 }
 

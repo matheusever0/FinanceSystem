@@ -1,8 +1,5 @@
 using Equilibrium.Web.Models;
 
-using Equilibrium.Web.Models.Filters;
-using Equilibrium.Web.Models.Generics;
-
 namespace Equilibrium.Web.Services
 {
     public interface IPaymentTypeService
@@ -14,7 +11,6 @@ namespace Equilibrium.Web.Services
         Task<PaymentTypeModel> CreatePaymentTypeAsync(CreatePaymentTypeModel model, string token);
         Task<PaymentTypeModel> UpdatePaymentTypeAsync(string id, UpdatePaymentTypeModel model, string token);
         Task DeletePaymentTypeAsync(string id, string token);
-        Task<PagedResult<PaymentTypeModel>> GetFilteredAsync(PaymentTypeFilter filter, string token);
     }
 }
 

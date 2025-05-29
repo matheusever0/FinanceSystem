@@ -1,6 +1,4 @@
 using Equilibrium.Web.Interfaces;
-using Equilibrium.Web.Models.Filters;
-using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Financing;
 using Equilibrium.Web.Models.Payment;
 
@@ -271,19 +269,6 @@ namespace Equilibrium.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter parcelas do financiamento {FinancingId}", financingId);
-                throw;
-            }
-        }
-        public async Task<PagedResult<PaymentModel>> GetFilteredAsync(PaymentFilter filter, string token)
-        {
-            try
-            {
-                
-                return await _apiService.GetFilteredAsync<PagedResult<PaymentModel>>("/api/Payments/filter", filter, token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao obter registros filtrados");
                 throw;
             }
         }

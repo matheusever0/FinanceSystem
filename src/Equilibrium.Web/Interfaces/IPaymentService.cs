@@ -1,8 +1,5 @@
 using Equilibrium.Web.Models.Payment;
 
-using Equilibrium.Web.Models.Filters;
-using Equilibrium.Web.Models.Generics;
-
 namespace Equilibrium.Web.Services
 {
     public interface IPaymentService
@@ -24,7 +21,6 @@ namespace Equilibrium.Web.Services
         Task<bool> MarkInstallmentAsPaidAsync(string installmentId, DateTime paymentDate, string token);
         Task<bool> MarkInstallmentAsOverdueAsync(string installmentId, string token);
         Task<bool> CancelInstallmentAsync(string installmentId, string token);
-        Task<PagedResult<PaymentModel>> GetFilteredAsync(PaymentFilter filter, string token);
     }
 }
 

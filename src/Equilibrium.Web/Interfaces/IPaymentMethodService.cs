@@ -1,7 +1,5 @@
-using Equilibrium.Web.Models.PaymentMethod;
-
-using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Generics;
+using Equilibrium.Web.Models.PaymentMethod;
 
 namespace Equilibrium.Web.Services
 {
@@ -15,7 +13,6 @@ namespace Equilibrium.Web.Services
         Task<PaymentMethodModel> CreatePaymentMethodAsync(CreatePaymentMethodModel model, string token);
         Task<PaymentMethodModel> UpdatePaymentMethodAsync(string id, UpdatePaymentMethodModel model, string token);
         Task DeletePaymentMethodAsync(string id, string token);
-        Task<PagedResult<PaymentMethodModel>> GetFilteredAsync(PaymentMethodFilter filter, string token);
     }
 }
 

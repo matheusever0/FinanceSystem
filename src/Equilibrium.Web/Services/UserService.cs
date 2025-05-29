@@ -1,5 +1,4 @@
 using Equilibrium.Web.Interfaces;
-using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Login;
 using Equilibrium.Web.Models.User;
@@ -66,19 +65,6 @@ namespace Equilibrium.Web.Services
         public async Task DeleteUserAsync(string id, string token)
         {
             await _apiService.DeleteAsync($"/api/Users/{id}", token);
-        }
-        public async Task<PagedResult<UserModel>> GetFilteredAsync(UserFilter filter, string token)
-        {
-            try
-            {
-                
-                return await _apiService.GetFilteredAsync<PagedResult<UserModel>>("/api/Users/filter", filter, token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao obter registros filtrados");
-                throw;
-            }
         }
     }
 }

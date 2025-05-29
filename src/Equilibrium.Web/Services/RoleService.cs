@@ -1,5 +1,4 @@
 using Equilibrium.Web.Interfaces;
-using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Role;
 
@@ -47,10 +46,6 @@ namespace Equilibrium.Web.Services
         public async Task<RoleModel> UpdateRolePermissionsAsync(string roleId, List<string> permissionIds, string token)
         {
             return await _apiService.PutAsync<RoleModel>($"/api/Roles/{roleId}/permissions", permissionIds, token);
-        }
-        public async Task<PagedResult<RoleModel>> GetFilteredAsync(RoleFilter filter, string token)
-        {
-            return await _apiService.GetFilteredAsync<PagedResult<RoleModel>>("/api/Roles/filter", filter, token);
         }
     }
 }

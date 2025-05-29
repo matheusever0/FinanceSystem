@@ -1,5 +1,4 @@
 using Equilibrium.Web.Interfaces;
-using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.PaymentMethod;
 
@@ -116,18 +115,6 @@ namespace Equilibrium.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao excluir método de pagamento com ID: {MethodId}", id);
-                throw;
-            }
-        }
-        public async Task<PagedResult<PaymentMethodModel>> GetFilteredAsync(PaymentMethodFilter filter, string token)
-        {
-            try
-            {
-                return await _apiService.GetFilteredAsync<PagedResult<PaymentMethodModel>>("/api/PaymentMethods/filter", filter, token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao obter registros filtrados");
                 throw;
             }
         }

@@ -1,5 +1,4 @@
 using Equilibrium.Web.Interfaces;
-using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Permission;
 using System.Collections.Concurrent;
@@ -106,19 +105,6 @@ namespace Equilibrium.Web.Services
             {
                 _logger.LogError(ex, "Erro ao obter permissões para o usuário: {UserId}", userId);
                 return Enumerable.Empty<PermissionModel>();
-            }
-        }
-        public async Task<PagedResult<PermissionModel>> GetFilteredAsync(PermissionFilter filter, string token)
-        {
-            try
-            {
-                
-                return await _apiService.GetFilteredAsync<PagedResult<PermissionModel>>("/api/Permissions/filter", filter, token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao obter registros filtrados");
-                throw;
             }
         }
     }

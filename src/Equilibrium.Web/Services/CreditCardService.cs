@@ -1,7 +1,6 @@
 using Equilibrium.Web.Interfaces;
-using Equilibrium.Web.Models.Filters;
-using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.CreditCard;
+using Equilibrium.Web.Models.Generics;
 
 namespace Equilibrium.Web.Services
 {
@@ -77,18 +76,6 @@ namespace Equilibrium.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao excluir cartão de crédito com ID: {CardId}", id);
-                throw;
-            }
-        }
-        public async Task<PagedResult<CreditCardModel>> GetFilteredAsync(CreditCardFilter filter, string token)
-        {
-            try
-            {
-                return await _apiService.GetFilteredAsync<PagedResult<CreditCardModel>>("/api/CreditCards/filter", filter, token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao obter registros filtrados");
                 throw;
             }
         }

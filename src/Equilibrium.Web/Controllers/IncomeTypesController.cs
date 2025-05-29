@@ -2,7 +2,6 @@ using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
 using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
-using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.IncomeType;
 using Equilibrium.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -269,68 +268,6 @@ namespace Equilibrium.Web.Controllers
             {
                 TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.IncomeType, ex);
                 return RedirectToAction(nameof(Index));
-            }
-        }
-
-        [HttpGet("filter")]
-        [RequirePermission("incomes.view")]
-        public async Task<IActionResult> Filter(IncomeTypeFilter filter = null)
-        {
-            if (filter == null)
-                filter = new IncomeTypeFilter();
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var result = await _incomeTypeService.GetFilteredAsync(filter, token);
-
-                // Add pagination headers
-                Response.Headers.Add("X-Pagination-Total", result.TotalCount.ToString());
-                Response.Headers.Add("X-Pagination-Pages", result.TotalPages.ToString());
-                Response.Headers.Add("X-Pagination-Page", result.PageNumber.ToString());
-                Response.Headers.Add("X-Pagination-Size", result.PageSize.ToString());
-
-                ViewBag.Filter = filter;
-                ViewBag.TotalCount = result.TotalCount;
-                ViewBag.TotalPages = result.TotalPages;
-                ViewBag.CurrentPage = result.PageNumber;
-                ViewBag.PageSize = result.PageSize;
-
-                return View("Index", result.Items);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.IncomeType, ex);
-                return RedirectToAction("Index", "Home");
-            }
-        }
-
-        [HttpGet("api/filter")]
-        [RequirePermission("incomes.view")]
-        public async Task<IActionResult> FilterJson([FromQuery] IncomeTypeFilter filter)
-        {
-            if (filter == null)
-                filter = new IncomeTypeFilter();
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var result = await _incomeTypeService.GetFilteredAsync(filter, token);
-
-                return Json(new
-                {
-                    items = result.Items,
-                    totalCount = result.TotalCount,
-                    pageNumber = result.PageNumber,
-                    pageSize = result.PageSize,
-                    totalPages = result.TotalPages,
-                    hasPreviousPage = result.HasPreviousPage,
-                    hasNextPage = result.HasNextPage
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
             }
         }
     }
