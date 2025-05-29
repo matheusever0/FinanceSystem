@@ -15,12 +15,13 @@
         }
     </div>
 
+    <!-- Filtros -->
     <div class="card shadow mb-4">
         <partial name="_Partials/Commons/_CardHeader" model='(
-            Title: "Filtros", 
-            BadgeText: "", 
-            BadgeClass: "", 
-            Icon: "fa-filter", 
+            Title: "Filtros",
+            BadgeText: "",
+            BadgeClass: "",
+            Icon: "fa-filter",
             CollapseTarget: "collapseFilters")' />
         <div class="card-body collapse show" id="collapseFilters">
             <div class="row">
@@ -44,47 +45,47 @@
     @if (!Model.Any())
     {
         <partial name="_Partials/Commons/_EmptyState" model='(
-            Message: "Nenhuma receita encontrada.", 
-            Icon: "fa-money-bill-alt", 
-            ButtonText: await PermissionHelper.HasPermissionAsync(Context, "incomes.create") ? "Criar Nova Receita" : "", 
-            ButtonUrl: Url.Action("Create"), 
-            ButtonIcon: "fa-plus", 
+            Message: "Nenhuma receita encontrada.",
+            Icon: "fa-money-bill-alt",
+            ButtonText: await PermissionHelper.HasPermissionAsync(Context, "incomes.create") ? "Criar Nova Receita" : "",
+            ButtonUrl: Url.Action("Create"),
+            ButtonIcon: "fa-plus",
             IsAlert: true)' />
     }
     else
     {
         <div class="row">
             <partial name="_Partials/Commons/_MetricCard" model='(
-                Title: "Total de Receitas", 
-                Value: Model.Sum(i => i.Amount).ToString("C2"), 
-                Icon: "fa-money-bill-alt", 
-                Color: "primary", 
-                SubValue: Model.Count() + " receitas", 
+                Title: "Total de Receitas",
+                Value: Model.Sum(i => i.Amount).ToString("C2"),
+                Icon: "fa-money-bill-alt",
+                Color: "primary",
+                SubValue: Model.Count() + " receitas",
                 ShowProgress: false)' />
-                
+
             <partial name="_Partials/Commons/_MetricCard" model='(
-                Title: "Total Recebido", 
-                Value: Model.Where(i => i.Status == 2).Sum(i => i.Amount).ToString("C2"), 
-                Icon: "fa-check-circle", 
-                Color: "success", 
-                SubValue: Model.Count(i => i.Status == 2) + " recebidas", 
+                Title: "Total Recebido",
+                Value: Model.Where(i => i.Status == 2).Sum(i => i.Amount).ToString("C2"),
+                Icon: "fa-check-circle",
+                Color: "success",
+                SubValue: Model.Count(i => i.Status == 2) + " recebidas",
                 ShowProgress: false)' />
-                
+
             <partial name="_Partials/Commons/_MetricCard" model='(
-                Title: "Total Pendente", 
-                Value: Model.Where(i => i.Status == 1).Sum(i => i.Amount).ToString("C2"), 
-                Icon: "fa-clock", 
-                Color: "warning", 
-                SubValue: Model.Count(i => i.Status == 1) + " pendentes", 
+                Title: "Total Pendente",
+                Value: Model.Where(i => i.Status == 1).Sum(i => i.Amount).ToString("C2"),
+                Icon: "fa-clock",
+                Color: "warning",
+                SubValue: Model.Count(i => i.Status == 1) + " pendentes",
                 ShowProgress: false)' />
         </div>
 
         <div class="card shadow mb-4">
             <partial name="_Partials/Commons/_CardHeader" model='(
-                Title: "Suas Receitas", 
-                BadgeText: "", 
-                BadgeClass: "", 
-                Icon: "fa-money-bill-alt", 
+                Title: "Suas Receitas",
+                BadgeText: "",
+                BadgeClass: "",
+                Icon: "fa-money-bill-alt",
                 CollapseTarget: "")' />
             <div class="card-body">
                 <div class="table-responsive">
@@ -92,43 +93,60 @@
                         <thead class="bg-light">
                             <tr>
                                 <th>Descrição</th>
-                                <th class="text-center">Valor</th>
                                 <th class="text-center">Vencimento</th>
-                                <th class="text-center">Data de Recebimento</th>
+                                <th class="text-end">Valor</th>
+                                <th class="text-center">Recebimento</th>
                                 <th>Tipo</th>
                                 <th class="text-center">Status</th>
                                 <th class="text-center">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var item in Model)
+                            @foreach (var item in Model.OrderBy(e => e.DueDate))
                             {
                                 <tr>
                                     <td>
                                         <a asp-action="Details" asp-route-id="@item.Id">
-                                            @item.Description
-                                            @if (item.IsRecurring)
-                                            {
-                                                <span class="badge bg-info me-2" title="Receita Recorrente">
-                                                    <i class="fas fa-sync-alt"></i>
-                                                </span>
-                                            }
+                                            <div class="fw-medium">
+                                                @if (item.IsRecurring)
+                                                {
+                                                    <span class="badge bg-info me-2" title="Receita Recorrente">
+                                                        <i class="fas fa-sync-alt"></i>
+                                                    </span>
+                                                }
+                                                @item.Description
+                                            </div>
+                                            <div class="small text-muted">
+                                                @(item.Installments.Any() ? $"Parcelado ({item.Installments.Count}x)" : "Receita Única")
+                                            </div>
                                         </a>
                                     </td>
-                                    <td class="text-end">@item.GetFormattedAmount()</td>
                                     <td class="text-center">@item.GetFormattedDueDate()</td>
+                                    <td class="text-end">@item.GetFormattedAmount()</td>
                                     <td class="text-center">@item.GetFormattedReceivedDate()</td>
                                     <td>@item.IncomeTypeName</td>
                                     <td class="text-center">
                                         <partial name="_Partials/Commons/_StatusBadge" model='(BadgeClass: item.StatusBadgeClass, Description: item.StatusDescription)' />
                                     </td>
                                     <td class="text-center">
-                                        <partial name="_Partials/Commons/_ActionButtons" model='(
-                                            Id: item.Id,
-                                            CanView: true,
-                                            CanEdit: (item.Status != 3 && await PermissionHelper.HasPermissionAsync(Context, "incomes.edit")),
-                                            CanDelete: (item.Status != 3 && await PermissionHelper.HasPermissionAsync(Context, "incomes.delete")),
-                                            ControllerName: "Incomes")' />
+                                        <div class="btn-group">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Visualizar">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (item.Status != 3 && await PermissionHelper.HasPermissionAsync(Context, "incomes.edit"))
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            }
+                                            @if (item.Status != 3 && await PermissionHelper.HasPermissionAsync(Context, "incomes.delete"))
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-danger" title="Excluir"
+                                                        onclick="confirmDelete('@item.Id', '@item.Description')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            }
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -139,3 +157,30 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        // Função para confirmar exclusão
+        function confirmDelete(id, description) {
+            if (confirm(`Tem certeza que deseja excluir a receita "${description}"?\n\nEsta ação não pode ser desfeita e todas as parcelas associadas também serão excluídas.`)) {
+                // Criar formulário dinamicamente para enviar DELETE
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/Incomes/Delete/${id}`;
+
+                // Adicionar token antiforgery se disponível
+                const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (tokenElement) {
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = tokenElement.value;
+                    form.appendChild(tokenInput);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+}

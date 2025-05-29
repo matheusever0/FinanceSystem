@@ -117,16 +117,9 @@
                     {
                         @if (Model.Status == 1) // Pendente
                         {
-                            <form asp-action="MarkAsPaid" asp-route-id="@Model.Id" method="post" class="mb-3" data-page="payment">
-                                @Html.AntiForgeryToken()
-                                <div class="mb-3">
-                                    <label for="paymentDate" class="form-label">Data de Pagamento</label>
-                                    <input type="date" id="paymentDate" name="paymentDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
-                                </div>
-                                <button type="submit" class="btn btn-success w-100">
-                                    <i class="fas fa-check-circle me-1"></i> Marcar como Pago
-                                </button>
-                            </form>
+                            <button type="button" class="btn btn-success w-100 mb-3" data-bs-toggle="modal" data-bs-target="#markAsPaidModal">
+                                <i class="fas fa-check-circle me-1"></i> Marcar como Pago
+                            </button>
 
                             <form asp-action="MarkAsOverdue" asp-route-id="@Model.Id" method="post" class="mb-3" data-page="payment">
                                 @Html.AntiForgeryToken()
@@ -137,23 +130,17 @@
                         }
                         else if (Model.Status == 3) // Vencido
                         {
-                            <form asp-action="MarkAsPaid" asp-route-id="@Model.Id" method="post" class="mb-3" data-page="payment">
-                                @Html.AntiForgeryToken()
-                                <div class="mb-3">
-                                    <label for="paymentDate" class="form-label">Data de Pagamento</label>
-                                    <input type="date" id="paymentDate" name="paymentDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
-                                </div>
-                                <button type="submit" class="btn btn-success w-100">
-                                    <i class="fas fa-check-circle me-1"></i> Marcar como Pago
-                                </button>
-                            </form>
+                            <button type="button" class="btn btn-success w-100 mb-3" data-bs-toggle="modal" data-bs-target="#markAsPaidModal">
+                                <i class="fas fa-check-circle me-1"></i> Marcar como Pago
+                            </button>
                         }
 
                         @if (Model.Status != 4) // Não Cancelado
                         {
                             <form asp-controller="Payments" asp-action="Cancel" asp-route-id="@Model.Id" method="post" data-page="payment">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-danger w-100 btn-cancel-payment" data-id="@Model.Id">
+                                <button type="submit" class="btn btn-danger w-100 mb-3 btn-cancel-payment" data-id="@Model.Id"
+                                        onclick="return confirm('Tem certeza que deseja cancelar este pagamento?')">
                                     <i class="fas fa-ban me-1"></i> Cancelar Pagamento
                                 </button>
                             </form>
@@ -162,9 +149,10 @@
 
                     @if (await PermissionHelper.HasPermissionAsync(Context, "payments.delete"))
                     {
-                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100 btn-delete-payment">
+                        <button type="button" class="btn btn-outline-danger w-100 btn-delete-payment" data-id="@Model.Id"
+                                onclick="confirmDelete('@Model.Id', '@Model.Description')">
                             <i class="fas fa-trash me-1"></i> Excluir Pagamento
-                        </a>
+                        </button>
                     }
                 </div>
             </div>
@@ -245,6 +233,34 @@
 <!-- Modais -->
 @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
 {
+    <!-- Modal Marcar como Pago -->
+    <div class="modal fade" id="markAsPaidModal" tabindex="-1" aria-labelledby="markAsPaidModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="MarkAsPaid" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="markAsPaidModalLabel">Marcar Pagamento como Pago</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="paymentDate" class="form-label">Data de Pagamento</label>
+                            <input type="date" id="paymentDate" name="paymentDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                        </div>
+                        <p>Confirme o pagamento de <strong>@Model.Description</strong> no valor de <strong>@Model.GetFormattedAmount()</strong>.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check-circle me-1"></i> Confirmar Pagamento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Marcar Parcela como Paga -->
     <div class="modal fade" id="markInstallmentPaidModal" tabindex="-1" aria-labelledby="markInstallmentPaidModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -258,8 +274,9 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="installmentPaymentDate" class="form-label">Data de Pagamento</label>
-                            <input type="date" id="installmentPaymentDate" name="paymentDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                            <input type="date" id="installmentPaymentDate" name="paymentDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
                         </div>
+                        <p>Confirme o pagamento desta parcela.</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -291,4 +308,44 @@
             </div>
         </div>
     </div>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.mark-installment-paid').forEach(button => {
+                button.addEventListener('click', function() {
+                    const installmentId = this.getAttribute('data-installment-id');
+                    const form = document.getElementById('markInstallmentPaidForm');
+                    form.action = `/PaymentInstallments/MarkAsPaid/${installmentId}`;
+                });
+            });
+
+            document.querySelectorAll('.mark-installment-overdue').forEach(button => {
+                button.addEventListener('click', function() {
+                    const installmentId = this.getAttribute('data-installment-id');
+                    const form = document.getElementById('markInstallmentOverdueForm');
+                    form.action = `/PaymentInstallments/MarkAsOverdue/${installmentId}`;
+                });
+            });
+        });
+
+        function confirmDelete(id, description) {
+            if (confirm(`Tem certeza que deseja excluir o pagamento "${description}"?\n\nEsta ação não pode ser desfeita.`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/Payments/Delete/${id}`;
+
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '__RequestVerificationToken';
+                tokenInput.value = token;
+                form.appendChild(tokenInput);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
 }

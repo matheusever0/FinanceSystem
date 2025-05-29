@@ -292,50 +292,94 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequirePermission("incomes.delete")]
         public async Task<IActionResult> Delete(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita não fornecido");
+                TempData["ErrorMessage"] = "ID da receita não fornecido.";
+                return RedirectToAction(nameof(Index));
             }
 
             try
             {
                 var token = HttpContext.GetJwtToken();
-                var income = await _incomeService.GetIncomeByIdAsync(id, token);
 
-                return income == null ? NotFound("Receita não encontrada") : View(income);
+                // Verificar se a receita existe
+                var income = await _incomeService.GetIncomeByIdAsync(id, token);
+                if (income == null)
+                {
+                    TempData["ErrorMessage"] = "Receita não encontrada.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Verificar se pode ser excluída (regras de negócio)
+                if (income.Status == 2) // Se já foi recebida
+                {
+                    TempData["ErrorMessage"] = "Não é possível excluir uma receita que já foi recebida.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                await _incomeService.DeleteIncomeAsync(id, token);
+                TempData["SuccessMessage"] = $"Receita '{income.Description}' excluída com sucesso.";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Income, ex);
-                return RedirectToAction(nameof(Index));
+                TempData["ErrorMessage"] = $"Erro ao excluir receita: {ex.Message}";
+                return RedirectToAction(nameof(Details), new { id });
             }
+
+            return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequirePermission("incomes.delete")]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        [RequirePermission("incomes.edit")]
+        public async Task<IActionResult> Receive(string id, DateTime receivedDate)
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita não fornecido");
+                TempData["ErrorMessage"] = "ID da receita não fornecido.";
+                return RedirectToAction(nameof(Index));
             }
 
             try
             {
                 var token = HttpContext.GetJwtToken();
-                await _incomeService.DeleteIncomeAsync(id, token);
-                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.Income);
-                return RedirectToAction(nameof(Index));
+
+                // Verificar se a receita existe
+                var income = await _incomeService.GetIncomeByIdAsync(id, token);
+                if (income == null)
+                {
+                    TempData["ErrorMessage"] = "Receita não encontrada.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Verificar se pode ser marcada como recebida
+                if (income.Status != 1) // Só pode marcar como recebida se estiver pendente
+                {
+                    TempData["ErrorMessage"] = "Esta receita não pode ser marcada como recebida.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                // Validar data de recebimento
+                if (receivedDate > DateTime.Today)
+                {
+                    TempData["ErrorMessage"] = "A data de recebimento não pode ser futura.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                await _incomeService.MarkAsReceivedAsync(id, receivedDate, token);
+                TempData["SuccessMessage"] = $"Receita '{income.Description}' marcada como recebida.";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.Income, ex);
-                return RedirectToAction(nameof(Index));
+                TempData["ErrorMessage"] = $"Erro ao marcar receita como recebida: {ex.Message}";
             }
+
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         [HttpPost]

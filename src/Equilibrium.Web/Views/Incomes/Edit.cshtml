@@ -20,7 +20,7 @@
                     Icon: "fa-money-bill-alt",
                     CollapseTarget: "")' />
                 <div class="card-body">
-                    <form asp-action="Edit" method="post">
+                    <form asp-action="Edit" method="post" data-page="income">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="Id" />
 
@@ -96,6 +96,11 @@
                             <span asp-validation-for="Notes" class="text-danger"></span>
                         </div>
 
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Alguns dados como número de parcelas não podem ser alterados após a criação da receita.
+                        </div>
+
                         <partial name="_Partials/Commons/_FormActions" model='(CancelAction: "Details", CancelController: "Incomes", IsEdit: true)' />
                     </form>
                 </div>
@@ -129,3 +134,49 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Máscara de dinheiro
+            $('.money-input').mask('#.##0,00', {reverse: true});
+
+            // Validação de formulário
+            $('form[data-page="income"]').on('submit', function(e) {
+                var isValid = true;
+
+                // Validar descrição
+                var description = $('#Description').val().trim();
+                if (description.length < 3) {
+                    isValid = false;
+                    showFieldError('Description', 'A descrição deve ter pelo menos 3 caracteres.');
+                }
+
+                // Validar valor
+                var amount = $('#Amount').val().replace(/\./g, '').replace(',', '.');
+                if (parseFloat(amount) <= 0) {
+                    isValid = false;
+                    showFieldError('Amount', 'O valor deve ser maior que zero.');
+                }
+
+                // Validar tipo de receita
+                if (!$('#IncomeTypeId').val()) {
+                    isValid = false;
+                    showFieldError('IncomeTypeId', 'Selecione um tipo de receita.');
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                }
+            });
+
+            function showFieldError(fieldId, message) {
+                var field = $('#' + fieldId);
+                field.addClass('is-invalid');
+
+                var errorSpan = field.siblings('.text-danger');
+                errorSpan.text(message);
+            }
+        });
+    </script>
+}

@@ -22,36 +22,43 @@ namespace Equilibrium.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequirePermission("incomes.edit")]
-        public async Task<IActionResult> MarkAsReceived(string id, DateTime? receivedDate = null)
+        public async Task<IActionResult> MarkAsReceived(string id, DateTime receivedDate)
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["ErrorMessage"] = MessageHelper.GetParentEntityNotFoundMessage(EntityNames.Income);
-                return RedirectToAction("Index", "Incomes");
+                return BadRequest("ID da parcela não fornecido");
             }
 
             try
             {
                 var token = HttpContext.GetJwtToken();
+
                 var incomeId = TempData["IncomeId"]?.ToString() ??
                     (await _incomeService.GetInstallmentParentIncomeAsync(id, token));
 
                 if (string.IsNullOrEmpty(incomeId))
                 {
-                    TempData["ErrorMessage"] = MessageHelper.GetParentEntityNotFoundMessage(EntityNames.Income);
+                    TempData["ErrorMessage"] = "Receita pai não encontrada.";
                     return RedirectToAction("Index", "Incomes");
                 }
 
-                await _incomeService.MarkInstallmentAsReceivedAsync(id, receivedDate ?? DateTime.Now, token);
-                TempData["SuccessMessage"] = MessageHelper.GetStatusChangeSuccessMessage(EntityNames.IncomeInstallment, EntityStatus.Received);
+                // Validar data de recebimento
+                if (receivedDate > DateTime.Today)
+                {
+                    TempData["ErrorMessage"] = "A data de recebimento não pode ser futura.";
+                    return RedirectToAction("Details", "Incomes", new { id = incomeId });
+                }
 
+                await _incomeService.MarkInstallmentAsReceivedAsync(id, receivedDate, token);
+
+                TempData["SuccessMessage"] = "Parcela marcada como recebida com sucesso.";
                 return RedirectToAction("Details", "Incomes", new { id = incomeId });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = MessageHelper.GetStatusChangeErrorMessage(EntityNames.IncomeInstallment, EntityStatus.Received, ex);
-                var incomeId = TempData["IncomeId"]?.ToString();
+                TempData["ErrorMessage"] = $"Erro ao marcar parcela como recebida: {ex.Message}";
 
+                var incomeId = TempData["IncomeId"]?.ToString();
                 return !string.IsNullOrEmpty(incomeId)
                     ? RedirectToAction("Details", "Incomes", new { id = incomeId })
                     : (IActionResult)RedirectToAction("Index", "Incomes");

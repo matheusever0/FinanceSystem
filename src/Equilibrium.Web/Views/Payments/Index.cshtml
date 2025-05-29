@@ -80,27 +80,27 @@
     else
     {
         <div class="row">
-                <partial name="_Partials/Commons/_MetricCard" model='(
-                    Title: "Total Geral",
-                    Value: Model.Sum(p => p.Amount).ToString("C2"),
-                    Icon: "fa-dollar-sign",
-                    Color: "primary",
-                    SubValue: Model.Count() + " pagamentos",
-                    ShowProgress: false)' />
-                <partial name="_Partials/Commons/_MetricCard" model='(
-                    Title: "Total Pago",
-                    Value: Model.Where(p => p.Status == 2).Sum(p => p.Amount).ToString("C2"),
-                    Icon: "fa-check-circle",
-                    Color: "success",
-                    SubValue: Model.Count(p => p.Status == 2) + " pagos",
-                    ShowProgress: false)' />
-                <partial name="_Partials/Commons/_MetricCard" model='(
-                    Title: "Total Pendente",
-                    Value: Model.Where(p => p.Status == 1 || p.Status == 3).Sum(p => p.Amount).ToString("C2"),
-                    Icon: "fa-exclamation-circle",
-                    Color: "warning",
-                    SubValue: Model.Count(p => p.Status == 1 || p.Status == 3) + " pendentes",
-                    ShowProgress: false)' />
+            <partial name="_Partials/Commons/_MetricCard" model='(
+                Title: "Total Geral",
+                Value: Model.Sum(p => p.Amount).ToString("C2"),
+                Icon: "fa-dollar-sign",
+                Color: "primary",
+                SubValue: Model.Count() + " pagamentos",
+                ShowProgress: false)' />
+            <partial name="_Partials/Commons/_MetricCard" model='(
+                Title: "Total Pago",
+                Value: Model.Where(p => p.Status == 2).Sum(p => p.Amount).ToString("C2"),
+                Icon: "fa-check-circle",
+                Color: "success",
+                SubValue: Model.Count(p => p.Status == 2) + " pagos",
+                ShowProgress: false)' />
+            <partial name="_Partials/Commons/_MetricCard" model='(
+                Title: "Total Pendente",
+                Value: Model.Where(p => p.Status == 1 || p.Status == 3).Sum(p => p.Amount).ToString("C2"),
+                Icon: "fa-exclamation-circle",
+                Color: "warning",
+                SubValue: Model.Count(p => p.Status == 1 || p.Status == 3) + " pendentes",
+                ShowProgress: false)' />
         </div>
 
         <div class="card shadow mb-4">
@@ -154,12 +154,24 @@
                                     <td>@item.PaymentTypeName</td>
                                     <td>@item.PaymentMethodName</td>
                                     <td class="text-center">
-                                        <partial name="_Partials/Commons/_ActionButtons" model='(
-                                            Id: item.Id,
-                                            CanView: true,
-                                            CanEdit: await PermissionHelper.HasPermissionAsync(Context, "payments.edit"),
-                                            CanDelete: await PermissionHelper.HasPermissionAsync(Context, "payments.delete"),
-                                            ControllerName: "Payments")' />
+                                        <div class="btn-group">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Visualizar">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            }
+                                            @if (await PermissionHelper.HasPermissionAsync(Context, "payments.delete"))
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-danger" title="Excluir"
+                                                        onclick="confirmDelete('@item.Id', '@item.Description')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            }
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -170,3 +182,30 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        // Função para confirmar exclusão
+        function confirmDelete(id, description) {
+            if (confirm(`Tem certeza que deseja excluir o pagamento "${description}"?\n\nEsta ação não pode ser desfeita e todas as parcelas associadas também serão excluídas.`)) {
+                // Criar formulário dinamicamente para enviar DELETE
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/Payments/Delete/${id}`;
+
+                // Adicionar token antiforgery se disponível
+                const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (tokenElement) {
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = tokenElement.value;
+                    form.appendChild(tokenInput);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+}

@@ -20,7 +20,7 @@
                     Icon: "fa-money-bill-alt",
                     CollapseTarget: "")' />
                 <div class="card-body">
-                    <form asp-action="Create" method="post">
+                    <form asp-action="Create" method="post" data-page="income">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                         <div class="row">
@@ -67,6 +67,14 @@
                                     <label asp-for="ReceivedDate" class="form-label"></label>
                                     <input asp-for="ReceivedDate" class="form-control" type="date" />
                                     <span asp-validation-for="ReceivedDate" class="text-danger"></span>
+                                    <div class="form-text">Se preenchido, a receita será marcada como recebida nesta data.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="NumberOfInstallments" class="form-label"></label>
+                                    <input asp-for="NumberOfInstallments" class="form-control" type="number" min="1" max="48" />
+                                    <span asp-validation-for="NumberOfInstallments" class="text-danger"></span>
+                                    <div class="form-text">Número de parcelas (deixe 1 para receita única).</div>
                                 </div>
 
                                 <div class="mb-3">
@@ -77,13 +85,6 @@
                                     </div>
                                     <span asp-validation-for="IsRecurring" class="text-danger"></span>
                                     <div class="form-text">Se marcado, novas receitas serão geradas mensalmente.</div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label asp-for="NumberOfInstallments" class="form-label"></label>
-                                    <input asp-for="NumberOfInstallments" class="form-control" type="number" min="1" max="48" />
-                                    <span asp-validation-for="NumberOfInstallments" class="text-danger"></span>
-                                    <div class="form-text">Número de parcelas (deixe 1 para pagamento único).</div>
                                 </div>
                             </div>
                         </div>
@@ -115,8 +116,8 @@
                         <li><strong>Tipo de Receita:</strong> Categoria da receita.</li>
                         <li><strong>Data de Vencimento:</strong> Data prevista para recebimento.</li>
                         <li><strong>Data de Recebimento:</strong> Preencha se já foi recebida.</li>
-                        <li><strong>Recorrente:</strong> Marque se esta receita se repete mensalmente.</li>
                         <li><strong>Parcelas:</strong> Número de parcelas (se aplicável).</li>
+                        <li><strong>Recorrente:</strong> Marque se esta receita se repete mensalmente.</li>
                         <li><strong>Observações:</strong> Informações adicionais sobre a receita.</li>
                     </ul>
                     <div class="alert alert-info">
@@ -127,3 +128,55 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Máscara de dinheiro
+            $('.money-input').mask('#.##0,00', {reverse: true});
+
+            // Validação de formulário
+            $('form[data-page="income"]').on('submit', function(e) {
+                var isValid = true;
+
+                // Validar descrição
+                var description = $('#Description').val().trim();
+                if (description.length < 3) {
+                    isValid = false;
+                    showFieldError('Description', 'A descrição deve ter pelo menos 3 caracteres.');
+                }
+
+                // Validar valor
+                var amount = $('#Amount').val().replace(/\./g, '').replace(',', '.');
+                if (parseFloat(amount) <= 0) {
+                    isValid = false;
+                    showFieldError('Amount', 'O valor deve ser maior que zero.');
+                }
+
+                // Validar tipo de receita
+                if (!$('#IncomeTypeId').val()) {
+                    isValid = false;
+                    showFieldError('IncomeTypeId', 'Selecione um tipo de receita.');
+                }
+
+                // Validar data de vencimento
+                if (!$('#DueDate').val()) {
+                    isValid = false;
+                    showFieldError('DueDate', 'A data de vencimento é obrigatória.');
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                }
+            });
+
+            function showFieldError(fieldId, message) {
+                var field = $('#' + fieldId);
+                field.addClass('is-invalid');
+
+                var errorSpan = field.siblings('.text-danger');
+                errorSpan.text(message);
+            }
+        });
+    </script>
+}

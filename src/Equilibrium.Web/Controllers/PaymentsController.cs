@@ -383,74 +383,97 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequirePermission("payments.delete")]
         public async Task<IActionResult> Delete(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento não fornecido");
+                TempData["ErrorMessage"] = "ID do pagamento não fornecido.";
+                return RedirectToAction(nameof(Index));
             }
 
             try
             {
                 var token = HttpContext.GetJwtToken();
                 var payment = await _paymentService.GetPaymentByIdAsync(id, token);
+                if (payment == null)
+                {
+                    TempData["ErrorMessage"] = "Pagamento não encontrado.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-                return payment == null ? NotFound("Pagamento não encontrado") : View(payment);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Payment, ex);
-                return RedirectToAction(nameof(Index));
-            }
-        }
+                if (payment.Status == 2) 
+                {
+                    TempData["ErrorMessage"] = "Não é possível excluir um pagamento que já foi pago.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
 
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("payments.delete")]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do pagamento não fornecido");
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
                 await _paymentService.DeletePaymentAsync(id, token);
-                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.Payment);
-                return RedirectToAction(nameof(Index));
+                TempData["SuccessMessage"] = $"Pagamento '{payment.Description}' excluído com sucesso.";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.Payment, ex);
-                return RedirectToAction(nameof(Index));
+                TempData["ErrorMessage"] = $"Erro ao excluir pagamento: {ex.Message}";
+                return RedirectToAction(nameof(Details), new { id });
             }
+
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequirePermission("payments.edit")]
-        public async Task<IActionResult> MarkAsPaid(string id, DateTime? paymentDate = null)
+        public async Task<IActionResult> MarkAsPaid(string id, DateTime paymentDate)
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento não fornecido");
+                TempData["ErrorMessage"] = "ID do pagamento não fornecido.";
+                return RedirectToAction(nameof(Index));
             }
 
             try
             {
                 var token = HttpContext.GetJwtToken();
-                await _paymentService.MarkAsPaidAsync(id, paymentDate ?? DateTime.Now, token);
-                TempData["SuccessMessage"] = MessageHelper.GetStatusChangeSuccessMessage(EntityNames.Payment, EntityStatus.Paid);
-                return RedirectToAction(nameof(Details), new { id });
+
+                // Verificar se o pagamento existe
+                var payment = await _paymentService.GetPaymentByIdAsync(id, token);
+                if (payment == null)
+                {
+                    TempData["ErrorMessage"] = "Pagamento não encontrado.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Verificar se pode ser marcado como pago
+                if (payment.Status == 2) // Se já foi pago
+                {
+                    TempData["ErrorMessage"] = "Este pagamento já foi marcado como pago.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                if (payment.Status == 4) // Se foi cancelado
+                {
+                    TempData["ErrorMessage"] = "Não é possível marcar um pagamento cancelado como pago.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                // Validar data de pagamento
+                if (paymentDate > DateTime.Today)
+                {
+                    TempData["ErrorMessage"] = "A data de pagamento não pode ser futura.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                await _paymentService.MarkAsPaidAsync(id, paymentDate, token);
+                TempData["SuccessMessage"] = $"Pagamento '{payment.Description}' marcado como pago.";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = MessageHelper.GetStatusChangeErrorMessage(EntityNames.Payment, EntityStatus.Paid, ex);
-                return RedirectToAction(nameof(Details), new { id });
+                TempData["ErrorMessage"] = $"Erro ao marcar pagamento como pago: {ex.Message}";
             }
+
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         [HttpPost]
