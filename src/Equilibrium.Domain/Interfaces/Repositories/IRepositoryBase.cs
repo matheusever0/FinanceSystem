@@ -10,6 +10,5 @@ namespace Equilibrium.Domain.Interfaces.Repositories
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(T entity);
-        Task<(IEnumerable<T> Items, int TotalCount)> FindWithSpecificationAsync(Specifications.BaseSpecification<T> specification);
     }
 }

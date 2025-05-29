@@ -1,6 +1,4 @@
-using Equilibrium.Application.DTOs.Common;
 using Equilibrium.Application.DTOs.PaymentInstallment;
-using Equilibrium.Domain.DTOs.Filters;
 
 namespace Equilibrium.Application.Interfaces
 {
@@ -14,7 +12,6 @@ namespace Equilibrium.Application.Interfaces
         Task<PaymentInstallmentDto> MarkAsPaidAsync(Guid id, DateTime paymentDate);
         Task<PaymentInstallmentDto> MarkAsOverdueAsync(Guid id);
         Task<PaymentInstallmentDto> CancelAsync(Guid id);
-        Task<PagedResult<PaymentInstallmentDto>> GetFilteredAsync(PaymentInstallmentFilter filter, Guid userId);
     }
 }
 

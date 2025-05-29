@@ -1,7 +1,7 @@
 using Equilibrium.Web.Models.Login;
 using Equilibrium.Web.Models.User;
 
-namespace Equilibrium.Web.Services
+namespace Equilibrium.Web.Interfaces
 {
     public interface IUserService
     {

@@ -1,7 +1,7 @@
 using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Permission;
 
-namespace Equilibrium.Web.Services
+namespace Equilibrium.Web.Interfaces
 {
     public interface IPermissionService
     {

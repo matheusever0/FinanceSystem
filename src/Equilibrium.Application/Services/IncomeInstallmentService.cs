@@ -3,9 +3,6 @@ using Equilibrium.Application.DTOs.IncomeInstallment;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Interfaces.Services;
 using Equilibrium.Resources;
-using Equilibrium.Domain.Specifications;
-using Equilibrium.Application.DTOs.Common;
-using Equilibrium.Domain.DTOs.Filters;
 
 namespace Equilibrium.Application.Services
 {
@@ -70,23 +67,6 @@ namespace Equilibrium.Application.Services
             await _unitOfWork.CompleteAsync();
 
             return _mapper.Map<IncomeInstallmentDto>(installment);
-        }
-        public async Task<PagedResult<IncomeInstallmentDto>> GetFilteredAsync(IncomeInstallmentFilter filter, Guid userId)
-        {
-            var specification = new IncomeInstallmentSpecification(filter);
-
-            // Apply custom criteria for user ID based on linked entities
-            specification.UserId = userId;
-
-            var (items, totalCount) = await _unitOfWork.IncomeInstallments.FindWithSpecificationAsync(specification);
-
-            return new PagedResult<IncomeInstallmentDto>
-            {
-                Items = _mapper.Map<IEnumerable<IncomeInstallmentDto>>(items),
-                TotalCount = totalCount,
-                PageNumber = filter.PageNumber,
-                PageSize = filter.PageSize
-            };
         }
     }
 }

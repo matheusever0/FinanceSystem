@@ -1,6 +1,4 @@
-using Equilibrium.Application.DTOs.Common;
 using Equilibrium.Application.DTOs.IncomeType;
-using Equilibrium.Domain.DTOs.Filters;
 
 namespace Equilibrium.Application.Interfaces
 {
@@ -13,6 +11,5 @@ namespace Equilibrium.Application.Interfaces
         Task<IncomeTypeDto> CreateAsync(CreateIncomeTypeDto createIncomeTypeDto, Guid userId);
         Task<IncomeTypeDto> UpdateAsync(Guid id, UpdateIncomeTypeDto updateIncomeTypeDto);
         Task DeleteAsync(Guid id);
-        Task<PagedResult<IncomeTypeDto>> GetFilteredAsync(IncomeTypeFilter filter, Guid userId);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Equilibrium.Web.Extensions;
+using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.Permission;
-using Equilibrium.Web.Services;
 using System.Security.Claims;
 
 namespace Equilibrium.Web.Helpers

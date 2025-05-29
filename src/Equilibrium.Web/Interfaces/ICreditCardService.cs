@@ -1,7 +1,6 @@
 using Equilibrium.Web.Models.CreditCard;
-using Equilibrium.Web.Models.Generics;
 
-namespace Equilibrium.Web.Services
+namespace Equilibrium.Web.Interfaces
 {
     public interface ICreditCardService
     {

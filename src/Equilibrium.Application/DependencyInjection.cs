@@ -27,8 +27,6 @@ namespace Equilibrium.Application
             services.AddScoped<IFinancingService, FinancingService>();
             services.AddScoped<IFinancingInstallmentService, FinancingInstallmentService>();
 
-            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-
             return services;
         }
     }

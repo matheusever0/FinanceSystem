@@ -1,12 +1,9 @@
 using AutoMapper;
-using Equilibrium.Application.DTOs.Common;
-using Equilibrium.Domain.DTOs.Filters;
 using Equilibrium.Application.DTOs.Payment;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Entities;
 using Equilibrium.Domain.Enums;
 using Equilibrium.Domain.Interfaces.Services;
-using Equilibrium.Domain.Specifications;
 using Equilibrium.Resources;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -378,23 +375,6 @@ namespace Equilibrium.Application.Services
             // Atualizar parcela
             installment.RevertPayment(newPaidAmount, newRemainingAmount, newStatus);
             await _unitOfWork.FinancingInstallments.UpdateAsync(installment);
-        }
-        public async Task<PagedResult<PaymentDto>> GetFilteredAsync(PaymentFilter filter, Guid userId)
-        {
-            var specification = new PaymentSpecification(filter)
-            {
-                UserId = userId
-            };
-
-            var (payments, totalCount) = await _unitOfWork.Payments.FindWithSpecificationAsync(specification);
-
-            return new PagedResult<PaymentDto>
-            {
-                Items = _mapper.Map<IEnumerable<PaymentDto>>(payments),
-                TotalCount = totalCount,
-                PageNumber = filter.PageNumber,
-                PageSize = filter.PageSize
-            };
         }
     }
 }

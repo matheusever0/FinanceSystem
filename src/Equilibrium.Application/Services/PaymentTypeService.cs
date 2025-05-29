@@ -1,10 +1,7 @@
 using AutoMapper;
-using Equilibrium.Application.DTOs.Common;
-using Equilibrium.Domain.DTOs.Filters;
 using Equilibrium.Application.DTOs.PaymentType;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Interfaces.Services;
-using Equilibrium.Domain.Specifications;
 using Equilibrium.Resources;
 
 namespace Equilibrium.Application.Services
@@ -101,23 +98,6 @@ namespace Equilibrium.Application.Services
 
             await _unitOfWork.PaymentTypes.DeleteAsync(paymentType);
             await _unitOfWork.CompleteAsync();
-        }
-        public async Task<PagedResult<PaymentTypeDto>> GetFilteredAsync(PaymentTypeFilter filter, Guid userId)
-        {
-            var specification = new PaymentTypeSpecification(filter)
-            {
-                UserId = userId
-            };
-
-            var (items, totalCount) = await _unitOfWork.PaymentTypes.FindWithSpecificationAsync(specification);
-
-            return new PagedResult<PaymentTypeDto>
-            {
-                Items = _mapper.Map<IEnumerable<PaymentTypeDto>>(items),
-                TotalCount = totalCount,
-                PageNumber = filter.PageNumber,
-                PageSize = filter.PageSize
-            };
         }
     }
 }

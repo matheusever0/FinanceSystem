@@ -2,6 +2,7 @@ using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
 using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
+using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.PaymentMethod;
 using Equilibrium.Web.Services;
 using Microsoft.AspNetCore.Authorization;

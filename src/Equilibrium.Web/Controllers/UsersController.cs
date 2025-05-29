@@ -4,6 +4,7 @@ using Equilibrium.Resources.Web.Helpers;
 using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Helpers;
+using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.User;
 using Equilibrium.Web.Services;
 using Microsoft.AspNetCore.Authorization;

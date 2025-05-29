@@ -1,11 +1,8 @@
 using AutoMapper;
-using Equilibrium.Application.DTOs.Common;
 using Equilibrium.Application.DTOs.IncomeType;
 using Equilibrium.Application.Interfaces;
-using Equilibrium.Domain.DTOs.Filters;
 using Equilibrium.Domain.Entities;
 using Equilibrium.Domain.Interfaces.Services;
-using Equilibrium.Domain.Specifications;
 using Equilibrium.Resources;
 
 namespace Equilibrium.Application.Services
@@ -102,23 +99,6 @@ namespace Equilibrium.Application.Services
 
             await _unitOfWork.IncomeTypes.DeleteAsync(incomeType);
             await _unitOfWork.CompleteAsync();
-        }
-        public async Task<PagedResult<IncomeTypeDto>> GetFilteredAsync(IncomeTypeFilter filter, Guid userId)
-        {
-            var specification = new IncomeTypeSpecification(filter)
-            {
-                UserId = userId
-            };
-
-            var (items, totalCount) = await _unitOfWork.IncomeTypes.FindWithSpecificationAsync(specification);
-
-            return new PagedResult<IncomeTypeDto>
-            {
-                Items = _mapper.Map<IEnumerable<IncomeTypeDto>>(items),
-                TotalCount = totalCount,
-                PageNumber = filter.PageNumber,
-                PageSize = filter.PageSize
-            };
         }
     }
 }

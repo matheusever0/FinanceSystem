@@ -1,6 +1,6 @@
 using Equilibrium.Web.Models;
 
-namespace Equilibrium.Web.Services
+namespace Equilibrium.Web.Interfaces
 {
     public interface IPaymentTypeService
     {

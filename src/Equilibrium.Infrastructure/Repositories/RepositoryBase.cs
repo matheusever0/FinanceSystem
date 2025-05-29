@@ -47,59 +47,5 @@ namespace Equilibrium.Infrastructure.Repositories
             _dbSet.Remove(entity);
             return Task.CompletedTask;
         }
-        public async Task<(IEnumerable<T> Items, int TotalCount)> FindWithSpecificationAsync(Domain.Specifications.BaseSpecification<T> specification)
-        {
-            var query = ApplySpecification(specification);
-            var totalCount = await query.CountAsync();
-
-            if (specification.IsPagingEnabled)
-            {
-                query = query.Skip(specification.Skip).Take(specification.Take);
-            }
-
-            var items = await query.ToListAsync();
-            return (items, totalCount);
-        }
-
-        private IQueryable<T> ApplySpecification(Domain.Specifications.BaseSpecification<T> spec)
-        {
-            var query = _dbSet.AsQueryable();
-
-            if (spec.Criteria != null)
-                query = query.Where(spec.Criteria);
-
-            // Apply user filter if provided and entity has UserId property
-            if (spec.UserId.HasValue)
-            {
-                var userIdProperty = typeof(T).GetProperty("UserId");
-                if (userIdProperty != null)
-                {
-                    var parameter = Expression.Parameter(typeof(T), "x");
-                    var property = Expression.Property(parameter, userIdProperty);
-                    var value = Expression.Constant(spec.UserId.Value);
-                    var equals = Expression.Equal(property, value);
-                    var lambda = Expression.Lambda<Func<T, bool>>(equals, parameter);
-
-                    query = query.Where(lambda);
-                }
-            }
-
-            foreach (var include in spec.Includes)
-            {
-                query = query.Include(include);
-            }
-
-            foreach (var include in spec.IncludeStrings)
-            {
-                query = query.Include(include);
-            }
-
-            if (spec.OrderBy != null)
-                query = query.OrderBy(spec.OrderBy);
-            else if (spec.OrderByDescending != null)
-                query = query.OrderByDescending(spec.OrderByDescending);
-
-            return query;
-        }
     }
 }

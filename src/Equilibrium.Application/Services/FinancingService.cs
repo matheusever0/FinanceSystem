@@ -3,9 +3,6 @@ using Equilibrium.Application.DTOs.Financing;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Entities;
 using Equilibrium.Domain.Enums;
-using Equilibrium.Domain.Specifications;
-using Equilibrium.Application.DTOs.Common;
-using Equilibrium.Domain.DTOs.Filters;
 using Equilibrium.Domain.Interfaces.Services;
 
 namespace Equilibrium.Application.Services
@@ -294,23 +291,6 @@ namespace Equilibrium.Application.Services
 
             await _unitOfWork.Financings.UpdateAsync(financing);
             await _unitOfWork.CompleteAsync();
-        }
-        public async Task<PagedResult<FinancingDto>> GetFilteredAsync(FinancingFilter filter, Guid userId)
-        {
-            var specification = new FinancingSpecification(filter)
-            {
-                UserId = userId
-            };
-
-            var (financings, totalCount) = await _unitOfWork.Financings.FindWithSpecificationAsync(specification);
-
-            return new PagedResult<FinancingDto>
-            {
-                Items = _mapper.Map<IEnumerable<FinancingDto>>(financings),
-                TotalCount = totalCount,
-                PageNumber = filter.PageNumber,
-                PageSize = filter.PageSize
-            };
         }
     }
 }
