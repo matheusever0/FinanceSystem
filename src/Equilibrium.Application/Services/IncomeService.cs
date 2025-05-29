@@ -19,46 +19,109 @@ namespace Equilibrium.Application.Services
             _mapper = mapper;
         }
 
+        public async Task<IEnumerable<IncomeDto>> GetFilteredAsync(Guid userId, IncomeFilter filter)
+        {
+            // Buscar todas as receitas do usuário
+            var query = await _unitOfWork.Incomes.FindAsync(i => i.UserId == userId);
+
+            // Aplicar filtros de texto
+            if (!string.IsNullOrEmpty(filter.Description))
+            {
+                query = query.Where(i => i.Description.Contains(filter.Description, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // Aplicar filtros de valor
+            if (filter.MinAmount.HasValue)
+            {
+                query = query.Where(i => i.Amount >= filter.MinAmount.Value);
+            }
+
+            if (filter.MaxAmount.HasValue)
+            {
+                query = query.Where(i => i.Amount <= filter.MaxAmount.Value);
+            }
+
+            // Aplicar filtros de status
+            if (filter.Status.HasValue)
+            {
+                query = query.Where(i => i.Status == filter.Status.Value);
+            }
+
+            // Aplicar filtros de tipo
+            if (filter.IncomeTypeId.HasValue)
+            {
+                query = query.Where(i => i.IncomeTypeId == filter.IncomeTypeId.Value);
+            }
+
+            // Aplicar filtros booleanos
+            if (filter.IsRecurring.HasValue)
+            {
+                query = query.Where(i => i.IsRecurring == filter.IsRecurring.Value);
+            }
+
+            // Filtros de data - priorizar Month/Year se fornecidos
+            if (filter.Month.HasValue && filter.Year.HasValue)
+            {
+                query = query.Where(i => i.DueDate.Month == filter.Month.Value && i.DueDate.Year == filter.Year.Value);
+            }
+            else
+            {
+                if (filter.StartDate.HasValue)
+                {
+                    query = query.Where(i => i.DueDate >= filter.StartDate.Value);
+                }
+
+                if (filter.EndDate.HasValue)
+                {
+                    query = query.Where(i => i.DueDate <= filter.EndDate.Value);
+                }
+            }
+
+            // Filtros de data de recebimento
+            if (filter.ReceivedStartDate.HasValue)
+            {
+                query = query.Where(i => i.ReceivedDate >= filter.ReceivedStartDate.Value);
+            }
+
+            if (filter.ReceivedEndDate.HasValue)
+            {
+                query = query.Where(i => i.ReceivedDate <= filter.ReceivedEndDate.Value);
+            }
+
+            // Filtro de parcelas
+            if (filter.HasInstallments.HasValue)
+            {
+                if (filter.HasInstallments.Value)
+                {
+                    query = query.Where(i => i.Installments.Any());
+                }
+                else
+                {
+                    query = query.Where(i => !i.Installments.Any());
+                }
+            }
+
+            // Aplicar ordenação
+            query = filter.OrderBy?.ToLower() switch
+            {
+                "description" => filter.Ascending ? query.OrderBy(i => i.Description) : query.OrderByDescending(i => i.Description),
+                "amount" => filter.Ascending ? query.OrderBy(i => i.Amount) : query.OrderByDescending(i => i.Amount),
+                "duedate" => filter.Ascending ? query.OrderBy(i => i.DueDate) : query.OrderByDescending(i => i.DueDate),
+                "receiveddate" => filter.Ascending ? query.OrderBy(i => i.ReceivedDate) : query.OrderByDescending(i => i.ReceivedDate),
+                "status" => filter.Ascending ? query.OrderBy(i => i.Status) : query.OrderByDescending(i => i.Status),
+                "createdat" => filter.Ascending ? query.OrderBy(i => i.CreatedAt) : query.OrderByDescending(i => i.CreatedAt),
+                _ => filter.Ascending ? query.OrderBy(i => i.DueDate) : query.OrderByDescending(i => i.DueDate)
+            };
+
+            // Retornar lista filtrada e ordenada
+            var items = query.ToList();
+            return _mapper.Map<IEnumerable<IncomeDto>>(items);
+        }
+
         public async Task<IncomeDto> GetByIdAsync(Guid id)
         {
             var income = await _unitOfWork.Incomes.GetIncomeWithDetailsAsync(id);
             return income == null ? throw new KeyNotFoundException(ResourceFinanceApi.Income_NotFound) : _mapper.Map<IncomeDto>(income);
-        }
-
-        public async Task<IEnumerable<IncomeDto>> GetAllByUserIdAsync(Guid userId)
-        {
-            var incomes = await _unitOfWork.Incomes.GetIncomesByUserIdAsync(userId);
-            return _mapper.Map<IEnumerable<IncomeDto>>(incomes);
-        }
-
-        public async Task<IEnumerable<IncomeDto>> GetByMonthAsync(Guid userId, int month, int year)
-        {
-            var incomes = await _unitOfWork.Incomes.GetIncomesByUserIdAndMonthAsync(userId, month, year);
-            return _mapper.Map<IEnumerable<IncomeDto>>(incomes);
-        }
-
-        public async Task<IEnumerable<IncomeDto>> GetPendingAsync(Guid userId)
-        {
-            var incomes = await _unitOfWork.Incomes.GetPendingIncomesByUserIdAsync(userId);
-            return _mapper.Map<IEnumerable<IncomeDto>>(incomes);
-        }
-
-        public async Task<IEnumerable<IncomeDto>> GetOverdueAsync(Guid userId)
-        {
-            var payments = await _unitOfWork.Incomes.GetOverdueIncomesByUserIdAsync(userId);
-            return _mapper.Map<IEnumerable<IncomeDto>>(payments);
-        }
-
-        public async Task<IEnumerable<IncomeDto>> GetReceivedAsync(Guid userId)
-        {
-            var incomes = await _unitOfWork.Incomes.GetReceivedIncomesByUserIdAsync(userId);
-            return _mapper.Map<IEnumerable<IncomeDto>>(incomes);
-        }
-
-        public async Task<IEnumerable<IncomeDto>> GetByTypeAsync(Guid userId, Guid incomeTypeId)
-        {
-            var incomes = await _unitOfWork.Incomes.GetIncomesByTypeAsync(userId, incomeTypeId);
-            return _mapper.Map<IEnumerable<IncomeDto>>(incomes);
         }
 
         public async Task<IncomeDto> CreateAsync(CreateIncomeDto createIncomeDto, Guid userId)
