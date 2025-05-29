@@ -30,42 +30,126 @@ namespace Equilibrium.Application.Services
             var payment = await _unitOfWork.Payments.GetPaymentWithDetailsAsync(id);
             return payment == null ? throw new KeyNotFoundException(ResourceFinanceApi.Payment_NotFound) : _mapper.Map<PaymentDto>(payment);
         }
-
-        public async Task<IEnumerable<PaymentDto>> GetAllByUserIdAsync(Guid userId)
+        public async Task<IEnumerable<PaymentDto>> GetFilteredAsync(Guid userId, PaymentFilter filter)
         {
-            var payments = await _unitOfWork.Payments.GetPaymentsByUserIdAsync(userId);
-            return _mapper.Map<IEnumerable<PaymentDto>>(payments);
+            var query = await _unitOfWork.Payments.FindAsync(p => p.UserId == userId);
+
+            if (!string.IsNullOrEmpty(filter.Description))
+            {
+                query = query.Where(p => p.Description.Contains(filter.Description, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(filter.Notes))
+            {
+                query = query.Where(p => p.Notes.Contains(filter.Notes, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (filter.MinAmount.HasValue)
+            {
+                query = query.Where(p => p.Amount >= filter.MinAmount.Value);
+            }
+
+            if (filter.MaxAmount.HasValue)
+            {
+                query = query.Where(p => p.Amount <= filter.MaxAmount.Value);
+            }
+
+            if (filter.Status.HasValue)
+            {
+                query = query.Where(p => p.Status == filter.Status.Value);
+            }
+
+            if (filter.PaymentTypeId.HasValue)
+            {
+                query = query.Where(p => p.PaymentTypeId == filter.PaymentTypeId.Value);
+            }
+
+            if (filter.PaymentMethodId.HasValue)
+            {
+                query = query.Where(p => p.PaymentMethodId == filter.PaymentMethodId.Value);
+            }
+
+            if (filter.FinancingId.HasValue)
+            {
+                query = query.Where(p => p.FinancingId == filter.FinancingId.Value);
+            }
+
+            if (filter.FinancingInstallmentId.HasValue)
+            {
+                query = query.Where(p => p.FinancingInstallmentId == filter.FinancingInstallmentId.Value);
+            }
+
+            if (filter.IsRecurring.HasValue)
+            {
+                query = query.Where(p => p.IsRecurring == filter.IsRecurring.Value);
+            }
+
+            if (filter.IsFinancingPayment.HasValue)
+            {
+                if (filter.IsFinancingPayment.Value)
+                {
+                    query = query.Where(p => p.FinancingId.HasValue);
+                }
+                else
+                {
+                    query = query.Where(p => !p.FinancingId.HasValue);
+                }
+            }
+
+            if (filter.Month.HasValue && filter.Year.HasValue)
+            {
+                query = query.Where(p => p.DueDate.Month == filter.Month.Value && p.DueDate.Year == filter.Year.Value);
+            }
+            else
+            {
+                if (filter.StartDate.HasValue)
+                {
+                    query = query.Where(p => p.DueDate >= filter.StartDate.Value);
+                }
+
+                if (filter.EndDate.HasValue)
+                {
+                    query = query.Where(p => p.DueDate <= filter.EndDate.Value);
+                }
+            }
+
+            if (filter.PaymentStartDate.HasValue)
+            {
+                query = query.Where(p => p.PaymentDate >= filter.PaymentStartDate.Value);
+            }
+
+            if (filter.PaymentEndDate.HasValue)
+            {
+                query = query.Where(p => p.PaymentDate <= filter.PaymentEndDate.Value);
+            }
+
+            if (filter.HasInstallments.HasValue)
+            {
+                if (filter.HasInstallments.Value)
+                {
+                    query = query.Where(p => p.Installments.Any());
+                }
+                else
+                {
+                    query = query.Where(p => !p.Installments.Any());
+                }
+            }
+
+            query = filter.OrderBy?.ToLower() switch
+            {
+                "description" => filter.Ascending ? query.OrderBy(p => p.Description) : query.OrderByDescending(p => p.Description),
+                "amount" => filter.Ascending ? query.OrderBy(p => p.Amount) : query.OrderByDescending(p => p.Amount),
+                "duedate" => filter.Ascending ? query.OrderBy(p => p.DueDate) : query.OrderByDescending(p => p.DueDate),
+                "paymentdate" => filter.Ascending ? query.OrderBy(p => p.PaymentDate) : query.OrderByDescending(p => p.PaymentDate),
+                "status" => filter.Ascending ? query.OrderBy(p => p.Status) : query.OrderByDescending(p => p.Status),
+                "createdat" => filter.Ascending ? query.OrderBy(p => p.CreatedAt) : query.OrderByDescending(p => p.CreatedAt),
+                _ => filter.Ascending ? query.OrderBy(p => p.DueDate) : query.OrderByDescending(p => p.DueDate)
+            };
+
+            var items = query.ToList();
+            return _mapper.Map<IEnumerable<PaymentDto>>(items);
         }
 
-        public async Task<IEnumerable<PaymentDto>> GetByMonthAsync(Guid userId, int month, int year)
-        {
-            var payments = await _unitOfWork.Payments.GetPaymentsByUserIdAndMonthAsync(userId, month, year);
-            return _mapper.Map<IEnumerable<PaymentDto>>(payments);
-        }
-
-        public async Task<IEnumerable<PaymentDto>> GetPendingAsync(Guid userId)
-        {
-            var payments = await _unitOfWork.Payments.GetPendingPaymentsByUserIdAsync(userId);
-            return _mapper.Map<IEnumerable<PaymentDto>>(payments);
-        }
-
-        public async Task<IEnumerable<PaymentDto>> GetOverdueAsync(Guid userId)
-        {
-            var payments = await _unitOfWork.Payments.GetOverduePaymentsByUserIdAsync(userId);
-            return _mapper.Map<IEnumerable<PaymentDto>>(payments);
-        }
-
-        public async Task<IEnumerable<PaymentDto>> GetByTypeAsync(Guid userId, Guid paymentTypeId)
-        {
-            var payments = await _unitOfWork.Payments.GetPaymentsByTypeAsync(userId, paymentTypeId);
-            return _mapper.Map<IEnumerable<PaymentDto>>(payments);
-        }
-
-        public async Task<IEnumerable<PaymentDto>> GetByMethodAsync(Guid userId, Guid paymentMethodId)
-        {
-            var payments = await _unitOfWork.Payments.GetPaymentsByMethodAsync(userId, paymentMethodId);
-            return _mapper.Map<IEnumerable<PaymentDto>>(payments);
-        }
 
         public async Task<PaymentDto> CreateAsync(CreatePaymentDto createPaymentDto, Guid userId)
         {

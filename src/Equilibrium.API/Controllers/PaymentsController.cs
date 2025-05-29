@@ -11,78 +11,43 @@ namespace Equilibrium.API.Controllers
     public class PaymentsController(IUnitOfWork unitOfWork,
         IPaymentService service) : AuthenticatedController<IPaymentService>(unitOfWork, service)
     {
+        /// <summary>
+        /// Busca pagamentos com filtros diversos
+        /// </summary>
+        /// <param name="filter">Filtros para busca</param>
+        /// <returns>Lista de pagamentos filtrados</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PaymentDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<PaymentDto>>> Get([FromQuery] PaymentFilter filter)
         {
+            // Validar mês se fornecido
+            if (!filter.IsValidMonth())
+            {
+                return BadRequest(new { message = "Mês deve estar entre 1 e 12" });
+            }
+
             var userId = HttpContext.GetCurrentUserId();
-            var payments = await _service.GetAllByUserIdAsync(userId);
+            var payments = await _service.GetFilteredAsync(userId, filter);
 
             return Ok(payments);
         }
 
+        /// <summary>
+        /// Busca pagamento específico por ID
+        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<PaymentDto>> GetById(Guid id)
         {
             try
             {
                 var payment = await _service.GetByIdAsync(id);
-
-                return payment.UserId != HttpContext.GetCurrentUserId() ? (ActionResult<PaymentDto>)Forbid() : (ActionResult<PaymentDto>)Ok(payment);
+                return payment.UserId != HttpContext.GetCurrentUserId()
+                    ? Forbid()
+                    : Ok(payment);
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
             }
-        }
-
-        [HttpGet("month/{year}/{month}")]
-        public async Task<ActionResult<IEnumerable<PaymentDto>>> GetByMonth(int year, int month)
-        {
-            if (month < 1 || month > 12)
-            {
-                return BadRequest(new { message = "Month must be between 1 and 12" });
-            }
-
-            var userId = HttpContext.GetCurrentUserId();
-            var payments = await _service.GetByMonthAsync(userId, month, year);
-
-            return Ok(payments);
-        }
-
-        [HttpGet("pending")]
-        public async Task<ActionResult<IEnumerable<PaymentDto>>> GetPending()
-        {
-            var userId = HttpContext.GetCurrentUserId();
-            var payments = await _service.GetPendingAsync(userId);
-
-            return Ok(payments);
-        }
-
-        [HttpGet("overdue")]
-        public async Task<ActionResult<IEnumerable<PaymentDto>>> GetOverdue()
-        {
-            var userId = HttpContext.GetCurrentUserId();
-            var payments = await _service.GetOverdueAsync(userId);
-
-            return Ok(payments);
-        }
-
-        [HttpGet("type/{typeId}")]
-        public async Task<ActionResult<IEnumerable<PaymentDto>>> GetByType(Guid typeId)
-        {
-            var userId = HttpContext.GetCurrentUserId();
-            var payments = await _service.GetByTypeAsync(userId, typeId);
-
-            return Ok(payments);
-        }
-
-        [HttpGet("method/{methodId}")]
-        public async Task<ActionResult<IEnumerable<PaymentDto>>> GetByMethod(Guid methodId)
-        {
-            var userId = HttpContext.GetCurrentUserId();
-            var payments = await _service.GetByMethodAsync(userId, methodId);
-
-            return Ok(payments);
         }
 
         [HttpPost]
@@ -231,7 +196,6 @@ namespace Equilibrium.API.Controllers
             return Ok(financings);
         }
 
-        // Adicionar um endpoint para listar parcelas pendentes de um financiamento
         [HttpGet("financing/{financingId}/installments")]
         public async Task<ActionResult<IEnumerable<FinancingInstallmentDto>>> GetFinancingInstallments(Guid financingId)
         {
@@ -261,4 +225,3 @@ namespace Equilibrium.API.Controllers
         }
     }
 }
-
