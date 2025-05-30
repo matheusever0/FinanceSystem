@@ -2,14 +2,6 @@
 @using Equilibrium.Web.Models.CreditCard
 @using Equilibrium.Web.Models.Income
 @using Equilibrium.Web.Models.Payment
-@{
-    var creditCards = ViewBag.CreditCards as IEnumerable<CreditCardModel> ?? new List<CreditCardModel>();
-    var pendingIncomes = ViewBag.PendingIncomes as IEnumerable<IncomeModel> ?? new List<IncomeModel>();
-    var paymentsPending = ViewBag.PendingPayments as IEnumerable<PaymentModel> ?? new List<PaymentModel>();
-    var paymentsOverdue = ViewBag.PaymentsOverdue as IEnumerable<PaymentModel> ?? new List<PaymentModel>();
-    var overdueIncomes = ViewBag.OverdueIncomes as IEnumerable<IncomeModel> ?? new List<IncomeModel>();
-
-}
 
 <div class="row">
     @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.view"))
@@ -22,8 +14,8 @@
                             <div class="col mr-2">
                                 <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                     Cartões de Crédito
-                                </div>        
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@creditCards.Count()</div>
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalCreditCards</div>
                             </div>
                             <div class="col-auto">
                                 <i class="fas fa-credit-card fa-2x text-gray-300"></i>
@@ -123,7 +115,7 @@
                                     Receitas Pendentes
                                 </div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    @string.Format("{0:C2}", pendingIncomes.Sum(i => i.Amount))
+                                    @string.Format("{0:C2}", ViewBag.TotalPendingIncomes)
                                 </div>
                             </div>
                             <div class="col-auto">
@@ -147,7 +139,7 @@
                                 <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                     Pagamentos Pendentes
                                 </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", paymentsPending.Sum(p => p.Amount))</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", ViewBag.TotalPendingPayments)</div>
                             </div>
                             <div class="col-auto">
                                 <i class="fas fa-clock fa-2x text-gray-300"></i>
@@ -167,7 +159,7 @@
                         <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                             Pagamentos Vencidos
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", paymentsOverdue.Sum(p => p.Amount))</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", ViewBag.TotalOverduePayments)</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
@@ -184,7 +176,7 @@
                         <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                             Receitas Vencidas
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", overdueIncomes.Sum(p => p.Amount))</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", ViewBag.TotalOverdueIncomes)</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>

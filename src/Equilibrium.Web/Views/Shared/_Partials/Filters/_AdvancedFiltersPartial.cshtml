@@ -5,13 +5,29 @@
 
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h6 class="mb-0">
+        <h6 class="mb-0 gap-2">
             <i class="fas fa-filter me-2"></i>
             Filtros Avançados
             @if (hasActiveFilters)
             {
-                <span class="badge bg-primary ms-2">Ativos</span>
+                <span class="badge bg-success ms-2">Ativos</span>
             }
+            <a href="@Url.Action("QuickFilter", new { filterType = "thismonth" })" class="btn btn-outline-primary">
+                <i class="fas fa-calendar-alt me-1"></i>
+                Este Mês
+            </a>
+            <a href="@Url.Action("QuickFilter", new { filterType = "thisweek" })" class="btn btn-outline-primary">
+                <i class="fas fa-calendar-week me-1"></i>
+                Esta Semana
+            </a>
+            <a href="@Url.Action("QuickFilter", new { filterType = "pending" })" class="btn btn-outline-warning">
+                <i class="fas fa-clock me-1"></i>
+                Pendentes
+            </a>
+            <a href="@Url.Action("QuickFilter", new { filterType = "overdue" })" class="btn btn-outline-danger">
+                <i class="fas fa-exclamation-triangle me-1"></i>
+                Vencidos
+            </a>
         </h6>
         <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
             <i class="fas @(hasActiveFilters ? "fa-chevron-down" : "fa-chevron-right")" id="collapseIcon"></i>
@@ -111,7 +127,7 @@
                             {
                                 @foreach (var status in ViewBag.StatusOptions)
                                 {
-                                    <option value="@status.Value" selected="@(Model?.Status == status.Value ? "selected" : "")">
+                                    <option value="@status.Value" selected="@(Model?.Status == status.Value ? "selected" : null)">
                                         @status.Text
                                     </option>
                                 }
@@ -128,7 +144,7 @@
                             {
                                 @foreach (var type in ViewBag.PaymentTypes)
                                 {
-                                    <option value="@type.Id" selected="@(Model?.PaymentTypeId == type.Id ? "selected" : "")">
+                                    <option value="@type.Id" selected="@(Model?.PaymentTypeId == type.Id ? "selected" : null)">
                                         @type.Name
                                     </option>
                                 }
@@ -145,7 +161,7 @@
                             {
                                 @foreach (var method in ViewBag.PaymentMethods)
                                 {
-                                    <option value="@method.Id" selected="@(Model?.PaymentMethodId == method.Id ? "selected" : "")">
+                                    <option value="@method.Id" selected="@(Model?.PaymentMethodId == method.Id ? "selected" : null)">
                                         @method.Name
                                     </option>
                                 }
@@ -177,7 +193,7 @@
                             {
                                 @foreach (var card in ViewBag.CreditCards)
                                 {
-                                    <option value="@card.Id" selected="@(Model?.CreditCardId == card.Id ? "selected" : "")">
+                                    <option value="@card.Id" selected="@(Model?.CreditCardId == card.Id ? "selected" : null)">
                                         @card.Name (*@card.LastFourDigits)
                                     </option>
                                 }
@@ -214,7 +230,7 @@
                             {
                                 @foreach (var option in ViewBag.OrderByOptions)
                                 {
-                                    <option value="@option.Value" selected="@(Model?.OrderBy == option.Value ? "selected" : "")">
+                                    <option value="@option.Value" selected="@(Model?.OrderBy == option.Value ? "selected" : null)">
                                         @option.Text
                                     </option>
                                 }
@@ -259,31 +275,9 @@
     </div>
 </div>
 
-<!-- Filtros Rápidos -->
-<div class="mb-3">
-    <div class="btn-group btn-group-sm" role="group">
-        <a href="@Url.Action("QuickFilter", new { filterType = "thismonth" })" class="btn btn-outline-primary">
-            <i class="fas fa-calendar-alt me-1"></i>
-            Este Mês
-        </a>
-        <a href="@Url.Action("QuickFilter", new { filterType = "thisweek" })" class="btn btn-outline-primary">
-            <i class="fas fa-calendar-week me-1"></i>
-            Esta Semana
-        </a>
-        <a href="@Url.Action("QuickFilter", new { filterType = "pending" })" class="btn btn-outline-warning">
-            <i class="fas fa-clock me-1"></i>
-            Pendentes
-        </a>
-        <a href="@Url.Action("QuickFilter", new { filterType = "overdue" })" class="btn btn-outline-danger">
-            <i class="fas fa-exclamation-triangle me-1"></i>
-            Vencidos
-        </a>
-    </div>
-</div>
-
 @if (hasActiveFilters)
 {
-    <div class="alert alert-info alert-dismissible fade show">
+    <div class="alert alert-success alert-dismissible fade show">
         <i class="fas fa-info-circle me-2"></i>
         <strong>Filtros ativos!</strong> Os resultados estão sendo filtrados.
         <a href="@Url.Action("ClearFilters")" class="alert-link">Limpar todos os filtros</a>
@@ -293,7 +287,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Controle do ícone de colapso
         const collapseElement = document.getElementById('advancedFilters');
         const collapseIcon = document.getElementById('collapseIcon');
 
@@ -306,8 +299,6 @@
                 collapseIcon.className = 'fas fa-chevron-right';
             });
         }
-
-        // Limpeza inteligente de filtros relacionados
         const startDate = document.getElementById('StartDate');
         const endDate = document.getElementById('EndDate');
         const monthSelect = document.getElementById('Month');
@@ -329,7 +320,6 @@
             });
         }
 
-        // Validação de faixa de valores
         const minAmount = document.getElementById('MinAmount');
         const maxAmount = document.getElementById('MaxAmount');
 
