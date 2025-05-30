@@ -69,7 +69,7 @@
                                     Receitas do Mês Recebidas
                                 </div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    @string.Format("{0:C2}", ViewBag.IncomesMonth ?? 0m)
+                                    @string.Format("{0:C2}", ViewBag.ThisMonthIncomes ?? 0m)
                                 </div>
                             </div>
                             <div class="col-auto">
@@ -98,7 +98,7 @@
                                     Pagamentos do mês efetuados.
                                 </div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    @string.Format("{0:C2}", ViewBag.PaymentsMonth ?? 0m)
+                                    @string.Format("{0:C2}", ViewBag.ThisMonthPayments ?? 0m)
                                 </div>
                             </div>
                             <div class="col-auto">

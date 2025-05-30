@@ -3,10 +3,13 @@ using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Payment;
+using Equilibrium.Web.Models.Income;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text.Json;
+using Equilibrium.Web.Models.Financing;
+using Equilibrium.Web.Models.CreditCard;
 
 namespace Equilibrium.Web.Controllers
 {
@@ -61,86 +64,205 @@ namespace Equilibrium.Web.Controllers
             var currentMonth = currentDate.Month;
             var currentYear = currentDate.Year;
 
-            // Dados básicos
-            var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
-
-            // Usar novos filtros para pagamentos
-            var thisMonthPaymentsFilter = new PaymentFilter
+            try
             {
-                Month = currentMonth,
-                Year = currentYear
-            };
-            var thisMonthPayments = await _paymentService.GetFilteredPaymentsAsync(thisMonthPaymentsFilter, token);
+                // Dados básicos
+                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
 
-            // Usar novos filtros para receitas
-            var thisMonthIncomesFilter = new IncomeFilter
+                // TOTAIS DO MÊS ATUAL - Usar filtros específicos para status
+                // Receitas RECEBIDAS do mês atual
+                var thisMonthReceivedIncomesFilter = new IncomeFilter
+                {
+                    Month = currentMonth,
+                    Year = currentYear,
+                    Status = "Received"  // Apenas recebidas
+                };
+                var thisMonthReceivedIncomes = await _incomeService.GetFilteredIncomesAsync(thisMonthReceivedIncomesFilter, token);
+
+                // Pagamentos PAGOS do mês atual  
+                var thisMonthPaidPaymentsFilter = new PaymentFilter
+                {
+                    Month = currentMonth,
+                    Year = currentYear,
+                    Status = "Paid"  // Apenas pagos
+                };
+                var thisMonthPaidPayments = await _paymentService.GetFilteredPaymentsAsync(thisMonthPaidPaymentsFilter, token);
+
+                // PENDÊNCIAS E VENCIMENTOS
+                var pendingPayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { Status = "Pending", Month = currentMonth, Year = currentYear }, token);
+                var overduePayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { Status = "Overdue", Month = currentMonth, Year = currentYear }, token);
+                var pendingIncomes = await _incomeService.GetFilteredIncomesAsync(new IncomeFilter { Status = "Pending", Month = currentMonth, Year = currentYear }, token);
+
+                // Receitas vencidas (pendentes com data de vencimento no passado)
+                var overdueIncomes = await _incomeService.GetFilteredIncomesAsync(new IncomeFilter
+                {
+                    Status = "Pending",
+                    Month = currentMonth,
+                    Year = currentYear
+                }, token);
+
+                // Calcular totais específicos
+                var totalIncomeReceived = thisMonthReceivedIncomes.Sum(i => i.Amount);
+                var totalPaymentsPaid = thisMonthPaidPayments.Sum(p => p.Amount);
+
+                // SALDO ATUAL: Total de receitas recebidas MENOS total de pagamentos pagos (histórico geral)
+                // Para saldo geral, vamos buscar todos os recebidos e pagos até hoje
+                var allReceivedIncomesFilter = new IncomeFilter
+                {
+                    Status = "Received",
+                    EndDate = DateTime.Today
+                };
+                var allPaidPaymentsFilter = new PaymentFilter
+                {
+                    Status = "Paid",
+                    EndDate = DateTime.Today
+                };
+
+                var allReceivedIncomes = await _incomeService.GetFilteredIncomesAsync(allReceivedIncomesFilter, token);
+                var allPaidPayments = await _paymentService.GetFilteredPaymentsAsync(allPaidPaymentsFilter, token);
+
+                var totalAllIncomeReceived = allReceivedIncomes.Sum(i => i.Amount);
+                var totalAllPaymentsPaid = allPaidPayments.Sum(p => p.Amount);
+                var currentBalance = totalAllIncomeReceived - totalAllPaymentsPaid;
+
+                // Próximos vencimentos
+                var upcomingPayments = await GetUpcomingPayments(token, 7);
+                var upcomingIncomes = await GetUpcomingIncomes(token, 7);
+
+                // Financiamentos ativos
+                var activeFinancings = await _financingService.GetActiveFinancingsAsync(token);
+
+                // Popular ViewBag com dados corretos
+                ViewBag.TotalBalance = currentBalance;  // Saldo geral atual
+                ViewBag.TotalIncomeReceived = totalIncomeReceived;  // Receitas recebidas do mês
+                ViewBag.TotalPaymentsPaid = totalPaymentsPaid;      // Pagamentos pagos do mês
+
+                ViewBag.PendingPayments = pendingPayments;
+                ViewBag.OverduePayments = overduePayments;
+                ViewBag.PendingIncomes = pendingIncomes;
+                ViewBag.OverdueIncomes = overdueIncomes;
+
+                ViewBag.UpcomingPayments = upcomingPayments;
+                ViewBag.UpcomingIncomes = upcomingIncomes;
+
+                ViewBag.CreditCards = creditCards;
+                ViewBag.ActiveFinancings = activeFinancings;
+
+                ViewBag.ThisMonthPayments = totalPaymentsPaid;
+                ViewBag.ThisMonthIncomes = totalIncomeReceived;
+
+                // Totais para as pendências (para mostrar valores nos cards)
+                ViewBag.TotalPendingPayments = pendingPayments.Sum(p => p.Amount);
+                ViewBag.TotalOverduePayments = overduePayments.Sum(p => p.Amount);
+                ViewBag.TotalPendingIncomes = pendingIncomes.Sum(i => i.Amount);
+                ViewBag.TotalOverdueIncomes = overdueIncomes.Sum(i => i.Amount);
+
+                // Dados para gráficos
+                await LoadChartData(token);
+            }
+            catch (Exception ex)
             {
-                Month = currentMonth,
-                Year = currentYear
-            };
-            var thisMonthIncomes = await _incomeService.GetFilteredIncomesAsync(thisMonthIncomesFilter, token);
+                // Em caso de erro, definir valores padrão
+                ViewBag.TotalBalance = 0m;
+                ViewBag.TotalIncomeReceived = 0m;
+                ViewBag.TotalPaymentsPaid = 0m;
+                ViewBag.TotalPendingPayments = 0m;
+                ViewBag.TotalOverduePayments = 0m;
+                ViewBag.TotalPendingIncomes = 0m;
+                ViewBag.TotalOverdueIncomes = 0m;
+                ViewBag.PendingPayments = new List<PaymentModel>();
+                ViewBag.OverduePayments = new List<PaymentModel>();
+                ViewBag.PendingIncomes = new List<IncomeModel>();
+                ViewBag.OverdueIncomes = new List<IncomeModel>();
+                ViewBag.UpcomingPayments = new List<PaymentModel>();
+                ViewBag.UpcomingIncomes = new List<IncomeModel>();
+                ViewBag.CreditCards = new List<CreditCardModel>();
+                ViewBag.ActiveFinancings = new List<FinancingModel>();
+                ViewBag.ThisMonthPayments = 0m;
+                ViewBag.ThisMonthIncomes = 0m;
 
-            // Filtros específicos para pendências e vencimentos
-            var pendingPayments = await _paymentService.GetPendingPaymentsAsync(token);
-            var overduePayments = await _paymentService.GetOverduePaymentsAsync(token);
-            var pendingIncomes = await _incomeService.GetPendingIncomesAsync(token);
-            var overdueIncomes = await _incomeService.GetIncomesByMonthAsync(currentMonth, currentYear, token);
-
-            
-
-            // Totais financeiros
-            var totalIncomeReceived = await _incomeService.GetReceivedIncomesTotalAsync(token);
-            var totalPaymentsPaid = await _paymentService.GetTotalPaymentsByPeriodAsync(currentMonth, currentYear, token);
-            var totalBalance = totalIncomeReceived - totalPaymentsPaid;
-
-            // Próximos vencimentos (próximos 7 dias)
-            var upcomingPayments = await GetUpcomingPayments(token, 7);
-            var upcomingIncomes = await _incomeService.GetUpcomingIncomesAsync(7, token);
-
-            // Financiamentos ativos
-            var activeFinancings = await _financingService.GetActiveFinancingsAsync(token);
-
-            // Popular ViewBag
-            ViewBag.TotalBalance = totalBalance;
-            ViewBag.TotalIncomeReceived = totalIncomeReceived;
-            ViewBag.TotalPaymentsPaid = totalPaymentsPaid;
-
-            ViewBag.PendingPayments = pendingPayments;
-            ViewBag.OverduePayments = overduePayments;
-            ViewBag.PendingIncomes = pendingIncomes;
-            ViewBag.OverdueIncomes = overdueIncomes.Where(e => e.DueDate < DateTime.Now);
-
-            ViewBag.UpcomingPayments = upcomingPayments;
-            ViewBag.UpcomingIncomes = upcomingIncomes;
-
-            ViewBag.CreditCards = creditCards;
-            ViewBag.ActiveFinancings = activeFinancings;
-
-            ViewBag.ThisMonthPayments = thisMonthPayments.Where(p => p.Status == STATUS_PAGO).Sum(p => p.Amount);
-            ViewBag.ThisMonthIncomes = thisMonthIncomes.Where(i => i.Status == STATUS_RECEBIDO).Sum(i => i.Amount);
-
-            // Dados para gráficos
-            await LoadChartData(token);
+                throw; // Re-throw para ser tratado pelo HandleException
+            }
         }
 
         private async Task LoadChartData(string token)
         {
-            var monthlyData = await GetMonthlyComparisonDataAsync(token);
-            ViewBag.MonthlyLabels = JsonSerializer.Serialize(monthlyData.Select(m => m.Month));
-            ViewBag.MonthlyIncomeValues = JsonSerializer.Serialize(monthlyData.Select(m => m.IncomeAmount));
-            ViewBag.MonthlyPaymentValues = JsonSerializer.Serialize(monthlyData.Select(m => m.PaymentAmount));
+            try
+            {
+                var monthlyData = await GetMonthlyComparisonDataAsync(token);
+                ViewBag.MonthlyLabels = JsonSerializer.Serialize(monthlyData.Select(m => m.Month));
+                ViewBag.MonthlyIncomeValues = JsonSerializer.Serialize(monthlyData.Select(m => m.IncomeAmount));
+                ViewBag.MonthlyPaymentValues = JsonSerializer.Serialize(monthlyData.Select(m => m.PaymentAmount));
 
-            // Dados por categoria
-            var currentMonth = DateTime.Now.Month;
-            var currentYear = DateTime.Now.Year;
+                // Dados por categoria do mês atual
+                var currentMonth = DateTime.Now.Month;
+                var currentYear = DateTime.Now.Year;
 
-            var paymentsByType = await _paymentService.GetPaymentsByTypeAsync(currentMonth, currentYear, token);
-            var incomesByType = await _incomeService.GetIncomesByTypeAsync(currentMonth, currentYear, token);
+                var paymentsByType = await GetPaymentsByTypeCurrentMonth(token, currentMonth, currentYear);
+                var incomesByType = await GetIncomesByTypeCurrentMonth(token, currentMonth, currentYear);
 
-            ViewBag.PaymentsByTypeLabels = JsonSerializer.Serialize(paymentsByType.Keys);
-            ViewBag.PaymentsByTypeValues = JsonSerializer.Serialize(paymentsByType.Values);
-            ViewBag.IncomesByTypeLabels = JsonSerializer.Serialize(incomesByType.Keys);
-            ViewBag.IncomesByTypeValues = JsonSerializer.Serialize(incomesByType.Values);
+                ViewBag.PaymentsByTypeLabels = JsonSerializer.Serialize(paymentsByType.Keys);
+                ViewBag.PaymentsByTypeValues = JsonSerializer.Serialize(paymentsByType.Values);
+                ViewBag.IncomesByTypeLabels = JsonSerializer.Serialize(incomesByType.Keys);
+                ViewBag.IncomesByTypeValues = JsonSerializer.Serialize(incomesByType.Values);
+            }
+            catch
+            {
+                // Em caso de erro, definir arrays vazios
+                ViewBag.MonthlyLabels = JsonSerializer.Serialize(new string[0]);
+                ViewBag.MonthlyIncomeValues = JsonSerializer.Serialize(new decimal[0]);
+                ViewBag.MonthlyPaymentValues = JsonSerializer.Serialize(new decimal[0]);
+                ViewBag.PaymentsByTypeLabels = JsonSerializer.Serialize(new string[0]);
+                ViewBag.PaymentsByTypeValues = JsonSerializer.Serialize(new decimal[0]);
+                ViewBag.IncomesByTypeLabels = JsonSerializer.Serialize(new string[0]);
+                ViewBag.IncomesByTypeValues = JsonSerializer.Serialize(new decimal[0]);
+            }
+        }
+
+        private async Task<Dictionary<string, decimal>> GetPaymentsByTypeCurrentMonth(string token, int month, int year)
+        {
+            try
+            {
+                var filter = new PaymentFilter
+                {
+                    Month = month,
+                    Year = year,
+                    Status = "Paid"
+                };
+
+                var payments = await _paymentService.GetFilteredPaymentsAsync(filter, token);
+
+                return payments
+                    .GroupBy(p => p.PaymentTypeName)
+                    .ToDictionary(g => g.Key, g => g.Sum(p => p.Amount));
+            }
+            catch
+            {
+                return new Dictionary<string, decimal>();
+            }
+        }
+
+        private async Task<Dictionary<string, decimal>> GetIncomesByTypeCurrentMonth(string token, int month, int year)
+        {
+            try
+            {
+                var filter = new IncomeFilter
+                {
+                    Month = month,
+                    Year = year,
+                    Status = "Received"
+                };
+
+                var incomes = await _incomeService.GetFilteredIncomesAsync(filter, token);
+
+                return incomes
+                    .GroupBy(i => i.IncomeTypeName)
+                    .ToDictionary(g => g.Key, g => g.Sum(i => i.Amount));
+            }
+            catch
+            {
+                return new Dictionary<string, decimal>();
+            }
         }
 
         private async Task<List<MonthlyComparisonData>> GetMonthlyComparisonDataAsync(string token)
@@ -199,18 +321,48 @@ namespace Equilibrium.Web.Controllers
 
         private async Task<List<PaymentModel>> GetUpcomingPayments(string token, int days)
         {
-            var endDate = DateTime.Today.AddDays(days);
-            var filter = new PaymentFilter
+            try
             {
-                StartDate = DateTime.Today,
-                EndDate = endDate,
-                Status = "Pending",
-                OrderBy = "dueDate",
-                Ascending = true
-            };
+                var endDate = DateTime.Today.AddDays(days);
+                var filter = new PaymentFilter
+                {
+                    StartDate = DateTime.Today,
+                    EndDate = endDate,
+                    Status = "Pending",
+                    OrderBy = "dueDate",
+                    Ascending = true
+                };
 
-            var payments = await _paymentService.GetFilteredPaymentsAsync(filter, token);
-            return payments.ToList();
+                var payments = await _paymentService.GetFilteredPaymentsAsync(filter, token);
+                return payments.ToList();
+            }
+            catch
+            {
+                return new List<PaymentModel>();
+            }
+        }
+
+        private async Task<List<IncomeModel>> GetUpcomingIncomes(string token, int days)
+        {
+            try
+            {
+                var endDate = DateTime.Today.AddDays(days);
+                var filter = new IncomeFilter
+                {
+                    StartDate = DateTime.Today,
+                    EndDate = endDate,
+                    Status = "Pending",
+                    OrderBy = "dueDate",
+                    Ascending = true
+                };
+
+                var incomes = await _incomeService.GetFilteredIncomesAsync(filter, token);
+                return incomes.ToList();
+            }
+            catch
+            {
+                return new List<IncomeModel>();
+            }
         }
 
         // Endpoints AJAX para carregamento dinâmico
@@ -279,7 +431,7 @@ namespace Equilibrium.Web.Controllers
             {
                 var token = GetToken();
                 var upcomingPayments = await GetUpcomingPayments(token, days);
-                var upcomingIncomes = await _incomeService.GetUpcomingIncomesAsync(days, token);
+                var upcomingIncomes = await GetUpcomingIncomes(token, days);
 
                 ViewBag.UpcomingPayments = upcomingPayments;
                 ViewBag.UpcomingIncomes = upcomingIncomes;
@@ -325,7 +477,6 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
-        // Método para análise rápida de tendências
         [HttpGet]
         public async Task<IActionResult> GetTrendAnalysis()
         {
@@ -336,12 +487,30 @@ namespace Equilibrium.Web.Controllers
                 var previousMonth = currentMonth.AddMonths(-1);
 
                 // Comparar receitas
-                var currentIncomeComparison = await _incomeService.ComparePeriodsAsync(
-                    new DateTime(currentMonth.Year, currentMonth.Month, 1),
-                    new DateTime(currentMonth.Year, currentMonth.Month, DateTime.DaysInMonth(currentMonth.Year, currentMonth.Month)),
-                    token);
+                var currentIncomeFilter = new IncomeFilter
+                {
+                    Month = currentMonth.Month,
+                    Year = currentMonth.Year,
+                    Status = "Received"
+                };
+                var previousIncomeFilter = new IncomeFilter
+                {
+                    Month = previousMonth.Month,
+                    Year = previousMonth.Year,
+                    Status = "Received"
+                };
 
-                // Comparar pagamentos 
+                var currentIncomes = await _incomeService.GetFilteredIncomesAsync(currentIncomeFilter, token);
+                var previousIncomes = await _incomeService.GetFilteredIncomesAsync(previousIncomeFilter, token);
+
+                var currentIncomeTotal = currentIncomes.Sum(i => i.Amount);
+                var previousIncomeTotal = previousIncomes.Sum(i => i.Amount);
+
+                var incomeChange = previousIncomeTotal > 0
+                    ? ((currentIncomeTotal - previousIncomeTotal) / previousIncomeTotal) * 100
+                    : 0;
+
+                // Comparar pagamentos
                 var currentPaymentFilter = new PaymentFilter
                 {
                     Month = currentMonth.Month,
@@ -369,11 +538,10 @@ namespace Equilibrium.Web.Controllers
                 {
                     income = new
                     {
-                        current = currentIncomeComparison.currentPeriod,
-                        previous = currentIncomeComparison.previousPeriod,
-                        change = currentIncomeComparison.percentageChange,
-                        trend = currentIncomeComparison.percentageChange > 0 ? "up" :
-                                currentIncomeComparison.percentageChange < 0 ? "down" : "stable"
+                        current = currentIncomeTotal,
+                        previous = previousIncomeTotal,
+                        change = incomeChange,
+                        trend = incomeChange > 0 ? "up" : incomeChange < 0 ? "down" : "stable"
                     },
                     payment = new
                     {
@@ -384,8 +552,8 @@ namespace Equilibrium.Web.Controllers
                     },
                     balance = new
                     {
-                        current = currentIncomeComparison.currentPeriod - currentPaymentTotal,
-                        previous = currentIncomeComparison.previousPeriod - previousPaymentTotal
+                        current = currentIncomeTotal - currentPaymentTotal,
+                        previous = previousIncomeTotal - previousPaymentTotal
                     }
                 };
 
@@ -397,32 +565,72 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
-        // Métodos auxiliares privados (mantidos para compatibilidade)
+        // Métodos auxiliares para partial views
         private async Task LoadFinancialSummaryData(string token)
         {
-            var currentDate = DateTime.Now;
-            var currentMonth = currentDate.Month;
-            var currentYear = currentDate.Year;
+            var currentMonth = DateTime.Now.Month;
+            var currentYear = DateTime.Now.Year;
 
             var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
 
-            var pendingIncomes = await _incomeService.GetPendingIncomesAsync(token);
-            var pendingPayments = await _paymentService.GetPendingPaymentsAsync(token);
-            var overduePayments = await _paymentService.GetOverduePaymentsAsync(token);
-            var overdueIncomes = await _incomeService.GetOverdueIncomesAsync(token);
+            // Pendências
+            var pendingPayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { Status = "Pending" }, token);
+            var overduePayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { Status = "Overdue" }, token);
+            var pendingIncomes = await _incomeService.GetFilteredIncomesAsync(new IncomeFilter { Status = "Pending" }, token);
+            var overdueIncomes = await _incomeService.GetFilteredIncomesAsync(new IncomeFilter
+            {
+                Status = "Pending",
+                EndDate = DateTime.Today.AddDays(-1)
+            }, token);
 
-            var totalIncome = await _incomeService.GetReceivedIncomesTotalAsync(token);
-            var totalPayments = await _paymentService.GetTotalPaymentsByPeriodAsync(currentMonth, currentYear, token);
-            var totalBalance = totalIncome - totalPayments;
+            // Totais do mês atual com filtros específicos
+            var thisMonthReceivedIncomes = await _incomeService.GetFilteredIncomesAsync(new IncomeFilter
+            {
+                Month = currentMonth,
+                Year = currentYear,
+                Status = "Received"
+            }, token);
 
-            ViewBag.TotalBalance = totalBalance;
+            var thisMonthPaidPayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter
+            {
+                Month = currentMonth,
+                Year = currentYear,
+                Status = "Paid"
+            }, token);
+
+            // Saldo geral (todos os recebidos menos todos os pagos até hoje)
+            var allReceivedIncomes = await _incomeService.GetFilteredIncomesAsync(new IncomeFilter
+            {
+                Status = "Received",
+                EndDate = DateTime.Today
+            }, token);
+
+            var allPaidPayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter
+            {
+                Status = "Paid",
+                EndDate = DateTime.Today
+            }, token);
+
+            var totalIncome = thisMonthReceivedIncomes.Sum(i => i.Amount);
+            var totalPayments = thisMonthPaidPayments.Sum(p => p.Amount);
+            var totalAllIncomeReceived = allReceivedIncomes.Sum(i => i.Amount);
+            var totalAllPaymentsPaid = allPaidPayments.Sum(p => p.Amount);
+            var currentBalance = totalAllIncomeReceived - totalAllPaymentsPaid;
+
+            ViewBag.TotalBalance = currentBalance;
             ViewBag.PendingPayments = pendingPayments;
             ViewBag.OverduePayments = overduePayments;
             ViewBag.OverdueIncomes = overdueIncomes;
             ViewBag.PendingIncomes = pendingIncomes;
             ViewBag.CreditCards = creditCards;
-            ViewBag.ThisMonthIncomes = await _incomeService.GetTotalIncomesByPeriodAsync(currentMonth, currentYear, token);
+            ViewBag.ThisMonthIncomes = totalIncome;
             ViewBag.ThisMonthPayments = totalPayments;
+
+            // Totais para os cards
+            ViewBag.TotalPendingPayments = pendingPayments.Sum(p => p.Amount);
+            ViewBag.TotalOverduePayments = overduePayments.Sum(p => p.Amount);
+            ViewBag.TotalPendingIncomes = pendingIncomes.Sum(i => i.Amount);
+            ViewBag.TotalOverdueIncomes = overdueIncomes.Sum(i => i.Amount);
         }
 
         private async Task LoadMonthlyComparisonData(string token)
@@ -435,15 +643,25 @@ namespace Equilibrium.Web.Controllers
 
         private async Task LoadPendingsData(string token)
         {
-            var pendingPayments = await _paymentService.GetPendingPaymentsAsync(token);
-            var overduePayments = await _paymentService.GetOverduePaymentsAsync(token);
-            var pendingIncomes = await _incomeService.GetPendingIncomesAsync(token);
-            var overdueIncomes = await _incomeService.GetOverdueIncomesAsync(token);
+            var pendingPayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { Status = "Pending" }, token);
+            var overduePayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { Status = "Overdue" }, token);
+            var pendingIncomes = await _incomeService.GetFilteredIncomesAsync(new IncomeFilter { Status = "Pending" }, token);
+            var overdueIncomes = await _incomeService.GetFilteredIncomesAsync(new IncomeFilter
+            {
+                Status = "Pending",
+                EndDate = DateTime.Today.AddDays(-1)
+            }, token);
 
             ViewBag.PendingPayments = pendingPayments;
             ViewBag.OverduePayments = overduePayments;
             ViewBag.PendingIncomes = pendingIncomes;
             ViewBag.OverdueIncomes = overdueIncomes;
+
+            // Totais para os cards de pendências
+            ViewBag.TotalPendingPayments = pendingPayments.Sum(p => p.Amount);
+            ViewBag.TotalOverduePayments = overduePayments.Sum(p => p.Amount);
+            ViewBag.TotalPendingIncomes = pendingIncomes.Sum(i => i.Amount);
+            ViewBag.TotalOverdueIncomes = overdueIncomes.Sum(i => i.Amount);
         }
 
         public IActionResult Privacy()
