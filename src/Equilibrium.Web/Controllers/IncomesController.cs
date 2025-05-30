@@ -1,21 +1,18 @@
-using Equilibrium.Resources.Web;
 using Equilibrium.Resources.Web.Enums;
-using Equilibrium.Resources.Web.Helpers;
-using Equilibrium.Web.Extensions;
+using Equilibrium.Web.Controllers;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.Income;
-using Equilibrium.Web.Services;
+using Equilibrium.Web.Models.Filters;
+using Equilibrium.Web.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Globalization;
-using System.Text;
 
 namespace Equilibrium.Web.Controllers
 {
     [Authorize]
     [RequirePermission("incomes.view")]
-    public class IncomesController : Controller
+    public class IncomesController : BaseController
     {
         private readonly IIncomeService _incomeService;
         private readonly IIncomeTypeService _incomeTypeService;
@@ -28,129 +25,130 @@ namespace Equilibrium.Web.Controllers
             _incomeTypeService = incomeTypeService ?? throw new ArgumentNullException(nameof(incomeTypeService));
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(IncomeFilter filter)
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
-                var incomes = await _incomeService.GetAllIncomesAsync(token);
+                var token = GetToken();
+
+                // Se não há filtros específicos, usa filtro padrão do mês atual
+                if (!filter.HasFilters())
+                {
+                    var now = DateTime.Now;
+                    filter = new IncomeFilter
+                    {
+                        Month = now.Month,
+                        Year = now.Year,
+                        OrderBy = "dueDate",
+                        Ascending = true
+                    };
+                }
+
+                var incomes = await _incomeService.GetFilteredIncomesAsync(filter, token);
+
+                // Carregar dados para os dropdowns de filtro
+                await LoadFilterDropdowns(token);
+
+                ViewBag.CurrentFilter = filter;
+                ViewBag.HasActiveFilters = filter.HasFilters();
+
                 return View(incomes);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Incomes, ex);
-                return RedirectToAction("Index", "Home");
+                return HandleException(ex, EntityNames.Incomes, "loading");
             }
         }
 
-        public async Task<IActionResult> Pending()
+        [HttpGet]
+        public async Task<IActionResult> QuickFilter(string filterType)
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
-                var incomes = await _incomeService.GetPendingIncomesAsync(token);
-                ViewBag.Title = "Receitas Pendentes";
-                return View("Index", incomes);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Incomes, ex);
-                return RedirectToAction("Index", "Home");
-            }
-        }
-
-        public async Task<IActionResult> Overdue()
-        {
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var incomes = await _incomeService.GetOverdueIncomesAsync(token);
-                ViewBag.Title = "Receitas Vencidas";
-                return View("Index", incomes);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Incomes, ex);
-                return RedirectToAction("Index", "Home");
-            }
-        }
-
-        public async Task<IActionResult> Received()
-        {
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var incomes = await _incomeService.GetReceivedIncomesAsync(token);
-                ViewBag.Title = "Receitas Recebidas";
-                return View("Index", incomes);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Incomes, ex);
-                return RedirectToAction("Index", "Home");
-            }
-        }
-
-        public async Task<IActionResult> ByMonth(int month, int year)
-        {
-            var currentDate = DateTime.Now;
-
-            if (month <= 0 || month > 12)
-            {
-                month = currentDate.Month;
-                year = currentDate.Year;
-            }
-
-            if (year <= 0)
-            {
-                year = currentDate.Year;
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var incomes = await _incomeService.GetIncomesByMonthAsync(month, year, token);
-
-                ViewBag.Month = month;
-                ViewBag.Year = year;
-                ViewBag.Title = $"Receitas de {new DateTime(year, month, 1).ToString("MMMM/yyyy")}";
-
-                return View("Index", incomes);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Incomes, ex);
-                return RedirectToAction("Index", "Home");
-            }
-        }
-
-        public async Task<IActionResult> ByType(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do tipo de receita não fornecido");
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var incomes = await _incomeService.GetIncomesByTypeAsync(id, token);
-                var incomeType = await _incomeTypeService.GetIncomeTypeByIdAsync(id, token);
-
-                if (incomeType == null)
+                var token = GetToken();
+                IncomeFilter filter = filterType?.ToLower() switch
                 {
-                    return NotFound("Tipo de receita não encontrado");
-                }
+                    "pending" => FilterHelper.QuickFilters.PendingIncomes(),
+                    "received" => FilterHelper.QuickFilters.ReceivedThisMonth(),
+                    "thisweek" => new IncomeFilter
+                    {
+                        StartDate = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek),
+                        EndDate = DateTime.Today.AddDays(6 - (int)DateTime.Today.DayOfWeek),
+                        OrderBy = "dueDate",
+                        Ascending = true
+                    },
+                    "thismonth" => new IncomeFilter
+                    {
+                        Month = DateTime.Now.Month,
+                        Year = DateTime.Now.Year,
+                        OrderBy = "dueDate",
+                        Ascending = true
+                    },
+                    _ => new IncomeFilter()
+                };
 
-                ViewBag.Title = $"Receitas por Tipo: {incomeType.Name}";
-                ViewBag.TypeId = id;
+                var incomes = await _incomeService.GetFilteredIncomesAsync(filter, token);
+                await LoadFilterDropdowns(token);
+
+                ViewBag.CurrentFilter = filter;
+                ViewBag.HasActiveFilters = filter.HasFilters();
 
                 return View("Index", incomes);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Incomes, ex);
-                return RedirectToAction("Index", "Home");
+                return HandleException(ex, EntityNames.Incomes, "loading");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApplyFilters(IncomeFilter filter)
+        {
+            try
+            {
+                var token = GetToken();
+                var incomes = await _incomeService.GetFilteredIncomesAsync(filter, token);
+
+                await LoadFilterDropdowns(token);
+
+                ViewBag.CurrentFilter = filter;
+                ViewBag.HasActiveFilters = filter.HasFilters();
+
+                return View("Index", incomes);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex, EntityNames.Incomes, "loading");
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ClearFilters()
+        {
+            try
+            {
+                var now = DateTime.Now;
+                var filter = new IncomeFilter
+                {
+                    Month = now.Month,
+                    Year = now.Year,
+                    OrderBy = "dueDate",
+                    Ascending = true
+                };
+
+                var token = GetToken();
+                var incomes = await _incomeService.GetFilteredIncomesAsync(filter, token);
+
+                await LoadFilterDropdowns(token);
+
+                ViewBag.CurrentFilter = filter;
+                ViewBag.HasActiveFilters = false;
+
+                return View("Index", incomes);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex, EntityNames.Incomes, "loading");
             }
         }
 
@@ -158,37 +156,50 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita não fornecido");
+                return NotFound();
             }
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var income = await _incomeService.GetIncomeByIdAsync(id, token);
 
-                return income == null ? NotFound("Receita não encontrada") : View(income);
+                if (income == null)
+                {
+                    return NotFound();
+                }
+
+                return View(income);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Income, ex);
-                return RedirectToAction(nameof(Index));
+                return HandleException(ex, EntityNames.Income, "loading");
             }
         }
 
+        [HttpGet]
         [RequirePermission("incomes.create")]
         public async Task<IActionResult> Create()
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
-                var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
-                ViewBag.IncomeTypes = incomeTypes;
-                return View();
+                var token = GetToken();
+                await LoadCreateEditDropdowns(token);
+
+                var model = new CreateIncomeModel
+                {
+                    DueDate = DateTime.Today,
+                    NumberOfInstallments = 1,
+                    Description = "",
+                    Notes = "",
+                    IncomeTypeId = ""
+                };
+
+                return View(model);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PreparingForm;
-                return RedirectToAction(nameof(Index));
+                return HandleException(ex, EntityNames.Income, "preparing form");
             }
         }
 
@@ -199,45 +210,60 @@ namespace Equilibrium.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
-                await LoadIncomeTypesForView();
-                return View(model);
+                try
+                {
+                    var token = GetToken();
+                    await LoadCreateEditDropdowns(token);
+                    return View(model);
+                }
+                catch (Exception ex)
+                {
+                    return HandleException(ex, EntityNames.Income, "preparing form");
+                }
             }
 
             try
             {
-                var token = HttpContext.GetJwtToken();
-                var income = await _incomeService.CreateIncomeAsync(model, token);
-                TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.Income);
-                return RedirectToAction(nameof(Details), new { id = income.Id });
+                var token = GetToken();
+                await _incomeService.CreateIncomeAsync(model, token);
+                return RedirectToIndexWithSuccess("Incomes", EntityNames.Income, "create");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, MessageHelper.GetCreationErrorMessage(EntityNames.Income, ex));
-                await LoadIncomeTypesForView();
-                return View(model);
+                try
+                {
+                    var token = GetToken();
+                    await LoadCreateEditDropdowns(token);
+                    SetErrorMessage(EntityNames.Income, "create", ex);
+                    return View(model);
+                }
+                catch
+                {
+                    return HandleException(ex, EntityNames.Income, "create");
+                }
             }
         }
 
+        [HttpGet]
         [RequirePermission("incomes.edit")]
         public async Task<IActionResult> Edit(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita não fornecido");
+                return NotFound();
             }
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var income = await _incomeService.GetIncomeByIdAsync(id, token);
 
                 if (income == null)
                 {
-                    return NotFound("Receita não encontrada");
+                    return NotFound();
                 }
 
-                var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
-                ViewBag.IncomeTypes = incomeTypes;
+                await LoadCreateEditDropdowns(token);
 
                 var model = new UpdateIncomeModel
                 {
@@ -256,8 +282,7 @@ namespace Equilibrium.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Income, ex);
-                return RedirectToAction(nameof(Index));
+                return HandleException(ex, EntityNames.Income, "loading");
             }
         }
 
@@ -268,27 +293,42 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita não fornecido");
+                return NotFound();
             }
 
             if (!ModelState.IsValid)
             {
-                await LoadIncomeTypesForView();
-                return View(model);
+                try
+                {
+                    var token = GetToken();
+                    await LoadCreateEditDropdowns(token);
+                    return View(model);
+                }
+                catch (Exception ex)
+                {
+                    return HandleException(ex, EntityNames.Income, "preparing form");
+                }
             }
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 await _incomeService.UpdateIncomeAsync(id, model, token);
-                TempData["SuccessMessage"] = MessageHelper.GetUpdateSuccessMessage(EntityNames.Income);
-                return RedirectToAction(nameof(Details), new { id });
+                return RedirectToDetailsWithSuccess("Incomes", id, EntityNames.Income, "update");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, MessageHelper.GetUpdateErrorMessage(EntityNames.Income, ex));
-                await LoadIncomeTypesForView();
-                return View(model);
+                try
+                {
+                    var token = GetToken();
+                    await LoadCreateEditDropdowns(token);
+                    SetErrorMessage(EntityNames.Income, "update", ex);
+                    return View(model);
+                }
+                catch
+                {
+                    return HandleException(ex, EntityNames.Income, "update");
+                }
             }
         }
 
@@ -299,87 +339,19 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["ErrorMessage"] = "ID da receita não fornecido.";
-                return RedirectToAction(nameof(Index));
+                return NotFound();
             }
 
             try
             {
-                var token = HttpContext.GetJwtToken();
-
-                // Verificar se a receita existe
-                var income = await _incomeService.GetIncomeByIdAsync(id, token);
-                if (income == null)
-                {
-                    TempData["ErrorMessage"] = "Receita não encontrada.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                // Verificar se pode ser excluída (regras de negócio)
-                if (income.Status == 2) // Se já foi recebida
-                {
-                    TempData["ErrorMessage"] = "Não é possível excluir uma receita que já foi recebida.";
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-
+                var token = GetToken();
                 await _incomeService.DeleteIncomeAsync(id, token);
-                TempData["SuccessMessage"] = $"Receita '{income.Description}' excluída com sucesso.";
+                return RedirectToIndexWithSuccess("Incomes", EntityNames.Income, "delete");
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao excluir receita: {ex.Message}";
-                return RedirectToAction(nameof(Details), new { id });
+                return HandleException(ex, EntityNames.Income, "delete");
             }
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("incomes.edit")]
-        public async Task<IActionResult> Receive(string id, DateTime receivedDate)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                TempData["ErrorMessage"] = "ID da receita não fornecido.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-
-                // Verificar se a receita existe
-                var income = await _incomeService.GetIncomeByIdAsync(id, token);
-                if (income == null)
-                {
-                    TempData["ErrorMessage"] = "Receita não encontrada.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                // Verificar se pode ser marcada como recebida
-                if (income.Status != 1) // Só pode marcar como recebida se estiver pendente
-                {
-                    TempData["ErrorMessage"] = "Esta receita não pode ser marcada como recebida.";
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-
-                // Validar data de recebimento
-                if (receivedDate > DateTime.Today)
-                {
-                    TempData["ErrorMessage"] = "A data de recebimento não pode ser futura.";
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-
-                await _incomeService.MarkAsReceivedAsync(id, receivedDate, token);
-                TempData["SuccessMessage"] = $"Receita '{income.Description}' marcada como recebida.";
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Erro ao marcar receita como recebida: {ex.Message}";
-            }
-
-            return RedirectToAction(nameof(Details), new { id });
         }
 
         [HttpPost]
@@ -394,15 +366,15 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 await _incomeService.MarkAsReceivedAsync(id, receivedDate ?? DateTime.Now, token);
-                TempData["SuccessMessage"] = MessageHelper.GetStatusChangeSuccessMessage(EntityNames.Income, EntityStatus.Received);
-                return RedirectToAction(nameof(Details), new { id });
+                SetStatusChangeSuccessMessage(EntityNames.Income, EntityStatus.Received);
+                return RedirectToAction("Details", new { id });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = MessageHelper.GetStatusChangeErrorMessage(EntityNames.Income, EntityStatus.Received, ex);
-                return RedirectToAction(nameof(Details), new { id });
+                SetStatusChangeErrorMessage(EntityNames.Income, EntityStatus.Received, ex);
+                return RedirectToAction("Details", new { id });
             }
         }
 
@@ -418,370 +390,146 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 await _incomeService.CancelIncomeAsync(id, token);
-                TempData["SuccessMessage"] = MessageHelper.GetCancelSuccessMessage(EntityNames.Income);
-                return RedirectToAction(nameof(Details), new { id });
+                SetSuccessMessage(EntityNames.Income, "cancel");
+                return RedirectToAction("Details", new { id });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = MessageHelper.GetCancelErrorMessage(EntityNames.Income, ex);
-                return RedirectToAction(nameof(Details), new { id });
+                SetErrorMessage(EntityNames.Income, "cancel", ex);
+                return RedirectToAction("Details", new { id });
             }
         }
 
-        [RequirePermission("incomes.view")]
-        public IActionResult Export()
-        {
-            // This action renders the Export view we just created
-            return View();
-        }
-
-        [RequirePermission("incomes.create")]
-        public IActionResult DownloadTemplate()
+        // Endpoints para relatórios e análises
+        [HttpGet]
+        public async Task<IActionResult> Analysis(int? year)
         {
             try
             {
-                var sb = new StringBuilder();
-                sb.AppendLine("Descricao,Valor,DataVencimento,DataRecebimento,TipoReceitaId,Recorrente,Parcelas,Observacoes");
+                year ??= DateTime.Now.Year;
+                var token = GetToken();
 
-                // Add example rows
-                sb.AppendLine("Salário,3500.00,25/06/2025,,id-tipo-receita-1,Sim,1,'Salário mensal'");
-                sb.AppendLine("Freelance,1200.00,15/06/2025,15/06/2025,id-tipo-receita-2,Não,1,'Projeto de design'");
-                sb.AppendLine("Aluguel,1800.00,10/06/2025,,id-tipo-receita-3,Sim,1,'Aluguel do imóvel'");
-                sb.AppendLine("Investimentos,350.00,30/06/2025,,id-tipo-receita-4,Não,1,'Rendimentos'");
+                var monthlyData = await _incomeService.GetMonthlyIncomeAnalysisAsync(year.Value, token);
+                var averageMonthly = await _incomeService.GetAverageMonthlyIncomeAsync(year.Value, token);
+                var recentIncomes = await _incomeService.GetRecentIncomesAsync(5, token);
 
-                // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
-                string content = sb.ToString();
-                byte[] utf8Bytes = Encoding.UTF8.GetBytes(content);
-                byte[] latin1Bytes = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), utf8Bytes);
-                byte[] resultBytes = Encoding.Convert(Encoding.GetEncoding("ISO-8859-1"), Encoding.UTF8, latin1Bytes);
+                ViewBag.Year = year;
+                ViewBag.MonthlyData = monthlyData;
+                ViewBag.AverageMonthly = averageMonthly;
+                ViewBag.RecentIncomes = recentIncomes;
 
-                // Adicionar BOM UTF-8
-                byte[] bom = Encoding.UTF8.GetPreamble();
-                byte[] finalBytes = new byte[bom.Length + resultBytes.Length];
-                Buffer.BlockCopy(bom, 0, finalBytes, 0, bom.Length);
-                Buffer.BlockCopy(resultBytes, 0, finalBytes, bom.Length, resultBytes.Length);
-
-                return File(finalBytes, "application/octet-stream", "modelo_receitas.csv");
+                return View();
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Erro ao gerar o modelo de CSV: " + ex.Message;
-                return RedirectToAction(nameof(Export));
+                return HandleException(ex, EntityNames.Incomes, "loading analysis");
             }
         }
 
-        [HttpPost]
-        [RequirePermission("incomes.create")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ImportFromCSV(IFormFile csvFile, bool validateOnly = false)
+        [HttpGet]
+        public async Task<IActionResult> Upcoming(int days = 30)
         {
-            if (csvFile == null || csvFile.Length == 0)
-            {
-                TempData["ErrorMessage"] = "Nenhum arquivo foi selecionado.";
-                return RedirectToAction(nameof(Export));
-            }
-
-            if (!csvFile.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
-            {
-                TempData["ErrorMessage"] = "O arquivo deve ser um CSV válido.";
-                return RedirectToAction(nameof(Export));
-            }
-
             try
             {
-                var token = HttpContext.GetJwtToken();
-                var successCount = 0;
-                var errorCount = 0;
-                var errors = new List<string>();
+                var token = GetToken();
+                var upcomingIncomes = await _incomeService.GetUpcomingIncomesAsync(days, token);
 
-                using (var reader = new StreamReader(csvFile.OpenReadStream()))
-                {
-                    // Skip header row
-                    var header = await reader.ReadLineAsync();
-                    if (header == null)
-                    {
-                        TempData["ErrorMessage"] = "O arquivo CSV está vazio ou não possui cabeçalho.";
-                        return RedirectToAction(nameof(Export));
-                    }
-
-                    // Validate header
-                    var expectedColumns = new[] { "Descricao", "Valor", "DataVencimento", "DataRecebimento",
-                "TipoReceitaId", "Recorrente", "Parcelas", "Observacoes" };
-                    var headerColumns = header.Split(';').Select(h => h.Trim()).ToArray();
-
-                    if (!ValidateHeader(headerColumns, expectedColumns, out var missingColumns))
-                    {
-                        TempData["ErrorMessage"] = $"O cabeçalho do CSV está inválido. Colunas ausentes: {string.Join(", ", missingColumns)}";
-                        return RedirectToAction(nameof(Export));
-                    }
-
-                    var lineNumber = 1; // Start with 1 for the header
-
-                    while (!reader.EndOfStream)
-                    {
-                        lineNumber++;
-                        var line = await reader.ReadLineAsync();
-                        if (string.IsNullOrWhiteSpace(line)) continue;
-
-                        try
-                        {
-                            var model = ParseIncomeLine(line, headerColumns);
-
-                            // If only validating, we don't create the income
-                            if (!validateOnly)
-                            {
-                                await _incomeService.CreateIncomeAsync(model, token);
-                            }
-
-                            successCount++;
-                        }
-                        catch (Exception ex)
-                        {
-                            errorCount++;
-                            errors.Add($"Erro na linha {lineNumber}: {ex.Message}");
-
-                            // If more than 10 errors, stop processing
-                            if (errors.Count > 10)
-                            {
-                                errors.Add("Muitos erros encontrados. Processamento interrompido.");
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (validateOnly)
-                {
-                    if (errorCount == 0)
-                    {
-                        TempData["SuccessMessage"] = $"Validação concluída com sucesso. {successCount} receitas estão prontas para importação.";
-                    }
-                    else
-                    {
-                        TempData["ErrorMessage"] = $"Validação concluída com {errorCount} erros. {string.Join("<br>", errors)}";
-                    }
-                }
-                else
-                {
-                    if (errorCount == 0)
-                    {
-                        TempData["SuccessMessage"] = $"{successCount} receitas foram importadas com sucesso.";
-                    }
-                    else
-                    {
-                        TempData["ErrorMessage"] = $"{successCount} receitas importadas com sucesso, mas {errorCount} apresentaram erros: {string.Join("<br>", errors)}";
-                    }
-                }
-
-                return RedirectToAction(nameof(Export));
+                ViewBag.Days = days;
+                return View(upcomingIncomes);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Erro ao processar o arquivo CSV: {ex.Message}";
-                return RedirectToAction(nameof(Export));
+                return HandleException(ex, EntityNames.Incomes, "loading upcoming");
             }
         }
 
-        // Helper methods
-        private bool ValidateHeader(string[] actual, string[] expected, out List<string> missingColumns)
-        {
-            missingColumns = new List<string>();
-
-            foreach (var column in expected)
-            {
-                if (!actual.Contains(column, StringComparer.OrdinalIgnoreCase))
-                {
-                    missingColumns.Add(column);
-                }
-            }
-
-            return missingColumns.Count == 0;
-        }
-
-        private CreateIncomeModel ParseIncomeLine(string line, string[] headers)
-        {
-            var values = ParseCsvLine(line);
-            var model = new CreateIncomeModel();
-
-            // Map values to model based on header positions
-            for (int i = 0; i < headers.Length && i < values.Length; i++)
-            {
-                var header = headers[i].Trim();
-                var value = values[i].Trim();
-
-                switch (header.ToLowerInvariant())
-                {
-                    case "descricao":
-                        model.Description = value;
-                        break;
-                    case "valor":
-                        model.Amount = ParseDecimal(value);
-                        break;
-                    case "datavencimento":
-                        model.DueDate = ParseDate(value);
-                        break;
-                    case "datarecebimento":
-                        model.ReceivedDate = string.IsNullOrEmpty(value) ? null : ParseDate(value);
-                        break;
-                    case "tiporeceitaid":
-                        model.IncomeTypeId = value;
-                        break;
-                    case "recorrente":
-                        model.IsRecurring = string.Equals(value, "Sim", StringComparison.OrdinalIgnoreCase);
-                        break;
-                    case "parcelas":
-                        model.NumberOfInstallments = string.IsNullOrEmpty(value) ? 1 : int.Parse(value);
-                        break;
-                    case "observacoes":
-                        model.Notes = string.IsNullOrEmpty(value) ? "" : value;
-                        break;
-                }
-            }
-
-            // Validate required fields
-            if (string.IsNullOrEmpty(model.Description))
-                throw new Exception("A descrição é obrigatória");
-
-            if (string.IsNullOrEmpty(model.IncomeTypeId))
-                throw new Exception("O tipo de receita é obrigatório");
-
-            return model;
-        }
-
-        private string[] ParseCsvLine(string line)
-        {
-            // Simple CSV parser that handles quoted values
-            var result = new List<string>();
-            var currentValue = new StringBuilder();
-            bool inQuotes = false;
-
-            for (int i = 0; i < line.Length; i++)
-            {
-                char c = line[i];
-
-                if (c == '"')
-                {
-                    // If we're in quotes and the next character is also a quote, it's an escaped quote
-                    if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
-                    {
-                        currentValue.Append('"');
-                        i++; // Skip next quote
-                    }
-                    else
-                    {
-                        // Toggle quote status
-                        inQuotes = !inQuotes;
-                    }
-                }
-                else if (c == ';' && !inQuotes)
-                {
-                    // End of field
-                    result.Add(currentValue.ToString());
-                    currentValue.Clear();
-                }
-                else
-                {
-                    currentValue.Append(c);
-                }
-            }
-
-            // Add the last field
-            result.Add(currentValue.ToString());
-
-            return result.ToArray();
-        }
-
-        private decimal ParseDecimal(string value)
-        {
-            // Handle both comma and dot as decimal separators
-            value = value.Replace(".", "").Replace(",", ".");
-            if (!decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
-            {
-                throw new Exception($"Valor inválido: {value}");
-            }
-            return result;
-        }
-
-        private DateTime ParseDate(string value)
-        {
-            // Try different date formats
-            string[] formats = { "dd/MM/yyyy", "yyyy-MM-dd", "MM/dd/yyyy" };
-            if (!DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
-            {
-                throw new Exception($"Data inválida: {value}. Use o formato DD/MM/AAAA.");
-            }
-            return result;
-        }
-
-        [RequirePermission("incomes.view")]
-        public async Task<IActionResult> ExportIncomeTypes()
+        // Métodos auxiliares privados
+        private async Task LoadFilterDropdowns(string token)
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
                 var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
 
-                var sb = new StringBuilder();
-                sb.AppendLine("Id,Nome,Descricao,Sistema");
-
-                foreach (var type in incomeTypes)
-                {
-                    // Escape quotes in text fields
-                    var name = EscapeCsvField(type.Name);
-                    var description = EscapeCsvField(type.Description);
-
-                    sb.AppendLine($"{type.Id},{name},{description},{(type.IsSystem ? "Sim" : "Não")}");
-                }
-
-                // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
-                string content = sb.ToString();
-                byte[] utf8Bytes = Encoding.UTF8.GetBytes(content);
-                byte[] latin1Bytes = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), utf8Bytes);
-                byte[] resultBytes = Encoding.Convert(Encoding.GetEncoding("ISO-8859-1"), Encoding.UTF8, latin1Bytes);
-
-                // Adicionar BOM UTF-8
-                byte[] bom = Encoding.UTF8.GetPreamble();
-                byte[] finalBytes = new byte[bom.Length + resultBytes.Length];
-                Buffer.BlockCopy(bom, 0, finalBytes, 0, bom.Length);
-                Buffer.BlockCopy(resultBytes, 0, finalBytes, bom.Length, resultBytes.Length);
-
-                return File(finalBytes, "application/octet-stream", "tipos_receita.csv");
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = "Erro ao exportar tipos de receita: " + ex.Message;
-                return RedirectToAction(nameof(Export));
-            }
-        }
-
-        private string EscapeCsvField(string field)
-        {
-            if (string.IsNullOrEmpty(field))
-                return string.Empty;
-
-            // Se contém vírgula, aspas ou quebra de linha, coloca entre aspas e dobra as aspas internas
-            if (field.Contains(",") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
-            {
-                return "\"" + field.Replace("\"", "\"\"") + "\"";
-            }
-
-            return field;
-        }
-
-
-        private async Task LoadIncomeTypesForView()
-        {
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
                 ViewBag.IncomeTypes = incomeTypes;
+
+                // Opções de status
+                ViewBag.StatusOptions = new List<dynamic>
+                {
+                    new { Value = "Pending", Text = "Pendente" },
+                    new { Value = "Received", Text = "Recebido" },
+                    new { Value = "Cancelled", Text = "Cancelado" }
+                };
+
+                // Opções de ordenação
+                ViewBag.OrderByOptions = new List<dynamic>
+                {
+                    new { Value = "dueDate", Text = "Data de Vencimento" },
+                    new { Value = "description", Text = "Descrição" },
+                    new { Value = "amount", Text = "Valor" },
+                    new { Value = "receivedDate", Text = "Data de Recebimento" },
+                    new { Value = "status", Text = "Status" },
+                    new { Value = "createdAt", Text = "Data de Criação" }
+                };
             }
-            catch
+            catch (Exception)
             {
-                ViewBag.IncomeTypes = new List<object>();
+                // Log do erro, mas não falhar o carregamento da página
+                SetCustomErrorMessage("Erro ao carregar opções de filtro. Algumas funcionalidades podem estar limitadas.");
+            }
+        }
+
+        private async Task LoadCreateEditDropdowns(string token)
+        {
+            var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
+            ViewBag.IncomeTypes = incomeTypes;
+        }
+
+        // Endpoint para AJAX - Busca rápida
+        [HttpGet]
+        public async Task<IActionResult> SearchAsync(string term)
+        {
+            try
+            {
+                var token = GetToken();
+                var incomes = await _incomeService.SearchIncomesAsync(term, token);
+
+                return Json(incomes.Select(i => new
+                {
+                    id = i.Id,
+                    description = i.Description,
+                    amount = i.GetFormattedAmount(),
+                    dueDate = i.GetFormattedDueDate(),
+                    status = i.StatusDescription
+                }));
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
+        }
+
+        // Endpoint para comparação de períodos (AJAX)
+        [HttpGet]
+        public async Task<IActionResult> ComparePeriods(DateTime currentStart, DateTime currentEnd)
+        {
+            try
+            {
+                var token = GetToken();
+                var comparison = await _incomeService.ComparePeriodsAsync(currentStart, currentEnd, token);
+
+                return Json(new
+                {
+                    currentPeriod = comparison.currentPeriod,
+                    previousPeriod = comparison.previousPeriod,
+                    percentageChange = comparison.percentageChange,
+                    trend = comparison.percentageChange > 0 ? "up" : comparison.percentageChange < 0 ? "down" : "stable"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
             }
         }
     }

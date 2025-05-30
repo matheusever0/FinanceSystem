@@ -1,0 +1,326 @@
+﻿@model Equilibrium.Web.Models.Filters.IncomeFilter
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">
+            <i class="fas fa-filter me-2"></i>
+            Filtros de Receitas
+        </h6>
+        <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#incomeFilters">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="collapse @(ViewBag.HasActiveFilters == true ? "show" : "")" id="incomeFilters">
+        <div class="card-body">
+            <form method="post" action="@Url.Action("ApplyFilters")" id="incomeFilterForm">
+                <div class="row">
+                    <!-- Filtro de Busca -->
+                    <div class="col-md-6 mb-3">
+                        <label for="Description" class="form-label">Descrição</label>
+                        <input type="text" class="form-control" id="Description" name="Description" 
+                               value="@Model?.Description" placeholder="Buscar por descrição...">
+                    </div>
+                    
+                    <!-- Tipo de Receita -->
+                    <div class="col-md-6 mb-3">
+                        <label for="IncomeTypeId" class="form-label">Tipo de Receita</label>
+                        <select class="form-select" id="IncomeTypeId" name="IncomeTypeId">
+                            <option value="">Todos os tipos</option>
+                            @if (ViewBag.IncomeTypes != null)
+                            {
+                                @foreach (var type in ViewBag.IncomeTypes)
+                                {
+                                    <option value="@type.Id" selected="@(Model?.IncomeTypeId == type.Id ? "selected" : "")">
+                                        @type.Name
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Filtros de Valor -->
+                    <div class="col-md-3 mb-3">
+                        <label for="MinAmount" class="form-label">Valor Mínimo</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input type="number" class="form-control" id="MinAmount" name="MinAmount" 
+                                   step="0.01" min="0" value="@Model?.MinAmount" placeholder="0,00">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <label for="MaxAmount" class="form-label">Valor Máximo</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input type="number" class="form-control" id="MaxAmount" name="MaxAmount" 
+                                   step="0.01" min="0" value="@Model?.MaxAmount" placeholder="999999,99">
+                        </div>
+                    </div>
+
+                    <!-- Filtros de Data de Vencimento -->
+                    <div class="col-md-3 mb-3">
+                        <label for="StartDate" class="form-label">Vence Desde</label>
+                        <input type="date" class="form-control" id="StartDate" name="StartDate" 
+                               value="@Model?.StartDate?.ToString("yyyy-MM-dd")">
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <label for="EndDate" class="form-label">Vence Até</label>
+                        <input type="date" class="form-control" id="EndDate" name="EndDate" 
+                               value="@Model?.EndDate?.ToString("yyyy-MM-dd")">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Filtros de Data de Recebimento -->
+                    <div class="col-md-3 mb-3">
+                        <label for="ReceivedStartDate" class="form-label">Recebido Desde</label>
+                        <input type="date" class="form-control" id="ReceivedStartDate" name="ReceivedStartDate" 
+                               value="@Model?.ReceivedStartDate?.ToString("yyyy-MM-dd")">
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <label for="ReceivedEndDate" class="form-label">Recebido Até</label>
+                        <input type="date" class="form-control" id="ReceivedEndDate" name="ReceivedEndDate" 
+                               value="@Model?.ReceivedEndDate?.ToString("yyyy-MM-dd")">
+                    </div>
+
+                    <!-- Filtros de Período -->
+                    <div class="col-md-2 mb-3">
+                        <label for="Month" class="form-label">Mês</label>
+                        <select class="form-select" id="Month" name="Month">
+                            <option value="">Todos</option>
+                            <option value="1" selected="@(Model?.Month == 1 ? "selected" : null)">Janeiro</option>
+                            <option value="2" selected="@(Model?.Month == 2 ? "selected" : null)">Fevereiro</option>
+                            <option value="3" selected="@(Model?.Month == 3 ? "selected" : null)">Março</option>
+                            <option value="4" selected="@(Model?.Month == 4 ? "selected" : null)">Abril</option>
+                            <option value="5" selected="@(Model?.Month == 5 ? "selected" : null)">Maio</option>
+                            <option value="6" selected="@(Model?.Month == 6 ? "selected" : null)">Junho</option>
+                            <option value="7" selected="@(Model?.Month == 7 ? "selected" : null)">Julho</option>
+                            <option value="8" selected="@(Model?.Month == 8 ? "selected" : null)">Agosto</option>
+                            <option value="9" selected="@(Model?.Month == 9 ? "selected" : null)">Setembro</option>
+                            <option value="10" selected="@(Model?.Month == 10 ? "selected" : null)">Outubro</option>
+                            <option value="11" selected="@(Model?.Month == 11 ? "selected" : null)">Novembro</option>
+                            <option value="12" selected="@(Model?.Month == 12 ? "selected" : null)">Dezembro</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2 mb-3">
+                        <label for="Year" class="form-label">Ano</label>
+                        <select class="form-select" id="Year" name="Year">
+                            <option value="">Todos</option>
+                            @for (int year = DateTime.Now.Year + 1; year >= DateTime.Now.Year - 5; year--)
+                            {
+                                <option value="@year" selected="@(Model?.Year == year ? "selected" : null)">@year</option>
+
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-2 mb-3">
+                        <label for="Status" class="form-label">Status</label>
+                        <select class="form-select" id="Status" name="Status">
+                            <option value="">Todos</option>
+                            @if (ViewBag.StatusOptions != null)
+                            {
+                                @foreach (var status in ViewBag.StatusOptions)
+                                {
+                                    <option value="@status.Value" selected="@(Model?.Status == status.Value ? "selected" : "")">
+                                        @status.Text
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Filtros Booleanos -->
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Opções</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="IsRecurring" name="IsRecurring" 
+                                   value="true" @(Model?.IsRecurring == true ? "checked" : "")>
+                            <label class="form-check-label" for="IsRecurring">
+                                Apenas recorrentes
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="HasInstallments" name="HasInstallments" 
+                                   value="true" @(Model?.HasInstallments == true ? "checked" : "")>
+                            <label class="form-check-label" for="HasInstallments">
+                                Com parcelas
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Ordenação -->
+                    <div class="col-md-4 mb-3">
+                        <label for="OrderBy" class="form-label">Ordenar por</label>
+                        <select class="form-select" id="OrderBy" name="OrderBy">
+                            @if (ViewBag.OrderByOptions != null)
+                            {
+                                @foreach (var option in ViewBag.OrderByOptions)
+                                {
+                                    <option value="@option.Value" selected="@(Model?.OrderBy == option.Value ? "selected" : "")">
+                                        @option.Text
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Ordem</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="Ascending" value="true" id="OrderAsc" 
+                                   @(Model?.Ascending != false ? "checked" : "")>
+                            <label class="form-check-label" for="OrderAsc">
+                                Crescente
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="Ascending" value="false" id="OrderDesc" 
+                                   @(Model?.Ascending == false ? "checked" : "")>
+                            <label class="form-check-label" for="OrderDesc">
+                                Decrescente
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Ações -->
+                    <div class="col-md-3 mb-3 d-flex align-items-end">
+                        <div class="btn-group w-100">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-search me-1"></i>
+                                Filtrar
+                            </button>
+                            <a href="@Url.Action("ClearFilters")" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>
+                                Limpar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros Rápidos -->
+<div class="mb-3">
+    <div class="btn-group btn-group-sm" role="group">
+        <a href="@Url.Action("QuickFilter", new { filterType = "thismonth" })" 
+           class="btn btn-outline-success @(Model?.Month == DateTime.Now.Month && Model?.Year == DateTime.Now.Year ? "active" : "")">
+            <i class="fas fa-calendar-alt me-1"></i>
+            Este Mês
+        </a>
+        <a href="@Url.Action("QuickFilter", new { filterType = "thisweek" })" 
+           class="btn btn-outline-success">
+            <i class="fas fa-calendar-week me-1"></i>
+            Esta Semana
+        </a>
+        <a href="@Url.Action("QuickFilter", new { filterType = "pending" })" 
+           class="btn btn-outline-warning @(Model?.Status == "Pending" ? "active" : "")">
+            <i class="fas fa-clock me-1"></i>
+            Pendentes
+        </a>
+        <a href="@Url.Action("QuickFilter", new { filterType = "received" })" 
+           class="btn btn-outline-info @(Model?.Status == "Received" ? "active" : "")">
+            <i class="fas fa-check-circle me-1"></i>
+            Recebidas
+        </a>
+    </div>
+</div>
+
+@if (ViewBag.HasActiveFilters == true)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Filtros ativos!</strong> Exibindo receitas filtradas.
+        <a href="@Url.Action("ClearFilters")" class="alert-link">Limpar todos os filtros</a>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit quando alterar select de mês/ano
+    const monthSelect = document.getElementById('Month');
+    const yearSelect = document.getElementById('Year');
+    
+    if (monthSelect && yearSelect) {
+        function autoSubmitIncome() {
+            if (monthSelect.value || yearSelect.value) {
+                document.getElementById('incomeFilterForm').submit();
+            }
+        }
+        
+        monthSelect.addEventListener('change', autoSubmitIncome);
+        yearSelect.addEventListener('change', autoSubmitIncome);
+    }
+    
+    // Limpeza inteligente de filtros relacionados
+    const startDate = document.getElementById('StartDate');
+    const endDate = document.getElementById('EndDate');
+    
+    if (startDate && endDate) {
+        startDate.addEventListener('change', function() {
+            if (this.value) {
+                monthSelect.value = '';
+                yearSelect.value = '';
+            }
+        });
+        
+        endDate.addEventListener('change', function() {
+            if (this.value) {
+                monthSelect.value = '';
+                yearSelect.value = '';
+            }
+        });
+    }
+    
+    // Validação de faixa de valores
+    const minAmount = document.getElementById('MinAmount');
+    const maxAmount = document.getElementById('MaxAmount');
+    
+    if (minAmount && maxAmount) {
+        minAmount.addEventListener('change', function() {
+            if (maxAmount.value && parseFloat(this.value) > parseFloat(maxAmount.value)) {
+                maxAmount.value = this.value;
+            }
+        });
+        
+        maxAmount.addEventListener('change', function() {
+            if (minAmount.value && parseFloat(this.value) < parseFloat(minAmount.value)) {
+                minAmount.value = this.value;
+            }
+        });
+    }
+    
+    // Limpeza de conflitos entre datas de vencimento e recebimento
+    const receivedStartDate = document.getElementById('ReceivedStartDate');
+    const receivedEndDate = document.getElementById('ReceivedEndDate');
+    
+    if (receivedStartDate || receivedEndDate) {
+        function clearDueDateWhenReceived() {
+            if (receivedStartDate?.value || receivedEndDate?.value) {
+                // Se tem filtro de recebimento, limpa filtros de vencimento
+                if (startDate) startDate.value = '';
+                if (endDate) endDate.value = '';
+                monthSelect.value = '';
+                yearSelect.value = '';
+            }
+        }
+        
+        receivedStartDate?.addEventListener('change', clearDueDateWhenReceived);
+        receivedEndDate?.addEventListener('change', clearDueDateWhenReceived);
+    }
+});
+</script>
