@@ -13,7 +13,7 @@
         </div>
     </div>
     
-    <div class="collapse @(ViewBag.HasActiveFilters == true ? "show" : "")" id="incomeFilters">
+    <div class="collapse @(ViewBag.HasActiveFilters ? "show" : "")" id="incomeFilters">
         <div class="card-body">
             <form method="post" action="@Url.Action("ApplyFilters")" id="incomeFilterForm">
                 <div class="row">
