@@ -1,17 +1,11 @@
 ﻿@model IEnumerable<PaymentModel>
 @using Equilibrium.Web.Helpers
 @using Equilibrium.Web.Models.Payment
+@using Equilibrium.Web.Models.Filters
 @{
     ViewData["Title"] = ViewBag.Title ?? "Pagamentos";
-
-    var currentMonth = ViewBag.Month ?? DateTime.Now.Month;
-    var currentYear = ViewBag.Year ?? DateTime.Now.Year;
-
-    var previousMonth = currentMonth == 1 ? 12 : currentMonth - 1;
-    var previousYear = currentMonth == 1 ? currentYear - 1 : currentYear;
-
-    var nextMonth = currentMonth == 12 ? 1 : currentMonth + 1;
-    var nextYear = currentMonth == 12 ? currentYear + 1 : currentYear;
+    var filter = ViewBag.CurrentFilter as PaymentFilter ?? new PaymentFilter();
+    var hasActiveFilters = ViewBag.HasActiveFilters ?? false;
 }
 
 <div class="container-fluid">
@@ -24,53 +18,13 @@
         }
     </div>
 
-    <!-- Filtros -->
-    <div class="card shadow mb-4">
-        <partial name="_Partials/Commons/_CardHeader" model='(
-            Title: "Filtros",
-            BadgeText: "",
-            BadgeClass: "",
-            Icon: "fa-filter",
-            CollapseTarget: "collapseFilters")' />
-        <div class="card-body collapse show" id="collapseFilters">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <div class="d-flex flex-wrap gap-2">
-                        <a asp-action="Index" class="btn btn-outline-primary btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewBag.Title == null ? "active" : "")">
-                            <i class="fas fa-list"></i> Todos
-                        </a>
-                        <a asp-action="Pending" class="btn btn-outline-warning btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "Pending" ? "active" : "")">
-                            <i class="fas fa-clock"></i> Pendentes
-                        </a>
-                        <a asp-action="Overdue" class="btn btn-outline-danger btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "Overdue" ? "active" : "")">
-                            <i class="fas fa-exclamation-triangle"></i> Vencidos
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="d-flex flex-wrap justify-content-md-end gap-2">
-                        <div class="btn-group">
-                            <a asp-action="ByMonth" asp-route-month="@previousMonth" asp-route-year="@previousYear" class="btn btn-outline-secondary btn-sm">
-                                <i class="fas fa-chevron-left"></i>
-                            </a>
-                            <a asp-action="ByMonth" asp-route-month="@DateTime.Now.Month" asp-route-year="@DateTime.Now.Year"
-                               class="btn btn-outline-primary btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "ByMonth" && currentMonth == DateTime.Now.Month && currentYear == DateTime.Now.Year ? "active" : "")">
-                                Mês Atual
-                            </a>
-                            <a asp-action="ByMonth" asp-route-month="@nextMonth" asp-route-year="@nextYear" class="btn btn-outline-secondary btn-sm">
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Filtros Avançados -->
+    <partial name="_Partials/Filters/_AdvancedFiltersPartial" model="filter" />
 
     @if (!Model.Any())
     {
         <partial name="_Partials/Commons/_EmptyState" model='(
-            Message: "Nenhum pagamento encontrado.",
+            Message: hasActiveFilters ? "Nenhum pagamento encontrado com os filtros aplicados." : "Nenhum pagamento encontrado.",
             Icon: "fa-money-bill-wave",
             ButtonText: await PermissionHelper.HasPermissionAsync(Context, "payments.create") ? "Criar Novo Pagamento" : "",
             ButtonUrl: Url.Action("Create"),
@@ -79,6 +33,7 @@
     }
     else
     {
+        <!-- Métricas Resumidas -->
         <div class="row">
             <partial name="_Partials/Commons/_MetricCard" model='(
                 Title: "Total Geral",
@@ -103,11 +58,12 @@
                 ShowProgress: false)' />
         </div>
 
+        <!-- Tabela de Pagamentos -->
         <div class="card shadow mb-4">
             <partial name="_Partials/Commons/_CardHeader" model='(
                 Title: "Seus Pagamentos",
-                BadgeText: "",
-                BadgeClass: "",
+                BadgeText: hasActiveFilters ? "Filtrado" : "",
+                BadgeClass: hasActiveFilters ? "bg-info" : "",
                 Icon: "fa-money-bill-wave",
                 CollapseTarget: "")' />
             <div class="card-body">
@@ -127,9 +83,9 @@
                         <tbody>
                             @foreach (var item in Model.OrderBy(e => e.DueDate))
                             {
-                                <tr>
+                                <tr class="@(item.Status == 3 ? "table-warning" : item.Status == 2 ? "table-success" : "")">
                                     <td>
-                                        <a asp-action="Details" asp-route-id="@item.Id">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none">
                                             <div class="fw-medium">
                                                 @if (item.IsRecurring)
                                                 {
@@ -144,15 +100,27 @@
                                             </div>
                                         </a>
                                     </td>
-                                    <td class="text-center">@item.GetFormattedDueDate()</td>
-                                    <td class="text-end">@item.GetFormattedAmount()</td>
+                                    <td class="text-center">
+                                        @item.GetFormattedDueDate()
+                                        @if (item.Status == 1 && item.DueDate < DateTime.Today)
+                                        {
+                                            <br>
+
+                                            <small class="text-danger">Vencido</small>
+                                        }
+                                    </td>
+                                    <td class="text-end fw-bold">@item.GetFormattedAmount()</td>
                                     <td class="text-center">
                                         <partial name="_Partials/Commons/_StatusBadge" model='(
                                             BadgeClass: item.StatusBadgeClass,
                                             Description: item.StatusDescription)' />
                                     </td>
-                                    <td>@item.PaymentTypeName</td>
-                                    <td>@item.PaymentMethodName</td>
+                                    <td>
+                                        <small class="text-muted">@item.PaymentTypeName</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@item.PaymentMethodName</small>
+                                    </td>
                                     <td class="text-center">
                                         <div class="btn-group">
                                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Visualizar">
@@ -180,6 +148,47 @@
                 </div>
             </div>
         </div>
+
+        <!-- Ações Rápidas -->
+        @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
+        {
+            <div class="card shadow mb-4">
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Ações Rápidas",
+                    BadgeText: "",
+                    BadgeClass: "",
+                    Icon: "fa-bolt",
+                    CollapseTarget: "")' />
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Index", new { status = "Pending", orderBy = "dueDate" })" class="btn btn-warning w-100">
+                                <i class="fas fa-clock me-1"></i>
+                                Ver Pendentes (@Model.Count(p => p.Status == 1))
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Index", new { status = "Overdue", orderBy = "dueDate" })" class="btn btn-danger w-100">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Ver Vencidos (@Model.Count(p => p.Status == 3))
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Index", new { month = DateTime.Now.Month, year = DateTime.Now.Year })" class="btn btn-info w-100">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                Este Mês
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="Export" class="btn btn-secondary w-100">
+                                <i class="fas fa-file-export me-1"></i>
+                                Exportar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     }
 </div>
 

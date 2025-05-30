@@ -1,8 +1,11 @@
 ﻿@model IEnumerable<IncomeModel>
 @using Equilibrium.Web.Helpers
 @using Equilibrium.Web.Models.Income
+@using Equilibrium.Web.Models.Filters
 @{
     ViewData["Title"] = ViewBag.Title ?? "Receitas";
+    var filter = ViewBag.CurrentFilter as IncomeFilter ?? new IncomeFilter();
+    var hasActiveFilters = ViewBag.HasActiveFilters ?? false;
 }
 
 <div class="container-fluid">
@@ -15,37 +18,13 @@
         }
     </div>
 
-    <!-- Filtros -->
-    <div class="card shadow mb-4">
-        <partial name="_Partials/Commons/_CardHeader" model='(
-            Title: "Filtros",
-            BadgeText: "",
-            BadgeClass: "",
-            Icon: "fa-filter",
-            CollapseTarget: "collapseFilters")' />
-        <div class="card-body collapse show" id="collapseFilters">
-            <div class="row">
-                <div class="col-12 mb-3">
-                    <div class="d-flex flex-wrap gap-2">
-                        <a asp-action="Index" class="btn btn-outline-primary btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewBag.Title == null ? "active" : "")">
-                            <i class="fas fa-list"></i> Todas
-                        </a>
-                        <a asp-action="Pending" class="btn btn-outline-warning btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "Pending" ? "active" : "")">
-                            <i class="fas fa-clock"></i> Pendentes
-                        </a>
-                        <a asp-action="Received" class="btn btn-outline-success btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "Received" ? "active" : "")">
-                            <i class="fas fa-check-circle"></i> Recebidas
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Filtros de Receitas -->
+    <partial name="_Partials/Filters/_IncomeFiltersPartial" model="filter" />
 
     @if (!Model.Any())
     {
         <partial name="_Partials/Commons/_EmptyState" model='(
-            Message: "Nenhuma receita encontrada.",
+            Message: hasActiveFilters ? "Nenhuma receita encontrada com os filtros aplicados." : "Nenhuma receita encontrada.",
             Icon: "fa-money-bill-alt",
             ButtonText: await PermissionHelper.HasPermissionAsync(Context, "incomes.create") ? "Criar Nova Receita" : "",
             ButtonUrl: Url.Action("Create"),
@@ -54,12 +33,13 @@
     }
     else
     {
+        <!-- Métricas Resumidas -->
         <div class="row">
             <partial name="_Partials/Commons/_MetricCard" model='(
                 Title: "Total de Receitas",
                 Value: Model.Sum(i => i.Amount).ToString("C2"),
                 Icon: "fa-money-bill-alt",
-                Color: "primary",
+                Color: "success",
                 SubValue: Model.Count() + " receitas",
                 ShowProgress: false)' />
 
@@ -80,11 +60,12 @@
                 ShowProgress: false)' />
         </div>
 
+        <!-- Tabela de Receitas -->
         <div class="card shadow mb-4">
             <partial name="_Partials/Commons/_CardHeader" model='(
                 Title: "Suas Receitas",
-                BadgeText: "",
-                BadgeClass: "",
+                BadgeText: hasActiveFilters ? "Filtrado" : "",
+                BadgeClass: hasActiveFilters ? "bg-success" : "",
                 Icon: "fa-money-bill-alt",
                 CollapseTarget: "")' />
             <div class="card-body">
@@ -104,9 +85,9 @@
                         <tbody>
                             @foreach (var item in Model.OrderBy(e => e.DueDate))
                             {
-                                <tr>
+                                <tr class="@(item.Status == 2 ? "table-success" : item.Status == 3 ? "table-secondary" : "")">
                                     <td>
-                                        <a asp-action="Details" asp-route-id="@item.Id">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none">
                                             <div class="fw-medium">
                                                 @if (item.IsRecurring)
                                                 {
@@ -121,10 +102,28 @@
                                             </div>
                                         </a>
                                     </td>
-                                    <td class="text-center">@item.GetFormattedDueDate()</td>
-                                    <td class="text-end">@item.GetFormattedAmount()</td>
-                                    <td class="text-center">@item.GetFormattedReceivedDate()</td>
-                                    <td>@item.IncomeTypeName</td>
+                                    <td class="text-center">
+                                        @item.GetFormattedDueDate()
+                                        @if (item.Status == 1 && item.DueDate < DateTime.Today)
+                                        {
+                                            <br>
+
+                                            <small class="text-warning">Vencido</small>
+                                        }
+                                    </td>
+                                    <td class="text-end fw-bold text-success">@item.GetFormattedAmount()</td>
+                                    <td class="text-center">
+                                        @item.GetFormattedReceivedDate()
+                                        @if (item.Status == 2 && item.ReceivedDate.HasValue)
+                                        {
+                                            <br>
+
+                                            <small class="text-success">Recebido</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@item.IncomeTypeName</small>
+                                    </td>
                                     <td class="text-center">
                                         <partial name="_Partials/Commons/_StatusBadge" model='(BadgeClass: item.StatusBadgeClass, Description: item.StatusDescription)' />
                                     </td>
@@ -155,6 +154,47 @@
                 </div>
             </div>
         </div>
+
+        <!-- Ações Rápidas -->
+        @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.edit"))
+        {
+            <div class="card shadow mb-4">
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Ações Rápidas",
+                    BadgeText: "",
+                    BadgeClass: "",
+                    Icon: "fa-bolt",
+                    CollapseTarget: "")' />
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Index", new { status = "Pending", orderBy = "dueDate" })" class="btn btn-warning w-100">
+                                <i class="fas fa-clock me-1"></i>
+                                Ver Pendentes (@Model.Count(i => i.Status == 1))
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Index", new { status = "Received", orderBy = "receivedDate", ascending = false })" class="btn btn-success w-100">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Ver Recebidas (@Model.Count(i => i.Status == 2))
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Index", new { month = DateTime.Now.Month, year = DateTime.Now.Year })" class="btn btn-info w-100">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                Este Mês
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="Export" class="btn btn-secondary w-100">
+                                <i class="fas fa-file-export me-1"></i>
+                                Exportar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     }
 </div>
 
