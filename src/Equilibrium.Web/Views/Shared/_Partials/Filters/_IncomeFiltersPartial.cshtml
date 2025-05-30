@@ -1,19 +1,24 @@
 ﻿@model Equilibrium.Web.Models.Filters.IncomeFilter
+@{
+    var hasActiveFilters = ViewBag.HasActiveFilters ?? false;
+}
 
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h6 class="mb-0">
             <i class="fas fa-filter me-2"></i>
             Filtros de Receitas
+            @if (hasActiveFilters)
+            {
+                <span class="badge bg-success ms-2">Ativos</span>
+            }
         </h6>
-        <div class="btn-group btn-group-sm">
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#incomeFilters">
-                <i class="fas fa-chevron-down"></i>
-            </button>
-        </div>
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#incomeFilters">
+            <i class="fas @(hasActiveFilters ? "fa-chevron-down" : "fa-chevron-right")" id="incomeCollapseIcon"></i>
+        </button>
     </div>
     
-    <div class="collapse @(ViewBag.HasActiveFilters ? "show" : "")" id="incomeFilters">
+    <div class="collapse @(hasActiveFilters ? "show" : "")" id="incomeFilters">
         <div class="card-body">
             <form method="post" action="@Url.Action("ApplyFilters")" id="incomeFilterForm">
                 <div class="row">
@@ -28,7 +33,7 @@
                     <div class="col-md-6 mb-3">
                         <label for="IncomeTypeId" class="form-label">Tipo de Receita</label>
                         <select class="form-select" id="IncomeTypeId" name="IncomeTypeId">
-                            <option value="">Todos os tipos</option>
+                            <option value="">Selecione o tipo</option>
                             @if (ViewBag.IncomeTypes != null)
                             {
                                 @foreach (var type in ViewBag.IncomeTypes)
@@ -117,7 +122,6 @@
                             @for (int year = DateTime.Now.Year + 1; year >= DateTime.Now.Year - 5; year--)
                             {
                                 <option value="@year" selected="@(Model?.Year == year ? "selected" : null)">@year</option>
-
                             }
                         </select>
                     </div>
@@ -216,30 +220,26 @@
 <!-- Filtros Rápidos -->
 <div class="mb-3">
     <div class="btn-group btn-group-sm" role="group">
-        <a href="@Url.Action("QuickFilter", new { filterType = "thismonth" })" 
-           class="btn btn-outline-success @(Model?.Month == DateTime.Now.Month && Model?.Year == DateTime.Now.Year ? "active" : "")">
+        <a href="@Url.Action("QuickFilter", new { filterType = "thismonth" })" class="btn btn-outline-success">
             <i class="fas fa-calendar-alt me-1"></i>
             Este Mês
         </a>
-        <a href="@Url.Action("QuickFilter", new { filterType = "thisweek" })" 
-           class="btn btn-outline-success">
+        <a href="@Url.Action("QuickFilter", new { filterType = "thisweek" })" class="btn btn-outline-success">
             <i class="fas fa-calendar-week me-1"></i>
             Esta Semana
         </a>
-        <a href="@Url.Action("QuickFilter", new { filterType = "pending" })" 
-           class="btn btn-outline-warning @(Model?.Status == "Pending" ? "active" : "")">
+        <a href="@Url.Action("QuickFilter", new { filterType = "pending" })" class="btn btn-outline-warning">
             <i class="fas fa-clock me-1"></i>
             Pendentes
         </a>
-        <a href="@Url.Action("QuickFilter", new { filterType = "received" })" 
-           class="btn btn-outline-info @(Model?.Status == "Received" ? "active" : "")">
+        <a href="@Url.Action("QuickFilter", new { filterType = "received" })" class="btn btn-outline-info">
             <i class="fas fa-check-circle me-1"></i>
             Recebidas
         </a>
     </div>
 </div>
 
-@if (ViewBag.HasActiveFilters == true)
+@if (hasActiveFilters)
 {
     <div class="alert alert-success alert-dismissible fade show">
         <i class="fas fa-info-circle me-2"></i>
@@ -251,26 +251,27 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto-submit quando alterar select de mês/ano
-    const monthSelect = document.getElementById('Month');
-    const yearSelect = document.getElementById('Year');
+    // Controle do ícone de colapso
+    const collapseElement = document.getElementById('incomeFilters');
+    const collapseIcon = document.getElementById('incomeCollapseIcon');
     
-    if (monthSelect && yearSelect) {
-        function autoSubmitIncome() {
-            if (monthSelect.value || yearSelect.value) {
-                document.getElementById('incomeFilterForm').submit();
-            }
-        }
+    if (collapseElement && collapseIcon) {
+        collapseElement.addEventListener('show.bs.collapse', function () {
+            collapseIcon.className = 'fas fa-chevron-down';
+        });
         
-        monthSelect.addEventListener('change', autoSubmitIncome);
-        yearSelect.addEventListener('change', autoSubmitIncome);
+        collapseElement.addEventListener('hide.bs.collapse', function () {
+            collapseIcon.className = 'fas fa-chevron-right';
+        });
     }
     
     // Limpeza inteligente de filtros relacionados
     const startDate = document.getElementById('StartDate');
     const endDate = document.getElementById('EndDate');
+    const monthSelect = document.getElementById('Month');
+    const yearSelect = document.getElementById('Year');
     
-    if (startDate && endDate) {
+    if (startDate && endDate && monthSelect && yearSelect) {
         startDate.addEventListener('change', function() {
             if (this.value) {
                 monthSelect.value = '';

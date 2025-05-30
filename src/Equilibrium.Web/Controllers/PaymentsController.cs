@@ -6,6 +6,7 @@ using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Payment;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Equilibrium.Web.Controllers
 {
@@ -17,76 +18,46 @@ namespace Equilibrium.Web.Controllers
         private readonly IPaymentTypeService _paymentTypeService;
         private readonly IPaymentMethodService _paymentMethodService;
         private readonly ICreditCardService _creditCardService;
-        private readonly IFinancingService _financingService;
 
         public PaymentsController(
             IPaymentService paymentService,
             IPaymentTypeService paymentTypeService,
             IPaymentMethodService paymentMethodService,
-            ICreditCardService creditCardService,
-            IFinancingService financingService)
+            ICreditCardService creditCardService)
         {
-            _paymentService = paymentService ?? throw new ArgumentNullException(nameof(paymentService));
-            _paymentTypeService = paymentTypeService ?? throw new ArgumentNullException(nameof(paymentTypeService));
-            _paymentMethodService = paymentMethodService ?? throw new ArgumentNullException(nameof(paymentMethodService));
-            _creditCardService = creditCardService ?? throw new ArgumentNullException(nameof(creditCardService));
-            _financingService = financingService ?? throw new ArgumentNullException(nameof(financingService));
+            _paymentService = paymentService;
+            _paymentTypeService = paymentTypeService;
+            _paymentMethodService = paymentMethodService;
+            _creditCardService = creditCardService;
         }
 
-        public async Task<IActionResult> Index(PaymentFilter filter)
+        public async Task<IActionResult> Index()
         {
             try
             {
                 var token = GetToken();
 
-                // Se não há filtros específicos, usa filtro padrão do mês atual
-                if (!filter.HasFilters())
-                {
-                    filter = FilterHelper.QuickFilters.ThisMonth();
-                }
+                var filter = FilterCacheHelper.GetPaymentFilter(HttpContext.Session);
+
+                if (filter == null)
+                    return View(new List<PaymentModel>());
+
+
+                var hasActiveFilters = filter.HasFilters();
+
+                await LoadFilterData(token);
 
                 var payments = await _paymentService.GetFilteredPaymentsAsync(filter, token);
 
-                // Carregar dados para os dropdowns de filtro
-                await LoadFilterDropdowns(token);
-
                 ViewBag.CurrentFilter = filter;
-                ViewBag.HasActiveFilters = filter.HasFilters();
+                ViewBag.HasActiveFilters = hasActiveFilters;
 
                 return View(payments);
+
             }
             catch (Exception ex)
             {
-                return HandleException(ex, EntityNames.Payments, "loading");
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> QuickFilter(string filterType)
-        {
-            try
-            {
-                var token = GetToken();
-                PaymentFilter filter = filterType?.ToLower() switch
-                {
-                    "pending" => FilterHelper.QuickFilters.PendingPayments(),
-                    "overdue" => FilterHelper.QuickFilters.OverduePayments(),
-                    "thisweek" => FilterHelper.QuickFilters.ThisWeek(),
-                    "thismonth" => FilterHelper.QuickFilters.ThisMonth(),
-                    _ => new PaymentFilter()
-                };
-
-                var payments = await _paymentService.GetFilteredPaymentsAsync(filter, token);
-                await LoadFilterDropdowns(token);
-
-                ViewBag.CurrentFilter = filter;
-                ViewBag.HasActiveFilters = filter.HasFilters();
-
-                return View("Index", payments);
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex, EntityNames.Payments, "loading");
+                return HandleException(ex, EntityNames.Payment, "loading");
             }
         }
 
@@ -95,389 +66,99 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = GetToken();
-                var payments = await _paymentService.GetFilteredPaymentsAsync(filter, token);
+                // Salvar filtro no cache
+                FilterCacheHelper.SavePaymentFilter(HttpContext.Session, filter);
 
-                await LoadFilterDropdowns(token);
-
-                ViewBag.CurrentFilter = filter;
-                ViewBag.HasActiveFilters = filter.HasFilters();
-
-                return View("Index", payments);
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, EntityNames.Payments, "loading");
+                return HandleException(ex, EntityNames.Payment, "filtering");
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ClearFilters()
+        public async Task<IActionResult> QuickFilter(string filterType)
         {
             try
             {
-                var filter = FilterHelper.QuickFilters.ThisMonth();
-                var token = GetToken();
-                var payments = await _paymentService.GetFilteredPaymentsAsync(filter, token);
-
-                await LoadFilterDropdowns(token);
-
-                ViewBag.CurrentFilter = filter;
-                ViewBag.HasActiveFilters = false;
-
-                return View("Index", payments);
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex, EntityNames.Payments, "loading");
-            }
-        }
-
-        public async Task<IActionResult> Details(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return NotFound();
-            }
-
-            try
-            {
-                var token = GetToken();
-                var payment = await _paymentService.GetPaymentByIdAsync(id, token);
-
-                if (payment == null)
+                var filter = filterType.ToLower() switch
                 {
-                    return NotFound();
-                }
-
-                return View(payment);
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex, EntityNames.Payment, "loading");
-            }
-        }
-
-        [HttpGet]
-        [RequirePermission("payments.create")]
-        public async Task<IActionResult> Create()
-        {
-            try
-            {
-                var token = GetToken();
-                await LoadCreateEditDropdowns(token);
-
-                var model = new CreatePaymentModel
-                {
-                    DueDate = DateTime.Today,
-                    NumberOfInstallments = 1
+                    "thismonth" => FilterHelper.QuickFilters.ThisMonth(),
+                    "thisweek" => FilterHelper.QuickFilters.ThisWeek(),
+                    "pending" => FilterHelper.QuickFilters.PendingPayments(),
+                    "overdue" => FilterHelper.QuickFilters.OverduePayments(),
+                    _ => new PaymentFilter()
                 };
 
-                return View(model);
+                // Salvar filtro rápido no cache
+                FilterCacheHelper.SavePaymentFilter(HttpContext.Session, filter);
+
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                return HandleException(ex, EntityNames.Payment, "preparing form");
+                return HandleException(ex, EntityNames.Payment, "filtering");
             }
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("payments.create")]
-        public async Task<IActionResult> Create(CreatePaymentModel model)
+        public IActionResult ClearFilters()
         {
-            if (!ModelState.IsValid)
-            {
-                try
-                {
-                    var token = GetToken();
-                    await LoadCreateEditDropdowns(token);
-                    return View(model);
-                }
-                catch (Exception ex)
-                {
-                    return HandleException(ex, EntityNames.Payment, "preparing form");
-                }
-            }
-
             try
             {
-                var token = GetToken();
-                await _paymentService.CreatePaymentAsync(model, token);
-                return RedirectToIndexWithSuccess("Payments", EntityNames.Payment, "create");
+                // Limpar cache de filtros
+                FilterCacheHelper.ClearPaymentFilter(HttpContext.Session);
+
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                try
-                {
-                    var token = GetToken();
-                    await LoadCreateEditDropdowns(token);
-                    SetErrorMessage(EntityNames.Payment, "create", ex);
-                    return View(model);
-                }
-                catch
-                {
-                    return HandleException(ex, EntityNames.Payment, "create");
-                }
+                return HandleException(ex, EntityNames.Payment, "clearing filters");
             }
         }
 
-        [HttpGet]
-        [RequirePermission("payments.edit")]
-        public async Task<IActionResult> Edit(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return NotFound();
-            }
-
-            try
-            {
-                var token = GetToken();
-                var payment = await _paymentService.GetPaymentByIdAsync(id, token);
-
-                if (payment == null)
-                {
-                    return NotFound();
-                }
-
-                await LoadCreateEditDropdowns(token);
-
-                var model = new UpdatePaymentModel
-                {
-                    Description = payment.Description,
-                    Amount = payment.Amount,
-                    DueDate = payment.DueDate,
-                    PaymentDate = payment.PaymentDate,
-                    Status = payment.Status,
-                    IsRecurring = payment.IsRecurring,
-                    Notes = payment.Notes,
-                    PaymentTypeId = payment.PaymentTypeId,
-                    PaymentMethodId = payment.PaymentMethodId
-                };
-
-                return View(model);
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex, EntityNames.Payment, "loading");
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("payments.edit")]
-        public async Task<IActionResult> Edit(string id, UpdatePaymentModel model)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return NotFound();
-            }
-
-            if (!ModelState.IsValid)
-            {
-                try
-                {
-                    var token = GetToken();
-                    await LoadCreateEditDropdowns(token);
-                    return View(model);
-                }
-                catch (Exception ex)
-                {
-                    return HandleException(ex, EntityNames.Payment, "preparing form");
-                }
-            }
-
-            try
-            {
-                var token = GetToken();
-                await _paymentService.UpdatePaymentAsync(id, model, token);
-                return RedirectToDetailsWithSuccess("Payments", id, EntityNames.Payment, "update");
-            }
-            catch (Exception ex)
-            {
-                try
-                {
-                    var token = GetToken();
-                    await LoadCreateEditDropdowns(token);
-                    SetErrorMessage(EntityNames.Payment, "update", ex);
-                    return View(model);
-                }
-                catch
-                {
-                    return HandleException(ex, EntityNames.Payment, "update");
-                }
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("payments.delete")]
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return NotFound();
-            }
-
-            try
-            {
-                var token = GetToken();
-                await _paymentService.DeletePaymentAsync(id, token);
-                return RedirectToIndexWithSuccess("Payments", EntityNames.Payment, "delete");
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex, EntityNames.Payment, "delete");
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("payments.edit")]
-        public async Task<IActionResult> MarkAsPaid(string id, DateTime? paymentDate = null)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do pagamento não fornecido");
-            }
-
-            try
-            {
-                var token = GetToken();
-                await _paymentService.MarkAsPaidAsync(id, paymentDate ?? DateTime.Now, token);
-                SetStatusChangeSuccessMessage(EntityNames.Payment, EntityStatus.Paid);
-                return RedirectToAction("Details", new { id });
-            }
-            catch (Exception ex)
-            {
-                SetStatusChangeErrorMessage(EntityNames.Payment, EntityStatus.Paid, ex);
-                return RedirectToAction("Details", new { id });
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("payments.edit")]
-        public async Task<IActionResult> MarkAsOverdue(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do pagamento não fornecido");
-            }
-
-            try
-            {
-                var token = GetToken();
-                await _paymentService.MarkAsOverdueAsync(id, token);
-                SetStatusChangeSuccessMessage(EntityNames.Payment, EntityStatus.Overdue);
-                return RedirectToAction("Details", new { id });
-            }
-            catch (Exception ex)
-            {
-                SetStatusChangeErrorMessage(EntityNames.Payment, EntityStatus.Overdue, ex);
-                return RedirectToAction("Details", new { id });
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("payments.edit")]
-        public async Task<IActionResult> Cancel(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do pagamento não fornecido");
-            }
-
-            try
-            {
-                var token = GetToken();
-                await _paymentService.CancelPaymentAsync(id, token);
-                SetSuccessMessage(EntityNames.Payment, "cancel");
-                return RedirectToAction("Details", new { id });
-            }
-            catch (Exception ex)
-            {
-                SetErrorMessage(EntityNames.Payment, "cancel", ex);
-                return RedirectToAction("Details", new { id });
-            }
-        }
-
-        // Métodos auxiliares privados
-        private async Task LoadFilterDropdowns(string token)
+        private async Task LoadFilterData(string token)
         {
             try
             {
+                // Carregar dados necessários para os filtros
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
                 var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
 
+                // Status options
+                var statusOptions = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "Pending", Text = "Pendente" },
+                    new SelectListItem { Value = "Paid", Text = "Pago" },
+                    new SelectListItem { Value = "Overdue", Text = "Vencido" },
+                    new SelectListItem { Value = "Cancelled", Text = "Cancelado" }
+                };
+
+                // Order by options
+                var orderByOptions = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "dueDate", Text = "Data de Vencimento" },
+                    new SelectListItem { Value = "description", Text = "Descrição" },
+                    new SelectListItem { Value = "amount", Text = "Valor" },
+                    new SelectListItem { Value = "paymentDate", Text = "Data de Pagamento" },
+                    new SelectListItem { Value = "status", Text = "Status" },
+                    new SelectListItem { Value = "createdAt", Text = "Data de Criação" }
+                };
+
                 ViewBag.PaymentTypes = paymentTypes;
                 ViewBag.PaymentMethods = paymentMethods;
                 ViewBag.CreditCards = creditCards;
-
-                // Opções de status
-                ViewBag.StatusOptions = new List<dynamic>
-                {
-                    new { Value = "Pending", Text = "Pendente" },
-                    new { Value = "Paid", Text = "Pago" },
-                    new { Value = "Overdue", Text = "Vencido" },
-                    new { Value = "Cancelled", Text = "Cancelado" }
-                };
-
-                // Opções de ordenação
-                ViewBag.OrderByOptions = new List<dynamic>
-                {
-                    new { Value = "dueDate", Text = "Data de Vencimento" },
-                    new { Value = "description", Text = "Descrição" },
-                    new { Value = "amount", Text = "Valor" },
-                    new { Value = "paymentDate", Text = "Data de Pagamento" },
-                    new { Value = "status", Text = "Status" },
-                    new { Value = "createdAt", Text = "Data de Criação" }
-                };
+                ViewBag.StatusOptions = statusOptions;
+                ViewBag.OrderByOptions = orderByOptions;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // Log do erro, mas não falhar o carregamento da página
-                SetCustomErrorMessage("Erro ao carregar opções de filtro. Algumas funcionalidades podem estar limitadas.");
-            }
-        }
-
-        private async Task LoadCreateEditDropdowns(string token)
-        {
-            var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
-            var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
-            var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
-            var financings = await _financingService.GetActiveFinancingsAsync(token);
-
-            ViewBag.PaymentTypes = paymentTypes;
-            ViewBag.PaymentMethods = paymentMethods;
-            ViewBag.CreditCards = creditCards;
-            ViewBag.Financings = financings;
-        }
-
-        // Endpoint para AJAX - Busca rápida
-        [HttpGet]
-        public async Task<IActionResult> SearchAsync(string term)
-        {
-            try
-            {
-                var token = GetToken();
-                var payments = await _paymentService.SearchPaymentsAsync(term, token);
-
-                return Json(payments.Select(p => new
-                {
-                    id = p.Id,
-                    description = p.Description,
-                    amount = p.GetFormattedAmount(),
-                    dueDate = p.GetFormattedDueDate(),
-                    status = p.StatusDescription
-                }));
-            }
-            catch (Exception ex)
-            {
-                return Json(new { error = ex.Message });
+                // Em caso de erro, definir listas vazias
+                ViewBag.PaymentTypes = new List<object>();
+                ViewBag.PaymentMethods = new List<object>();
+                ViewBag.CreditCards = new List<object>();
+                ViewBag.StatusOptions = new List<SelectListItem>();
+                ViewBag.OrderByOptions = new List<SelectListItem>();
             }
         }
     }

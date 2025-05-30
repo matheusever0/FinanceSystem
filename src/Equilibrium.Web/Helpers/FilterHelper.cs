@@ -1,4 +1,5 @@
 ﻿using Equilibrium.Web.Models.Filters;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Web;
 
 namespace Equilibrium.Web.Helpers
@@ -98,30 +99,6 @@ namespace Equilibrium.Web.Helpers
         }
 
         /// <summary>
-        /// Constrói uma query string a partir de um filtro de financiamentos
-        /// </summary>
-        public static string BuildFinancingQueryString(FinancingFilter filter)
-        {
-            if (filter == null) return string.Empty;
-
-            var parameters = new List<string>();
-
-            AddParameter(parameters, "description", filter.Description);
-            AddParameter(parameters, "minAmount", filter.MinAmount);
-            AddParameter(parameters, "maxAmount", filter.MaxAmount);
-            AddParameter(parameters, "status", filter.Status);
-            AddParameter(parameters, "type", filter.Type);
-            AddParameter(parameters, "startDate", filter.StartDate?.ToString("yyyy-MM-dd"));
-            AddParameter(parameters, "endDate", filter.EndDate?.ToString("yyyy-MM-dd"));
-            AddParameter(parameters, "minInterestRate", filter.MinInterestRate);
-            AddParameter(parameters, "maxInterestRate", filter.MaxInterestRate);
-            AddParameter(parameters, "orderBy", filter.OrderBy);
-            AddParameter(parameters, "ascending", filter.Ascending);
-
-            return string.Join("&", parameters);
-        }
-
-        /// <summary>
         /// Converte filtros em Dictionary para facilitar uso com HttpClient
         /// </summary>
         public static Dictionary<string, string> PaymentFilterToDictionary(PaymentFilter filter)
@@ -184,7 +161,7 @@ namespace Equilibrium.Web.Helpers
         }
 
         /// <summary>
-        /// Cria filtros pré-definidos comuns
+        /// Cria filtros pré-definidos comuns para pagamentos
         /// </summary>
         public static class QuickFilters
         {
@@ -235,6 +212,19 @@ namespace Equilibrium.Web.Helpers
                 };
             }
 
+            public static PaymentFilter PaidThisMonth()
+            {
+                var now = DateTime.Now;
+                return new PaymentFilter
+                {
+                    Status = "Paid",
+                    Month = now.Month,
+                    Year = now.Year,
+                    OrderBy = "paymentDate",
+                    Ascending = false
+                };
+            }
+
             public static IncomeFilter PendingIncomes()
             {
                 return new IncomeFilter
@@ -255,6 +245,86 @@ namespace Equilibrium.Web.Helpers
                     Year = now.Year,
                     OrderBy = "receivedDate",
                     Ascending = false
+                };
+            }
+
+            public static IncomeFilter ThisMonthIncomes()
+            {
+                var now = DateTime.Now;
+                return new IncomeFilter
+                {
+                    Month = now.Month,
+                    Year = now.Year,
+                    OrderBy = "dueDate",
+                    Ascending = true
+                };
+            }
+
+            public static IncomeFilter ThisWeekIncomes()
+            {
+                var now = DateTime.Now;
+                var startOfWeek = now.AddDays(-(int)now.DayOfWeek);
+                var endOfWeek = startOfWeek.AddDays(6);
+
+                return new IncomeFilter
+                {
+                    StartDate = startOfWeek.Date,
+                    EndDate = endOfWeek.Date,
+                    OrderBy = "dueDate",
+                    Ascending = true
+                };
+            }
+        }
+
+        /// <summary>
+        /// Opções padrão para dropdowns
+        /// </summary>
+        public static class DropdownOptions
+        {
+            public static List<SelectListItem> GetPaymentOrderByOptions()
+            {
+                return new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "dueDate", Text = "Data de Vencimento", Selected = true },
+                    new SelectListItem { Value = "description", Text = "Descrição" },
+                    new SelectListItem { Value = "amount", Text = "Valor" },
+                    new SelectListItem { Value = "paymentDate", Text = "Data de Pagamento" },
+                    new SelectListItem { Value = "status", Text = "Status" },
+                    new SelectListItem { Value = "createdAt", Text = "Data de Criação" }
+                };
+            }
+
+            public static List<SelectListItem> GetIncomeOrderByOptions()
+            {
+                return new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "dueDate", Text = "Data de Vencimento", Selected = true },
+                    new SelectListItem { Value = "description", Text = "Descrição" },
+                    new SelectListItem { Value = "amount", Text = "Valor" },
+                    new SelectListItem { Value = "receivedDate", Text = "Data de Recebimento" },
+                    new SelectListItem { Value = "status", Text = "Status" },
+                    new SelectListItem { Value = "createdAt", Text = "Data de Criação" }
+                };
+            }
+
+            public static List<SelectListItem> GetPaymentStatusOptions()
+            {
+                return new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "Pending", Text = "Pendente" },
+                    new SelectListItem { Value = "Paid", Text = "Pago" },
+                    new SelectListItem { Value = "Overdue", Text = "Vencido" },
+                    new SelectListItem { Value = "Cancelled", Text = "Cancelado" }
+                };
+            }
+
+            public static List<SelectListItem> GetIncomeStatusOptions()
+            {
+                return new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "Pending", Text = "Pendente" },
+                    new SelectListItem { Value = "Received", Text = "Recebido" },
+                    new SelectListItem { Value = "Cancelled", Text = "Cancelado" }
                 };
             }
         }
@@ -353,6 +423,28 @@ namespace Equilibrium.Web.Helpers
             }
 
             return filter;
+        }
+
+        /// <summary>
+        /// Verifica se dois filtros são equivalentes
+        /// </summary>
+        public static bool AreFiltersEqual(PaymentFilter filter1, PaymentFilter filter2)
+        {
+            if (filter1 == null && filter2 == null) return true;
+            if (filter1 == null || filter2 == null) return false;
+
+            return filter1.Description == filter2.Description &&
+                   filter1.Notes == filter2.Notes &&
+                   filter1.MinAmount == filter2.MinAmount &&
+                   filter1.MaxAmount == filter2.MaxAmount &&
+                   filter1.StartDate == filter2.StartDate &&
+                   filter1.EndDate == filter2.EndDate &&
+                   filter1.Month == filter2.Month &&
+                   filter1.Year == filter2.Year &&
+                   filter1.Status == filter2.Status &&
+                   filter1.PaymentTypeId == filter2.PaymentTypeId &&
+                   filter1.PaymentMethodId == filter2.PaymentMethodId &&
+                   filter1.IsRecurring == filter2.IsRecurring;
         }
     }
 }

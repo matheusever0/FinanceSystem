@@ -1,32 +1,37 @@
 ﻿@model Equilibrium.Web.Models.Filters.PaymentFilter
+@{
+    var hasActiveFilters = ViewBag.HasActiveFilters ?? false;
+}
 
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h6 class="mb-0">
             <i class="fas fa-filter me-2"></i>
             Filtros Avançados
+            @if (hasActiveFilters)
+            {
+                <span class="badge bg-primary ms-2">Ativos</span>
+            }
         </h6>
-        <div class="btn-group btn-group-sm">
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
-                <i class="fas fa-chevron-down"></i>
-            </button>
-        </div>
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
+            <i class="fas @(hasActiveFilters ? "fa-chevron-down" : "fa-chevron-right")" id="collapseIcon"></i>
+        </button>
     </div>
-    
-    <div class="collapse @(ViewBag.HasActiveFilters ? "show" : "")" id="advancedFilters">
+
+    <div class="collapse @(hasActiveFilters ? "show" : "")" id="advancedFilters">
         <div class="card-body">
             <form method="post" action="@Url.Action("ApplyFilters")" id="filterForm">
                 <div class="row">
                     <!-- Filtros de Busca -->
                     <div class="col-md-6 mb-3">
                         <label for="Description" class="form-label">Descrição</label>
-                        <input type="text" class="form-control" id="Description" name="Description" 
+                        <input type="text" class="form-control" id="Description" name="Description"
                                value="@Model?.Description" placeholder="Buscar por descrição...">
                     </div>
-                    
+
                     <div class="col-md-6 mb-3">
                         <label for="Notes" class="form-label">Observações</label>
-                        <input type="text" class="form-control" id="Notes" name="Notes" 
+                        <input type="text" class="form-control" id="Notes" name="Notes"
                                value="@Model?.Notes" placeholder="Buscar nas observações...">
                     </div>
                 </div>
@@ -37,16 +42,16 @@
                         <label for="MinAmount" class="form-label">Valor Mínimo</label>
                         <div class="input-group">
                             <span class="input-group-text">R$</span>
-                            <input type="number" class="form-control" id="MinAmount" name="MinAmount" 
+                            <input type="number" class="form-control" id="MinAmount" name="MinAmount"
                                    step="0.01" min="0" value="@Model?.MinAmount" placeholder="0,00">
                         </div>
                     </div>
-                    
+
                     <div class="col-md-3 mb-3">
                         <label for="MaxAmount" class="form-label">Valor Máximo</label>
                         <div class="input-group">
                             <span class="input-group-text">R$</span>
-                            <input type="number" class="form-control" id="MaxAmount" name="MaxAmount" 
+                            <input type="number" class="form-control" id="MaxAmount" name="MaxAmount"
                                    step="0.01" min="0" value="@Model?.MaxAmount" placeholder="999999,99">
                         </div>
                     </div>
@@ -54,13 +59,13 @@
                     <!-- Filtros de Data -->
                     <div class="col-md-3 mb-3">
                         <label for="StartDate" class="form-label">Data Inicial</label>
-                        <input type="date" class="form-control" id="StartDate" name="StartDate" 
+                        <input type="date" class="form-control" id="StartDate" name="StartDate"
                                value="@Model?.StartDate?.ToString("yyyy-MM-dd")">
                     </div>
-                    
+
                     <div class="col-md-3 mb-3">
                         <label for="EndDate" class="form-label">Data Final</label>
-                        <input type="date" class="form-control" id="EndDate" name="EndDate" 
+                        <input type="date" class="form-control" id="EndDate" name="EndDate"
                                value="@Model?.EndDate?.ToString("yyyy-MM-dd")">
                     </div>
                 </div>
@@ -85,7 +90,7 @@
                             <option value="12" selected="@(Model?.Month == 12 ? "selected" : null)">Dezembro</option>
                         </select>
                     </div>
-                    
+
                     <div class="col-md-2 mb-3">
                         <label for="Year" class="form-label">Ano</label>
                         <select class="form-select" id="Year" name="Year">
@@ -93,7 +98,6 @@
                             @for (int year = DateTime.Now.Year + 1; year >= DateTime.Now.Year - 5; year--)
                             {
                                 <option value="@year" selected="@(Model?.Year == year ? "selected" : null)">@year</option>
-
                             }
                         </select>
                     </div>
@@ -119,7 +123,7 @@
                     <div class="col-md-3 mb-3">
                         <label for="PaymentTypeId" class="form-label">Tipo de Pagamento</label>
                         <select class="form-select" id="PaymentTypeId" name="PaymentTypeId">
-                            <option value="">Todos</option>
+                            <option value="">Selecione o tipo</option>
                             @if (ViewBag.PaymentTypes != null)
                             {
                                 @foreach (var type in ViewBag.PaymentTypes)
@@ -136,7 +140,7 @@
                     <div class="col-md-3 mb-3">
                         <label for="PaymentMethodId" class="form-label">Método de Pagamento</label>
                         <select class="form-select" id="PaymentMethodId" name="PaymentMethodId">
-                            <option value="">Todos</option>
+                            <option value="">Selecione o método</option>
                             @if (ViewBag.PaymentMethods != null)
                             {
                                 @foreach (var method in ViewBag.PaymentMethods)
@@ -154,13 +158,13 @@
                     <!-- Filtros de Data de Pagamento -->
                     <div class="col-md-3 mb-3">
                         <label for="PaymentStartDate" class="form-label">Pago Desde</label>
-                        <input type="date" class="form-control" id="PaymentStartDate" name="PaymentStartDate" 
+                        <input type="date" class="form-control" id="PaymentStartDate" name="PaymentStartDate"
                                value="@Model?.PaymentStartDate?.ToString("yyyy-MM-dd")">
                     </div>
-                    
+
                     <div class="col-md-3 mb-3">
                         <label for="PaymentEndDate" class="form-label">Pago Até</label>
-                        <input type="date" class="form-control" id="PaymentEndDate" name="PaymentEndDate" 
+                        <input type="date" class="form-control" id="PaymentEndDate" name="PaymentEndDate"
                                value="@Model?.PaymentEndDate?.ToString("yyyy-MM-dd")">
                     </div>
 
@@ -185,14 +189,14 @@
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Opções</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="IsRecurring" name="IsRecurring" 
+                            <input class="form-check-input" type="checkbox" id="IsRecurring" name="IsRecurring"
                                    value="true" @(Model?.IsRecurring == true ? "checked" : "")>
                             <label class="form-check-label" for="IsRecurring">
                                 Apenas recorrentes
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="HasInstallments" name="HasInstallments" 
+                            <input class="form-check-input" type="checkbox" id="HasInstallments" name="HasInstallments"
                                    value="true" @(Model?.HasInstallments == true ? "checked" : "")>
                             <label class="form-check-label" for="HasInstallments">
                                 Com parcelas
@@ -217,25 +221,25 @@
                             }
                         </select>
                     </div>
-                    
+
                     <div class="col-md-2 mb-3">
                         <label class="form-label">Ordem</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="Ascending" value="true" id="OrderAsc" 
-                                   @(Model?.Ascending != false ? "checked" : "")>
+                            <input class="form-check-input" type="radio" name="Ascending" value="true" id="OrderAsc"
+                            @(Model?.Ascending != false ? "checked" : "")>
                             <label class="form-check-label" for="OrderAsc">
                                 Crescente
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="Ascending" value="false" id="OrderDesc" 
-                                   @(Model?.Ascending == false ? "checked" : "")>
+                            <input class="form-check-input" type="radio" name="Ascending" value="false" id="OrderDesc"
+                            @(Model?.Ascending == false ? "checked" : "")>
                             <label class="form-check-label" for="OrderDesc">
                                 Decrescente
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- Ações -->
                     <div class="col-md-6 mb-3 d-flex align-items-end">
                         <div class="btn-group w-100">
@@ -258,30 +262,26 @@
 <!-- Filtros Rápidos -->
 <div class="mb-3">
     <div class="btn-group btn-group-sm" role="group">
-        <a href="@Url.Action("QuickFilter", new { filterType = "thismonth" })" 
-           class="btn btn-outline-primary @(Model?.Month == DateTime.Now.Month && Model?.Year == DateTime.Now.Year ? "active" : "")">
+        <a href="@Url.Action("QuickFilter", new { filterType = "thismonth" })" class="btn btn-outline-primary">
             <i class="fas fa-calendar-alt me-1"></i>
             Este Mês
         </a>
-        <a href="@Url.Action("QuickFilter", new { filterType = "thisweek" })" 
-           class="btn btn-outline-primary">
+        <a href="@Url.Action("QuickFilter", new { filterType = "thisweek" })" class="btn btn-outline-primary">
             <i class="fas fa-calendar-week me-1"></i>
             Esta Semana
         </a>
-        <a href="@Url.Action("QuickFilter", new { filterType = "pending" })" 
-           class="btn btn-outline-warning @(Model?.Status == "Pending" ? "active" : "")">
+        <a href="@Url.Action("QuickFilter", new { filterType = "pending" })" class="btn btn-outline-warning">
             <i class="fas fa-clock me-1"></i>
             Pendentes
         </a>
-        <a href="@Url.Action("QuickFilter", new { filterType = "overdue" })" 
-           class="btn btn-outline-danger @(Model?.Status == "Overdue" ? "active" : "")">
+        <a href="@Url.Action("QuickFilter", new { filterType = "overdue" })" class="btn btn-outline-danger">
             <i class="fas fa-exclamation-triangle me-1"></i>
             Vencidos
         </a>
     </div>
 </div>
 
-@if (ViewBag.HasActiveFilters == true)
+@if (hasActiveFilters)
 {
     <div class="alert alert-info alert-dismissible fade show">
         <i class="fas fa-info-circle me-2"></i>
@@ -292,58 +292,59 @@
 }
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-submit quando alterar select de mês/ano
-    const monthSelect = document.getElementById('Month');
-    const yearSelect = document.getElementById('Year');
-    
-    if (monthSelect && yearSelect) {
-        function autoSubmit() {
-            if (monthSelect.value || yearSelect.value) {
-                document.getElementById('filterForm').submit();
-            }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Controle do ícone de colapso
+        const collapseElement = document.getElementById('advancedFilters');
+        const collapseIcon = document.getElementById('collapseIcon');
+
+        if (collapseElement && collapseIcon) {
+            collapseElement.addEventListener('show.bs.collapse', function () {
+                collapseIcon.className = 'fas fa-chevron-down';
+            });
+
+            collapseElement.addEventListener('hide.bs.collapse', function () {
+                collapseIcon.className = 'fas fa-chevron-right';
+            });
         }
-        
-        monthSelect.addEventListener('change', autoSubmit);
-        yearSelect.addEventListener('change', autoSubmit);
-    }
-    
-    // Limpeza inteligente de filtros relacionados
-    const startDate = document.getElementById('StartDate');
-    const endDate = document.getElementById('EndDate');
-    
-    if (startDate && endDate) {
-        startDate.addEventListener('change', function() {
-            if (this.value) {
-                monthSelect.value = '';
-                yearSelect.value = '';
-            }
-        });
-        
-        endDate.addEventListener('change', function() {
-            if (this.value) {
-                monthSelect.value = '';
-                yearSelect.value = '';
-            }
-        });
-    }
-    
-    // Validação de faixa de valores
-    const minAmount = document.getElementById('MinAmount');
-    const maxAmount = document.getElementById('MaxAmount');
-    
-    if (minAmount && maxAmount) {
-        minAmount.addEventListener('change', function() {
-            if (maxAmount.value && parseFloat(this.value) > parseFloat(maxAmount.value)) {
-                maxAmount.value = this.value;
-            }
-        });
-        
-        maxAmount.addEventListener('change', function() {
-            if (minAmount.value && parseFloat(this.value) < parseFloat(minAmount.value)) {
-                minAmount.value = this.value;
-            }
-        });
-    }
-});
+
+        // Limpeza inteligente de filtros relacionados
+        const startDate = document.getElementById('StartDate');
+        const endDate = document.getElementById('EndDate');
+        const monthSelect = document.getElementById('Month');
+        const yearSelect = document.getElementById('Year');
+
+        if (startDate && endDate && monthSelect && yearSelect) {
+            startDate.addEventListener('change', function() {
+                if (this.value) {
+                    monthSelect.value = '';
+                    yearSelect.value = '';
+                }
+            });
+
+            endDate.addEventListener('change', function() {
+                if (this.value) {
+                    monthSelect.value = '';
+                    yearSelect.value = '';
+                }
+            });
+        }
+
+        // Validação de faixa de valores
+        const minAmount = document.getElementById('MinAmount');
+        const maxAmount = document.getElementById('MaxAmount');
+
+        if (minAmount && maxAmount) {
+            minAmount.addEventListener('change', function() {
+                if (maxAmount.value && parseFloat(this.value) > parseFloat(maxAmount.value)) {
+                    maxAmount.value = this.value;
+                }
+            });
+
+            maxAmount.addEventListener('change', function() {
+                if (minAmount.value && parseFloat(this.value) < parseFloat(minAmount.value)) {
+                    minAmount.value = this.value;
+                }
+            });
+        }
+    });
 </script>
