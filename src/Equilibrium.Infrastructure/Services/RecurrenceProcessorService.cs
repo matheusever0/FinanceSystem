@@ -9,7 +9,7 @@ namespace Equilibrium.Infrastructure.Services
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<RecurrenceProcessorService> _logger;
-        private readonly TimeSpan _processingInterval = TimeSpan.FromHours(24); 
+        private readonly TimeSpan _processingInterval = TimeSpan.FromHours(24);
 
         public RecurrenceProcessorService(
             IServiceScopeFactory serviceScopeFactory,
@@ -30,17 +30,15 @@ namespace Equilibrium.Infrastructure.Services
 
                 try
                 {
-                    if (now.Day == 1)
-                    {
-                        using var scope = _serviceScopeFactory.CreateScope();
+                    using var scope = _serviceScopeFactory.CreateScope();
 
-                        var recurrenceService = scope.ServiceProvider.GetRequiredService<IRecurrenceService>();
+                    var recurrenceService = scope.ServiceProvider.GetRequiredService<IRecurrenceService>();
 
-                        await recurrenceService.ProcessRecurringPaymentsAsync();
-                        await recurrenceService.ProcessRecurringIncomesAsync();
+                    await recurrenceService.ProcessRecurringPaymentsAsync();
+                    await recurrenceService.ProcessRecurringIncomesAsync();
 
-                        _logger.LogInformation("Recurrence Processor Service processed recurrences.");
-                    }
+                    _logger.LogInformation("Recurrence Processor Service processed recurrences.");
+
                 }
                 catch (Exception ex)
                 {

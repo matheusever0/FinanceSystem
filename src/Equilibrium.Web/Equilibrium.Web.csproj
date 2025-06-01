@@ -25,7 +25,7 @@
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </Content>
 	  <Content Update="appsettings.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </Content>
 	</ItemGroup>
 	<PropertyGroup>
