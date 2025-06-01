@@ -25,16 +25,22 @@ namespace Equilibrium.Infrastructure.Services
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Recurrence Processor Service running at: {Time}", DateTimeOffset.Now);
+                var now = DateTime.Now;
+                _logger.LogInformation("Recurrence Processor Service running at: {Time}", now);
 
                 try
                 {
-                    using var scope = _serviceScopeFactory.CreateScope();
+                    if (now.Day == 1)
+                    {
+                        using var scope = _serviceScopeFactory.CreateScope();
 
-                    var recurrenceService = scope.ServiceProvider.GetRequiredService<IRecurrenceService>();
+                        var recurrenceService = scope.ServiceProvider.GetRequiredService<IRecurrenceService>();
 
-                    await recurrenceService.ProcessRecurringPaymentsAsync();
-                    await recurrenceService.ProcessRecurringIncomesAsync();
+                        await recurrenceService.ProcessRecurringPaymentsAsync();
+                        await recurrenceService.ProcessRecurringIncomesAsync();
+
+                        _logger.LogInformation("Recurrence Processor Service processed recurrences.");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -42,8 +48,10 @@ namespace Equilibrium.Infrastructure.Services
                 }
 
                 _logger.LogInformation("Recurrence Processor Service completed. Waiting for next run.");
+
                 await Task.Delay(_processingInterval, stoppingToken);
             }
         }
+
     }
 }
