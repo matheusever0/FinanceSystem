@@ -25,6 +25,7 @@ namespace Equilibrium.Infrastructure.Data
         public DbSet<IncomeType> IncomeTypes { get; set; }
         public DbSet<Financing> Financings { get; set; }
         public DbSet<FinancingInstallment> FinancingInstallments { get; set; }
+        public DbSet<CreditCardPayment> CreditCardPayments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -220,6 +221,22 @@ namespace Equilibrium.Infrastructure.Data
             modelBuilder.Entity<PaymentType>()
                 .Property(pt => pt.IsFinancingType)
                 .HasDefaultValue(false);
+
+            modelBuilder.Entity<CreditCardPayment>()
+                .Property(e => e.Id)
+                .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+            modelBuilder.Entity<CreditCardPayment>()
+                .HasOne(p => p.CreditCard)
+                .WithMany() 
+                .HasForeignKey(p => p.CreditCardId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CreditCardPayment>()
+                .HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

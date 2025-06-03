@@ -31,7 +31,9 @@ namespace Equilibrium.Application.Mappings
 
             CreateMap<Payment, PaymentDto>()
                 .ForMember(dest => dest.PaymentTypeName, opt => opt.MapFrom(src => src.PaymentType.Name))
-                .ForMember(dest => dest.PaymentMethodName, opt => opt.MapFrom(src => src.PaymentMethod.Name));
+                .ForMember(dest => dest.PaymentMethodName, opt => opt.MapFrom(src => src.PaymentMethod.Name))
+                .ForMember(dest => dest.CreditCardName, opt => opt.MapFrom(src => src.CreditCard != null ? src.CreditCard.Name : null))
+                .ForMember(dest => dest.FinancingDescription, opt => opt.MapFrom(src => src.Financing != null ? src.Financing.Description : null));
 
             CreateMap<PaymentType, PaymentTypeDto>();
 
@@ -76,6 +78,9 @@ namespace Equilibrium.Application.Mappings
             CreateMap<FinancingInstallment, FinancingInstallmentDetailDto>()
                 .ForMember(dest => dest.FinancingDescription, opt => opt.Ignore())
                 .ForMember(dest => dest.Payments, opt => opt.Ignore());
+
+            CreateMap<CreditCardPayment, InvoicePaymentDto>();
+            CreateMap<CreditCardInvoiceDto, CreditCardInvoiceDetailDto>();
         }
     }
 }

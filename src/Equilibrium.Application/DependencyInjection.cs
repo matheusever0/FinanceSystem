@@ -26,6 +26,7 @@ namespace Equilibrium.Application
             services.AddScoped<IIncomeTypeService, IncomeTypeService>();
             services.AddScoped<IFinancingService, FinancingService>();
             services.AddScoped<IFinancingInstallmentService, FinancingInstallmentService>();
+            services.AddScoped<ICreditCardInvoiceService, CreditCardInvoiceService>();
 
             return services;
         }

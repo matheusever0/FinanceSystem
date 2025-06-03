@@ -17,6 +17,7 @@ namespace Equilibrium.Domain.Interfaces.Services
         IIncomeInstallmentRepository IncomeInstallments { get; }
         IFinancingRepository Financings { get; }
         IFinancingInstallmentRepository FinancingInstallments { get; }
+        ICreditCardPaymentRepository CreditCardPayments { get; }
         Task<int> CompleteAsync();
     }
 }

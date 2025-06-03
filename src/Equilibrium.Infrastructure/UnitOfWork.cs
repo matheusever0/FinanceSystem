@@ -21,6 +21,7 @@ namespace Equilibrium.Infrastructure
         private IIncomeInstallmentRepository? _incomeInstallmentRepository;
         private IFinancingRepository? _financingRepository;
         private IFinancingInstallmentRepository? _financingInstallmentRepository;
+        private ICreditCardPaymentRepository? _creditCardPaymentRepository;
 
         private bool _disposed = false;
 
@@ -54,6 +55,7 @@ namespace Equilibrium.Infrastructure
         public IFinancingRepository Financings => _financingRepository ??= new FinancingRepository(_context);
 
         public IFinancingInstallmentRepository FinancingInstallments => _financingInstallmentRepository ??= new FinancingInstallmentRepository(_context);
+        public ICreditCardPaymentRepository CreditCardPayments => _creditCardPaymentRepository ??= new CreditCardPaymentRepository(_context);
 
         public async Task<int> CompleteAsync()
         {
