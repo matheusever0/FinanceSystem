@@ -1,0 +1,230 @@
+﻿@model IEnumerable<CreditCardInvoiceModel>
+@using Equilibrium.Web.Models.CreditCard
+@{
+    ViewData["Title"] = "Histórico de Faturas";
+    var card = ViewBag.CreditCard as CreditCardModel;
+    var months = ViewBag.Months ?? 12;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-history me-2"></i>
+            Histórico de Faturas - @card?.Name
+        </h2>
+        <div>
+            <partial name="_Partials/Commons/_BackButton" model='(Action: "CurrentInvoice", Controller: "CreditCards", Text: "Fatura Atual")' />
+        </div>
+    </div>
+
+    <!-- Filtro de Período -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="d-flex align-items-end gap-3">
+                <div>
+                    <label for="months" class="form-label">Últimos meses</label>
+                    <select name="months" id="months" class="form-select">
+                        <option value="3" selected="@(months == 3 ? "selected" : null)">3 meses</option>
+                        <option value="6" selected="@(months == 6 ? "selected" : null)">6 meses</option>
+                        <option value="12" selected="@(months == 12 ? "selected" : null)">12 meses</option>
+                        <option value="24" selected="@(months == 24 ? "selected" : null)">24 meses</option>
+
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter me-1"></i> Filtrar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <partial name="_Partials/Commons/_EmptyState" model='(
+            Message: "Nenhuma fatura encontrada no período selecionado.",
+            Icon: "fa-file-invoice",
+            ButtonText: "",
+            ButtonUrl: "",
+            ButtonIcon: "",
+            IsAlert: true)' />
+    }
+    else
+    {
+        <!-- Resumo Geral -->
+        <div class="row mb-4">
+            @{
+                var totalAmount = Model.Sum(i => i.TotalAmount);
+                var totalPaid = Model.Sum(i => i.PaidAmount);
+                var avgAmount = Model.Average(i => i.TotalAmount);
+                var overdueCount = Model.Count(i => i.IsOverdue);
+            }
+
+            <partial name="_Partials/Commons/_MetricCard" model='(
+                Title: "Total Faturado",
+                Value: totalAmount.ToString("C2"),
+                Icon: "fa-dollar-sign",
+                Color: "primary",
+                SubValue: Model.Count() + " faturas",
+                ShowProgress: false)' />
+
+            <partial name="_Partials/Commons/_MetricCard" model='(
+                Title: "Total Pago",
+                Value: totalPaid.ToString("C2"),
+                Icon: "fa-check-circle",
+                Color: "success",
+                SubValue: ((totalPaid / totalAmount) * 100).ToString("0") + "%",
+                ShowProgress: false)' />
+
+            <partial name="_Partials/Commons/_MetricCard" model='(
+                Title: "Média Mensal",
+                Value: avgAmount.ToString("C2"),
+                Icon: "fa-chart-line",
+                Color: "info",
+                SubValue: "por fatura",
+                ShowProgress: false)' />
+
+            <partial name="_Partials/Commons/_MetricCard" model='(
+                Title: "Faturas Vencidas",
+                Value: overdueCount.ToString(),
+                Icon: "fa-exclamation-triangle",
+                Color: overdueCount > 0 ? "danger" : "success",
+                SubValue: overdueCount > 0 ? "requer atenção" : "tudo em dia",
+                ShowProgress: false)' />
+        </div>
+
+        <!-- Lista de Faturas -->
+        <div class="card shadow">
+            <partial name="_Partials/Commons/_CardHeader" model='(
+                Title: "Faturas dos Últimos " + months + " Meses",
+                BadgeText: Model.Count().ToString(),
+                BadgeClass: "bg-info",
+                Icon: "fa-list",
+                CollapseTarget: "")' />
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Período</th>
+                                <th>Vencimento</th>
+                                <th class="text-end">Valor Total</th>
+                                <th class="text-end">Valor Pago</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Transações</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var invoice in Model.OrderByDescending(i => i.ReferenceDate))
+                            {
+                                <tr class="@(invoice.IsOverdue ? "table-danger" : invoice.IsPaid ? "table-success" : "")">
+                                    <td>
+                                        <strong>@invoice.ReferenceDate.ToString("MM/yyyy")</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            @invoice.ClosingDate.ToString("dd/MM") - @invoice.ReferenceDate.ToString("dd/MM")
+                                        </small>
+                                    </td>
+                                    <td>@invoice.GetFormattedDueDate()</td>
+                                    <td class="text-end fw-bold">@invoice.GetFormattedTotalAmount()</td>
+                                    <td class="text-end">@string.Format("{0:C2}", invoice.PaidAmount)</td>
+                                    <td class="text-center">
+                                        @if (invoice.IsPaid)
+                                        {
+                                            <span class="badge bg-success">Paga</span>
+                                        }
+                                        else if (invoice.IsOverdue)
+                                        {
+                                            <span class="badge bg-danger">Vencida</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Pendente</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-info">@invoice.TransactionCount</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <a asp-action="InvoiceDetails" 
+                                               asp-route-id="@card?.Id" 
+                                               asp-route-referenceDate="@invoice.ReferenceDate.ToString("yyyy-MM-dd")" 
+                                               class="btn btn-sm btn-primary" title="Ver Detalhes">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (!invoice.IsPaid && invoice.RemainingAmount > 0)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-success" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#quickPayModal"
+                                                        data-amount="@invoice.RemainingAmount"
+                                                        data-reference="@invoice.ReferenceDate.ToString("MM/yyyy")"
+                                                        title="Pagar Fatura">
+                                                    <i class="fas fa-money-bill"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal de Pagamento Rápido -->
+<div class="modal fade" id="quickPayModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="PayInvoice" asp-route-id="@card?.Id" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title">Pagamento Rápido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Fatura: <span id="modalReference"></span></p>
+                    <div class="mb-3">
+                        <label for="quickAmount" class="form-label">Valor</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input type="number" id="quickAmount" name="Amount" class="form-control" step="0.01" readonly>
+                        </div>
+                    </div>
+                    <input type="hidden" name="PayFullAmount" value="true">
+                    <input type="hidden" name="PaymentDate" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Confirmar Pagamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const quickPayModal = document.getElementById('quickPayModal');
+            if (quickPayModal) {
+                quickPayModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const amount = button.getAttribute('data-amount');
+                    const reference = button.getAttribute('data-reference');
+                    
+                    document.getElementById('quickAmount').value = amount;
+                    document.getElementById('modalReference').textContent = reference;
+                });
+            }
+        });
+    </script>
+}
+
+<!-- Atualização da View Details.cshtml do CreditCard -->
+<!-- Adicionar no final da seção de Ações (col-lg-4) -->
+
