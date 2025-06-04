@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Equilibrium.API.Controllers
 {
     public class CreditCardsController(IUnitOfWork unitOfWork, 
-        ICreditCardService service) : AuthenticatedController<ICreditCardService>(unitOfWork, service)
+        ICreditCardService service, ICreditCardInvoiceService invoiceService) : AuthenticatedController<ICreditCardService>(unitOfWork, service)
     {
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CreditCardDto>>> GetAll()
@@ -119,11 +119,8 @@ namespace Equilibrium.API.Controllers
                 if (creditCard.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 
-                // Aqui você injetaria o ICreditCardInvoiceService
-                // var invoice = await _invoiceService.GetCurrentInvoiceAsync(id);
-                // return Ok(invoice);
-
-                return NoContent(); // Temporário até injetar o serviço
+                var invoice = await invoiceService.GetCurrentInvoiceAsync(id);
+                return Ok(invoice);
             }
             catch (KeyNotFoundException ex)
             {
@@ -140,11 +137,8 @@ namespace Equilibrium.API.Controllers
                 if (creditCard.UserId != HttpContext.GetCurrentUserId())
                     return Forbid();
 
-                // Aqui você injetaria o ICreditCardInvoiceService
-                // var updatedCard = await _invoiceService.PayInvoiceAsync(id, payInvoiceDto);
-                // return Ok(updatedCard);
-
-                return NoContent(); // Temporário até injetar o serviço
+                var updatedCard = await invoiceService.PayInvoiceAsync(id, payInvoiceDto);
+                return Ok(updatedCard);
             }
             catch (KeyNotFoundException ex)
             {

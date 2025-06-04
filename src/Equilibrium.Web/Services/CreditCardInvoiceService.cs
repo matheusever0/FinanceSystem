@@ -18,8 +18,7 @@ namespace Equilibrium.Web.Services
         {
             try
             {
-                var invoice = await _apiService.GetAsync<CreditCardInvoiceModel>(
-                    $"creditcards/{creditCardId}/invoices/current", token);
+                var invoice = await _apiService.GetAsync<CreditCardInvoiceModel>($"/api/CreditCards/{creditCardId}/invoices/current", token);
                 return invoice ?? new CreditCardInvoiceModel
                 {
                     CreditCardId = creditCardId,
@@ -38,7 +37,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 var invoices = await _apiService.GetAsync<IEnumerable<CreditCardInvoiceModel>>(
-                    $"creditcards/{creditCardId}/invoices/history?months={months}", token);
+                    $"/api/CreditCards/{creditCardId}/invoices/history?months={months}", token);
                 return invoices ?? new List<CreditCardInvoiceModel>();
             }
             catch (Exception ex)
@@ -54,7 +53,7 @@ namespace Equilibrium.Web.Services
             {
                 var dateParam = referenceDate?.ToString("yyyy-MM-dd") ?? "";
                 var invoiceDetails = await _apiService.GetAsync<CreditCardInvoiceDetailModel>(
-                    $"creditcards/{creditCardId}/invoices/details?referenceDate={dateParam}", token);
+                    $"/api/CreditCards/{creditCardId}/invoices/details?referenceDate={dateParam}", token);
                 return invoiceDetails ?? new CreditCardInvoiceDetailModel
                 {
                     CreditCardId = creditCardId,
@@ -73,7 +72,7 @@ namespace Equilibrium.Web.Services
             try
             {
                 await _apiService.PostAsync<object>(
-                    $"creditcards/{creditCardId}/invoices/pay", paymentData, token);
+                    $"/api/CreditCards/{creditCardId}/invoices/pay", paymentData, token);
                 return true;
             }
             catch (Exception ex)
