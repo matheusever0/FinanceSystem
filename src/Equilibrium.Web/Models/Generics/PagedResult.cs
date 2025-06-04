@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace Equilibrium.Web.Models.Generics
 {
     public class PagedResult<T>

@@ -6,7 +6,6 @@ using Equilibrium.Web.Filters;
 using Equilibrium.Web.Helpers;
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.User;
-using Equilibrium.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
