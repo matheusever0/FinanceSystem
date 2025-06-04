@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+namespace Equilibrium.Web.Models.CreditCard;
+
 public class InvoicePaymentModel
 {
     public required string Id { get; set; }

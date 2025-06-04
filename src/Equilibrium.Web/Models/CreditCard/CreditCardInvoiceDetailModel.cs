@@ -1,6 +1,7 @@
-﻿using Equilibrium.Web.Models.CreditCard;
-using Equilibrium.Web.Models.Payment;
+﻿using Equilibrium.Web.Models.Payment;
 using System.ComponentModel.DataAnnotations;
+
+namespace Equilibrium.Web.Models.CreditCard;
 
 public class CreditCardInvoiceDetailModel : CreditCardInvoiceModel
 {
