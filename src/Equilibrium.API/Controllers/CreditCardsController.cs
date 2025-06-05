@@ -108,49 +108,6 @@ namespace Equilibrium.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
-
-        [HttpGet("{id}/current-invoice")]
-        public async Task<ActionResult<CreditCardInvoiceDto>> GetCurrentInvoice(Guid id)
-        {
-            try
-            {
-                var creditCard = await _service.GetByIdAsync(id);
-                if (creditCard.UserId != HttpContext.GetCurrentUserId())
-                    return Forbid();
-
-                // Aqui você injetaria o ICreditCardInvoiceService
-                // var invoice = await _invoiceService.GetCurrentInvoiceAsync(id);
-                // return Ok(invoice);
-
-                return NoContent(); // Temporário até injetar o serviço
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-        }
-
-        [HttpPost("{id}/pay-invoice")]
-        public async Task<ActionResult<CreditCardDto>> PayInvoice(Guid id, [FromBody] PayInvoiceDto payInvoiceDto)
-        {
-            try
-            {
-                var creditCard = await _service.GetByIdAsync(id);
-                if (creditCard.UserId != HttpContext.GetCurrentUserId())
-                    return Forbid();
-
-                // Aqui você injetaria o ICreditCardInvoiceService
-                // var updatedCard = await _invoiceService.PayInvoiceAsync(id, payInvoiceDto);
-                // return Ok(updatedCard);
-
-                return NoContent(); // Temporário até injetar o serviço
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-        }
     }
 }
 

@@ -30,12 +30,7 @@ namespace Equilibrium.Domain.Entities
         public Guid? FinancingInstallmentId { get; protected set; }
         public FinancingInstallment? FinancingInstallment { get; protected set; }
 
-        // ✅ ADICIONADO: Propriedade CreditCardId
-        public Guid? CreditCardId { get; protected set; }
-        public CreditCard? CreditCard { get; protected set; }
-
         public ICollection<PaymentInstallment> Installments { get; protected set; }
-
         protected Payment()
         {
             Installments = [];
@@ -68,46 +63,6 @@ namespace Equilibrium.Domain.Entities
 
             UserId = user.Id;
             User = user;
-
-            Installments = [];
-        }
-
-        // ✅ NOVO: Construtor com CreditCard
-        public Payment(
-            string description,
-            decimal amount,
-            DateTime dueDate,
-            PaymentType paymentType,
-            PaymentMethod paymentMethod,
-            User user,
-            CreditCard? creditCard = null,
-            bool isRecurring = false,
-            string notes = null)
-        {
-            Id = Guid.NewGuid();
-            Description = description;
-            Amount = amount;
-            DueDate = dueDate;
-            Status = PaymentStatus.Pending;
-            IsRecurring = isRecurring;
-            Notes = notes;
-            CreatedAt = DateTime.Now;
-
-            PaymentTypeId = paymentType.Id;
-            PaymentType = paymentType;
-
-            PaymentMethodId = paymentMethod.Id;
-            PaymentMethod = paymentMethod;
-
-            UserId = user.Id;
-            User = user;
-
-            // ✅ NOVO: Associar cartão de crédito se fornecido
-            if (creditCard != null)
-            {
-                CreditCardId = creditCard.Id;
-                CreditCard = creditCard;
-            }
 
             Installments = [];
         }
@@ -151,22 +106,6 @@ namespace Equilibrium.Domain.Entities
                 FinancingInstallmentId = financingInstallment.Id;
                 FinancingInstallment = financingInstallment;
             }
-        }
-
-        // ✅ NOVO: Método para associar cartão de crédito
-        public void AssociateCreditCard(CreditCard creditCard)
-        {
-            CreditCardId = creditCard.Id;
-            CreditCard = creditCard;
-            UpdateUpdatedAt();
-        }
-
-        // ✅ NOVO: Método para remover associação do cartão
-        public void RemoveCreditCardAssociation()
-        {
-            CreditCardId = null;
-            CreditCard = null;
-            UpdateUpdatedAt();
         }
 
         public void MarkAsPaid(DateTime paymentDate)
@@ -256,12 +195,12 @@ namespace Equilibrium.Domain.Entities
             PaymentType = paymentType;
             UpdateUpdatedAt();
         }
-
         public void UpdateMethod(PaymentMethod paymentMethod)
         {
             PaymentMethod = paymentMethod;
             UpdateUpdatedAt();
         }
+
 
         public void UpdateRecurring(bool recurring)
         {
