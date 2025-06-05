@@ -4,6 +4,7 @@ using Equilibrium.Application.DTOs.CreditCard;
 using Equilibrium.Application.DTOs.Payment;
 using Equilibrium.Application.Interfaces;
 using Equilibrium.Domain.Entities;
+using Equilibrium.Domain.Enums;
 using Equilibrium.Domain.Interfaces.Services;
 using Equilibrium.Resources;
 

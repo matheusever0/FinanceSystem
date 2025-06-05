@@ -1,4 +1,5 @@
 using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.PaymentMethod;
 
 namespace Equilibrium.Web.Services

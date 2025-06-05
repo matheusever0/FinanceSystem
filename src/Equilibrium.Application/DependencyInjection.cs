@@ -2,6 +2,8 @@ using Equilibrium.Application.Interfaces;
 using Equilibrium.Application.Mappings;
 using Equilibrium.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
+using FluentValidation;
+using System.Reflection;
 
 namespace Equilibrium.Application
 {

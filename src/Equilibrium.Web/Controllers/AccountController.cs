@@ -2,6 +2,7 @@
 using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.Login;
+using Equilibrium.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;

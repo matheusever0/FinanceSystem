@@ -1,3 +1,4 @@
+using Equilibrium.Web.Models.Generics;
 using Equilibrium.Web.Models.Role;
 
 namespace Equilibrium.Web.Interfaces
