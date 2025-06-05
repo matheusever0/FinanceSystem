@@ -74,41 +74,6 @@ namespace Equilibrium.Infrastructure.Migrations
                     b.ToTable("CreditCards");
                 });
 
-            modelBuilder.Entity("Equilibrium.Domain.Entities.CreditCardPayment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID()");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CreditCardId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("PaymentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreditCardId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("CreditCardPayments");
-                });
-
             modelBuilder.Entity("Equilibrium.Domain.Entities.Financing", b =>
                 {
                     b.Property<Guid>("Id")
@@ -356,9 +321,6 @@ namespace Equilibrium.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("CreditCardId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -398,8 +360,6 @@ namespace Equilibrium.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CreditCardId");
 
                     b.HasIndex("FinancingId");
 
@@ -666,25 +626,6 @@ namespace Equilibrium.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Equilibrium.Domain.Entities.CreditCardPayment", b =>
-                {
-                    b.HasOne("Equilibrium.Domain.Entities.CreditCard", "CreditCard")
-                        .WithMany()
-                        .HasForeignKey("CreditCardId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Equilibrium.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CreditCard");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Equilibrium.Domain.Entities.Financing", b =>
                 {
                     b.HasOne("Equilibrium.Domain.Entities.User", "User")
@@ -749,10 +690,6 @@ namespace Equilibrium.Infrastructure.Migrations
 
             modelBuilder.Entity("Equilibrium.Domain.Entities.Payment", b =>
                 {
-                    b.HasOne("Equilibrium.Domain.Entities.CreditCard", "CreditCard")
-                        .WithMany()
-                        .HasForeignKey("CreditCardId");
-
                     b.HasOne("Equilibrium.Domain.Entities.Financing", "Financing")
                         .WithMany("Payments")
                         .HasForeignKey("FinancingId")
@@ -780,8 +717,6 @@ namespace Equilibrium.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("CreditCard");
 
                     b.Navigation("Financing");
 
