@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Equilibrium.Web.Models.CreditCard;
-
 public class PayInvoiceModel
 {
     [Required(ErrorMessage = "O valor é obrigatório")]
