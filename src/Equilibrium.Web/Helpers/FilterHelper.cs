@@ -274,6 +274,24 @@ namespace Equilibrium.Web.Helpers
                     Ascending = true
                 };
             }
+
+            public static IncomeFilter OverdueIncomes()
+            {
+                var now = DateTime.Now;
+                var firstDayOfMonth = new DateTime(now.Year, now.Month, 1);
+                var yesterday = now.AddDays(-1);
+
+                return new IncomeFilter
+                {
+                    Status = "pending",
+                    StartDate = firstDayOfMonth,        
+                    EndDate = yesterday,                
+                    Month = now.Month,
+                    Year = now.Year,
+                    OrderBy = "dueDate",
+                    Ascending = true
+                };
+            }
         }
 
         /// <summary>

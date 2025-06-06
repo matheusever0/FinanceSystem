@@ -55,7 +55,7 @@
                     @if (paymentsPending.Count() > 5)
                     {
                         <div class="text-center mt-3">
-                            <a asp-controller="Payments" asp-action="Pending" class="btn btn-sm btn-warning">
+                            <a asp-controller="Payments" asp-action="QuickFilter" asp-route-filterType="pending" class="btn btn-sm btn-warning">
                                 Ver todos (@paymentsPending.Count())
                             </a>
                         </div>
@@ -111,7 +111,7 @@
                     @if (pendingIncomes.Count() > 5)
                     {
                         <div class="text-center mt-3">
-                            <a asp-controller="Incomes" asp-action="Pending" class="btn btn-sm btn-success">
+                            <a asp-controller="Incomes" asp-action="QuickFilter" asp-route-filterType="pending" class="btn btn-sm btn-success">
                                 Ver todas (@pendingIncomes.Count())
                             </a>
                         </div>
@@ -167,7 +167,7 @@
                     @if (paymentsOverdue.Count() > 5)
                     {
                         <div class="text-center mt-3">
-                            <a asp-controller="Payments" asp-action="Overdue" class="btn btn-sm btn-danger">
+                            <a asp-controller="Payments" asp-action="QuickFilter" asp-route-filterType="overdue" class="btn btn-sm btn-danger">
                                 Ver todos (@paymentsOverdue.Count())
                             </a>
                         </div>
@@ -222,7 +222,7 @@
                     @if (overdueIncomes.Count() > 5)
                     {
                         <div class="text-center mt-3">
-                            <a asp-controller="Incomes" asp-action="Overdue" class="btn btn-sm btn-danger">
+                            <a asp-controller="Incomes" asp-action="QuickFilter" asp-route-filterType="overdue" class="btn btn-sm btn-danger">
                                 Ver todos (@overdueIncomes.Count())
                             </a>
                         </div>

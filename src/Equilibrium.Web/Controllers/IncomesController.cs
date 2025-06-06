@@ -81,6 +81,7 @@ namespace Equilibrium.Web.Controllers
                     "thisweek" => CreateThisWeekIncomeFilter(),
                     "pending" => FilterHelper.QuickFilters.PendingIncomes(),
                     "received" => FilterHelper.QuickFilters.ReceivedThisMonth(),
+                    "overdue" => FilterHelper.QuickFilters.OverdueIncomes(),
                     _ => new IncomeFilter()
                 };
 
@@ -162,7 +163,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita n?o fornecido");
+                return BadRequest("ID da receita não fornecido");
             }
 
             try
@@ -170,7 +171,7 @@ namespace Equilibrium.Web.Controllers
                 var token = GetToken();
                 var income = await _incomeService.GetIncomeByIdAsync(id, token);
 
-                return income == null ? NotFound("Receita n?o encontrada") : View(income);
+                return income == null ? NotFound("Receita não encontrada") : View(income);
             }
             catch (Exception ex)
             {
@@ -227,7 +228,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita n?o fornecido");
+                return BadRequest("ID da receita não fornecido");
             }
 
             try
@@ -237,7 +238,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (income == null)
                 {
-                    return NotFound("Receita n?o encontrada");
+                    return NotFound("Receita não encontrada");
                 }
 
                 var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
@@ -272,7 +273,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita n?o fornecido");
+                return BadRequest("ID da receita não fornecido");
             }
 
             if (!ModelState.IsValid)
@@ -303,7 +304,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["ErrorMessage"] = "ID da receita n?o fornecido.";
+                TempData["ErrorMessage"] = "ID da receita não fornecido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -311,23 +312,21 @@ namespace Equilibrium.Web.Controllers
             {
                 var token = GetToken();
 
-                // Verificar se a receita existe
                 var income = await _incomeService.GetIncomeByIdAsync(id, token);
                 if (income == null)
                 {
-                    TempData["ErrorMessage"] = "Receita n?o encontrada.";
+                    TempData["ErrorMessage"] = "Receita não encontrada.";
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Verificar se pode ser exclu?da (regras de neg?cio)
-                if (income.Status == 2) // Se j? foi recebida
+                if (income.Status == 2) 
                 {
-                    TempData["ErrorMessage"] = "N?o ? poss?vel excluir uma receita que j? foi recebida.";
+                    TempData["ErrorMessage"] = "Não ? possível excluir uma receita que já foi recebida.";
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
                 await _incomeService.DeleteIncomeAsync(id, token);
-                TempData["SuccessMessage"] = $"Receita '{income.Description}' exclu?da com sucesso.";
+                TempData["SuccessMessage"] = $"Receita '{income.Description}' excluída com sucesso.";
             }
             catch (Exception ex)
             {
@@ -345,7 +344,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["ErrorMessage"] = "ID da receita n?o fornecido.";
+                TempData["ErrorMessage"] = "ID da receita não fornecido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -353,25 +352,23 @@ namespace Equilibrium.Web.Controllers
             {
                 var token = GetToken();
 
-                // Verificar se a receita existe
                 var income = await _incomeService.GetIncomeByIdAsync(id, token);
                 if (income == null)
                 {
-                    TempData["ErrorMessage"] = "Receita n?o encontrada.";
+                    TempData["ErrorMessage"] = "Receita não encontrada.";
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Verificar se pode ser marcada como recebida
-                if (income.Status != 1) // S? pode marcar como recebida se estiver pendente
+                if (income.Status != 1) 
                 {
-                    TempData["ErrorMessage"] = "Esta receita n?o pode ser marcada como recebida.";
+                    TempData["ErrorMessage"] = "Esta receita não pode ser marcada como recebida.";
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
                 // Validar data de recebimento
                 if (receivedDate > DateTime.Today)
                 {
-                    TempData["ErrorMessage"] = "A data de recebimento n?o pode ser futura.";
+                    TempData["ErrorMessage"] = "A data de recebimento não pode ser futura.";
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
@@ -393,7 +390,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita n?o fornecido");
+                return BadRequest("ID da receita não fornecido");
             }
 
             try
@@ -417,7 +414,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID da receita n?o fornecido");
+                return BadRequest("ID da receita não fornecido");
             }
 
             try
@@ -434,10 +431,21 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
+        [HttpGet]
+        public IActionResult FilterByMonth(int month, int year)
+        {
+            var filter = new IncomeFilter
+            {
+                Month = month,
+                Year = year
+            };
+
+            return ApplyFilters(filter);
+        }
+
         [RequirePermission("incomes.view")]
         public IActionResult Export()
         {
-            // This action renders the Export view we just created
             return View();
         }
 
@@ -449,19 +457,16 @@ namespace Equilibrium.Web.Controllers
                 var sb = new StringBuilder();
                 sb.AppendLine("Descricao,Valor,DataVencimento,DataRecebimento,TipoReceitaId,Recorrente,Parcelas,Observacoes");
 
-                // Add example rows
                 sb.AppendLine("Sal?rio,3500.00,25/06/2025,,id-tipo-receita-1,Sim,1,'Sal?rio mensal'");
                 sb.AppendLine("Freelance,1200.00,15/06/2025,15/06/2025,id-tipo-receita-2,N?o,1,'Projeto de design'");
                 sb.AppendLine("Aluguel,1800.00,10/06/2025,,id-tipo-receita-3,Sim,1,'Aluguel do im?vel'");
                 sb.AppendLine("Investimentos,350.00,30/06/2025,,id-tipo-receita-4,N?o,1,'Rendimentos'");
 
-                // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
                 string content = sb.ToString();
                 byte[] utf8Bytes = Encoding.UTF8.GetBytes(content);
                 byte[] latin1Bytes = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), utf8Bytes);
                 byte[] resultBytes = Encoding.Convert(Encoding.GetEncoding("ISO-8859-1"), Encoding.UTF8, latin1Bytes);
 
-                // Adicionar BOM UTF-8
                 byte[] bom = Encoding.UTF8.GetPreamble();
                 byte[] finalBytes = new byte[bom.Length + resultBytes.Length];
                 Buffer.BlockCopy(bom, 0, finalBytes, 0, bom.Length);
@@ -489,7 +494,7 @@ namespace Equilibrium.Web.Controllers
 
             if (!csvFile.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
             {
-                TempData["ErrorMessage"] = "O arquivo deve ser um CSV v?lido.";
+                TempData["ErrorMessage"] = "O arquivo deve ser um CSV válido.";
                 return RedirectToAction(nameof(Export));
             }
 
@@ -502,26 +507,24 @@ namespace Equilibrium.Web.Controllers
 
                 using (var reader = new StreamReader(csvFile.OpenReadStream()))
                 {
-                    // Skip header row
                     var header = await reader.ReadLineAsync();
                     if (header == null)
                     {
-                        TempData["ErrorMessage"] = "O arquivo CSV est? vazio ou n?o possui cabe?alho.";
+                        TempData["ErrorMessage"] = "O arquivo CSV está vazio ou não possui cabeçalho.";
                         return RedirectToAction(nameof(Export));
                     }
 
-                    // Validate header
                     var expectedColumns = new[] { "Descricao", "Valor", "DataVencimento", "DataRecebimento",
                 "TipoReceitaId", "Recorrente", "Parcelas", "Observacoes" };
                     var headerColumns = header.Split(';').Select(h => h.Trim()).ToArray();
 
                     if (!ValidateHeader(headerColumns, expectedColumns, out var missingColumns))
                     {
-                        TempData["ErrorMessage"] = $"O cabe?alho do CSV est? inv?lido. Colunas ausentes: {string.Join(", ", missingColumns)}";
+                        TempData["ErrorMessage"] = $"O cabeçalho do CSV está invalido. Colunas ausentes: {string.Join(", ", missingColumns)}";
                         return RedirectToAction(nameof(Export));
                     }
 
-                    var lineNumber = 1; // Start with 1 for the header
+                    var lineNumber = 1; 
 
                     while (!reader.EndOfStream)
                     {
@@ -533,7 +536,6 @@ namespace Equilibrium.Web.Controllers
                         {
                             var model = ParseIncomeLine(line, headerColumns);
 
-                            // If only validating, we don't create the income
                             if (!validateOnly)
                             {
                                 await _incomeService.CreateIncomeAsync(model, token);
@@ -560,11 +562,11 @@ namespace Equilibrium.Web.Controllers
                 {
                     if (errorCount == 0)
                     {
-                        TempData["SuccessMessage"] = $"Valida??o conclu?da com sucesso. {successCount} receitas est?o prontas para importa??o.";
+                        TempData["SuccessMessage"] = $"Validação concluída com sucesso. {successCount} receitas estão prontas para importação.";
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = $"Valida??o conclu?da com {errorCount} erros. {string.Join("<br>", errors)}";
+                        TempData["ErrorMessage"] = $"Validação concluída com {errorCount} erros. {string.Join("<br>", errors)}";
                     }
                 }
                 else
@@ -588,8 +590,7 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
-        // Helper methods
-        private bool ValidateHeader(string[] actual, string[] expected, out List<string> missingColumns)
+        private static bool ValidateHeader(string[] actual, string[] expected, out List<string> missingColumns)
         {
             missingColumns = new List<string>();
 
@@ -609,7 +610,6 @@ namespace Equilibrium.Web.Controllers
             var values = ParseCsvLine(line);
             var model = new CreateIncomeModel();
 
-            // Map values to model based on header positions
             for (int i = 0; i < headers.Length && i < values.Length; i++)
             {
                 var header = headers[i].Trim();
@@ -644,19 +644,17 @@ namespace Equilibrium.Web.Controllers
                 }
             }
 
-            // Validate required fields
             if (string.IsNullOrEmpty(model.Description))
-                throw new Exception("A descri??o ? obrigat?ria");
+                throw new Exception("A descrição é obrigatória");
 
             if (string.IsNullOrEmpty(model.IncomeTypeId))
-                throw new Exception("O tipo de receita ? obrigat?rio");
+                throw new Exception("O tipo de receita é obrigatório");
 
             return model;
         }
 
         private string[] ParseCsvLine(string line)
         {
-            // Simple CSV parser that handles quoted values
             var result = new List<string>();
             var currentValue = new StringBuilder();
             bool inQuotes = false;
@@ -667,21 +665,18 @@ namespace Equilibrium.Web.Controllers
 
                 if (c == '"')
                 {
-                    // If we're in quotes and the next character is also a quote, it's an escaped quote
                     if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
                     {
                         currentValue.Append('"');
-                        i++; // Skip next quote
+                        i++; 
                     }
                     else
                     {
-                        // Toggle quote status
                         inQuotes = !inQuotes;
                     }
                 }
                 else if (c == ';' && !inQuotes)
                 {
-                    // End of field
                     result.Add(currentValue.ToString());
                     currentValue.Clear();
                 }
@@ -691,7 +686,6 @@ namespace Equilibrium.Web.Controllers
                 }
             }
 
-            // Add the last field
             result.Add(currentValue.ToString());
 
             return result.ToArray();
@@ -699,18 +693,16 @@ namespace Equilibrium.Web.Controllers
 
         private decimal ParseDecimal(string value)
         {
-            // Handle both comma and dot as decimal separators
             value = value.Replace(".", "").Replace(",", ".");
             if (!decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             {
-                throw new Exception($"Valor inv?lido: {value}");
+                throw new Exception($"Valor inválido: {value}");
             }
             return result;
         }
 
         private DateTime ParseDate(string value)
         {
-            // Try different date formats
             string[] formats = { "dd/MM/yyyy", "yyyy-MM-dd", "MM/dd/yyyy" };
             if (!DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
             {
@@ -732,20 +724,17 @@ namespace Equilibrium.Web.Controllers
 
                 foreach (var type in incomeTypes)
                 {
-                    // Escape quotes in text fields
                     var name = EscapeCsvField(type.Name);
                     var description = EscapeCsvField(type.Description);
 
                     sb.AppendLine($"{type.Id},{name},{description},{(type.IsSystem ? "Sim" : "N?o")}");
                 }
 
-                // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
                 string content = sb.ToString();
                 byte[] utf8Bytes = Encoding.UTF8.GetBytes(content);
                 byte[] latin1Bytes = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), utf8Bytes);
                 byte[] resultBytes = Encoding.Convert(Encoding.GetEncoding("ISO-8859-1"), Encoding.UTF8, latin1Bytes);
 
-                // Adicionar BOM UTF-8
                 byte[] bom = Encoding.UTF8.GetPreamble();
                 byte[] finalBytes = new byte[bom.Length + resultBytes.Length];
                 Buffer.BlockCopy(bom, 0, finalBytes, 0, bom.Length);
@@ -765,7 +754,6 @@ namespace Equilibrium.Web.Controllers
             if (string.IsNullOrEmpty(field))
                 return string.Empty;
 
-            // Se cont?m v?rgula, aspas ou quebra de linha, coloca entre aspas e dobra as aspas internas
             if (field.Contains(",") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
             {
                 return "\"" + field.Replace("\"", "\"\"") + "\"";

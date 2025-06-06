@@ -15,7 +15,6 @@ namespace Equilibrium.Web.Services
             _apiService = apiService;
         }
 
-        // Método principal com filtros avançados
         public async Task<IEnumerable<IncomeModel>> GetFilteredIncomesAsync(IncomeFilter filter, string token)
         {
             var queryParams = FilterHelper.BuildIncomeQueryString(filter);
@@ -26,7 +25,6 @@ namespace Equilibrium.Web.Services
             return await _apiService.GetAsync<IEnumerable<IncomeModel>>(endpoint, token);
         }
 
-        // Método para paginação
         public async Task<PagedResult<IncomeModel>> GetPagedIncomesAsync(IncomeFilter filter, string token)
         {
             var queryParams = FilterHelper.BuildIncomeQueryString(filter);
@@ -37,7 +35,6 @@ namespace Equilibrium.Web.Services
             return await _apiService.GetAsync<PagedResult<IncomeModel>>(endpoint, token);
         }
 
-        // Métodos existentes mantidos para compatibilidade
         public async Task<IEnumerable<IncomeModel>> GetAllIncomesAsync(string token)
         {
             return await _apiService.GetAsync<IEnumerable<IncomeModel>>("/api/incomes", token);
@@ -94,7 +91,6 @@ namespace Equilibrium.Web.Services
             return await GetFilteredIncomesAsync(filter, token);
         }
 
-        // Novos métodos usando filtros avançados
         public async Task<IEnumerable<IncomeModel>> GetIncomesByDateRangeAsync(DateTime startDate, DateTime endDate, string token)
         {
             var filter = new IncomeFilter
@@ -172,8 +168,7 @@ namespace Equilibrium.Web.Services
 
         public async Task<IncomeModel> MarkAsReceivedAsync(string id, DateTime? receivedDate, string token)
         {
-            var data = receivedDate.HasValue ? new { receivedDate = receivedDate.Value } : null;
-            return await _apiService.PostAsync<IncomeModel>($"/api/incomes/{id}/received", data, token);
+            return await _apiService.PostAsync<IncomeModel>($"/api/incomes/{id}/received", receivedDate, token);
         }
 
         public async Task<IncomeModel> CancelIncomeAsync(string id, string token)
@@ -181,7 +176,6 @@ namespace Equilibrium.Web.Services
             return await _apiService.PostAsync<IncomeModel>($"/api/incomes/{id}/cancel", null, token);
         }
 
-        // Métodos para parcelas
         public async Task<string> GetInstallmentParentIncomeAsync(string installmentId, string token)
         {
             return await _apiService.GetAsync<string>($"/api/incomeinstallments/{installmentId}/parent", token);
@@ -200,7 +194,6 @@ namespace Equilibrium.Web.Services
             return true;
         }
 
-        // Métodos estatísticos
         public async Task<decimal> GetTotalIncomesByPeriodAsync(int month, int year, string token)
         {
             var filter = new IncomeFilter
@@ -231,7 +224,6 @@ namespace Equilibrium.Web.Services
             return incomes.Sum(i => i.Amount);
         }
 
-        // Métodos para relatórios
         public async Task<Dictionary<string, decimal>> GetIncomesByTypeAsync(int month, int year, string token)
         {
             var filter = new IncomeFilter
@@ -274,7 +266,6 @@ namespace Equilibrium.Web.Services
             return (await GetFilteredIncomesAsync(filter, token)).ToList();
         }
 
-        // Métodos para análise de tendências
         public async Task<Dictionary<string, decimal>> GetMonthlyIncomeAnalysisAsync(int year, string token)
         {
             var monthlyData = new Dictionary<string, decimal>();
@@ -304,7 +295,6 @@ namespace Equilibrium.Web.Services
             return activeMonths > 0 ? monthlyData.Values.Sum() / activeMonths : 0;
         }
 
-        // Método para comparação de períodos
         public async Task<(decimal currentPeriod, decimal previousPeriod, decimal percentageChange)>
             ComparePeriodsAsync(DateTime currentStart, DateTime currentEnd, string token)
         {

@@ -221,7 +221,7 @@
                                         <td class="text-end">@string.Format("{0:C2}", month.Value)</td>
                                         <td class="text-center">@string.Format("{0:0.0}%", percentage)</td>
                                         <td class="text-center">
-                                            <a asp-controller="Incomes" asp-action="Index" asp-route-month="@monthIndex" asp-route-year="@currentYear" class="btn btn-sm btn-success">
+                                            <a asp-controller="Incomes" asp-action="FilterByMonth" asp-route-month="@monthIndex" asp-route-year="@currentYear" class="btn btn-sm btn-success">
                                                 <i class="fas fa-search"></i>
                                             </a>
                                         </td>
@@ -277,7 +277,7 @@
                                         <td class="text-end">@string.Format("{0:C2}", month.Value)</td>
                                         <td class="text-center">@string.Format("{0:0.0}%", percentage)</td>
                                         <td class="text-center">
-                                            <a asp-controller="Reports" asp-action="Monthly" asp-route-month="@monthIndex" asp-route-year="@currentYear" class="btn btn-sm btn-danger">
+                                            <a asp-controller="Payments" asp-action="FilterByMonth" asp-route-month="@monthIndex" asp-route-year="@currentYear" class="btn btn-sm btn-danger">
                                                 <i class="fas fa-search"></i>
                                             </a>
                                         </td>

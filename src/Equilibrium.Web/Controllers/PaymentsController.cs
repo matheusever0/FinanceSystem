@@ -93,6 +93,7 @@ namespace Equilibrium.Web.Controllers
                     "thisweek" => FilterHelper.QuickFilters.ThisWeek(),
                     "pending" => FilterHelper.QuickFilters.PendingPayments(),
                     "overdue" => FilterHelper.QuickFilters.OverduePayments(),
+                    "paidmonth" => FilterHelper.QuickFilters.PaidThisMonth(),
                     _ => new PaymentFilter()
                 };
 
@@ -166,7 +167,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento n�o fornecido");
+                return BadRequest("ID do pagamento não fornecido");
             }
 
             try
@@ -174,7 +175,7 @@ namespace Equilibrium.Web.Controllers
                 var token = GetToken();
                 var payment = await _paymentService.GetPaymentByIdAsync(id, token);
 
-                return payment == null ? NotFound("Pagamento n�o encontrado") : View(payment);
+                return payment == null ? NotFound("Pagamento não encontrado") : View(payment);
             }
             catch (Exception ex)
             {
@@ -203,7 +204,7 @@ namespace Equilibrium.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Erro ao preparar o formul�rio.";
+                TempData["ErrorMessage"] = "Erro ao preparar o formulário.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -262,7 +263,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (!financingPaymentTypes.Any())
                 {
-                    TempData["WarningMessage"] = "N�o h� tipos de pagamento configurados para financiamento.";
+                    TempData["WarningMessage"] = "não h� tipos de pagamento configurados para financiamento.";
                     return RedirectToAction(nameof(Create));
                 }
 
@@ -288,7 +289,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento n�o fornecido");
+                return BadRequest("ID do pagamento não fornecido");
             }
 
             try
@@ -298,7 +299,7 @@ namespace Equilibrium.Web.Controllers
 
                 if (payment == null)
                 {
-                    return NotFound("Pagamento n�o encontrado");
+                    return NotFound("Pagamento não encontrado");
                 }
 
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
@@ -339,7 +340,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento n�o fornecido");
+                return BadRequest("ID do pagamento não fornecido");
             }
 
             if (!ModelState.IsValid)
@@ -370,7 +371,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["ErrorMessage"] = "ID do pagamento n�o fornecido.";
+                TempData["ErrorMessage"] = "ID do pagamento não fornecido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -380,18 +381,18 @@ namespace Equilibrium.Web.Controllers
                 var payment = await _paymentService.GetPaymentByIdAsync(id, token);
                 if (payment == null)
                 {
-                    TempData["ErrorMessage"] = "Pagamento n�o encontrado.";
+                    TempData["ErrorMessage"] = "Pagamento não encontrado.";
                     return RedirectToAction(nameof(Index));
                 }
 
                 if (payment.Status == 2)
                 {
-                    TempData["ErrorMessage"] = "N�o � poss�vel excluir um pagamento que j� foi pago.";
+                    TempData["ErrorMessage"] = "não é possível excluir um pagamento que já foi pago.";
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
                 await _paymentService.DeletePaymentAsync(id, token);
-                TempData["SuccessMessage"] = $"Pagamento '{payment.Description}' exclu�do com sucesso.";
+                TempData["SuccessMessage"] = $"Pagamento '{payment.Description}' excluído com sucesso.";
             }
             catch (Exception ex)
             {
@@ -409,7 +410,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["ErrorMessage"] = "ID do pagamento n�o fornecido.";
+                TempData["ErrorMessage"] = "ID do pagamento não fornecido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -420,25 +421,25 @@ namespace Equilibrium.Web.Controllers
                 var payment = await _paymentService.GetPaymentByIdAsync(id, token);
                 if (payment == null)
                 {
-                    TempData["ErrorMessage"] = "Pagamento n�o encontrado.";
+                    TempData["ErrorMessage"] = "Pagamento não encontrado.";
                     return RedirectToAction(nameof(Index));
                 }
 
                 if (payment.Status == 2) 
                 {
-                    TempData["ErrorMessage"] = "Este pagamento j� foi marcado como pago.";
+                    TempData["ErrorMessage"] = "Este pagamento já foi marcado como pago.";
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
                 if (payment.Status == 4) 
                 {
-                    TempData["ErrorMessage"] = "N�o � poss�vel marcar um pagamento cancelado como pago.";
+                    TempData["ErrorMessage"] = "não é possível marcar um pagamento cancelado como pago.";
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
                 if (paymentDate > DateTime.Today)
                 {
-                    TempData["ErrorMessage"] = "A data de pagamento n�o pode ser futura.";
+                    TempData["ErrorMessage"] = "A data de pagamento não pode ser futura.";
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
@@ -460,7 +461,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento n�o fornecido");
+                return BadRequest("ID do pagamento não fornecido");
             }
 
             try
@@ -484,7 +485,7 @@ namespace Equilibrium.Web.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest("ID do pagamento n�o fornecido");
+                return BadRequest("ID do pagamento não fornecido");
             }
 
             try
@@ -499,6 +500,18 @@ namespace Equilibrium.Web.Controllers
                 TempData["ErrorMessage"] = MessageHelper.GetCancelErrorMessage(EntityNames.Payment, ex);
                 return RedirectToAction(nameof(Details), new { id });
             }
+        }
+
+        [HttpGet]
+        public IActionResult FilterByMonth(int month, int year)
+        {
+            var filter = new PaymentFilter
+            {
+                Month = month,
+                Year = year
+            };
+
+            return ApplyFilters(filter);
         }
 
         [RequirePermission("payments.create")]
@@ -516,9 +529,9 @@ namespace Equilibrium.Web.Controllers
                 sb.AppendLine("Descricao,Valor,DataVencimento,DataPagamento,TipoPagamentoId,MetodoPagamentoId,Recorrente,Parcelas,CartaoCreditoId,FinanciamentoId,ParcelaFinanciamentoId,Observacoes");
 
                 sb.AppendLine("Aluguel,1500.00,05/06/2025,,id-tipo-pagamento-1,id-metodo-pagamento-1,Sim,1,,,,'Pagamento mensal de aluguel'");
-                sb.AppendLine("Compra Supermercado,253.45,10/06/2025,10/06/2025,id-tipo-pagamento-2,id-metodo-pagamento-2,N�o,1,,,,'Compras do m�s'");
-                sb.AppendLine("Parcela Carro,850.00,15/06/2025,,id-tipo-pagamento-3,id-metodo-pagamento-3,N�o,1,id-cartao-1,,,'Parcela 10/48'");
-                sb.AppendLine("Presta��o Apartamento,2500.00,20/06/2025,,id-tipo-pagamento-4,id-metodo-pagamento-4,N�o,1,,id-financiamento-1,id-parcela-financiamento-1,'Presta��o 24/360'");
+                sb.AppendLine("Compra Supermercado,253.45,10/06/2025,10/06/2025,id-tipo-pagamento-2,id-metodo-pagamento-2,não,1,,,,'Compras do m�s'");
+                sb.AppendLine("Parcela Carro,850.00,15/06/2025,,id-tipo-pagamento-3,id-metodo-pagamento-3,não,1,id-cartao-1,,,'Parcela 10/48'");
+                sb.AppendLine("Prestação Apartamento,2500.00,20/06/2025,,id-tipo-pagamento-4,id-metodo-pagamento-4,não,1,,id-financiamento-1,id-parcela-financiamento-1,'Prestação 24/360'");
 
                 string content = sb.ToString();
                 byte[] utf8Bytes = Encoding.UTF8.GetBytes(content);
@@ -568,7 +581,7 @@ namespace Equilibrium.Web.Controllers
                     var header = await reader.ReadLineAsync();
                     if (header == null)
                     {
-                        TempData["ErrorMessage"] = "O arquivo CSV est� vazio ou n�o possui cabe�alho.";
+                        TempData["ErrorMessage"] = "O arquivo CSV está vazio ou não possui cabeçalho.";
                         return RedirectToAction(nameof(Export));
                     }
 
@@ -579,7 +592,7 @@ namespace Equilibrium.Web.Controllers
 
                     if (!ValidateHeader(headerColumns, expectedColumns, out var missingColumns))
                     {
-                        TempData["ErrorMessage"] = $"O cabe�alho do CSV est� inv�lido. Colunas ausentes: {string.Join(", ", missingColumns)}";
+                        TempData["ErrorMessage"] = $"O cabeçalho do CSV está inválido. Colunas ausentes: {string.Join(", ", missingColumns)}";
                         return RedirectToAction(nameof(Export));
                     }
 
@@ -620,11 +633,11 @@ namespace Equilibrium.Web.Controllers
                 {
                     if (errorCount == 0)
                     {
-                        TempData["SuccessMessage"] = $"Valida��o conclu�da com sucesso. {successCount} pagamentos est�o prontos para importa��o.";
+                        TempData["SuccessMessage"] = $"Validação conclu�da com sucesso. {successCount} pagamentos estão prontos para importa��o.";
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = $"Valida��o conclu�da com {errorCount} erros. {string.Join("<br>", errors)}";
+                        TempData["ErrorMessage"] = $"Validação conclu�da com {errorCount} erros. {string.Join("<br>", errors)}";
                     }
                 }
                 else
@@ -715,16 +728,16 @@ namespace Equilibrium.Web.Controllers
             }
 
             if (string.IsNullOrEmpty(model.Description))
-                throw new Exception("A descri��o � obrigat�ria");
+                throw new Exception("A descrição é obrigatória");
 
             if (string.IsNullOrEmpty(model.PaymentTypeId))
-                throw new Exception("O tipo de pagamento � obrigat�rio");
+                throw new Exception("O tipo de pagamento é obrigatório");
 
             if (string.IsNullOrEmpty(model.PaymentMethodId))
-                throw new Exception("O m�todo de pagamento � obrigat�rio");
+                throw new Exception("O m�todo de pagamento é obrigatório");
 
             if (!string.IsNullOrEmpty(model.FinancingId) && string.IsNullOrEmpty(model.FinancingInstallmentId))
-                throw new Exception("Quando um financiamento � especificado, a parcela do financiamento � obrigat�ria");
+                throw new Exception("Quando um financiamento é especificado, a parcela do financiamento é obrigatória");
 
             return model;
         }
@@ -772,7 +785,7 @@ namespace Equilibrium.Web.Controllers
             value = value.Replace(".", "").Replace(",", ".");
             if (!decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             {
-                throw new Exception($"Valor inv�lido: {value}");
+                throw new Exception($"Valor inválido: {value}");
             }
             return result;
         }
@@ -782,7 +795,7 @@ namespace Equilibrium.Web.Controllers
             string[] formats = { "dd/MM/yyyy", "yyyy-MM-dd", "MM/dd/yyyy" };
             if (!DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
             {
-                throw new Exception($"Data inv�lida: {value}. Use o formato DD/MM/AAAA.");
+                throw new Exception($"Data inválida: {value}. Use o formato DD/MM/AAAA.");
             }
             return result;
         }
@@ -803,7 +816,7 @@ namespace Equilibrium.Web.Controllers
                     var name = EscapeCsvField(type.Name);
                     var description = EscapeCsvField(type.Description);
 
-                    sb.AppendLine($"{type.Id},{name},{description},{(type.IsFinancingType ? "Sim" : "N�o")}");
+                    sb.AppendLine($"{type.Id},{name},{description},{(type.IsFinancingType ? "Sim" : "não")}");
                 }
 
                 string content = sb.ToString();
@@ -859,7 +872,7 @@ namespace Equilibrium.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Erro ao exportar m�todos de pagamento: " + ex.Message;
+                TempData["ErrorMessage"] = "Erro ao exportar métodos de pagamento: " + ex.Message;
                 return RedirectToAction(nameof(Export));
             }
         }
@@ -897,7 +910,7 @@ namespace Equilibrium.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Erro ao exportar cart�es de cr�dito: " + ex.Message;
+                TempData["ErrorMessage"] = "Erro ao exportar cartões de crédito: " + ex.Message;
                 return RedirectToAction(nameof(Export));
             }
         }

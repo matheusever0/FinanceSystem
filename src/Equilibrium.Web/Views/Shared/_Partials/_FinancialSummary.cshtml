@@ -49,9 +49,8 @@
     {
         <div class="col-xl-3 col-md-6 mb-4">
             <a asp-controller="Incomes"
-               asp-action="ByMonth"
-               asp-route-month="@DateTime.Now.Month"
-               asp-route-year="@DateTime.Now.Year"
+               asp-action="QuickFilter"
+               asp-route-filterType="received"
                class="text-decoration-none">
                 <div class="card border-left-success shadow h-100 py-2">
                     <div class="card-body">
@@ -78,9 +77,8 @@
     {
         <div class="col-xl-3 col-md-6 mb-4">
             <a asp-controller="Payments"
-               asp-action="ByMonth"
-               asp-route-month="@DateTime.Now.Month"
-               asp-route-year="@DateTime.Now.Year"
+               asp-action="QuickFilter"
+               asp-route-filterType="paidmonth"
                class="text-decoration-none">
                 <div class="card border-left-success shadow h-100 py-2">
                     <div class="card-body">
@@ -106,7 +104,10 @@
     @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.view"))
     {
         <div class="col-xl-3 col-md-6 mb-4">
-            <a asp-controller="Incomes" asp-action="Pending" class="text-decoration-none">
+            <a asp-controller="Incomes"
+               asp-action="QuickFilter"
+               asp-route-filterType="pending"
+               class="text-decoration-none">
                 <div class="card border-left-warning shadow h-100 py-2">
                     <div class="card-body">
                         <div class="row no-gutters align-items-center">
@@ -131,7 +132,10 @@
     @if (await PermissionHelper.HasPermissionAsync(Context, "payments.view"))
     {
         <div class="col-xl-3 col-md-6 mb-4">
-            <a asp-controller="Payments" asp-action="Pending" class="text-decoration-none">
+            <a asp-controller="Payments"
+               asp-action="QuickFilter"
+               asp-route-filterType="pending"
+               class="text-decoration-none">
                 <div class="card border-left-warning shadow h-100 py-2">
                     <div class="card-body">
                         <div class="row no-gutters align-items-center">
@@ -152,37 +156,48 @@
     }
 
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-danger shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                            Pagamentos Vencidos
+        <a asp-controller="Payments"
+           asp-action="QuickFilter"
+           asp-route-filterType="overdue"
+           class="text-decoration-none">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Pagamentos Vencidos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", ViewBag.TotalOverduePayments)</div>
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", ViewBag.TotalOverduePayments)</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-danger shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                            Receitas Vencidas
+        <a asp-controller="Incomes"
+           asp-action="QuickFilter"
+           asp-route-filterType="overdue"
+           class="text-decoration-none">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Receitas Vencidas
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", ViewBag.TotalOverdueIncomes)</div>
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">@string.Format("{0:C2}", ViewBag.TotalOverdueIncomes)</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
                     </div>
                 </div>
+
             </div>
-        </div>
+        </a>
     </div>
 </div>
