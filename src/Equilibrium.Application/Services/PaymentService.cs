@@ -316,6 +316,13 @@ namespace Equilibrium.Application.Services
                 await RevertPaymentFinancing(payment);
             }
 
+            if (payment.CreditCardId.HasValue && payment.Status == PaymentStatus.Paid)
+            {
+                var creditCardService = _serviceProvider.GetRequiredService<ICreditCardService>();
+
+                await creditCardService.UpdateLimitAsync(payment.CreditCardId.Value, payment.Amount);
+            }
+
             payment.Cancel();
             await _unitOfWork.Payments.UpdateAsync(payment);
             await _unitOfWork.CompleteAsync();
