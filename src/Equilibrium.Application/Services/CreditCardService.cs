@@ -84,6 +84,16 @@ namespace Equilibrium.Application.Services
             await _unitOfWork.CreditCards.DeleteAsync(creditCard);
             await _unitOfWork.CompleteAsync();
         }
+
+        public async Task UpdateLimitAsync(Guid id, decimal value)
+        {
+            var creditCard = await _unitOfWork.CreditCards.GetByIdAsync(id) ?? throw new KeyNotFoundException(ResourceFinanceApi.CreditCard_NotFound);
+            creditCard.IncrementAvailableLimit(value);
+
+            await _unitOfWork.CreditCards.UpdateAsync(creditCard);
+            await _unitOfWork.CompleteAsync();
+
+        }
     }
 }
 

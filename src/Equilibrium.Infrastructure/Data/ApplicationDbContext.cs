@@ -119,6 +119,12 @@ namespace Equilibrium.Infrastructure.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Payment>()
+                .HasOne(p => p.CreditCard)
+                .WithMany()
+                .HasForeignKey(p => p.CreditCardId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
                 .HasOne(p => p.PaymentType)
                 .WithMany(pt => pt.Payments)
                 .HasForeignKey(p => p.PaymentTypeId)

@@ -108,6 +108,30 @@ namespace Equilibrium.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPost("creditCards/{id}/value/{value}")]
+        public async Task<ActionResult<CreditCardDto>> ReturnLimit(Guid id, decimal value)
+        {
+            try
+            {
+                var existingCard = await _service.GetByIdAsync(id);
+                if (existingCard.UserId != HttpContext.GetCurrentUserId())
+                {
+                    return Forbid();
+                }
+
+                await _service.UpdateLimitAsync(id, value);
+                return Ok(existingCard);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }
 

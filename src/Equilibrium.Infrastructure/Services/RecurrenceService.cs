@@ -56,10 +56,10 @@ namespace Equilibrium.Infrastructure.Services
                             nextDueDate,
                             payment.PaymentType,
                             payment.PaymentMethod,
-                            payment.User,
-                            payment.IsRecurring,
-                            payment.Notes
-                        );
+                            payment.User);
+
+                        newPayment.SetRecurring(payment.IsRecurring);
+                        newPayment.SetNotes(payment.Notes);
 
                         await _unitOfWork.Payments.AddAsync(newPayment);
                         _logger.LogInformation("Created recurring payment for {NextDueDate:yyyy-MM-dd} - {Description}", nextDueDate, payment.Description);

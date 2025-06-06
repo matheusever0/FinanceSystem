@@ -30,7 +30,11 @@ namespace Equilibrium.Domain.Entities
         public Guid? FinancingInstallmentId { get; protected set; }
         public FinancingInstallment? FinancingInstallment { get; protected set; }
 
+        public Guid? CreditCardId { get; protected set; }
+        public CreditCard? CreditCard { get; protected set; }
+
         public ICollection<PaymentInstallment> Installments { get; protected set; }
+
         protected Payment()
         {
             Installments = [];
@@ -42,17 +46,15 @@ namespace Equilibrium.Domain.Entities
             DateTime dueDate,
             PaymentType paymentType,
             PaymentMethod paymentMethod,
-            User user,
-            bool isRecurring = false,
-            string notes = null)
+            User user)
         {
             Id = Guid.NewGuid();
             Description = description;
             Amount = amount;
             DueDate = dueDate;
             Status = PaymentStatus.Pending;
-            IsRecurring = isRecurring;
-            Notes = notes;
+            IsRecurring = false;
+            Notes = string.Empty;
             CreatedAt = DateTime.Now;
 
             PaymentTypeId = paymentType.Id;
@@ -67,45 +69,37 @@ namespace Equilibrium.Domain.Entities
             Installments = [];
         }
 
-        public Payment(
-             string description,
-             decimal amount,
-             DateTime dueDate,
-             PaymentType paymentType,
-             PaymentMethod paymentMethod,
-             User user,
-             Financing financing,
-             FinancingInstallment? financingInstallment = null,
-             bool isRecurring = false,
-             string notes = null)
+        public void SetRecurring(bool isRecurring)
         {
-            Id = Guid.NewGuid();
-            Description = description;
-            Amount = amount;
-            DueDate = dueDate;
-            Status = PaymentStatus.Pending;
             IsRecurring = isRecurring;
-            Notes = notes;
-            CreatedAt = DateTime.Now;
+            UpdateUpdatedAt();
+        }
 
-            PaymentTypeId = paymentType.Id;
-            PaymentType = paymentType;
+        public void SetNotes(string notes)
+        {
+            Notes = notes ?? string.Empty;
+            UpdateUpdatedAt();
+        }
 
-            PaymentMethodId = paymentMethod.Id;
-            PaymentMethod = paymentMethod;
-
-            UserId = user.Id;
-            User = user;
-
-            Installments = [];
-            FinancingId = financing.Id;
+        public void SetFinancing(Financing financing)
+        {
+            FinancingId = financing?.Id;
             Financing = financing;
+            UpdateUpdatedAt();
+        }
 
-            if (financingInstallment != null)
-            {
-                FinancingInstallmentId = financingInstallment.Id;
-                FinancingInstallment = financingInstallment;
-            }
+        public void SetFinancingInstallment(FinancingInstallment installment)
+        {
+            FinancingInstallmentId = installment?.Id;
+            FinancingInstallment = installment;
+            UpdateUpdatedAt();
+        }
+
+        public void SetCreditCard(CreditCard creditCard)
+        {
+            CreditCardId = creditCard?.Id;
+            CreditCard = creditCard;
+            UpdateUpdatedAt();
         }
 
         public void MarkAsPaid(DateTime paymentDate)
@@ -113,19 +107,15 @@ namespace Equilibrium.Domain.Entities
             PaymentDate = paymentDate;
             Status = PaymentStatus.Paid;
 
-            // Se for um pagamento de financiamento
             if (FinancingId.HasValue)
             {
-                // Se for um pagamento de parcela
                 if (FinancingInstallmentId.HasValue && FinancingInstallment != null)
                 {
                     FinancingInstallment.AddPayment(this);
                 }
 
-                // Atualizar o saldo devedor do financiamento
                 if (Financing != null)
                 {
-                    // Somente o valor da amortização reduz o saldo devedor
                     decimal amortizationAmount = FinancingInstallment?.AmortizationAmount ?? Amount;
                     Financing.UpdateRemainingDebt(amortizationAmount);
                 }
@@ -193,14 +183,16 @@ namespace Equilibrium.Domain.Entities
         public void UpdateType(PaymentType paymentType)
         {
             PaymentType = paymentType;
-            UpdateUpdatedAt();
-        }
-        public void UpdateMethod(PaymentMethod paymentMethod)
-        {
-            PaymentMethod = paymentMethod;
+            PaymentTypeId = paymentType.Id;
             UpdateUpdatedAt();
         }
 
+        public void UpdateMethod(PaymentMethod paymentMethod)
+        {
+            PaymentMethod = paymentMethod;
+            PaymentMethodId = paymentMethod.Id;
+            UpdateUpdatedAt();
+        }
 
         public void UpdateRecurring(bool recurring)
         {

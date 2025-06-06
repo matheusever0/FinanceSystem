@@ -9,6 +9,7 @@ namespace Equilibrium.Application.Interfaces
         Task<CreditCardDto> CreateAsync(CreateCreditCardDto createCreditCardDto, Guid userId);
         Task<CreditCardDto> UpdateAsync(Guid id, UpdateCreditCardDto updateCreditCardDto);
         Task DeleteAsync(Guid id);
+        Task UpdateLimitAsync(Guid id, decimal value);
     }
 }
 
