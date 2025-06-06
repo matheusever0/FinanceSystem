@@ -1,6 +1,5 @@
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.Financing;
-using Equilibrium.Web.Models.Generics;
 
 namespace Equilibrium.Web.Services
 {

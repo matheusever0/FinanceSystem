@@ -417,7 +417,6 @@ namespace Equilibrium.Web.Controllers
             {
                 var token = GetToken();
 
-                // Verificar se o pagamento existe
                 var payment = await _paymentService.GetPaymentByIdAsync(id, token);
                 if (payment == null)
                 {
@@ -425,20 +424,18 @@ namespace Equilibrium.Web.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Verificar se pode ser marcado como pago
-                if (payment.Status == 2) // Se j� foi pago
+                if (payment.Status == 2) 
                 {
                     TempData["ErrorMessage"] = "Este pagamento j� foi marcado como pago.";
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
-                if (payment.Status == 4) // Se foi cancelado
+                if (payment.Status == 4) 
                 {
                     TempData["ErrorMessage"] = "N�o � poss�vel marcar um pagamento cancelado como pago.";
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
-                // Validar data de pagamento
                 if (paymentDate > DateTime.Today)
                 {
                     TempData["ErrorMessage"] = "A data de pagamento n�o pode ser futura.";
@@ -507,7 +504,6 @@ namespace Equilibrium.Web.Controllers
         [RequirePermission("payments.create")]
         public IActionResult Export()
         {
-            // This action renders the Export view we just created
             return View();
         }
 
@@ -519,19 +515,16 @@ namespace Equilibrium.Web.Controllers
                 var sb = new StringBuilder();
                 sb.AppendLine("Descricao,Valor,DataVencimento,DataPagamento,TipoPagamentoId,MetodoPagamentoId,Recorrente,Parcelas,CartaoCreditoId,FinanciamentoId,ParcelaFinanciamentoId,Observacoes");
 
-                // Add example rows
                 sb.AppendLine("Aluguel,1500.00,05/06/2025,,id-tipo-pagamento-1,id-metodo-pagamento-1,Sim,1,,,,'Pagamento mensal de aluguel'");
                 sb.AppendLine("Compra Supermercado,253.45,10/06/2025,10/06/2025,id-tipo-pagamento-2,id-metodo-pagamento-2,N�o,1,,,,'Compras do m�s'");
                 sb.AppendLine("Parcela Carro,850.00,15/06/2025,,id-tipo-pagamento-3,id-metodo-pagamento-3,N�o,1,id-cartao-1,,,'Parcela 10/48'");
                 sb.AppendLine("Presta��o Apartamento,2500.00,20/06/2025,,id-tipo-pagamento-4,id-metodo-pagamento-4,N�o,1,,id-financiamento-1,id-parcela-financiamento-1,'Presta��o 24/360'");
 
-                // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
                 string content = sb.ToString();
                 byte[] utf8Bytes = Encoding.UTF8.GetBytes(content);
                 byte[] latin1Bytes = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), utf8Bytes);
                 byte[] resultBytes = Encoding.Convert(Encoding.GetEncoding("ISO-8859-1"), Encoding.UTF8, latin1Bytes);
 
-                // Adicionar BOM UTF-8
                 byte[] bom = Encoding.UTF8.GetPreamble();
                 byte[] finalBytes = new byte[bom.Length + resultBytes.Length];
                 Buffer.BlockCopy(bom, 0, finalBytes, 0, bom.Length);
@@ -572,7 +565,6 @@ namespace Equilibrium.Web.Controllers
 
                 using (var reader = new StreamReader(csvFile.OpenReadStream()))
                 {
-                    // Skip header row
                     var header = await reader.ReadLineAsync();
                     if (header == null)
                     {
@@ -580,7 +572,6 @@ namespace Equilibrium.Web.Controllers
                         return RedirectToAction(nameof(Export));
                     }
 
-                    // Validate header
                     var expectedColumns = new[] { "Descricao", "Valor", "DataVencimento", "DataPagamento",
                 "TipoPagamentoId", "MetodoPagamentoId", "Recorrente", "Parcelas",
                 "CartaoCreditoId", "FinanciamentoId", "Observacoes" };
@@ -592,7 +583,7 @@ namespace Equilibrium.Web.Controllers
                         return RedirectToAction(nameof(Export));
                     }
 
-                    var lineNumber = 1; // Start with 1 for the header
+                    var lineNumber = 1;
 
                     while (!reader.EndOfStream)
                     {
@@ -604,7 +595,6 @@ namespace Equilibrium.Web.Controllers
                         {
                             var model = ParsePaymentLine(line, headerColumns);
 
-                            // If only validating, we don't create the payment
                             if (!validateOnly)
                             {
                                 await _paymentService.CreatePaymentAsync(model, token);
@@ -617,7 +607,6 @@ namespace Equilibrium.Web.Controllers
                             errorCount++;
                             errors.Add($"Erro na linha {lineNumber}: {ex.Message}");
 
-                            // If more than 10 errors, stop processing
                             if (errors.Count > 10)
                             {
                                 errors.Add("Muitos erros encontrados. Processamento interrompido.");
@@ -659,7 +648,6 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
-        // Helper methods
         private bool ValidateHeader(string[] actual, string[] expected, out List<string> missingColumns)
         {
             missingColumns = new List<string>();
@@ -680,7 +668,6 @@ namespace Equilibrium.Web.Controllers
             var values = ParseCsvLine(line);
             var model = new CreatePaymentModel();
 
-            // Map values to model based on header positions
             for (int i = 0; i < headers.Length && i < values.Length; i++)
             {
                 var header = headers[i].Trim();
@@ -727,7 +714,6 @@ namespace Equilibrium.Web.Controllers
                 }
             }
 
-            // Validate required fields
             if (string.IsNullOrEmpty(model.Description))
                 throw new Exception("A descri��o � obrigat�ria");
 
@@ -737,7 +723,6 @@ namespace Equilibrium.Web.Controllers
             if (string.IsNullOrEmpty(model.PaymentMethodId))
                 throw new Exception("O m�todo de pagamento � obrigat�rio");
 
-            // Validar se tem financiamento mas n�o tem parcela
             if (!string.IsNullOrEmpty(model.FinancingId) && string.IsNullOrEmpty(model.FinancingInstallmentId))
                 throw new Exception("Quando um financiamento � especificado, a parcela do financiamento � obrigat�ria");
 
@@ -746,7 +731,6 @@ namespace Equilibrium.Web.Controllers
 
         private string[] ParseCsvLine(string line)
         {
-            // Simple CSV parser that handles quoted values
             var result = new List<string>();
             var currentValue = new StringBuilder();
             bool inQuotes = false;
@@ -757,21 +741,18 @@ namespace Equilibrium.Web.Controllers
 
                 if (c == '"')
                 {
-                    // If we're in quotes and the next character is also a quote, it's an escaped quote
                     if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
                     {
                         currentValue.Append('"');
-                        i++; // Skip next quote
+                        i++; 
                     }
                     else
                     {
-                        // Toggle quote status
                         inQuotes = !inQuotes;
                     }
                 }
                 else if (c == ';' && !inQuotes)
                 {
-                    // End of field
                     result.Add(currentValue.ToString());
                     currentValue.Clear();
                 }
@@ -781,7 +762,6 @@ namespace Equilibrium.Web.Controllers
                 }
             }
 
-            // Add the last field
             result.Add(currentValue.ToString());
 
             return result.ToArray();
@@ -789,7 +769,6 @@ namespace Equilibrium.Web.Controllers
 
         private decimal ParseDecimal(string value)
         {
-            // Handle both comma and dot as decimal separators
             value = value.Replace(".", "").Replace(",", ".");
             if (!decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             {
@@ -800,7 +779,6 @@ namespace Equilibrium.Web.Controllers
 
         private DateTime ParseDate(string value)
         {
-            // Try different date formats
             string[] formats = { "dd/MM/yyyy", "yyyy-MM-dd", "MM/dd/yyyy" };
             if (!DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
             {
@@ -822,20 +800,17 @@ namespace Equilibrium.Web.Controllers
 
                 foreach (var type in paymentTypes)
                 {
-                    // Escape quotes in text fields
                     var name = EscapeCsvField(type.Name);
                     var description = EscapeCsvField(type.Description);
 
                     sb.AppendLine($"{type.Id},{name},{description},{(type.IsFinancingType ? "Sim" : "N�o")}");
                 }
 
-                // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
                 string content = sb.ToString();
                 byte[] utf8Bytes = Encoding.UTF8.GetBytes(content);
                 byte[] latin1Bytes = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), utf8Bytes);
                 byte[] resultBytes = Encoding.Convert(Encoding.GetEncoding("ISO-8859-1"), Encoding.UTF8, latin1Bytes);
 
-                // Adicionar BOM UTF-8
                 byte[] bom = Encoding.UTF8.GetPreamble();
                 byte[] finalBytes = new byte[bom.Length + resultBytes.Length];
                 Buffer.BlockCopy(bom, 0, finalBytes, 0, bom.Length);
@@ -864,21 +839,17 @@ namespace Equilibrium.Web.Controllers
                 foreach (var method in paymentMethods)
                 {
 
-                    // Escape quotes in text fields
                     var name = EscapeCsvField(method.Name);
                     var description = EscapeCsvField(method.Description);
 
                     sb.AppendLine($"{method.Id},{name},{description}");
                 }
 
-                // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
-                // Isso �s vezes resolve problemas de codifica��o
                 string content = sb.ToString();
                 byte[] utf8Bytes = Encoding.UTF8.GetBytes(content);
                 byte[] latin1Bytes = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), utf8Bytes);
                 byte[] resultBytes = Encoding.Convert(Encoding.GetEncoding("ISO-8859-1"), Encoding.UTF8, latin1Bytes);
 
-                // Adicionar BOM UTF-8
                 byte[] bom = Encoding.UTF8.GetPreamble();
                 byte[] finalBytes = new byte[bom.Length + resultBytes.Length];
                 Buffer.BlockCopy(bom, 0, finalBytes, 0, bom.Length);
@@ -906,20 +877,17 @@ namespace Equilibrium.Web.Controllers
 
                 foreach (var card in creditCards)
                 {
-                    // Escape quotes in text fields
                     var name = EscapeCsvField(card.Name);
                     var brand = EscapeCsvField(card.CardBrand);
 
                     sb.AppendLine($"{card.Id},{name},{brand},{card.LastFourDigits}");
                 }
 
-                // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
                 string content = sb.ToString();
                 byte[] utf8Bytes = Encoding.UTF8.GetBytes(content);
                 byte[] latin1Bytes = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), utf8Bytes);
                 byte[] resultBytes = Encoding.Convert(Encoding.GetEncoding("ISO-8859-1"), Encoding.UTF8, latin1Bytes);
 
-                // Adicionar BOM UTF-8
                 byte[] bom = Encoding.UTF8.GetPreamble();
                 byte[] finalBytes = new byte[bom.Length + resultBytes.Length];
                 Buffer.BlockCopy(bom, 0, finalBytes, 0, bom.Length);
@@ -947,20 +915,17 @@ namespace Equilibrium.Web.Controllers
 
                 foreach (var financing in financings)
                 {
-                    // Escape quotes in text fields
                     var description = EscapeCsvField(financing.Description);
                     var status = EscapeCsvField(financing.StatusDescription);
 
                     sb.AppendLine($"{financing.Id},{description},{financing.TotalAmount.ToString("F2", CultureInfo.InvariantCulture)},{financing.StartDate:dd/MM/yyyy},{status}");
                 }
 
-                // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
                 string content = sb.ToString();
                 byte[] utf8Bytes = Encoding.UTF8.GetBytes(content);
                 byte[] latin1Bytes = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), utf8Bytes);
                 byte[] resultBytes = Encoding.Convert(Encoding.GetEncoding("ISO-8859-1"), Encoding.UTF8, latin1Bytes);
 
-                // Adicionar BOM UTF-8
                 byte[] bom = Encoding.UTF8.GetPreamble();
                 byte[] finalBytes = new byte[bom.Length + resultBytes.Length];
                 Buffer.BlockCopy(bom, 0, finalBytes, 0, bom.Length);
@@ -985,17 +950,14 @@ namespace Equilibrium.Web.Controllers
                 var sb = new StringBuilder();
                 sb.AppendLine("Id,FinanciamentoId,DescricaoFinanciamento,NumeroParcela,Valor,DataVencimento,Status");
 
-                // Obter os financiamentos ativos
                 var financings = await _financingService.GetActiveFinancingsAsync(token);
 
                 foreach (var financing in financings)
                 {
-                    // Para cada financiamento, obter suas parcelas
                     var installments = await _financingService.GetFinancingInstallmentsAsync(financing.Id, token);
 
                     if (installments != null && installments.Any())
                     {
-                        // Escape quotes in text fields
                         var financingDescription = EscapeCsvField(financing.Description);
 
                         foreach (var installment in installments)
@@ -1007,13 +969,11 @@ namespace Equilibrium.Web.Controllers
                     }
                 }
 
-                // Converter de UTF-8 para ISO-8859-1 (Latin1) e depois de volta para UTF-8
                 string content = sb.ToString();
                 byte[] utf8Bytes = Encoding.UTF8.GetBytes(content);
                 byte[] latin1Bytes = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding("ISO-8859-1"), utf8Bytes);
                 byte[] resultBytes = Encoding.Convert(Encoding.GetEncoding("ISO-8859-1"), Encoding.UTF8, latin1Bytes);
 
-                // Adicionar BOM UTF-8
                 byte[] bom = Encoding.UTF8.GetPreamble();
                 byte[] finalBytes = new byte[bom.Length + resultBytes.Length];
                 Buffer.BlockCopy(bom, 0, finalBytes, 0, bom.Length);
@@ -1033,7 +993,6 @@ namespace Equilibrium.Web.Controllers
             if (string.IsNullOrEmpty(field))
                 return string.Empty;
 
-            // Se cont�m v�rgula, aspas ou quebra de linha, coloca entre aspas e dobra as aspas internas
             if (field.Contains(",") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
             {
                 return "\"" + field.Replace("\"", "\"\"") + "\"";

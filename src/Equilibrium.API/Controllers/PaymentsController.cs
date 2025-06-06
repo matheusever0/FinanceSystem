@@ -19,7 +19,6 @@ namespace Equilibrium.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PaymentDto>>> Get([FromQuery] PaymentFilter filter)
         {
-            // Validar mês se fornecido
             if (!filter.IsValidMonth())
             {
                 return BadRequest(new { message = "Mês deve estar entre 1 e 12" });
@@ -211,7 +210,6 @@ namespace Equilibrium.API.Controllers
                 var installmentService = HttpContext.RequestServices.GetRequiredService<IFinancingInstallmentService>();
                 var installments = await installmentService.GetByFinancingIdAsync(financingId);
 
-                // Filtrar apenas parcelas pendentes ou parcialmente pagas
                 var pendingInstallments = installments.Where(i =>
                     i.Status == FinancingInstallmentStatus.Pending ||
                     i.Status == FinancingInstallmentStatus.PartiallyPaid).ToList();

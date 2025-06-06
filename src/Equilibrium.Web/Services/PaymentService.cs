@@ -181,8 +181,7 @@ namespace Equilibrium.Web.Services
 
         public async Task<PaymentModel> MarkAsPaidAsync(string id, DateTime? paymentDate, string token)
         {
-            var data = paymentDate.HasValue ? new { paymentDate = paymentDate.Value } : null;
-            return await _apiService.PostAsync<PaymentModel>($"/api/payments/{id}/paid", data, token);
+            return await _apiService.PostAsync<PaymentModel>($"/api/payments/{id}/paid", paymentDate, token);
         }
 
         public async Task<PaymentModel> MarkAsOverdueAsync(string id, string token)

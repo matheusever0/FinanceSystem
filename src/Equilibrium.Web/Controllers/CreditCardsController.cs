@@ -5,7 +5,6 @@ using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.CreditCard;
-using Equilibrium.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
