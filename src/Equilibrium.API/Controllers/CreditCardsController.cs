@@ -109,8 +109,8 @@ namespace Equilibrium.API.Controllers
             }
         }
 
-        [HttpPost("creditCards/{id}/value/{value}")]
-        public async Task<ActionResult<CreditCardDto>> ReturnLimit(Guid id, decimal value)
+        [HttpPost("value/{id}")]
+        public async Task<ActionResult<CreditCardDto>> ReturnLimit(Guid id, [FromBody] decimal value)
         {
             try
             {

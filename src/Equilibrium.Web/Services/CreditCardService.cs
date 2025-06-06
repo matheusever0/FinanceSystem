@@ -81,7 +81,15 @@ namespace Equilibrium.Web.Services
 
         public async Task<CreditCardModel> UpdateLimitCreditCardAsync(string id, decimal value, string token)
         {
-            return await _apiService.PostAsync<CreditCardModel>($"/api/CreditCards/{id}/value/{value}", token: token);
+            try
+            {
+                return await _apiService.PostAsync<CreditCardModel>($"/api/CreditCards/value/{id}", value, token);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao excluir cartão de crédito com ID: {CardId}", id);
+                throw;
+            }
         }
     }
 }

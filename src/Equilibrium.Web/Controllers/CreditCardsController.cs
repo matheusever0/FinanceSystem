@@ -216,6 +216,56 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission("creditcards.edit")]
+        public async Task<IActionResult> PayInvoice(string id, [FromBody] decimal amount)
+        {
+            try
+            {
+                var token = HttpContext.GetJwtToken();
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    return Json(new { success = false, message = "Token de autenticação não encontrado." });
+                }
+
+                if (amount <= 0)
+                {
+                    return Json(new { success = false, message = "O valor do pagamento deve ser maior que zero." });
+                }
+
+                var currentCard = await _creditCardService.GetCreditCardByIdAsync(id, token);
+                var usedAmount = currentCard.Limit - currentCard.AvailableLimit;
+
+                if (amount > usedAmount)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = $"O valor do pagamento (R$ {amount:N2}) não pode ser maior que o valor utilizado (R$ {usedAmount:N2})."
+                    });
+                }
+
+                var updatedCard = await _creditCardService.UpdateLimitCreditCardAsync(id, amount, token);
+
+                TempData["SuccessMessage"] = $"Pagamento de {amount:C2} registrado com sucesso! Novo limite disponível: {updatedCard.GetFormattedAvailableLimit()}.";
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Pagamento registrado com sucesso!",
+                    newAvailableLimit = updatedCard.GetFormattedAvailableLimit(),
+                    newUsedLimit = updatedCard.GetFormattedUsedLimit(),
+                    paymentAmount = amount.ToString("C2")
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Erro interno. Tente novamente." });
+            }
+        }
+
         private async Task LoadPaymentMethodsForView()
         {
             try

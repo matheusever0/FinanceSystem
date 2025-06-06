@@ -131,8 +131,14 @@ namespace Equilibrium.Web.Services
         public async Task<T> PostAsync<T>(string endpoint, object? data = null, string token = "")
         {
             var client = CreateClient(token);
-            var json = data != null ? JsonSerializer.Serialize(data) : "";
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpContent? content = null;
+            if (data != null)
+            {
+                var json = JsonSerializer.Serialize(data);
+                content = new StringContent(json, Encoding.UTF8, "application/json");
+            }
+
             var response = await client.PostAsync(endpoint, content);
             var responseContent = await HandleResponse(response);
 
