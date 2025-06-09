@@ -21,6 +21,10 @@ document.addEventListener('DOMContentLoaded', function () {
         FinanceSystem.Validation.initialize();
     }
 
+    if (FinanceSystem.Core.DeleteHelper && typeof FinanceSystem.Core.DeleteHelper.initialize === 'function') {
+        FinanceSystem.Core.DeleteHelper.initialize();
+    }
+
     initializePageModules();
 });
 

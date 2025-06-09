@@ -100,7 +100,7 @@ namespace Equilibrium.Web.Controllers
         }
 
         protected IActionResult HandleException(Exception ex, EntityNames entity, string action,
-            string redirectController = null, string redirectAction = "Index", object routeValues = null)
+            string? redirectController = null, string redirectAction = "Index", object? routeValues = null)
         {
             SetErrorMessage(entity, action, ex);
 
@@ -136,6 +136,88 @@ namespace Equilibrium.Web.Controllers
                 return true;
 
             return GetCurrentUserId() == resourceUserId;
+        }
+        protected async Task<IActionResult> HandleGenericDelete<TService>(
+        string id,
+        TService service,
+        Func<TService, string, string, Task> deleteMethod,
+        Func<TService, string, string, Task<object>> getMethod,
+        string entityName,
+        string? redirectUrl = null,
+        Func<object, Task<(bool IsValid, string ErrorMessage)>>? customValidation = null)
+        where TService : class
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                TempData["ErrorMessage"] = $"ID do {entityName} não fornecido.";
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                var token = GetToken();
+
+                var item = await getMethod(service, id, token);
+                if (item == null)
+                {
+                    TempData["ErrorMessage"] = $"{char.ToUpper(entityName[0])}{entityName[1..]} não encontrado.";
+                    return RedirectToAction("Index");
+                }
+
+                var (IsValid, ErrorMessage) = customValidation != null
+                    ? await customValidation(item)
+                    : await ValidateBeforeDelete(item, entityName);
+
+                if (!IsValid)
+                {
+                    TempData["ErrorMessage"] = ErrorMessage;
+                    return RedirectToAction("Details", new { id });
+                }
+
+                await deleteMethod(service, id, token);
+
+                var description = GetEntityDescription(item);
+                TempData["SuccessMessage"] = $"{char.ToUpper(entityName[0])}{entityName[1..]} '{description}' excluído com sucesso.";
+
+                if (!string.IsNullOrEmpty(redirectUrl))
+                {
+                    return Redirect(redirectUrl);
+                }
+
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Erro ao excluir {entityName}: {ex.Message}";
+                return RedirectToAction("Details", new { id });
+            }
+        }
+
+        protected virtual async Task<(bool IsValid, string ErrorMessage)> ValidateBeforeDelete(object item, string entityName) => await Task.FromResult((true, (string?)null));
+
+        protected virtual string GetEntityDescription(object item)
+        {
+            var type = item.GetType();
+
+            var nameProperty = type.GetProperty("Name");
+            if (nameProperty != null)
+            {
+                return nameProperty.GetValue(item)?.ToString() ?? "Item";
+            }
+
+            var descriptionProperty = type.GetProperty("Description");
+            if (descriptionProperty != null)
+            {
+                return descriptionProperty.GetValue(item)?.ToString() ?? "Item";
+            }
+
+            var idProperty = type.GetProperty("Id");
+            if (idProperty != null)
+            {
+                return $"Item {idProperty.GetValue(item)}";
+            }
+
+            return "Item";
         }
     }
 }

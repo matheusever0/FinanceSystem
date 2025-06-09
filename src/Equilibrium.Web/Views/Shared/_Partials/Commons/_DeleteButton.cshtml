@@ -1,0 +1,37 @@
+﻿@model (string Id, string Controller, string EntityName, string Description, string CssClass, string CustomMessage, string RedirectUrl, bool CheckStatus, string StatusField, string[] AllowedStatuses, bool ShowConfirmation, bool IconOnly, string ButtonText)
+
+@{
+    var cssClass = !string.IsNullOrEmpty(Model.CssClass) ? Model.CssClass : "btn btn-outline-danger";
+    var controller = !string.IsNullOrEmpty(Model.Controller) ? Model.Controller : ViewContext.RouteData.Values["Controller"]?.ToString();
+    var redirectUrl = !string.IsNullOrEmpty(Model.RedirectUrl) ? Model.RedirectUrl : "";
+    var checkStatus = Model.CheckStatus;
+    var statusField = !string.IsNullOrEmpty(Model.StatusField) ? Model.StatusField : "Status";
+    var allowedStatuses = Model.AllowedStatuses != null ? string.Join(",", Model.AllowedStatuses) : "";
+    var showConfirmation = Model.ShowConfirmation;
+    var iconOnly = Model.IconOnly;
+    var buttonText = !string.IsNullOrEmpty(Model.ButtonText) ? Model.ButtonText : $"Excluir {Model.EntityName}";
+
+    // NOVA ABORDAGEM: JSON para evitar problemas com encoding
+    var deleteConfig = new
+    {
+        id = Model.Id,
+        controller = controller,
+        entityName = Model.EntityName,
+        description = Model.Description,
+        customMessage = Model.CustomMessage ?? "",
+        redirectUrl = redirectUrl,
+        checkStatus = checkStatus,
+        statusField = statusField,
+        allowedStatuses = allowedStatuses,
+        confirmationRequired = showConfirmation
+    };
+    var configJson = System.Text.Json.JsonSerializer.Serialize(deleteConfig);
+}
+
+<button type="button"
+        class="@cssClass"
+        data-delete-config='@Html.Raw(configJson)'
+        onclick="FinanceSystem.Core.DeleteHelper.handleDeleteFromConfig(this)"
+        title="@buttonText">
+    <i class="fas fa-trash@(iconOnly ? "" : " me-1")"></i>@(iconOnly ? "" : $" {buttonText}")
+</button>

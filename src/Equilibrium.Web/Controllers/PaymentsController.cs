@@ -130,20 +130,20 @@ namespace Equilibrium.Web.Controllers
 
                 var statusOptions = new List<SelectListItem>
                 {
-                    new SelectListItem { Value = "Pending", Text = "Pendente" },
-                    new SelectListItem { Value = "Paid", Text = "Pago" },
-                    new SelectListItem { Value = "Overdue", Text = "Vencido" },
-                    new SelectListItem { Value = "Cancelled", Text = "Cancelado" }
+                    new() { Value = "Pending", Text = "Pendente" },
+                    new() { Value = "Paid", Text = "Pago" },
+                    new() { Value = "Overdue", Text = "Vencido" },
+                    new() { Value = "Cancelled", Text = "Cancelado" }
                 };
 
                 var orderByOptions = new List<SelectListItem>
                 {
-                    new SelectListItem { Value = "dueDate", Text = "Data de Vencimento" },
-                    new SelectListItem { Value = "description", Text = "Descrição" },
-                    new SelectListItem { Value = "amount", Text = "Valor" },
-                    new SelectListItem { Value = "paymentDate", Text = "Data de Pagamento" },
-                    new SelectListItem { Value = "status", Text = "Status" },
-                    new SelectListItem { Value = "createdAt", Text = "Data de Criação" }
+                    new() { Value = "dueDate", Text = "Data de Vencimento" },
+                    new() { Value = "description", Text = "Descrição" },
+                    new() { Value = "amount", Text = "Valor" },
+                    new() { Value = "paymentDate", Text = "Data de Pagamento" },
+                    new() { Value = "status", Text = "Status" },
+                    new() { Value = "createdAt", Text = "Data de Criação" }
                 };
 
                 ViewBag.PaymentTypes = paymentTypes;
@@ -260,7 +260,7 @@ namespace Equilibrium.Web.Controllers
 
                 var financingPaymentTypes = paymentTypes.Where(pt => pt.IsFinancingType).ToList();
 
-                if (!financingPaymentTypes.Any())
+                if (financingPaymentTypes.Count == 0)
                 {
                     TempData["WarningMessage"] = "não h� tipos de pagamento configurados para financiamento.";
                     return RedirectToAction(nameof(Create));
@@ -368,38 +368,21 @@ namespace Equilibrium.Web.Controllers
         [RequirePermission("payments.delete")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                TempData["ErrorMessage"] = "ID do pagamento não fornecido.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            try
-            {
-                var token = GetToken();
-                var payment = await _paymentService.GetPaymentByIdAsync(id, token);
-                if (payment == null)
-                {
-                    TempData["ErrorMessage"] = "Pagamento não encontrado.";
-                    return RedirectToAction(nameof(Index));
+            return await HandleGenericDelete(
+                id,
+                _paymentService,
+                async (service, itemId, token) => await service.DeletePaymentAsync(itemId, token),
+                async (service, itemId, token) => await service.GetPaymentByIdAsync(itemId, token),
+                "pagamento",
+                null,
+                async (item) => {
+                    if (item is PaymentModel payment && payment.Status == 2)
+                    {
+                        return (false, "Não é possível excluir um pagamento que já foi pago.");
+                    }
+                    return (true, null);
                 }
-
-                if (payment.Status == 2)
-                {
-                    TempData["ErrorMessage"] = "não é possível excluir um pagamento que já foi pago.";
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-
-                await _paymentService.DeletePaymentAsync(id, token);
-                TempData["SuccessMessage"] = $"Pagamento '{payment.Description}' excluído com sucesso.";
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Erro ao excluir pagamento: {ex.Message}";
-                return RedirectToAction(nameof(Details), new { id });
-            }
-
-            return RedirectToAction(nameof(Index));
+            );
         }
 
         [HttpPost]
@@ -673,7 +656,7 @@ namespace Equilibrium.Web.Controllers
 
         private static bool ValidateHeader(string[] actual, string[] expected, out List<string> missingColumns)
         {
-            missingColumns = new List<string>();
+            missingColumns = [];
 
             foreach (var column in expected)
             {
@@ -787,7 +770,7 @@ namespace Equilibrium.Web.Controllers
 
             result.Add(currentValue.ToString());
 
-            return result.ToArray();
+            return [.. result];
         }
 
         private static decimal ParseDecimal(string value)
@@ -802,7 +785,7 @@ namespace Equilibrium.Web.Controllers
 
         private static DateTime ParseDate(string value)
         {
-            string[] formats = { "dd/MM/yyyy", "yyyy-MM-dd", "MM/dd/yyyy" };
+            string[] formats = ["dd/MM/yyyy", "yyyy-MM-dd", "MM/dd/yyyy"];
             if (!DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
             {
                 throw new ArgumentException($"Data inválida: {value}. Use o formato DD/MM/AAAA.");
@@ -1016,7 +999,7 @@ namespace Equilibrium.Web.Controllers
             if (string.IsNullOrEmpty(field))
                 return string.Empty;
 
-            if (field.Contains(",") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
+            if (field.Contains(',') || field.Contains('"') || field.Contains('\n') || field.Contains('\r'))
             {
                 return "\"" + field.Replace("\"", "\"\"") + "\"";
             }
