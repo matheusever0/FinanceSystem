@@ -18,7 +18,6 @@
         }
     </div>
 
-    <!-- Filtros de Receitas -->
     <partial name="_Partials/Filters/_IncomeFiltersPartial" model="filter" />
 
     @if (!Model.Any())
@@ -33,34 +32,35 @@
     }
     else
     {
-        <!-- Métricas Resumidas -->
         <div class="row">
             <partial name="_Partials/Commons/_MetricCard" model='(
-                Title: "Total de Receitas",
-                Value: Model.Sum(i => i.Amount).ToString("C2"),
-                Icon: "fa-money-bill-alt",
-                Color: "success",
-                SubValue: Model.Count() + " receitas",
-                ShowProgress: false)' />
+                 Title: "Total de Receitas" ,
+                 Value: Model.Sum(i=>
+            i.Amount).ToString("C2"),
+            Icon: "fa-money-bill-alt",
+            Color: "success",
+            SubValue: Model.Count() + " receitas",
+            ShowProgress: false)' />
 
-            <partial name="_Partials/Commons/_MetricCard" model='(
-                Title: "Total Recebido",
-                Value: Model.Where(i => i.Status == 2).Sum(i => i.Amount).ToString("C2"),
+                <partial name="_Partials/Commons/_MetricCard" model='(
+                     Title: "Total Recebido" ,
+                     Value: Model.Where(i=>
+                i.Status == 2).Sum(i => i.Amount).ToString("C2"),
                 Icon: "fa-check-circle",
                 Color: "success",
                 SubValue: Model.Count(i => i.Status == 2) + " recebidas",
                 ShowProgress: false)' />
 
-            <partial name="_Partials/Commons/_MetricCard" model='(
-                Title: "Total Pendente",
-                Value: Model.Where(i => i.Status == 1).Sum(i => i.Amount).ToString("C2"),
-                Icon: "fa-clock",
-                Color: "warning",
-                SubValue: Model.Count(i => i.Status == 1) + " pendentes",
-                ShowProgress: false)' />
+                    <partial name="_Partials/Commons/_MetricCard" model='(
+                         Title: "Total Pendente" ,
+                         Value: Model.Where(i=>
+                    i.Status == 1).Sum(i => i.Amount).ToString("C2"),
+                    Icon: "fa-clock",
+                    Color: "warning",
+                    SubValue: Model.Count(i => i.Status == 1) + " pendentes",
+                    ShowProgress: false)' />
         </div>
 
-        <!-- Tabela de Receitas -->
         <div class="card shadow mb-4">
             <partial name="_Partials/Commons/_CardHeader" model='(
                 Title: "Suas Receitas",
@@ -138,12 +138,22 @@
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             }
-                                            @if (item.Status != 3 && await PermissionHelper.HasPermissionAsync(Context, "incomes.delete"))
+                                            @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.delete"))
                                             {
-                                                <button type="button" class="btn btn-sm btn-outline-danger" title="Excluir"
-                                                        onclick="confirmDelete('@item.Id', '@item.Description')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                                <partial name="_Partials/Commons/_DeleteButton" model='(
+                                                    Id: item.Id,
+                                                    Controller: "Incomes",
+                                                    EntityName: "receita",
+                                                    Description: item.Description,
+                                                    CssClass: "btn btn-sm btn-danger",
+                                                    CustomMessage: "",
+                                                    RedirectUrl: "",
+                                                    CheckStatus: true,
+                                                    StatusField: "Status",
+                                                    AllowedStatuses: new[]{"1","3","4"},
+                                                    ShowConfirmation: true,
+                                                    IconOnly: true,
+                                                    ButtonText: "")' />
                                             }
                                         </div>
                                     </td>
@@ -155,7 +165,6 @@
             </div>
         </div>
 
-        <!-- Ações Rápidas -->
         @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.edit"))
         {
             <div class="card shadow mb-4">
@@ -197,30 +206,3 @@
         }
     }
 </div>
-
-@section Scripts {
-    <script>
-        // Função para confirmar exclusão
-        function confirmDelete(id, description) {
-            if (confirm(`Tem certeza que deseja excluir a receita "${description}"?\n\nEsta ação não pode ser desfeita e todas as parcelas associadas também serão excluídas.`)) {
-                // Criar formulário dinamicamente para enviar DELETE
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/Incomes/Delete/${id}`;
-
-                // Adicionar token antiforgery se disponível
-                const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
-                if (tokenElement) {
-                    const tokenInput = document.createElement('input');
-                    tokenInput.type = 'hidden';
-                    tokenInput.name = '__RequestVerificationToken';
-                    tokenInput.value = tokenElement.value;
-                    form.appendChild(tokenInput);
-                }
-
-                document.body.appendChild(form);
-                form.submit();
-            }
-        }
-    </script>
-}

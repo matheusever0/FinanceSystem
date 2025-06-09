@@ -6,6 +6,7 @@ using Equilibrium.Web.Helpers;
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Income;
+using Equilibrium.Web.Models.Payment;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -302,39 +303,21 @@ namespace Equilibrium.Web.Controllers
         [RequirePermission("incomes.delete")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                TempData["ErrorMessage"] = "ID da receita não fornecido.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            try
-            {
-                var token = GetToken();
-
-                var income = await _incomeService.GetIncomeByIdAsync(id, token);
-                if (income == null)
-                {
-                    TempData["ErrorMessage"] = "Receita não encontrada.";
-                    return RedirectToAction(nameof(Index));
+            return await HandleGenericDelete(
+                id,
+                _incomeService,
+                async (service, itemId, token) => await service.DeleteIncomeAsync(itemId, token),
+                async (service, itemId, token) => await service.GetIncomeByIdAsync(itemId, token),
+                "receita",
+                null,
+                async (item) => {
+                    if (item is IncomeModel income && income.Status == 2)
+                    {
+                        return (false, "Não é possível excluir uma receita que já foi paga.");
+                    }
+                    return (true, null);
                 }
-
-                if (income.Status == 2) 
-                {
-                    TempData["ErrorMessage"] = "Não ? possível excluir uma receita que já foi recebida.";
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-
-                await _incomeService.DeleteIncomeAsync(id, token);
-                TempData["SuccessMessage"] = $"Receita '{income.Description}' excluída com sucesso.";
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Erro ao excluir receita: {ex.Message}";
-                return RedirectToAction(nameof(Details), new { id });
-            }
-
-            return RedirectToAction(nameof(Index));
+            );
         }
 
         [HttpPost]
