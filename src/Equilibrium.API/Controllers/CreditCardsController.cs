@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Equilibrium.API.Controllers
 {
-    public class CreditCardsController(IUnitOfWork unitOfWork, 
+    public class CreditCardsController(IUnitOfWork unitOfWork,
         ICreditCardService service) : AuthenticatedController<ICreditCardService>(unitOfWork, service)
     {
         [HttpGet]
@@ -98,30 +98,6 @@ namespace Equilibrium.API.Controllers
 
                 await _service.DeleteAsync(id);
                 return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpPost("value/{id}")]
-        public async Task<ActionResult<CreditCardDto>> ReturnLimit(Guid id, [FromBody] decimal value)
-        {
-            try
-            {
-                var existingCard = await _service.GetByIdAsync(id);
-                if (existingCard.UserId != HttpContext.GetCurrentUserId())
-                {
-                    return Forbid();
-                }
-
-                await _service.UpdateLimitAsync(id, value);
-                return Ok(existingCard);
             }
             catch (KeyNotFoundException ex)
             {

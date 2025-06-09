@@ -1,10 +1,10 @@
 using Equilibrium.Resources.Web;
 using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
-using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.CreditCard;
+using Equilibrium.Web.Models.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,26 +12,29 @@ namespace Equilibrium.Web.Controllers
 {
     [Authorize]
     [RequirePermission("creditcards.view")]
-    public class CreditCardsController : Controller
+    public class CreditCardsController : BaseController
     {
         private readonly ICreditCardService _creditCardService;
         private readonly IPaymentMethodService _paymentMethodService;
+        private readonly IPaymentService _paymentService;
 
         private const int CREDIT_CARD_PAYMENT_TYPE = 2;
 
         public CreditCardsController(
             ICreditCardService creditCardService,
-            IPaymentMethodService paymentMethodService)
+            IPaymentMethodService paymentMethodService,
+            IPaymentService paymentService)
         {
             _creditCardService = creditCardService ?? throw new ArgumentNullException(nameof(creditCardService));
             _paymentMethodService = paymentMethodService ?? throw new ArgumentNullException(nameof(paymentMethodService));
+            _paymentService = paymentService ?? throw new ArgumentNullException(nameof(paymentService));
         }
 
         public async Task<IActionResult> Index()
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
                 return View(creditCards);
             }
@@ -51,8 +54,9 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var creditCard = await _creditCardService.GetCreditCardByIdAsync(id, token);
+                ViewBag.PaymentsWithCard = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { CreditCardId = id }, token);
 
                 return creditCard == null ? NotFound("Cartão de crédito não encontrado") : View(creditCard);
             }
@@ -68,7 +72,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var creditCardPaymentMethods = await _paymentMethodService.GetByTypeAsync(CREDIT_CARD_PAYMENT_TYPE, token);
                 ViewBag.PaymentMethods = creditCardPaymentMethods;
                 return View();
@@ -93,7 +97,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var creditCard = await _creditCardService.CreateCreditCardAsync(model, token);
                 TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.CreditCard);
                 return RedirectToAction(nameof(Details), new { id = creditCard.Id });
@@ -116,7 +120,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var creditCard = await _creditCardService.GetCreditCardByIdAsync(id, token);
 
                 if (creditCard == null)
@@ -158,7 +162,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 await _creditCardService.UpdateCreditCardAsync(id, model, token);
                 TempData["SuccessMessage"] = MessageHelper.GetUpdateSuccessMessage(EntityNames.CreditCard);
                 return RedirectToAction(nameof(Details), new { id });
@@ -180,7 +184,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var creditCard = await _creditCardService.GetCreditCardByIdAsync(id, token);
 
                 return creditCard == null ? NotFound("Cartão de crédito não encontrado") : View(creditCard);
@@ -204,7 +208,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 await _creditCardService.DeleteCreditCardAsync(id, token);
                 TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.CreditCard);
                 return RedirectToAction(nameof(Index));
@@ -216,61 +220,11 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("creditcards.edit")]
-        public async Task<IActionResult> PayInvoice(string id, [FromBody] decimal amount)
-        {
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-
-                if (string.IsNullOrEmpty(token))
-                {
-                    return Json(new { success = false, message = "Token de autenticação não encontrado." });
-                }
-
-                if (amount <= 0)
-                {
-                    return Json(new { success = false, message = "O valor do pagamento deve ser maior que zero." });
-                }
-
-                var currentCard = await _creditCardService.GetCreditCardByIdAsync(id, token);
-                var usedAmount = currentCard.Limit - currentCard.AvailableLimit;
-
-                if (amount > usedAmount)
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = $"O valor do pagamento (R$ {amount:N2}) não pode ser maior que o valor utilizado (R$ {usedAmount:N2})."
-                    });
-                }
-
-                var updatedCard = await _creditCardService.UpdateLimitCreditCardAsync(id, amount, token);
-
-                TempData["SuccessMessage"] = $"Pagamento de {amount:C2} registrado com sucesso! Novo limite disponível: {updatedCard.GetFormattedAvailableLimit()}.";
-
-                return Json(new
-                {
-                    success = true,
-                    message = "Pagamento registrado com sucesso!",
-                    newAvailableLimit = updatedCard.GetFormattedAvailableLimit(),
-                    newUsedLimit = updatedCard.GetFormattedUsedLimit(),
-                    paymentAmount = amount.ToString("C2")
-                });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Erro interno. Tente novamente." });
-            }
-        }
-
         private async Task LoadPaymentMethodsForView()
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var creditCardPaymentMethods = await _paymentMethodService.GetByTypeAsync(CREDIT_CARD_PAYMENT_TYPE, token);
                 ViewBag.PaymentMethods = creditCardPaymentMethods;
             }

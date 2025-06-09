@@ -7,7 +7,9 @@
     var paymentsWithCard = ViewBag.PaymentsWithCard as IEnumerable<PaymentModel> ?? new List<PaymentModel>();
     var usedPercentage = (Model.Limit - Model.AvailableLimit) / Model.Limit * 100;
     var colorClass = usedPercentage > 75 ? "danger" : (usedPercentage > 50 ? "warning" : "success");
-    var usedAmount = Model.Limit - Model.AvailableLimit;
+    var today = DateTime.Today;
+    var closingDay = Model.ClosingDay;
+    var dueDay = Model.DueDay;
 }
 
 @section Styles {
@@ -22,17 +24,10 @@
             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary me-2">
                 <i class="fas fa-edit me-1"></i> Editar
             </a>
-            @if (usedAmount > 0)
-            {
-                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#payInvoiceModal">
-                    <i class="fas fa-money-bill-wave me-1"></i> Pagar Fatura
-                </button>
-            }
         }
     </div>
 
     <div class="row">
-        <!-- Informações do Cartão -->
         <div class="col-lg-6">
             <div class="card shadow mb-4">
                 <partial name="_Partials/Commons/_CardHeader" model='(Title: "Informações do Cartão", BadgeText: Model.CardBrand, BadgeClass: "bg-primary", Icon: "fa-credit-card", CollapseTarget: "")' />
@@ -65,7 +60,6 @@
             </div>
         </div>
 
-        <!-- Ações -->
         <div class="col-lg-6">
             <div class="card shadow mb-4">
                 <partial name="_Partials/Commons/_CardHeader" model='(Title: "Ações", BadgeText: "", BadgeClass: "", Icon: "fa-tools", CollapseTarget: "")' />
@@ -74,7 +68,7 @@
                         <i class="fas fa-plus me-1"></i> Criar Novo Pagamento com Este Cartão
                     </a>
 
-                    <a asp-controller="Payments" asp-action="ByMethod" asp-route-id="@Model.PaymentMethodId" class="btn btn-info w-100 mb-3">
+                    <a asp-controller="Payments" asp-action="FilterByCreditCard" asp-route-creditCardId="@Model.Id" class="btn btn-info w-100 mb-3">
                         <i class="fas fa-list me-1"></i> Ver Pagamentos com Este Cartão
                     </a>
 
@@ -84,11 +78,11 @@
                             <i class="fas fa-edit me-1"></i> Editar Cartão
                         </a>
 
-                        @if (usedAmount > 0)
+                        @if (today.Day >= Model.ClosingDay || today.Day >= Model.DueDay)
                         {
-                            <button type="button" class="btn btn-success w-100 mb-3" data-bs-toggle="modal" data-bs-target="#payInvoiceModal">
-                                <i class="fas fa-money-bill-wave me-1"></i> Pagar Fatura (@usedAmount.ToString("C2"))
-                            </button>
+                            <a asp-controller="Payments" asp-action="Create" asp-route-paymentMethodId="@Model.PaymentMethodId" asp-route-creditCardId="@Model.Id" class="btn btn-primary w-100 mb-3">
+                                <i class="fas fa-money-bill-wave me-1"></i> Pagar Fatura (mensal)
+                            </a>
                         }
                         else
                         {
@@ -114,10 +108,6 @@
                 <div class="card-body">
                     <div class="text-center">
                         @{
-                            var today = DateTime.Today;
-                            var closingDay = Model.ClosingDay;
-                            var dueDay = Model.DueDay;
-
                             DateTime nextClosingDate;
                             DateTime nextDueDate;
 
@@ -171,7 +161,6 @@
         </div>
     </div>
 
-    <!-- Pagamentos Recentes -->
     @if (paymentsWithCard.Any())
     {
         <div class="card shadow mb-4">
@@ -214,7 +203,7 @@
                     </table>
                 </div>
                 <div class="p-3 text-center">
-                    <a asp-controller="Payments" asp-action="ByMethod" asp-route-id="@Model.PaymentMethodId" class="btn btn-sm btn-primary">
+                    <a asp-controller="Payments" asp-action="FilterByCreditCard" asp-route-creditCardId="@Model.Id" class="btn btn-sm btn-primary">
                         Ver Todos os Pagamentos
                     </a>
                 </div>
@@ -232,188 +221,3 @@
             IsAlert: true)' />
     }
 </div>
-
-<!-- Modal para Pagar Fatura -->
-<div class="modal fade" id="payInvoiceModal" tabindex="-1" aria-labelledby="payInvoiceModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="payInvoiceModalLabel">
-                    <i class="fas fa-money-bill-wave me-2"></i>Pagar Fatura do Cartão
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="payInvoiceForm">
-                    @Html.AntiForgeryToken()
-
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Cartão:</strong> @Model.Name (@Model.CardBrand *@Model.LastFourDigits)<br>
-                        <strong>Limite Total:</strong> @Model.GetFormattedLimit()<br>
-                        <strong>Limite Disponível:</strong> @Model.GetFormattedAvailableLimit()<br>
-                        <strong>Valor Utilizado:</strong> @usedAmount.ToString("C2")
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="paymentAmount" class="form-label">Valor do Pagamento *</label>
-                        <div class="input-group">
-                            <span class="input-group-text">R$</span>
-                            <input type="number"
-                                   class="form-control"
-                                   id="paymentAmount"
-                                   name="paymentAmount"
-                                   step="0.01"
-                                   min="0.01"
-                                   max="@usedAmount"
-                                   placeholder="0,00"
-                                   required>
-                        </div>
-                        <div class="form-text">
-                            Valor máximo: @usedAmount.ToString("C2") (valor total utilizado)
-                        </div>
-                        <div class="invalid-feedback" id="paymentError"></div>
-                    </div>
-
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setPaymentAmount(@usedAmount.ToString(System.Globalization.CultureInfo.InvariantCulture))">
-                                Pagar Total (@usedAmount.ToString("C2"))
-                            </button>
-                            <button type="button"
-                                    class="btn btn-outline-secondary btn-sm"
-                                    onclick="setPaymentAmount(@((usedAmount / 2).ToString(System.Globalization.CultureInfo.InvariantCulture)))">
-                                Pagar Metade (@((usedAmount / 2).ToString("C2")))
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <small>
-                            <strong>Nota:</strong> Este pagamento apenas atualiza o limite disponível do cartão.
-                            Para registro contábil completo, registre também um pagamento no sistema.
-                        </small>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>Cancelar
-                </button>
-                <button type="button" class="btn btn-success" id="confirmPayment">
-                    <i class="fas fa-money-bill-wave me-1"></i>Confirmar Pagamento
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('payInvoiceModal');
-            const form = document.getElementById('payInvoiceForm');
-            const paymentAmountInput = document.getElementById('paymentAmount');
-            const confirmButton = document.getElementById('confirmPayment');
-            const paymentError = document.getElementById('paymentError');
-            const maxPayment = parseFloat("@usedAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)");
-
-            // Função para definir valor do pagamento
-            window.setPaymentAmount = function(amount) {
-                paymentAmountInput.value = amount.toFixed(2);
-                paymentAmountInput.dispatchEvent(new Event('input'));
-            };
-
-            // Validação em tempo real
-            paymentAmountInput.addEventListener('input', function() {
-                this.classList.remove('is-invalid');
-                paymentError.textContent = '';
-
-                const value = parseFloat(this.value);
-                if (value <= 0) {
-                    this.classList.add('is-invalid');
-                    paymentError.textContent = 'O valor deve ser maior que zero.';
-                } else if (value > maxPayment) {
-                    this.classList.add('is-invalid');
-                    paymentError.textContent = `O valor não pode ser maior que R$ ${maxPayment.toFixed(2)}.`;
-                }
-            });
-
-            // Confirmar pagamento
-            confirmButton.addEventListener('click', function() {
-                const paymentAmount = parseFloat(paymentAmountInput.value);
-
-                // Validações
-                if (!paymentAmount || paymentAmount <= 0) {
-                    paymentAmountInput.classList.add('is-invalid');
-                    paymentError.textContent = 'Por favor, informe um valor válido maior que zero.';
-                    return;
-                }
-
-                if (paymentAmount > maxPayment) {
-                    paymentAmountInput.classList.add('is-invalid');
-                    paymentError.textContent = `O valor não pode ser maior que R$ ${maxPayment.toFixed(2)}.`;
-                    return;
-                }
-
-                // Confirmar ação
-                const confirmed = confirm(
-                    `Confirmar pagamento de ${paymentAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}?\n\n` +
-                    'Esta ação irá aumentar o limite disponível do cartão.'
-                );
-                if (!confirmed) return;
-
-                // Desabilitar botão e mostrar loading
-                confirmButton.disabled = true;
-                confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processando...';
-
-                // Fazer requisição
-                payInvoice('@Model.Id', paymentAmount);
-            });
-
-            // Função para processar pagamento
-        function payInvoice(cardId, paymentAmount) {
-            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-
-            fetch(`/CreditCards/PayInvoice/${cardId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': token
-                },
-                body: JSON.stringify(paymentAmount)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const bootstrapModal = bootstrap.Modal.getInstance(modal);
-                    bootstrapModal.hide();
-
-                    alert(data.message);
-                    window.location.reload();
-                } else {
-                    alert('Erro: ' + data.message);
-                    confirmButton.disabled = false;
-                    confirmButton.innerHTML = '<i class="fas fa-money-bill-wave me-1"></i>Confirmar Pagamento';
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro interno. Tente novamente.');
-                confirmButton.disabled = false;
-                confirmButton.innerHTML = '<i class="fas fa-money-bill-wave me-1"></i>Confirmar Pagamento';
-            });
-        }
-
-            // Reset form when modal closes
-            modal.addEventListener('hidden.bs.modal', function() {
-                form.reset();
-                paymentAmountInput.classList.remove('is-invalid');
-                paymentError.textContent = '';
-                confirmButton.disabled = false;
-                confirmButton.innerHTML = '<i class="fas fa-money-bill-wave me-1"></i>Confirmar Pagamento';
-            });
-        });
-    </script>
-}

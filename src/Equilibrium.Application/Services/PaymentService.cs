@@ -14,15 +14,18 @@ namespace Equilibrium.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ICreditCardService _creditCardService;
 
         public PaymentService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            ICreditCardService creditCardService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _serviceProvider = serviceProvider;
+            _creditCardService = creditCardService;
         }
 
         public async Task<PaymentDto> GetByIdAsync(Guid id)
@@ -32,7 +35,12 @@ namespace Equilibrium.Application.Services
         }
         public async Task<IEnumerable<PaymentDto>> GetFilteredAsync(Guid userId, PaymentFilter filter)
         {
-            var query = await _unitOfWork.Payments.FindAsync(p => p.UserId == userId);
+            var query = await _unitOfWork.Payments.FindAsync(
+                                    p => p.UserId == userId,
+                                    p => p.User,
+                                    p => p.PaymentMethod,
+                                    p => p.PaymentType
+                                );
 
             if (!string.IsNullOrEmpty(filter.Description))
             {
@@ -67,6 +75,11 @@ namespace Equilibrium.Application.Services
             if (filter.PaymentMethodId.HasValue)
             {
                 query = query.Where(p => p.PaymentMethodId == filter.PaymentMethodId.Value);
+            }
+
+            if (filter.CreditCardId.HasValue)
+            {
+                query = query.Where(e => e.CreditCardId == filter.CreditCardId.Value);
             }
 
             if (filter.FinancingId.HasValue)
@@ -312,16 +325,12 @@ namespace Equilibrium.Application.Services
                 throw new InvalidOperationException("Payment is already cancelled");
 
             if (payment.FinancingId.HasValue && payment.Status == PaymentStatus.Paid)
-            {
                 await RevertPaymentFinancing(payment);
-            }
+
 
             if (payment.CreditCardId.HasValue && payment.Status == PaymentStatus.Paid)
-            {
-                var creditCardService = _serviceProvider.GetRequiredService<ICreditCardService>();
+                await _creditCardService.UpdateLimitAsync(payment.CreditCardId.Value, payment.Amount);
 
-                await creditCardService.UpdateLimitAsync(payment.CreditCardId.Value, payment.Amount);
-            }
 
             payment.Cancel();
             await _unitOfWork.Payments.UpdateAsync(payment);

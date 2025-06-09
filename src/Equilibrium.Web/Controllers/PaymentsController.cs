@@ -1,7 +1,6 @@
 ﻿using Equilibrium.Resources.Web;
 using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
-using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Helpers;
 using Equilibrium.Web.Interfaces;
@@ -189,7 +188,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
                 var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
@@ -202,7 +201,7 @@ namespace Equilibrium.Web.Controllers
 
                 return View();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = "Erro ao preparar o formulário.";
                 return RedirectToAction(nameof(Index));
@@ -514,6 +513,17 @@ namespace Equilibrium.Web.Controllers
             return ApplyFilters(filter);
         }
 
+        [HttpGet]
+        public IActionResult FilterByCreditCard(string creditCardId)
+        {
+            var filter = new PaymentFilter
+            {
+                CreditCardId = creditCardId
+            };
+
+            return ApplyFilters(filter);
+        }
+
         [RequirePermission("payments.create")]
         public IActionResult Export()
         {
@@ -661,7 +671,7 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
-        private bool ValidateHeader(string[] actual, string[] expected, out List<string> missingColumns)
+        private static bool ValidateHeader(string[] actual, string[] expected, out List<string> missingColumns)
         {
             missingColumns = new List<string>();
 
@@ -676,7 +686,7 @@ namespace Equilibrium.Web.Controllers
             return missingColumns.Count == 0;
         }
 
-        private CreatePaymentModel ParsePaymentLine(string line, string[] headers)
+        private static CreatePaymentModel ParsePaymentLine(string line, string[] headers)
         {
             var values = ParseCsvLine(line);
             var model = new CreatePaymentModel();
@@ -728,21 +738,21 @@ namespace Equilibrium.Web.Controllers
             }
 
             if (string.IsNullOrEmpty(model.Description))
-                throw new Exception("A descrição é obrigatória");
+                throw new ArgumentException("A descrição é obrigatória");
 
             if (string.IsNullOrEmpty(model.PaymentTypeId))
-                throw new Exception("O tipo de pagamento é obrigatório");
+                throw new ArgumentException("O tipo de pagamento é obrigatório");
 
             if (string.IsNullOrEmpty(model.PaymentMethodId))
-                throw new Exception("O m�todo de pagamento é obrigatório");
+                throw new ArgumentException("O m�todo de pagamento é obrigatório");
 
             if (!string.IsNullOrEmpty(model.FinancingId) && string.IsNullOrEmpty(model.FinancingInstallmentId))
-                throw new Exception("Quando um financiamento é especificado, a parcela do financiamento é obrigatória");
+                throw new ArgumentException("Quando um financiamento é especificado, a parcela do financiamento é obrigatória");
 
             return model;
         }
 
-        private string[] ParseCsvLine(string line)
+        private static string[] ParseCsvLine(string line)
         {
             var result = new List<string>();
             var currentValue = new StringBuilder();
@@ -780,22 +790,22 @@ namespace Equilibrium.Web.Controllers
             return result.ToArray();
         }
 
-        private decimal ParseDecimal(string value)
+        private static decimal ParseDecimal(string value)
         {
             value = value.Replace(".", "").Replace(",", ".");
             if (!decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             {
-                throw new Exception($"Valor inválido: {value}");
+                throw new ArgumentException($"Valor inválido: {value}");
             }
             return result;
         }
 
-        private DateTime ParseDate(string value)
+        private static DateTime ParseDate(string value)
         {
             string[] formats = { "dd/MM/yyyy", "yyyy-MM-dd", "MM/dd/yyyy" };
             if (!DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
             {
-                throw new Exception($"Data inválida: {value}. Use o formato DD/MM/AAAA.");
+                throw new ArgumentException($"Data inválida: {value}. Use o formato DD/MM/AAAA.");
             }
             return result;
         }
@@ -1001,7 +1011,7 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
-        private string EscapeCsvField(string field)
+        private static string EscapeCsvField(string field)
         {
             if (string.IsNullOrEmpty(field))
                 return string.Empty;
@@ -1014,7 +1024,7 @@ namespace Equilibrium.Web.Controllers
             return field;
         }
 
-        private async Task LoadFormDependencies(bool includeFinancings = true)
+        private async Task LoadFormDependencies()
         {
             try
             {

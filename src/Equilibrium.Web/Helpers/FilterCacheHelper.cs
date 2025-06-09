@@ -71,13 +71,13 @@ namespace Equilibrium.Web.Helpers
         public static bool HasPaymentFilter(ISession session)
         {
             var filter = GetPaymentFilter(session);
-            return filter.HasFilters();
+            return filter!.HasFilters();
         }
 
         public static bool HasIncomeFilter(ISession session)
         {
             var filter = GetIncomeFilter(session);
-            return filter.HasFilters();
+            return filter!.HasFilters();
         }
 
         public static void ClearPaymentFilter(ISession session)

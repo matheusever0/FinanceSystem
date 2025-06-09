@@ -21,16 +21,17 @@ namespace Equilibrium.Application.Services
 
         public async Task<IEnumerable<IncomeDto>> GetFilteredAsync(Guid userId, IncomeFilter filter)
         {
-            // Buscar todas as receitas do usuário
-            var query = await _unitOfWork.Incomes.FindAsync(i => i.UserId == userId);
+            var query = await _unitOfWork.Incomes.FindAsync(
+                        p => p.UserId == userId,
+                        p => p.User,
+                        p => p.IncomeType
+                    );
 
-            // Aplicar filtros de texto
             if (!string.IsNullOrEmpty(filter.Description))
             {
                 query = query.Where(i => i.Description.Contains(filter.Description, StringComparison.OrdinalIgnoreCase));
             }
 
-            // Aplicar filtros de valor
             if (filter.MinAmount.HasValue)
             {
                 query = query.Where(i => i.Amount >= filter.MinAmount.Value);
@@ -41,25 +42,21 @@ namespace Equilibrium.Application.Services
                 query = query.Where(i => i.Amount <= filter.MaxAmount.Value);
             }
 
-            // Aplicar filtros de status
             if (filter.Status.HasValue)
             {
                 query = query.Where(i => i.Status == filter.Status.Value);
             }
 
-            // Aplicar filtros de tipo
             if (filter.IncomeTypeId.HasValue)
             {
                 query = query.Where(i => i.IncomeTypeId == filter.IncomeTypeId.Value);
             }
 
-            // Aplicar filtros booleanos
             if (filter.IsRecurring.HasValue)
             {
                 query = query.Where(i => i.IsRecurring == filter.IsRecurring.Value);
             }
 
-            // Filtros de data - priorizar Month/Year se fornecidos
             if (filter.Month.HasValue && filter.Year.HasValue)
             {
                 query = query.Where(i => i.DueDate.Month == filter.Month.Value && i.DueDate.Year == filter.Year.Value);
@@ -77,7 +74,6 @@ namespace Equilibrium.Application.Services
                 }
             }
 
-            // Filtros de data de recebimento
             if (filter.ReceivedStartDate.HasValue)
             {
                 query = query.Where(i => i.ReceivedDate >= filter.ReceivedStartDate.Value);
@@ -88,7 +84,6 @@ namespace Equilibrium.Application.Services
                 query = query.Where(i => i.ReceivedDate <= filter.ReceivedEndDate.Value);
             }
 
-            // Filtro de parcelas
             if (filter.HasInstallments.HasValue)
             {
                 if (filter.HasInstallments.Value)
@@ -101,7 +96,6 @@ namespace Equilibrium.Application.Services
                 }
             }
 
-            // Aplicar ordenação
             query = filter.OrderBy?.ToLower() switch
             {
                 "description" => filter.Ascending ? query.OrderBy(i => i.Description) : query.OrderByDescending(i => i.Description),
@@ -113,7 +107,6 @@ namespace Equilibrium.Application.Services
                 _ => filter.Ascending ? query.OrderBy(i => i.DueDate) : query.OrderByDescending(i => i.DueDate)
             };
 
-            // Retornar lista filtrada e ordenada
             var items = query.ToList();
             return _mapper.Map<IEnumerable<IncomeDto>>(items);
         }
