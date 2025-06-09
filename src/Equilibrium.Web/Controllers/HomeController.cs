@@ -117,7 +117,7 @@ namespace Equilibrium.Web.Controllers
 
                 await LoadChartData(token);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ViewBag.TotalBalance = 0m;
                 ViewBag.TotalIncomeReceived = 0m;
@@ -162,13 +162,13 @@ namespace Equilibrium.Web.Controllers
             }
             catch
             {
-                ViewBag.MonthlyLabels = JsonSerializer.Serialize(new string[0]);
-                ViewBag.MonthlyIncomeValues = JsonSerializer.Serialize(new decimal[0]);
-                ViewBag.MonthlyPaymentValues = JsonSerializer.Serialize(new decimal[0]);
-                ViewBag.PaymentsByTypeLabels = JsonSerializer.Serialize(new string[0]);
-                ViewBag.PaymentsByTypeValues = JsonSerializer.Serialize(new decimal[0]);
-                ViewBag.IncomesByTypeLabels = JsonSerializer.Serialize(new string[0]);
-                ViewBag.IncomesByTypeValues = JsonSerializer.Serialize(new decimal[0]);
+                ViewBag.MonthlyLabels = JsonSerializer.Serialize(Array.Empty<string>());
+                ViewBag.MonthlyIncomeValues = JsonSerializer.Serialize(Array.Empty<decimal>());
+                ViewBag.MonthlyPaymentValues = JsonSerializer.Serialize(Array.Empty<decimal>());
+                ViewBag.PaymentsByTypeLabels = JsonSerializer.Serialize(Array.Empty<string>());
+                ViewBag.PaymentsByTypeValues = JsonSerializer.Serialize(Array.Empty<decimal>());
+                ViewBag.IncomesByTypeLabels = JsonSerializer.Serialize(Array.Empty<string>());
+                ViewBag.IncomesByTypeValues = JsonSerializer.Serialize(Array.Empty<decimal>());
             }
         }
 
@@ -186,7 +186,7 @@ namespace Equilibrium.Web.Controllers
             }
             catch
             {
-                return new Dictionary<string, decimal>();
+                return [];
             }
         }
 
@@ -255,11 +255,11 @@ namespace Equilibrium.Web.Controllers
                 var filter = new PaymentFilter { StartDate = DateTime.Today, EndDate = endDate, Status = "Pending", OrderBy = "dueDate", Ascending = true };
 
                 var payments = await _paymentService.GetFilteredPaymentsAsync(filter, token);
-                return payments.ToList();
+                return [.. payments];
             }
             catch
             {
-                return new List<PaymentModel>();
+                return [];
             }
         }
 

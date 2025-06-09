@@ -72,7 +72,7 @@ namespace Equilibrium.Web.Services
             return Task.FromResult(timeUntilExpiration <= threshold);
         }
 
-        public async Task<string?> RefreshTokenAsync(string currentToken)
+        public string? RefreshToken(string currentToken)
         {
             try
             {

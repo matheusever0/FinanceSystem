@@ -1,4 +1,5 @@
-﻿@model (string Id, string Controller, string EntityName, string Description, string CssClass, string CustomMessage, string RedirectUrl, bool CheckStatus, string StatusField, string[] AllowedStatuses, bool ShowConfirmation, bool IconOnly, string ButtonText)
+﻿@using Equilibrium.Web.Models.Commons
+@model DeleteButtonModel
 
 @{
     var cssClass = !string.IsNullOrEmpty(Model.CssClass) ? Model.CssClass : "btn btn-outline-danger";
@@ -11,7 +12,6 @@
     var iconOnly = Model.IconOnly;
     var buttonText = !string.IsNullOrEmpty(Model.ButtonText) ? Model.ButtonText : $"Excluir {Model.EntityName}";
 
-    // NOVA ABORDAGEM: JSON para evitar problemas com encoding
     var deleteConfig = new
     {
         id = Model.Id,

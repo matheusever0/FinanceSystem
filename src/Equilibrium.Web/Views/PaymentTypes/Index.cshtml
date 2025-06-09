@@ -1,4 +1,5 @@
 ﻿@using Equilibrium.Web.Helpers
+@using Equilibrium.Web.Models.Commons
 @model IEnumerable<Equilibrium.Web.Models.PaymentTypeModel>
 @{
     ViewData["Title"] = ViewBag.Title ?? "Tipos de Pagamento";
@@ -26,13 +27,13 @@
         <div class="row">
             <div class="col-md-12 mb-3">
                 <div class="d-flex gap-2">
-                    <a asp-action="Index" class="btn btn-outline-primary btn-sm @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewBag.IsSystemView == null && ViewBag.IsUserView == null ? "active" : "")">
+                    <a asp-action="Index" class="btn btn-outline-primary btn-sm @(ViewContext?.RouteData?.Values["action"]!.ToString() == "Index" && ViewBag.IsSystemView == null && ViewBag.IsUserView == null ? "active" : "")">
                         <i class="fas fa-list"></i> Todos
                     </a>
-                    <a asp-action="System" class="btn btn-outline-success btn-sm @(ViewBag.IsSystemView == true ? "active" : "")">
+                    <a asp-action="System" class="btn btn-outline-success btn-sm @(ViewBag.IsSystemView ? "active" : "")">
                         <i class="fas fa-cog"></i> Sistema
                     </a>
-                    <a asp-action="User" class="btn btn-outline-info btn-sm @(ViewBag.IsUserView == true ? "active" : "")">
+                    <a asp-action="User" class="btn btn-outline-info btn-sm @(ViewBag.IsUserView ? "active" : "")">
                         <i class="fas fa-user"></i> Meus Tipos
                     </a>
                 </div>
@@ -85,12 +86,21 @@
                                 </td>
                                 <td class="text-center">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="text-center">
-                                    <partial name="_Partials/Commons/_ActionButtons" model='(
-                                        Id: item.Id,
-                                        CanView: true,
-                                        CanEdit: !item.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.edit"),
-                                        CanDelete: !item.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.delete"),
-                                        ControllerName: "PaymentTypes")' />
+                                    <div class="btn-group">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <partial name="_Partials/Commons/_DeleteButton" model='new DeleteButtonModel {
+                                                Id = item.Id,
+                                                Controller = "PaymentTypes",
+                                                EntityName = "tipo de pagamento",
+                                                Description = item.Name,
+                                                CssClass = "btn btn-sm btn-danger",
+                                                IconOnly = true }' />
+                                    </div>
                                 </td>
                             </tr>
                         }

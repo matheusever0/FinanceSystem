@@ -1,4 +1,5 @@
 ﻿@model Equilibrium.Web.Models.PaymentTypeModel
+@using Equilibrium.Web.Models.Commons
 @using Equilibrium.Web.Helpers
 @{
     ViewData["Title"] = "Detalhes do Tipo de Pagamento";
@@ -88,9 +89,14 @@
 
                     @if (await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.delete"))
                     {
-                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
-                            <i class="fas fa-trash"></i> Excluir
-                        </a>
+                        <partial name="_Partials/Commons/_DeleteButton" model='new DeleteButtonModel {
+                                Id = Model.Id,
+                                Controller = "PaymentTypes",
+                                EntityName = "tipo de pagamento",
+                                Description = Model.Name,
+                                CssClass = "btn btn-outline-danger w-100",
+                                IconOnly = false,
+                                ButtonText = "Excluir Tipo de Pagamento" }' />
                     }
                 </div>
             </div>

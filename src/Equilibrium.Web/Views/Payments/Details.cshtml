@@ -1,6 +1,7 @@
 ﻿@model PaymentModel
 @using Equilibrium.Web.Helpers
 @using Equilibrium.Web.Models.Payment
+@using Equilibrium.Web.Models.Commons
 @{
     ViewData["Title"] = "Detalhes do Pagamento";
 }
@@ -150,20 +151,18 @@
                     @if (await PermissionHelper.HasPermissionAsync(Context, "payments.delete"))
                     {
 
-                        <partial name="_Partials/Commons/_DeleteButton" model='(
-                            Id: Model.Id,
-                            Controller: "Payments",
-                            EntityName: "pagamento",
-                            Description: Model.Description,
-                            CssClass: "btn btn-danger w-100",
-                            CustomMessage: "Tem certeza que deseja excluir o pagamento \"" + Model.Description + "\"?\n\nEsta ação não pode ser desfeita e todas as parcelas associadas também serão excluídas.",
-                            RedirectUrl: "",
-                            CheckStatus: true,
-                            StatusField: "Status",
-                            AllowedStatuses: new[]{"1","3","4"},
-                            ShowConfirmation: true,
-                            IconOnly: false, 
-                            ButtonText: "Excluir Pagamento")' />
+                        <partial name="_Partials/Commons/_DeleteButton" model='new DeleteButtonModel {
+                                Id = Model.Id,
+                                Controller = "Payments",
+                                EntityName = "pagamento",
+                                Description = Model.Description,
+                                CssClass = "btn btn-danger w-100",
+                                CustomMessage = "Tem certeza que deseja excluir o pagamento \"" + Model.Description + "\"?\n\nEsta ação não pode ser desfeita e todas as parcelas associadas também serão excluídas.",
+                                CheckStatus = true,
+                                StatusField = "Status",
+                                AllowedStatuses = new[]{"1","4","3"},
+                                IconOnly = false,
+                                ButtonText = "Excluir Pagamento" }' />
 
                         <div data-entity-status="@Model.Status" style="display:none;"></div>
                     }

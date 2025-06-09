@@ -6,7 +6,7 @@ namespace Equilibrium.Web.Interfaces
     {
         Task<bool> IsTokenValidAsync(string token);
         Task<bool> IsTokenNearExpirationAsync(string token, TimeSpan threshold);
-        Task<string?> RefreshTokenAsync(string currentToken);
+        string? RefreshToken(string currentToken);
         Task InvalidateTokenAsync(string token);
         Task CleanupExpiredTokensAsync();
         DateTime? GetTokenExpiration(string token);

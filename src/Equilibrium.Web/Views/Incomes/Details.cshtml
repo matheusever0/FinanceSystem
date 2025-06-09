@@ -1,6 +1,7 @@
 ﻿@model IncomeModel
 @using Equilibrium.Web.Helpers
 @using Equilibrium.Web.Models.Income
+@using Equilibrium.Web.Models.Commons
 @{
     ViewData["Title"] = "Detalhes da Receita";
 }
@@ -144,20 +145,18 @@
 
                     @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.delete"))
                     {
-                        <partial name="_Partials/Commons/_DeleteButton" model='(
-                            Id: Model.Id,
-                            Controller: "Incomes",
-                            EntityName: "receita",
-                            Description: Model.Description,
-                            CssClass: "btn btn-danger w-100",
-                            CustomMessage: "Tem certeza que deseja excluir a receita \"" + Model.Description + "\"?\n\nEsta ação não pode ser desfeita e todas as parcelas associadas também serão excluídas.",
-                            RedirectUrl: "",
-                            CheckStatus: true,
-                            StatusField: "Status",
-                            AllowedStatuses: new[]{"1","3","4"},
-                            ShowConfirmation: true,
-                            IconOnly: false,
-                            ButtonText: "Excluir Receita")' />
+                        <partial name="_Partials/Commons/_DeleteButton" model='new DeleteButtonModel {
+                                Id = Model.Id,
+                                Controller = "Incomes",
+                                EntityName = "receita",
+                                Description = Model.Description,
+                                CssClass = "btn btn-danger w-100",
+                                CustomMessage = "Tem certeza que deseja excluir a receita \"" + Model.Description + "\"?\n\nEsta ação não pode ser desfeita e todas as parcelas associadas também serão excluídas.",
+                                CheckStatus = true,
+                                StatusField = "Status",
+                                AllowedStatuses = new[]{"1","3", "4"},
+                                IconOnly = false,
+                                ButtonText = "Excluir Receita" }' />
                     }
                 </div>
             </div>

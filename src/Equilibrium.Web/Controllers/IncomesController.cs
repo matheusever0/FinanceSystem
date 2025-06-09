@@ -110,7 +110,7 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
-        private IncomeFilter CreateThisWeekIncomeFilter()
+        private static IncomeFilter CreateThisWeekIncomeFilter()
         {
             var now = DateTime.Now;
             var startOfWeek = now.AddDays(-(int)now.DayOfWeek);
@@ -133,19 +133,19 @@ namespace Equilibrium.Web.Controllers
 
                 var statusOptions = new List<SelectListItem>
             {
-                new SelectListItem { Value = "Pending", Text = "Pendente" },
-                new SelectListItem { Value = "Received", Text = "Recebido" },
-                new SelectListItem { Value = "Cancelled", Text = "Cancelado" }
+                new () { Value = "Pending", Text = "Pendente" },
+                new () { Value = "Received", Text = "Recebido" },
+                new () { Value = "Cancelled", Text = "Cancelado" }
             };
 
                 var orderByOptions = new List<SelectListItem>
             {
-                new SelectListItem { Value = "dueDate", Text = "Data de Vencimento" },
-                new SelectListItem { Value = "description", Text = "Descrição" },
-                new SelectListItem { Value = "amount", Text = "Valor" },
-                new SelectListItem { Value = "receivedDate", Text = "Data de Recebimento" },
-                new SelectListItem { Value = "status", Text = "Status" },
-                new SelectListItem { Value = "createdAt", Text = "Data de Criação" }
+                new () { Value = "dueDate", Text = "Data de Vencimento" },
+                new () { Value = "description", Text = "Descrição" },
+                new () { Value = "amount", Text = "Valor" },
+                new () { Value = "receivedDate", Text = "Data de Recebimento" },
+                new () { Value = "status", Text = "Status" },
+                new () { Value = "createdAt", Text = "Data de Criação" }
             };
 
                 ViewBag.IncomeTypes = incomeTypes;
@@ -191,7 +191,7 @@ namespace Equilibrium.Web.Controllers
                 ViewBag.IncomeTypes = incomeTypes;
                 return View();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PreparingForm;
                 return RedirectToAction(nameof(Index));
@@ -575,7 +575,7 @@ namespace Equilibrium.Web.Controllers
 
         private static bool ValidateHeader(string[] actual, string[] expected, out List<string> missingColumns)
         {
-            missingColumns = new List<string>();
+            missingColumns = [];
 
             foreach (var column in expected)
             {
@@ -588,7 +588,7 @@ namespace Equilibrium.Web.Controllers
             return missingColumns.Count == 0;
         }
 
-        private CreateIncomeModel ParseIncomeLine(string line, string[] headers)
+        private static CreateIncomeModel ParseIncomeLine(string line, string[] headers)
         {
             var values = ParseCsvLine(line);
             var model = new CreateIncomeModel();
@@ -628,15 +628,15 @@ namespace Equilibrium.Web.Controllers
             }
 
             if (string.IsNullOrEmpty(model.Description))
-                throw new Exception("A descrição é obrigatória");
+                throw new ArgumentException("A descrição é obrigatória");
 
             if (string.IsNullOrEmpty(model.IncomeTypeId))
-                throw new Exception("O tipo de receita é obrigatório");
+                throw new ArgumentException("O tipo de receita é obrigatório");
 
             return model;
         }
 
-        private string[] ParseCsvLine(string line)
+        private static string[] ParseCsvLine(string line)
         {
             var result = new List<string>();
             var currentValue = new StringBuilder();
@@ -671,25 +671,25 @@ namespace Equilibrium.Web.Controllers
 
             result.Add(currentValue.ToString());
 
-            return result.ToArray();
+            return [.. result];
         }
 
-        private decimal ParseDecimal(string value)
+        private static decimal ParseDecimal(string value)
         {
             value = value.Replace(".", "").Replace(",", ".");
             if (!decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             {
-                throw new Exception($"Valor inválido: {value}");
+                throw new ArgumentException($"Valor inválido: {value}");
             }
             return result;
         }
 
-        private DateTime ParseDate(string value)
+        private static DateTime ParseDate(string value)
         {
-            string[] formats = { "dd/MM/yyyy", "yyyy-MM-dd", "MM/dd/yyyy" };
+            string[] formats = ["dd/MM/yyyy", "yyyy-MM-dd", "MM/dd/yyyy"];
             if (!DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
             {
-                throw new Exception($"Data inv?lida: {value}. Use o formato DD/MM/AAAA.");
+                throw new ArgumentException($"Data inválida: {value}. Use o formato DD/MM/AAAA.");
             }
             return result;
         }
@@ -732,12 +732,12 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
-        private string EscapeCsvField(string field)
+        private static string EscapeCsvField(string field)
         {
             if (string.IsNullOrEmpty(field))
                 return string.Empty;
 
-            if (field.Contains(",") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
+            if (field.Contains(',') || field.Contains('"') || field.Contains('\n') || field.Contains('\r'))
             {
                 return "\"" + field.Replace("\"", "\"\"") + "\"";
             }

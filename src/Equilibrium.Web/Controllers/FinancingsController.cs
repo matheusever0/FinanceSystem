@@ -91,7 +91,7 @@ namespace Equilibrium.Web.Controllers
                 // Filtrar tipos de pagamento marcados como de financiamento
                 var financingPaymentTypes = paymentTypes.Where(pt => pt.IsFinancingType).ToList();
 
-                if (!financingPaymentTypes.Any())
+                if (financingPaymentTypes.Count == 0)
                 {
                     TempData["ErrorMessage"] = "Não há tipos de pagamento configurados para financiamento";
                     return RedirectToAction(nameof(Index));
@@ -103,7 +103,7 @@ namespace Equilibrium.Web.Controllers
 
                 return View();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PreparingForm;
                 return RedirectToAction(nameof(Index));
@@ -266,26 +266,18 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
-        private List<SelectListItem> GetCorrectionIndexes()
-        {
-            return new List<SelectListItem>
-            {
-                new SelectListItem { Value = "5", Text = "Fixo (sem correção)" },
-                new SelectListItem { Value = "1", Text = "IPCA" },
-                new SelectListItem { Value = "3", Text = "SELIC" },
-                new SelectListItem { Value = "2", Text = "TR" },
-                new SelectListItem { Value = "4", Text = "IGPM" }
-            };
-        }
+        private static List<SelectListItem> GetCorrectionIndexes() => [
+                new() { Value = "5", Text = "Fixo (sem correção)" },
+                new() { Value = "1", Text = "IPCA" },
+                new() { Value = "3", Text = "SELIC" },
+                new() { Value = "2", Text = "TR" },
+                new() { Value = "4", Text = "IGPM" }
+            ];
 
-        private List<SelectListItem> GetFinancingTypes()
-        {
-            return new List<SelectListItem>
-            {
+        private static List<SelectListItem> GetFinancingTypes() => [
                 new SelectListItem { Value = "1", Text = "Price (Prestações fixas)" },
                 new SelectListItem { Value = "2", Text = "SAC (Amortizações iguais)" }
-            };
-        }
+            ];
 
         private async Task LoadFormDependencies()
         {

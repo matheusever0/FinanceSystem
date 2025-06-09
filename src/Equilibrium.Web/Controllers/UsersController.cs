@@ -80,7 +80,7 @@ namespace Equilibrium.Web.Controllers
                 ViewBag.Roles = roles;
                 return View();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PreparingForm;
                 return RedirectToAction(nameof(Index));
@@ -98,7 +98,7 @@ namespace Equilibrium.Web.Controllers
                 return View(model);
             }
 
-            if (model.Roles == null || !model.Roles.Any())
+            if (model.Roles == null || model.Roles.Count == 0)
             {
                 ModelState.AddModelError("Roles", ResourceFinanceWeb.Validation_SelectRole);
                 await LoadRolesForView();
@@ -139,7 +139,7 @@ namespace Equilibrium.Web.Controllers
                 }
 
                 var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var userPermissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId, token);
+                var userPermissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId!, token);
 
                 if (userPermissions.PodeEditarSomenteProprioUsuario() && id != currentUserId)
                 {
@@ -183,7 +183,7 @@ namespace Equilibrium.Web.Controllers
                 return View(model);
             }
 
-            if (model.Roles == null || !model.Roles.Any())
+            if (model.Roles == null || model.Roles.Count == 0)
             {
                 ModelState.AddModelError("Roles", ResourceFinanceWeb.Validation_SelectRole);
                 await LoadRolesForView();
@@ -195,7 +195,7 @@ namespace Equilibrium.Web.Controllers
                 var token = HttpContext.GetJwtToken();
 
                 var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var userPermissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId, token);
+                var userPermissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId!, token);
 
                 if (userPermissions.PodeEditarSomenteProprioUsuario() && id != currentUserId)
                 {

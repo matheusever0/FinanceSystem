@@ -77,7 +77,7 @@ namespace Equilibrium.Web.Controllers
                 ViewBag.PaymentMethods = creditCardPaymentMethods;
                 return View();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = ResourceFinanceWeb.Error_PreparingForm;
                 return RedirectToAction(nameof(Index));

@@ -11,20 +11,22 @@ namespace Equilibrium.Web.Controllers
 {
     [Authorize]
     [RequirePermission("paymenttypes.view")]
-    public class PaymentTypesController : Controller
+    public class PaymentTypesController : BaseController
     {
         private readonly IPaymentTypeService _paymentTypeService;
+        private readonly IPaymentService _paymentService;
 
-        public PaymentTypesController(IPaymentTypeService paymentTypeService)
+        public PaymentTypesController(IPaymentTypeService paymentTypeService, IPaymentService paymentService)
         {
-            _paymentTypeService = paymentTypeService ?? throw new ArgumentNullException(nameof(paymentTypeService));
+            _paymentTypeService = paymentTypeService;
+            _paymentService = paymentService;
         }
 
         public async Task<IActionResult> Index()
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 return View(paymentTypes);
             }
@@ -56,7 +58,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentTypes = await _paymentTypeService.GetUserPaymentTypesAsync(token);
                 ViewBag.IsUserView = true;
                 ViewBag.Title = "Meus Tipos de Pagamento";
@@ -78,7 +80,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentType = await _paymentTypeService.GetPaymentTypeByIdAsync(id, token);
 
                 return paymentType == null ? NotFound("Tipo de pagamento não encontrado") : View(paymentType);
@@ -108,7 +110,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentType = await _paymentTypeService.CreatePaymentTypeAsync(model, token);
                 TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.PaymentType);
                 return RedirectToAction(nameof(Details), new { id = paymentType.Id });
@@ -130,7 +132,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentType = await _paymentTypeService.GetPaymentTypeByIdAsync(id, token);
 
                 if (paymentType == null)
@@ -177,7 +179,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentType = await _paymentTypeService.GetPaymentTypeByIdAsync(id, token);
 
                 if (paymentType == null)
@@ -202,74 +204,30 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequirePermission("paymenttypes.delete")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do tipo de pagamento não fornecido");
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var paymentType = await _paymentTypeService.GetPaymentTypeByIdAsync(id, token);
-
-                if (paymentType == null)
-                {
-                    return NotFound("Tipo de pagamento não encontrado");
+            return await HandleGenericDelete(
+                id,
+                _paymentTypeService,
+                async (service, itemId, token) => await service.DeletePaymentTypeAsync(itemId, token),
+                async (service, itemId, token) => await service.GetPaymentTypeByIdAsync(itemId, token),
+                "tipo de pagamento",
+                null,
+                async (item) => {
+                    if (item is PaymentTypeModel paymentType)
+                    {
+                        var paymentsCount = await _paymentService.GetPaymentsByTypeAsync(paymentType.Id, GetToken());
+                        if (paymentsCount.Any())
+                        {
+                            return (false, $"Este tipo possui {paymentsCount.Count()} pagamentos associados. Não é possível excluir.");
+                        }
+                    }
+                    return (true, null);
                 }
-
-                if (paymentType.IsSystem)
-                {
-                    TempData["ErrorMessage"] = MessageHelper.GetCannotDeleteSystemEntityMessage(EntityNames.PaymentType);
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-
-                return View(paymentType);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.PaymentType, ex);
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("paymenttypes.delete")]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do tipo de pagamento não fornecido");
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var paymentType = await _paymentTypeService.GetPaymentTypeByIdAsync(id, token);
-
-                if (paymentType == null)
-                {
-                    return NotFound("Tipo de pagamento não encontrado");
-                }
-
-                if (paymentType.IsSystem)
-                {
-                    TempData["ErrorMessage"] = MessageHelper.GetCannotDeleteSystemEntityMessage(EntityNames.PaymentType);
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-
-                await _paymentTypeService.DeletePaymentTypeAsync(id, token);
-                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.PaymentType);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.PaymentType, ex);
-                return RedirectToAction(nameof(Index));
-            }
+            );
         }
     }
 }

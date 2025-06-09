@@ -2,6 +2,7 @@
 @using Equilibrium.Web.Helpers
 @using Equilibrium.Web.Models.Payment
 @using Equilibrium.Web.Models.Filters
+@using Equilibrium.Web.Models.Commons
 @{
     ViewData["Title"] = ViewBag.Title ?? "Pagamentos";
     var filter = ViewBag.CurrentFilter as PaymentFilter ?? new PaymentFilter();
@@ -134,20 +135,16 @@
                                             }
                                             @if (await PermissionHelper.HasPermissionAsync(Context, "payments.delete"))
                                             {
-                                                <partial name="_Partials/Commons/_DeleteButton" model='(
-                                                    Id: item.Id,
-                                                    Controller: "Payments",
-                                                    EntityName: "pagamento",
-                                                    Description: item.Description,
-                                                    CssClass: "btn btn-sm btn-danger",
-                                                    CustomMessage: "", 
-                                                    RedirectUrl: "",
-                                                    CheckStatus: true,
-                                                    StatusField: "Status",
-                                                    AllowedStatuses: new[]{"1","3","4"},
-                                                    ShowConfirmation: true,
-                                                    IconOnly: true, 
-                                                    ButtonText: "")' />
+                                                <partial name="_Partials/Commons/_DeleteButton" model='new DeleteButtonModel {
+                                                        Id = item.Id,
+                                                        Controller = "Payments",
+                                                        EntityName = "pagamento",
+                                                        Description = item.Description,
+                                                        CssClass = "btn btn-sm btn-danger",
+                                                        CheckStatus = true,
+                                                        StatusField = "Status",
+                                                        AllowedStatuses = new[]{"1","3","4"},
+                                                        IconOnly = true }' />
                                             }
                                         </div>
                                     </td>
