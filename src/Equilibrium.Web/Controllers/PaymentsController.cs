@@ -507,6 +507,104 @@ namespace Equilibrium.Web.Controllers
             return ApplyFilters(filter);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission("payments.edit")]
+        public async Task<IActionResult> PayInvoiceMonth(Guid creditCardId, int month)
+        {
+            try
+            {
+                var token = GetToken();
+                var year = DateTime.Now.Year;
+
+                if (month < DateTime.Now.Month)
+                {
+                    year = DateTime.Now.Year + 1;
+                }
+
+                var creditCard = await _creditCardService.GetCreditCardByIdAsync(creditCardId.ToString(), token);
+                if (creditCard == null)
+                {
+                    TempData["ErrorMessage"] = "Cartão de crédito não encontrado.";
+                    return RedirectToAction("Details", "CreditCards", new { id = creditCardId });
+                }
+
+                var paymentFilter = new PaymentFilter
+                {
+                    Month = month,
+                    Year = year,
+                    Status = "Pending",
+                    PaymentMethodId = creditCard.PaymentMethodId
+                };
+
+                var pendingPayments = await _paymentService.GetFilteredPaymentsAsync(paymentFilter, token);
+
+                if (!pendingPayments.Any())
+                {
+                    TempData["InfoMessage"] = "Não há pagamentos pendentes para este cartão no mês selecionado.";
+                    return RedirectToAction("Details", "CreditCards", new { id = creditCardId });
+                }
+
+                var successCount = 0;
+                var totalAmount = 0m;
+                var errors = new List<string>();
+
+                foreach (var payment in pendingPayments)
+                {
+                    try
+                    {
+                        var updateModel = new UpdatePaymentModel
+                        {
+                            Description = payment.Description,
+                            Amount = payment.Amount,
+                            DueDate = payment.DueDate,
+                            PaymentDate = DateTime.Now,
+                            Status = 2, // Status "Paid"
+                            IsRecurring = payment.IsRecurring,
+                            Notes = payment.Notes + $" - Pago via fatura mensal em {DateTime.Now:dd/MM/yyyy}",
+                            PaymentTypeId = payment.PaymentTypeId,
+                            PaymentMethodId = payment.PaymentMethodId
+                        };
+
+                        var result = await _paymentService.UpdatePaymentAsync(payment.Id, updateModel, token);
+
+                        if (result != null)
+                        {
+                            successCount++;
+                            totalAmount += payment.Amount;
+
+                            await _creditCardService.UpdateLimitAsync(creditCardId.ToString(), payment.Amount, token);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"Erro ao processar pagamento {payment.Description}: {ex.Message}");
+                    }
+                }
+
+                if (successCount > 0)
+                {
+                    var message = $"Fatura do cartão paga com sucesso! {successCount} pagamento(s) processado(s) no valor total de {totalAmount:C}.";
+                    if (errors.Any())
+                    {
+                        message += $" Houveram {errors.Count} erro(s) durante o processamento.";
+                    }
+                    TempData["SuccessMessage"] = message;
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Não foi possível processar nenhum pagamento. " + string.Join("; ", errors);
+                }
+
+                return RedirectToAction("Details", "CreditCards", new { id = creditCardId });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = MessageHelper.GetUpdateErrorMessage(EntityNames.Payment, ex);
+                return RedirectToAction("Details", "CreditCards", new { id = creditCardId });
+            }
+        }
+
         [RequirePermission("payments.create")]
         public IActionResult Export()
         {

@@ -9,6 +9,7 @@ namespace Equilibrium.Web.Interfaces
         Task<CreditCardModel> CreateCreditCardAsync(CreateCreditCardModel model, string token);
         Task<CreditCardModel> UpdateCreditCardAsync(string id, UpdateCreditCardModel model, string token);
         Task DeleteCreditCardAsync(string id, string token);
+        Task UpdateLimitAsync(string id, decimal value, string token);
     }
 }
 

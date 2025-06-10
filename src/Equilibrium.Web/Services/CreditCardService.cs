@@ -78,5 +78,10 @@ namespace Equilibrium.Web.Services
                 throw;
             }
         }
+
+        public async Task UpdateLimitAsync(string id, decimal value, string token)
+        {
+            await _apiService.PostAsync<object>($"/api/CreditCards/{id}/update-limit", value, token);
+        }
     }
 }
