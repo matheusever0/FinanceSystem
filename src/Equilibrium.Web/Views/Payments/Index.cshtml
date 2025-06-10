@@ -127,24 +127,27 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group">
-                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Visualizar">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
-                                            {
-                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                            }
-                                            @if (await PermissionHelper.HasPermissionAsync(Context, "payments.delete"))
-                                            {
-                                                var paymentDeleteModel = new DeleteButtonModel(item.Id, "Payments", "pagamento", item.Description, false);
-                                                paymentDeleteModel.CheckStatus = true;
-                                                paymentDeleteModel.StatusField = "Status";
-                                                paymentDeleteModel.AllowedStatuses = new[] { "1", "3" };
+                                            @{
+                                                var canEdit = await PermissionHelper.HasPermissionAsync(Context, "payments.edit");
+                                                var canDelete = await PermissionHelper.HasPermissionAsync(Context, "payments.delete");
 
-                                                <partial name="_Partials/Commons/_DeleteButton" model='paymentDeleteModel' />
+                                                DeleteButtonModel deleteConfig = null;
+                                                if (canDelete)
+                                                {
+                                                    deleteConfig = new DeleteButtonModel(item.Id, "Payments", "pagamento", item.Description, true);
+                                                    deleteConfig.CheckStatus = true;
+                                                    deleteConfig.StatusField = "Status";
+                                                    deleteConfig.AllowedStatuses = new[] { "1", "3","4" };
+                                                }
                                             }
+                                            <partial name="_Partials/Commons/_ActionButtons" model='(
+                                                            Id: item.Id,
+                                                            CanView: true,
+                                                            CanEdit: canEdit,
+                                                            CanDelete: canDelete,
+                                                            ControllerName: "Payments",
+                                                            DeleteConfig: deleteConfig,
+                                                            ExtraButtons: "")' />
                                         </div>
                                     </td>
                                 </tr>

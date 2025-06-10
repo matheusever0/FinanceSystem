@@ -1,24 +1,113 @@
-﻿@model (string Id, bool CanView, bool CanEdit, bool CanDelete, string ControllerName)
+﻿@using Equilibrium.Web.Models.Commons
+@model (string Id, bool CanView, bool CanEdit, bool CanDelete, string ControllerName, DeleteButtonModel DeleteConfig, string ExtraButtons)
+
 @{
     var controller = Model.ControllerName ?? ViewContext.RouteData.Values["Controller"].ToString();
+    var hasExtraButtons = !string.IsNullOrEmpty(Model.ExtraButtons);
 }
-<div class="btn-group">
+
+<div class="btn-group" role="group" aria-label="Ações">
     @if (Model.CanView)
     {
-        <a asp-controller="@controller" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-sm btn-info">
+        <a asp-controller="@controller" asp-action="Details" asp-route-id="@Model.Id"
+           class="btn btn-sm btn-info" title="Visualizar detalhes">
             <i class="fas fa-eye"></i>
         </a>
     }
+
     @if (Model.CanEdit)
     {
-        <a asp-controller="@controller" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">
+        <a asp-controller="@controller" asp-action="Edit" asp-route-id="@Model.Id"
+           class="btn btn-sm btn-primary" title="Editar">
             <i class="fas fa-edit"></i>
         </a>
     }
+
+    @* Botões extras (personalizados por view) *@
+    @if (hasExtraButtons)
+    {
+        @Html.Raw(Model.ExtraButtons)
+    }
+
     @if (Model.CanDelete)
     {
-        <a asp-controller="@controller" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-sm btn-danger">
-            <i class="fas fa-trash"></i>
-        </a>
+        @if (Model.DeleteConfig != null)
+        {
+            <partial name="_Partials/Commons/_DeleteButton" model="Model.DeleteConfig" />
+        }
+        else
+        {
+            <a asp-controller="@controller" asp-action="Delete" asp-route-id="@Model.Id"
+               class="btn btn-sm btn-outline-danger" title="Excluir"
+               onclick="return confirm('Tem certeza que deseja excluir este item?')">
+                <i class="fas fa-trash"></i>
+            </a>
+        }
     }
 </div>
+
+@* CSS específico para esta partial *@
+<style>
+    /* Garante que os botões fiquem alinhados corretamente */
+    .btn-group[role="group"] {
+        display: inline-flex;
+        flex-wrap: nowrap;
+        gap: 0;
+        vertical-align: middle;
+    }
+
+    .btn-group[role="group"] .btn {
+        margin-left: 0 !important;
+        margin-bottom: 0 !important;
+        border-radius: 0;
+        position: relative;
+        flex: 0 1 auto;
+    }
+
+    /* Bordas arredondadas apenas no primeiro e último botão */
+    .btn-group[role="group"] .btn:first-child {
+        border-top-left-radius: var(--border-radius);
+        border-bottom-left-radius: var(--border-radius);
+    }
+
+    .btn-group[role="group"] .btn:last-child {
+        border-top-right-radius: var(--border-radius);
+        border-bottom-right-radius: var(--border-radius);
+    }
+
+    /* Ajusta bordas entre botões */
+    .btn-group[role="group"] .btn:not(:first-child) {
+        margin-left: -1px;
+    }
+
+    /* Garante que botões outline tenham aparência consistente */
+    .btn-group[role="group"] .btn-outline-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+
+    .btn-group[role="group"] .btn-outline-danger:hover {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+
+    /* Responsividade para mobile */
+    @@media (max-width: 767.98px) {
+        .btn-group[role="group"] {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .btn-group[role="group"] .btn {
+            border-radius: var(--border-radius) !important;
+            margin-left: 0 !important;
+            margin-bottom: 0.25rem;
+            width: 100%;
+        }
+
+        .btn-group[role="group"] .btn:last-child {
+            margin-bottom: 0;
+        }
+    }
+</style>

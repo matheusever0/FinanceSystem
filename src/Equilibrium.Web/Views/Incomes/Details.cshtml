@@ -146,7 +146,7 @@
                     @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.delete"))
                     {
 
-                        var paymentDeleteModel = new DeleteButtonModel(Model.Id, "Payments", "pagamento", Model.Description, true);
+                        var paymentDeleteModel = new DeleteButtonModel(Model.Id, "Payments", "pagamento", Model.Description, false);
                         paymentDeleteModel.CheckStatus = true;
                         paymentDeleteModel.StatusField = "Status";
                         paymentDeleteModel.AllowedStatuses = new[] { "1", "3" };

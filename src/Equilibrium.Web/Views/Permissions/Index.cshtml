@@ -31,12 +31,14 @@
                             <td>@(string.IsNullOrEmpty(item.Description) ? "-" : item.Description)</td>
                             <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
                             <td>
-                                <div class="btn-group">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Editar</a>
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Detalhes</a>
-                                    <partial name="_Partials/Commons/_DeleteButton"
-                                             model='@(new DeleteButtonModel(item.Id, "Permissions", "permissão", item.Name, false))' />
-                                </div>
+                                <partial name="_Partials/Commons/_ActionButtons" model='(
+                                        Id: item.Id,
+                                        CanView: true,
+                                        CanEdit: true,
+                                        CanDelete: true,
+                                        ControllerName: "Permissions",
+                                        DeleteConfig: new DeleteButtonModel(item.Id, "Permissions", "permissão", item.Name, true),
+                                        ExtraButtons: "")' />
                             </td>
                         </tr>
                     }

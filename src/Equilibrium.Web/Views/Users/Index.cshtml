@@ -50,22 +50,19 @@
                             <td>@string.Join(", ", item.Roles)</td>
                             <td>@(item.LastLogin.HasValue ? item.LastLogin.Value.ToString("dd/MM/yyyy HH:mm") : "Nunca")</td>
                             <td>
-                                <div class="btn-group">
-                                    @if (await PermissionHelper.HasPermissionAsync(Context, "users.edit"))
-                                    {
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-edit me-1"></i>Editar
-                                        </a>
-                                    }
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
-                                        <i class="fas fa-info-circle me-1"></i>Detalhes
-                                    </a>
-                                    @if (await PermissionHelper.HasPermissionAsync(Context, "users.delete") && item.Id != Context.GetCurrentUserId())
-                                    {
-                                        <partial name="_Partials/Commons/_DeleteButton"
-                                                 model='@(new DeleteButtonModel(item.Id, "Users", "usuário", item.Username, false))' />
-                                    }
-                                </div>
+                                @{
+                                    var canEdit = await PermissionHelper.HasPermissionAsync(Context, "users.edit");
+                                    var canDelete = await PermissionHelper.HasPermissionAsync(Context, "users.delete") && item.Id != Context.GetCurrentUserId();
+                                    var deleteConfig = canDelete ? new DeleteButtonModel(item.Id, "Users", "usuário", item.Username, true) : null;
+                                }
+                                <partial name="_Partials/Commons/_ActionButtons" model='(
+                                        Id: item.Id,
+                                        CanView: true,
+                                        CanEdit: canEdit,
+                                        CanDelete: canDelete,
+                                        ControllerName: "Users",
+                                        DeleteConfig: deleteConfig,
+                                        ExtraButtons: "")' />
                             </td>
                         </tr>
                     }

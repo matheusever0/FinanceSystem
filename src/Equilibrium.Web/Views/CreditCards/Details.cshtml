@@ -190,12 +190,10 @@
                                         <partial name="_Partials/Commons/_StatusBadge" model="(BadgeClass: payment.StatusBadgeClass, Description: payment.StatusDescription)" />
                                     </td>
                                     <td class="text-center">
-                                        <partial name="_Partials/Commons/_ActionButtons" model='(
-                                            Id: payment.Id,
-                                            CanView: true,
-                                            CanEdit: false,
-                                            CanDelete: false,
-                                            ControllerName: "Payments")' />
+                                        <a asp-controller="Payments" asp-action="Details" asp-route-id="@payment.Id"
+                                           class="btn btn-sm btn-info" title="Visualizar detalhes">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
                                     </td>
                                 </tr>
                             }
