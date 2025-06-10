@@ -15,7 +15,6 @@ namespace Equilibrium.Web.Services
             _apiService = apiService;
         }
 
-        // Método principal com filtros avançados
         public async Task<IEnumerable<PaymentModel>> GetFilteredPaymentsAsync(PaymentFilter filter, string token)
         {
             var queryParams = FilterHelper.BuildPaymentQueryString(filter);
@@ -26,7 +25,6 @@ namespace Equilibrium.Web.Services
             return await _apiService.GetAsync<IEnumerable<PaymentModel>>(endpoint, token);
         }
 
-        // Método para paginação
         public async Task<PagedResult<PaymentModel>> GetPagedPaymentsAsync(PaymentFilter filter, string token)
         {
             var queryParams = FilterHelper.BuildPaymentQueryString(filter);
@@ -37,7 +35,6 @@ namespace Equilibrium.Web.Services
             return await _apiService.GetAsync<PagedResult<PaymentModel>>(endpoint, token);
         }
 
-        // Métodos existentes mantidos para compatibilidade
         public async Task<IEnumerable<PaymentModel>> GetAllPaymentsAsync(string token)
         {
             return await _apiService.GetAsync<IEnumerable<PaymentModel>>("/api/payments", token);
@@ -94,7 +91,6 @@ namespace Equilibrium.Web.Services
             return await GetFilteredPaymentsAsync(filter, token);
         }
 
-        // Novos métodos usando filtros avançados
         public async Task<IEnumerable<PaymentModel>> GetPaymentsByDateRangeAsync(DateTime startDate, DateTime endDate, string token)
         {
             var filter = new PaymentFilter
