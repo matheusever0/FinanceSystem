@@ -11,17 +11,20 @@ namespace Equilibrium.Web.Controllers
 {
     [Authorize]
     [RequirePermission("roles.view")]
-    public class RolesController : Controller
+    public class RolesController : BaseController
     {
         private readonly IRoleService _roleService;
         private readonly IPermissionService _permissionService;
+        private readonly IUserService _userService;
 
         public RolesController(
             IRoleService roleService,
-            IPermissionService permissionService)
+            IPermissionService permissionService,
+            IUserService userService)
         {
-            _roleService = roleService ?? throw new ArgumentNullException(nameof(roleService));
-            _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
+            _roleService = roleService;
+            _permissionService = permissionService;
+            _userService = userService;
         }
 
         public async Task<IActionResult> Index()
@@ -160,55 +163,18 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequirePermission("roles.delete")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do perfil não fornecido");
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var role = await _roleService.GetRoleByIdAsync(id, token);
-
-                if (role == null)
-                {
-                    return NotFound("Perfil não encontrado");
-                }
-
-                return View(role);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Role, ex);
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("roles.delete")]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do perfil não fornecido");
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                await _roleService.DeleteRoleAsync(id, token);
-                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.Role);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.Role, ex);
-                return RedirectToAction(nameof(Index));
-            }
+            return await HandleGenericDelete(
+                id,
+                _roleService,
+                async (service, itemId, token) => await service.DeleteRoleAsync(itemId, token),
+                async (service, itemId, token) => await service.GetRoleByIdAsync(itemId, token),
+                "perfil"
+            );
         }
 
         [RequirePermission("permissions.manage")]

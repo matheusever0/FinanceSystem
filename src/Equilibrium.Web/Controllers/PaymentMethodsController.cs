@@ -12,13 +12,15 @@ namespace Equilibrium.Web.Controllers
 {
     [Authorize]
     [RequirePermission("paymentmethods.view")]
-    public class PaymentMethodsController : Controller
+    public class PaymentMethodsController : BaseController
     {
         private readonly IPaymentMethodService _paymentMethodService;
+        private readonly IPaymentService _paymentService;
 
-        public PaymentMethodsController(IPaymentMethodService paymentMethodService)
+        public PaymentMethodsController(IPaymentMethodService paymentMethodService, IPaymentService paymentService)
         {
-            _paymentMethodService = paymentMethodService ?? throw new ArgumentNullException(nameof(paymentMethodService));
+            _paymentMethodService = paymentMethodService;
+            _paymentService = paymentService;
         }
 
         public async Task<IActionResult> Index()
@@ -230,74 +232,35 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequirePermission("paymentmethods.delete")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do método de pagamento não fornecido");
-            }
+            return await HandleGenericDelete(
+                id,
+                _paymentMethodService,
+                async (service, itemId, token) => await service.DeletePaymentMethodAsync(itemId, token),
+                async (service, itemId, token) => await service.GetPaymentMethodByIdAsync(itemId, token),
+                "método de pagamento",
+                null,
+                async (item) => {
+                    if (item is PaymentMethodModel method)
+                    {
+                        if (method.Type == 2 && method.CreditCards?.Any() == true)
+                        {
+                            return (false, $"Este método possui {method.CreditCards.Count} cartões associados. Exclua os cartões primeiro.");
+                        }
 
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
-
-                if (paymentMethod == null)
-                {
-                    return NotFound("Método de pagamento não encontrado");
+                        var paymentsCount = await _paymentService.GetPaymentsByMethodAsync(method.Id, GetToken());
+                        if (paymentsCount.Any())
+                        {
+                            return (false, $"Este método possui {paymentsCount.Count()} pagamentos associados. Não é possível excluir.");
+                        }
+                    }
+                    return (true, null);
                 }
-
-                if (paymentMethod.IsSystem)
-                {
-                    TempData["ErrorMessage"] = MessageHelper.GetCannotDeleteSystemEntityMessage(EntityNames.PaymentMethod);
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-
-                return View(paymentMethod);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.PaymentMethod, ex);
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("paymentmethods.delete")]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do método de pagamento não fornecido");
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
-
-                if (paymentMethod == null)
-                {
-                    return NotFound("Método de pagamento não encontrado");
-                }
-
-                if (paymentMethod.IsSystem)
-                {
-                    TempData["ErrorMessage"] = MessageHelper.GetCannotDeleteSystemEntityMessage(EntityNames.PaymentMethod);
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-
-                await _paymentMethodService.DeletePaymentMethodAsync(id, token);
-                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.PaymentMethod);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.PaymentMethod, ex);
-                return RedirectToAction(nameof(Index));
-            }
+            );
         }
 
         private List<SelectListItem> GetPaymentMethodTypes()

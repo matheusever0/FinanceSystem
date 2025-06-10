@@ -11,7 +11,7 @@ namespace Equilibrium.Web.Controllers
 {
     [Authorize]
     [RequirePermission("permissions.manage")]
-    public class PermissionsController : Controller
+    public class PermissionsController : BaseController
     {
         private readonly IPermissionService _permissionService;
         private readonly IRoleService _roleService;
@@ -148,48 +148,18 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission("permissions.delete")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID da permissão não fornecido");
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var permission = await _permissionService.GetPermissionByIdAsync(id, token);
-
-                return permission == null ? NotFound("Permissão não encontrada") : View(permission);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.Permission, ex);
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID da permissão não fornecido");
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                await _permissionService.DeletePermissionAsync(id, token);
-                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.Permission);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.Permission, ex);
-                return RedirectToAction(nameof(Index));
-            }
+            return await HandleGenericDelete(
+                id,
+                _permissionService,
+                async (service, itemId, token) => await service.DeletePermissionAsync(itemId, token),
+                async (service, itemId, token) => await service.GetPermissionByIdAsync(itemId, token),
+                "permissão"
+            );
         }
 
         public async Task<IActionResult> RolePermissions(string id)

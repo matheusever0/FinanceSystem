@@ -1,5 +1,6 @@
 ﻿@using Equilibrium.Web.Extensions
 @using Equilibrium.Web.Helpers
+@using Equilibrium.Web.Models.Commons
 @using Equilibrium.Web.Models.User
 @model IEnumerable<UserModel>
 
@@ -61,9 +62,8 @@
                                     </a>
                                     @if (await PermissionHelper.HasPermissionAsync(Context, "users.delete") && item.Id != Context.GetCurrentUserId())
                                     {
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash me-1"></i>Excluir
-                                        </a>
+                                        <partial name="_Partials/Commons/_DeleteButton"
+                                                 model='@(new DeleteButtonModel(item.Id, "Users", "usuário", item.Username, false))' />
                                     }
                                 </div>
                             </td>

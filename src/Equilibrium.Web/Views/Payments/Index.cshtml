@@ -1,122 +1,199 @@
-﻿@using Equilibrium.Web.Helpers
+﻿@model IEnumerable<PaymentModel>
+@using Equilibrium.Web.Helpers
+@using Equilibrium.Web.Models.Payment
+@using Equilibrium.Web.Models.Filters
 @using Equilibrium.Web.Models.Commons
-@model IEnumerable<Equilibrium.Web.Models.PaymentTypeModel>
 @{
-    ViewData["Title"] = ViewBag.Title ?? "Tipos de Pagamento";
+    ViewData["Title"] = ViewBag.Title ?? "Pagamentos";
+    var filter = ViewBag.CurrentFilter as PaymentFilter ?? new PaymentFilter();
+    var hasActiveFilters = ViewBag.HasActiveFilters ?? false;
 }
 
-<div class="d-flex justify-content-end mb-3">
-    <div>
-        @if (await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.create"))
+<div class="container-fluid">
+    <div class="d-flex justify-content-end mb-3">
+        @if (await PermissionHelper.HasPermissionAsync(Context, "payments.create"))
         {
             <a asp-action="Create" class="btn btn-primary">
-                <i class="fas fa-plus me-1"></i> Novo Tipo de Pagamento
+                <i class="fas fa-plus me-1"></i> Novo Pagamento
             </a>
         }
     </div>
-</div>
 
-<div class="card shadow mb-4">
-    <partial name="_Partials/Commons/_CardHeader" model='(
-        Title: "Filtros",
-        BadgeText: "",
-        BadgeClass: "",
-        Icon: "fa-filter",
-        CollapseTarget: "collapseFilters")' />
-    <div class="card-body collapse show" id="collapseFilters">
+    <!-- Filtros Avançados -->
+    <partial name="_Partials/Filters/_AdvancedFiltersPartial" model="filter" />
+
+    @if (!Model.Any())
+    {
+        <partial name="_Partials/Commons/_EmptyState" model='(
+            Message: hasActiveFilters ? "Nenhum pagamento encontrado com os filtros aplicados." : "Nenhum pagamento encontrado.",
+            Icon: "fa-money-bill-wave",
+            ButtonText: await PermissionHelper.HasPermissionAsync(Context, "payments.create") ? "Criar Novo Pagamento" : "",
+            ButtonUrl: Url.Action("Create"),
+            ButtonIcon: "fa-plus",
+            IsAlert: true)' />
+    }
+    else
+    {
+        <!-- Métricas Resumidas -->
         <div class="row">
-            <div class="col-md-12 mb-3">
-                <div class="d-flex gap-2">
-                    <a asp-action="Index" class="btn btn-outline-primary btn-sm @(ViewContext?.RouteData?.Values["action"]!.ToString() == "Index" && ViewBag.IsSystemView == null && ViewBag.IsUserView == null ? "active" : "")">
-                        <i class="fas fa-list"></i> Todos
-                    </a>
-                    <a asp-action="System" class="btn btn-outline-success btn-sm @(ViewBag.IsSystemView ? "active" : "")">
-                        <i class="fas fa-cog"></i> Sistema
-                    </a>
-                    <a asp-action="User" class="btn btn-outline-info btn-sm @(ViewBag.IsUserView ? "active" : "")">
-                        <i class="fas fa-user"></i> Meus Tipos
-                    </a>
+            <partial name="_Partials/Commons/_MetricCard" model='(
+                 Title: "Total Geral" ,
+                 Value: Model.Sum(p=>
+            p.Amount).ToString("C2"),
+            Icon: "fa-dollar-sign",
+            Color: "primary",
+            SubValue: Model.Count() + " pagamentos",
+            ShowProgress: false)' />
+                <partial name="_Partials/Commons/_MetricCard" model='(
+                     Title: "Total Pago" ,
+                     Value: Model.Where(p=>
+                p.Status == 2).Sum(p => p.Amount).ToString("C2"),
+                Icon: "fa-check-circle",
+                Color: "success",
+                SubValue: Model.Count(p => p.Status == 2) + " pagos",
+                ShowProgress: false)' />
+                    <partial name="_Partials/Commons/_MetricCard" model='(
+                         Title: "Total Pendente" ,
+                         Value: Model.Where(p=>
+                    p.Status == 1 || p.Status == 3).Sum(p => p.Amount).ToString("C2"),
+                    Icon: "fa-exclamation-circle",
+                    Color: "warning",
+                    SubValue: Model.Count(p => p.Status == 1 || p.Status == 3) + " pendentes",
+                    ShowProgress: false)' />
+        </div>
+
+        <!-- Tabela de Pagamentos -->
+        <div class="card shadow mb-4">
+            <partial name="_Partials/Commons/_CardHeader" model='(
+                Title: "Seus Pagamentos",
+                BadgeText: hasActiveFilters ? "Filtrado" : "",
+                BadgeClass: hasActiveFilters ? "bg-info" : "",
+                Icon: "fa-money-bill-wave",
+                CollapseTarget: "")' />
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover datatable">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Descrição</th>
+                                <th class="text-center">Vencimento</th>
+                                <th class="text-end">Valor</th>
+                                <th class="text-center">Status</th>
+                                <th>Tipo</th>
+                                <th>Método</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderBy(e => e.DueDate))
+                            {
+                                <tr class="@(item.Status == 3 ? "table-warning" : item.Status == 2 ? "table-success" : "")">
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none">
+                                            <div class="fw-medium">
+                                                @if (item.IsRecurring)
+                                                {
+                                                    <span class="badge bg-info me-2" title="Pagamento Recorrente">
+                                                        <i class="fas fa-sync-alt"></i>
+                                                    </span>
+                                                }
+                                                @item.Description
+                                            </div>
+                                            <div class="small text-muted">
+                                                @(item.Installments.Any() ? $"Parcelado ({item.Installments.Count}x)" : "Pagamento Único")
+                                            </div>
+                                        </a>
+                                    </td>
+                                    <td class="text-center">
+                                        @item.GetFormattedDueDate()
+                                        @if (item.Status == 1 && item.DueDate < DateTime.Today)
+                                        {
+                                            <br>
+
+                                            <small class="text-danger">Vencido</small>
+                                        }
+                                    </td>
+                                    <td class="text-end fw-bold">@item.GetFormattedAmount()</td>
+                                    <td class="text-center">
+                                        <partial name="_Partials/Commons/_StatusBadge" model='(
+                                            BadgeClass: item.StatusBadgeClass,
+                                            Description: item.StatusDescription)' />
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@item.PaymentTypeName</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@item.PaymentMethodName</small>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Visualizar">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            }
+                                            @if (await PermissionHelper.HasPermissionAsync(Context, "payments.delete"))
+                                            {
+                                                var paymentDeleteModel = new DeleteButtonModel(item.Id, "Payments", "pagamento", item.Description, false);
+                                                paymentDeleteModel.CheckStatus = true;
+                                                paymentDeleteModel.StatusField = "Status";
+                                                paymentDeleteModel.AllowedStatuses = new[] { "1", "3" };
+
+                                                <partial name="_Partials/Commons/_DeleteButton" model='paymentDeleteModel' />
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="card shadow mb-4">
-    <partial name="_Partials/Commons/_CardHeader" model='(
-        Title: "Tipos de Pagamento",
-        BadgeText: "",
-        BadgeClass: "",
-        Icon: "fa-tags",
-        CollapseTarget: "")' />
-    <div class="card-body">
-        @if (Model != null && Model.Any())
+        <!-- Ações Rápidas -->
+        @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
         {
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover datatable">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Descrição</th>
-                            <th class="text-center">Origem</th>
-                            <th class="text-center">Financiamento</th>
-                            <th class="text-center">Data de Criação</th>
-                            <th class="text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.OrderBy(e => e.Name))
-                        {
-                            <tr>
-                                <td>
-                                    <a asp-action="Details" asp-route-id="@item.Id">
-                                        @item.Name
-                                    </a>
-                                </td>
-                                <td>@(string.IsNullOrEmpty(item.Description) ? "-" : item.Description)</td>
-                                <td class="text-center">
-                                    <partial name="_Partials/Commons/_StatusBadge" model='(
-                                        BadgeClass: item.IsSystem ? "bg-info" : "bg-primary",
-                                        Description: item.IsSystem ? "Sistema" : "Personalizado")' />
-                                </td>
-                                <td class="text-center">
-                                    <partial name="_Partials/Commons/_StatusBadge" model='(
-                                        BadgeClass: item.IsFinancingType ? "bg-success" : "bg-secondary",
-                                        Description: item.IsFinancingType ? "Sim" : "Não")' />
-                                </td>
-                                <td class="text-center">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td class="text-center">
-                                    <div class="btn-group">
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        @{
-                                            var paymentDeleteModel = new DeleteButtonModel(item.Id, "Payments", "pagamento", item.Description, true);
-                                            paymentDeleteModel.CheckStatus = true;
-                                            paymentDeleteModel.StatusField = "Status";
-                                            paymentDeleteModel.AllowedStatuses = new[] { "1", "3" };
-                                        }
-                                        <partial name="_Partials/Commons/_DeleteButton" model='paymentDeleteModel' />
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+            <div class="card shadow mb-4">
+                <partial name="_Partials/Commons/_CardHeader" model='(
+                    Title: "Ações Rápidas",
+                    BadgeText: "",
+                    BadgeClass: "",
+                    Icon: "fa-bolt",
+                    CollapseTarget: "")' />
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Index", new { status = "Pending", orderBy = "dueDate" })" class="btn btn-warning w-100">
+                                <i class="fas fa-clock me-1"></i>
+                                Ver Pendentes (@Model.Count(p => p.Status == 1))
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Index", new { status = "Overdue", orderBy = "dueDate" })" class="btn btn-danger w-100">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Ver Vencidos (@Model.Count(p => p.Status == 3))
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Index", new { month = DateTime.Now.Month, year = DateTime.Now.Year })" class="btn btn-info w-100">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                Este Mês
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="Export" class="btn btn-secondary w-100">
+                                <i class="fas fa-file-export me-1"></i>
+                                Exportar
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         }
-        else
-        {
-            <partial name="_Partials/Commons/_EmptyState" model='(
-                Message: "Nenhum tipo de pagamento encontrado.",
-                Icon: "fa-tags",
-                ButtonText: await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.create") ? "Criar Novo Tipo" : "",
-                ButtonUrl: Url.Action("Create"),
-                ButtonIcon: "fa-plus",
-                IsAlert: true)' />
-        }
-    </div>
+    }
 </div>

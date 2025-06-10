@@ -1,5 +1,6 @@
 ﻿@model PaymentMethodModel
 @using Equilibrium.Web.Helpers
+@using Equilibrium.Web.Models.Commons
 @using Equilibrium.Web.Models.PaymentMethod
 @{
     ViewData["Title"] = "Detalhes do Método de Pagamento";
@@ -142,9 +143,8 @@
 
                     @if (await PermissionHelper.HasPermissionAsync(Context, "paymentmethods.delete"))
                     {
-                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100">
-                            <i class="fas fa-trash me-1"></i> Excluir Método de Pagamento
-                        </a>
+                        <partial name="_Partials/Commons/_DeleteButton"
+                                 model='@(new DeleteButtonModel(Model.Id, "PaymentMethods", "método de pagamento", Model.Name, false))' />
                     }
                 }
                 else

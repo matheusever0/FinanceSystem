@@ -3,6 +3,7 @@ using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
+using Equilibrium.Web.Models;
 using Equilibrium.Web.Models.CreditCard;
 using Equilibrium.Web.Models.Filters;
 using Microsoft.AspNetCore.Authorization;
@@ -174,50 +175,30 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequirePermission("creditcards.delete")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do cartão de crédito não fornecido");
-            }
-
-            try
-            {
-                var token = GetToken();
-                var creditCard = await _creditCardService.GetCreditCardByIdAsync(id, token);
-
-                return creditCard == null ? NotFound("Cartão de crédito não encontrado") : View(creditCard);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.CreditCard, ex);
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("creditcards.delete")]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do cartão de crédito não fornecido");
-            }
-
-            try
-            {
-                var token = GetToken();
-                await _creditCardService.DeleteCreditCardAsync(id, token);
-                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.CreditCard);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.CreditCard, ex);
-                return RedirectToAction(nameof(Index));
-            }
+            return await HandleGenericDelete(
+                id,
+                _creditCardService,
+                async (service, itemId, token) => await service.DeleteCreditCardAsync(itemId, token),
+                async (service, itemId, token) => await service.GetCreditCardByIdAsync(itemId, token),
+                "cartão de crédito",
+                null,
+                async (item) => {
+                    if (item is CreditCardModel card)
+                    {
+                        var pendingPayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { CreditCardId = card.Id }, GetToken());
+                        if (pendingPayments?.Any() == true)
+                        {
+                            return (false, "Não é possivel excluir este cartão pois existe pagamentos associados.");
+                        }
+                    }
+                    return (true, null);
+                }
+            );
         }
 
         private async Task LoadPaymentMethodsForView()

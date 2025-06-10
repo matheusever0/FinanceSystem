@@ -1,5 +1,6 @@
 ﻿@model CreditCardModel
 @using Equilibrium.Web.Helpers
+@using Equilibrium.Web.Models.Commons
 @using Equilibrium.Web.Models.CreditCard
 @using Equilibrium.Web.Models.Payment
 @{
@@ -96,9 +97,8 @@
 
                     @if (await PermissionHelper.HasPermissionAsync(Context, "creditcards.delete"))
                     {
-                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100">
-                            <i class="fas fa-trash me-1"></i> Excluir Cartão
-                        </a>
+                        <partial name="_Partials/Commons/_DeleteButton"
+                                 model='@(new DeleteButtonModel(Model.Id, "CreditCards", "cartão de crédito", Model.Name, false))' />
                     }
                 </div>
             </div>

@@ -11,13 +11,15 @@ namespace Equilibrium.Web.Controllers
 {
     [Authorize]
     [RequirePermission("incomes.view")]
-    public class IncomeTypesController : Controller
+    public class IncomeTypesController : BaseController
     {
         private readonly IIncomeTypeService _incomeTypeService;
+        private readonly IIncomeService _incomeService;
 
-        public IncomeTypesController(IIncomeTypeService incomeTypeService)
+        public IncomeTypesController(IIncomeTypeService incomeTypeService, IIncomeService incomeService)
         {
-            _incomeTypeService = incomeTypeService ?? throw new ArgumentNullException(nameof(incomeTypeService));
+            _incomeTypeService = incomeTypeService;
+            _incomeService = incomeService;
         }
 
         public async Task<IActionResult> Index()
@@ -201,74 +203,30 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
-        [RequirePermission("incomes.delete")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission("incometypes.delete")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do tipo de receita não fornecido");
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var incomeType = await _incomeTypeService.GetIncomeTypeByIdAsync(id, token);
-
-                if (incomeType == null)
-                {
-                    return NotFound("Tipo de receita não encontrado");
+            return await HandleGenericDelete(
+                id,
+                _incomeTypeService,
+                async (service, itemId, token) => await service.DeleteIncomeTypeAsync(itemId, token),
+                async (service, itemId, token) => await service.GetIncomeTypeByIdAsync(itemId, token),
+                "tipo de receita",
+                null,
+                async (item) => {
+                    if (item is IncomeTypeModel incomeType)
+                    {
+                        var incomesCount = await _incomeService.GetIncomesByTypeAsync(incomeType.Id, GetToken());
+                        if (incomesCount.Any())
+                        {
+                            return (false, $"Este tipo possui {incomesCount.Count()} receitas associadas. Não é possível excluir.");
+                        }
+                    }
+                    return (true, null);
                 }
-
-                if (incomeType.IsSystem)
-                {
-                    TempData["ErrorMessage"] = MessageHelper.GetCannotDeleteSystemEntityMessage(EntityNames.IncomeType);
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-
-                return View(incomeType);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.IncomeType, ex);
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("incomes.delete")]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do tipo de receita não fornecido");
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var incomeType = await _incomeTypeService.GetIncomeTypeByIdAsync(id, token);
-
-                if (incomeType == null)
-                {
-                    return NotFound("Tipo de receita não encontrado");
-                }
-
-                if (incomeType.IsSystem)
-                {
-                    TempData["ErrorMessage"] = MessageHelper.GetCannotDeleteSystemEntityMessage(EntityNames.IncomeType);
-                    return RedirectToAction(nameof(Details), new { id });
-                }
-
-                await _incomeTypeService.DeleteIncomeTypeAsync(id, token);
-                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.IncomeType);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.IncomeType, ex);
-                return RedirectToAction(nameof(Index));
-            }
+            );
         }
     }
 }

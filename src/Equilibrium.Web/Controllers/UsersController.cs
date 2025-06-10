@@ -13,7 +13,7 @@ using System.Security.Claims;
 namespace Equilibrium.Web.Controllers
 {
     [Authorize]
-    public class UsersController : Controller
+    public class UsersController : BaseController
     {
         private readonly IUserService _userService;
         private readonly IRoleService _roleService;
@@ -215,70 +215,26 @@ namespace Equilibrium.Web.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequirePermission("users.delete")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do usuário não fornecido");
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-                var user = await _userService.GetUserByIdAsync(id, token);
-
-                if (user == null)
-                {
-                    return NotFound("Usuário não encontrado");
+            return await HandleGenericDelete(
+                id,
+                _userService,
+                async (service, itemId, token) => await service.DeleteUserAsync(itemId, token),
+                async (service, itemId, token) => await service.GetUserByIdAsync(itemId, token),
+                "usuário",
+                null,
+                async (item) => {
+                    if (item is UserModel user && user.Id == GetCurrentUserId())
+                    {
+                        return (false, "Você não pode excluir sua própria conta.");
+                    }
+                    return (true, null);
                 }
-
-                var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (id == currentUserId)
-                {
-                    TempData["ErrorMessage"] = "Não é possível excluir seu próprio usuário.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                return View(user);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetLoadingErrorMessage(EntityNames.User, ex);
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [RequirePermission("users.delete")]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("ID do usuário não fornecido");
-            }
-
-            try
-            {
-                var token = HttpContext.GetJwtToken();
-
-                var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (id == currentUserId)
-                {
-                    TempData["ErrorMessage"] = "Não é possível excluir seu próprio usuário.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                await _userService.DeleteUserAsync(id, token);
-                TempData["SuccessMessage"] = MessageHelper.GetDeletionSuccessMessage(EntityNames.User);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = MessageHelper.GetDeletionErrorMessage(EntityNames.User, ex);
-                return RedirectToAction(nameof(Index));
-            }
+            );
         }
 
         private async Task LoadRolesForView()

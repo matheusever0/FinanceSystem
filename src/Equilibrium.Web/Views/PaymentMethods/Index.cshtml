@@ -1,5 +1,6 @@
 ﻿@model IEnumerable<PaymentMethodModel>
 @using Equilibrium.Web.Helpers
+@using Equilibrium.Web.Models.Commons
 @using Equilibrium.Web.Models.PaymentMethod
 @{
     ViewData["Title"] = ViewBag.Title ?? "Métodos de Pagamento";
@@ -96,12 +97,17 @@
                                 </td>
                                 <td class="text-center">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="text-center">
-                                    <partial name="_Partials/Commons/_ActionButtons" model='(
-                                        Id: item.Id,
-                                        CanView: true,
-                                        CanEdit: !item.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "paymentmethods.edit"),
-                                        CanDelete: !item.IsSystem && await PermissionHelper.HasPermissionAsync(Context, "paymentmethods.delete"),
-                                        ControllerName: "PaymentMethods")' />
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    @if (!item.IsSystem)
+                                    {
+                                        <partial name="_Partials/Commons/_DeleteButton"
+                                                 model='@(new DeleteButtonModel(item.Id, "PaymentMethods", "método de pagamento", item.Name, true))' />
+                                    }
                                 </td>
                             </tr>
                         }
