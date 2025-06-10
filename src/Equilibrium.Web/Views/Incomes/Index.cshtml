@@ -141,16 +141,13 @@
                                             }
                                             @if (await PermissionHelper.HasPermissionAsync(Context, "incomes.delete"))
                                             {
-                                                <partial name="_Partials/Commons/_DeleteButton" model='new DeleteButtonModel {
-                                                Id = item.Id,
-                                                Controller = "Incomes",
-                                                EntityName = "receita",
-                                                Description = item.Description,
-                                                CssClass = "btn btn-sm btn-danger",
-                                                CheckStatus = true,
-                                                StatusField = "Status",
-                                                AllowedStatuses = new[]{"1","3"},
-                                                IconOnly = true }' />
+
+                                                var incomeDeleteModel = new DeleteButtonModel(item.Id, "Incomes", "receita", item.Description, true);
+                                                incomeDeleteModel.CheckStatus = true;
+                                                incomeDeleteModel.StatusField = "Status";
+                                                incomeDeleteModel.AllowedStatuses = new[] { "1", "3" };
+
+                                                <partial name="_Partials/Commons/_DeleteButton" model='incomeDeleteModel' />
                                             }
                                         </div>
                                     </td>

@@ -67,19 +67,19 @@
                                 SecondaryText: "",
                                 ValueClass: "")' />
 
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                                <partial name="_Partials/Commons/_FinancialDataItem" model='(
                                 Label: "Método de Pagamento",
                                 Value: "<a asp-controller=\"PaymentMethods\" asp-action=\"Details\" asp-route-id=\"" + Model.PaymentMethodId + "\">" + Model.PaymentMethodName + "</a>",
-                                SecondaryText: "",
-                                ValueClass: "")' />
+                                    SecondaryText: "",
+                                    ValueClass: "")' />
 
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                                    <partial name="_Partials/Commons/_FinancialDataItem" model='(
                                 Label: "Recorrente",
                                 Value: Model.IsRecurring ? "Sim" : "Não",
                                 SecondaryText: "",
                                 ValueClass: "")' />
 
-                            <partial name="_Partials/Commons/_FinancialDataItem" model='(
+                                    <partial name="_Partials/Commons/_FinancialDataItem" model='(
                                 Label: "Data de Criação",
                                 Value: Model.CreatedAt.ToString("dd/MM/yyyy HH:mm"),
                                 SecondaryText: "",
@@ -116,7 +116,7 @@
                 <div class="card-body">
                     @if (await PermissionHelper.HasPermissionAsync(Context, "payments.edit"))
                     {
-                        @if (Model.Status == 1) // Pendente
+                        @if (Model.Status == 1) 
                         {
                             <button type="button" class="btn btn-success w-100 mb-3" data-bs-toggle="modal" data-bs-target="#markAsPaidModal">
                                 <i class="fas fa-check-circle me-1"></i> Marcar como Pago
@@ -129,14 +129,14 @@
                                 </button>
                             </form>
                         }
-                        else if (Model.Status == 3) // Vencido
+                        else if (Model.Status == 3) 
                         {
                             <button type="button" class="btn btn-success w-100 mb-3" data-bs-toggle="modal" data-bs-target="#markAsPaidModal">
                                 <i class="fas fa-check-circle me-1"></i> Marcar como Pago
                             </button>
                         }
 
-                        @if (Model.Status != 4) // Não Cancelado
+                        @if (Model.Status != 4) 
                         {
                             <form asp-controller="Payments" asp-action="Cancel" asp-route-id="@Model.Id" method="post" data-page="payment">
                                 @Html.AntiForgeryToken()
@@ -151,18 +151,13 @@
                     @if (await PermissionHelper.HasPermissionAsync(Context, "payments.delete"))
                     {
 
-                        <partial name="_Partials/Commons/_DeleteButton" model='new DeleteButtonModel {
-                                Id = Model.Id,
-                                Controller = "Payments",
-                                EntityName = "pagamento",
-                                Description = Model.Description,
-                                CssClass = "btn btn-danger w-100",
-                                CustomMessage = "Tem certeza que deseja excluir o pagamento \"" + Model.Description + "\"?\n\nEsta ação não pode ser desfeita e todas as parcelas associadas também serão excluídas.",
-                                CheckStatus = true,
-                                StatusField = "Status",
-                                AllowedStatuses = new[]{"1","4","3"},
-                                IconOnly = false,
-                                ButtonText = "Excluir Pagamento" }' />
+                        var paymentDeleteModel = new DeleteButtonModel(Model.Id, "Payments", "pagamento", Model.Description, false);
+                        paymentDeleteModel.CustomMessage = "Tem certeza que deseja excluir o pagamento \"" + Model.Description + "\"?\n\nEsta ação não pode ser desfeita e todas as parcelas associadas também serão excluídas.";
+                        paymentDeleteModel.CheckStatus = true;
+                        paymentDeleteModel.StatusField = "Status";
+                        paymentDeleteModel.AllowedStatuses = new[] { "1", "3" };
+
+                        <partial name="_Partials/Commons/_DeleteButton" model='paymentDeleteModel' />
 
                         <div data-entity-status="@Model.Status" style="display:none;"></div>
                     }

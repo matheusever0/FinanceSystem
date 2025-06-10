@@ -89,14 +89,8 @@
 
                     @if (await PermissionHelper.HasPermissionAsync(Context, "paymenttypes.delete"))
                     {
-                        <partial name="_Partials/Commons/_DeleteButton" model='new DeleteButtonModel {
-                                Id = Model.Id,
-                                Controller = "PaymentTypes",
-                                EntityName = "tipo de pagamento",
-                                Description = Model.Name,
-                                CssClass = "btn btn-outline-danger w-100",
-                                IconOnly = false,
-                                ButtonText = "Excluir Tipo de Pagamento" }' />
+                        <partial name="_Partials/Commons/_DeleteButton"
+                                 model='@(new DeleteButtonModel(Model.Id, "PaymentTypes", "tipo de pagamento", Model.Name, false))' />
                     }
                 </div>
             </div>
