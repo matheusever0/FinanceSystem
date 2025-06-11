@@ -1,6 +1,5 @@
 using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
-using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.PaymentMethod;
@@ -27,7 +26,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentMethods = await _paymentMethodService.GetAllPaymentMethodsAsync(token);
                 return View(paymentMethods);
             }
@@ -42,7 +41,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentMethods = await _paymentMethodService.GetSystemPaymentMethodsAsync(token);
                 ViewBag.IsSystemView = true;
                 ViewBag.Title = "Métodos de Pagamento do Sistema";
@@ -59,7 +58,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentMethods = await _paymentMethodService.GetUserPaymentMethodsAsync(token);
                 ViewBag.IsUserView = true;
                 ViewBag.Title = "Meus Métodos de Pagamento";
@@ -81,7 +80,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentMethods = await _paymentMethodService.GetByTypeAsync(type, token);
 
                 string typeDescription = GetPaymentMethodTypeDescription(type);
@@ -106,7 +105,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
 
                 return paymentMethod == null ? NotFound("Método de pagamento não encontrado") : View(paymentMethod);
@@ -138,7 +137,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentMethod = await _paymentMethodService.CreatePaymentMethodAsync(model, token);
                 TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.PaymentMethod);
                 return RedirectToAction(nameof(Details), new { id = paymentMethod.Id });
@@ -161,7 +160,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
 
                 if (paymentMethod == null)
@@ -207,7 +206,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentMethod = await _paymentMethodService.GetPaymentMethodByIdAsync(id, token);
 
                 if (paymentMethod == null)

@@ -44,8 +44,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = GetToken();
-                await LoadDashboardData(token);
+                await LoadDashboardData(GetToken());
                 return View();
             }
             catch (Exception ex)

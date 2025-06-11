@@ -26,7 +26,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var incomeTypes = await _incomeTypeService.GetAllIncomeTypesAsync(token);
                 return View(incomeTypes);
             }
@@ -41,7 +41,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var incomeTypes = await _incomeTypeService.GetSystemIncomeTypesAsync(token);
                 ViewBag.IsSystemView = true;
                 ViewBag.Title = "Tipos de Receita do Sistema";
@@ -58,7 +58,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var incomeTypes = await _incomeTypeService.GetUserIncomeTypesAsync(token);
                 ViewBag.IsUserView = true;
                 ViewBag.Title = "Meus Tipos de Receita";
@@ -80,7 +80,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var incomeType = await _incomeTypeService.GetIncomeTypeByIdAsync(id, token);
 
                 return incomeType == null ? NotFound("Tipo de receita não encontrado") : View(incomeType);
@@ -110,7 +110,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var incomeType = await _incomeTypeService.CreateIncomeTypeAsync(model, token);
                 TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.IncomeType);
                 return RedirectToAction(nameof(Details), new { id = incomeType.Id });
@@ -132,7 +132,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var incomeType = await _incomeTypeService.GetIncomeTypeByIdAsync(id, token);
 
                 if (incomeType == null)
@@ -178,7 +178,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var incomeType = await _incomeTypeService.GetIncomeTypeByIdAsync(id, token);
 
                 if (incomeType == null)

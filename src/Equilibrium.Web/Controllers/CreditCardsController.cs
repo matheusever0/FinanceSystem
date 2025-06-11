@@ -3,7 +3,6 @@ using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
-using Equilibrium.Web.Models;
 using Equilibrium.Web.Models.CreditCard;
 using Equilibrium.Web.Models.Filters;
 using Microsoft.AspNetCore.Authorization;
@@ -26,17 +25,16 @@ namespace Equilibrium.Web.Controllers
             IPaymentMethodService paymentMethodService,
             IPaymentService paymentService)
         {
-            _creditCardService = creditCardService ?? throw new ArgumentNullException(nameof(creditCardService));
-            _paymentMethodService = paymentMethodService ?? throw new ArgumentNullException(nameof(paymentMethodService));
-            _paymentService = paymentService ?? throw new ArgumentNullException(nameof(paymentService));
+            _creditCardService = creditCardService;
+            _paymentMethodService = paymentMethodService;
+            _paymentService = paymentService;
         }
 
         public async Task<IActionResult> Index()
         {
             try
             {
-                var token = GetToken();
-                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
+                var creditCards = await _creditCardService.GetAllCreditCardsAsync(GetToken());
                 return View(creditCards);
             }
             catch (Exception ex)
@@ -73,8 +71,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = GetToken();
-                var creditCardPaymentMethods = await _paymentMethodService.GetByTypeAsync(CREDIT_CARD_PAYMENT_TYPE, token);
+                var creditCardPaymentMethods = await _paymentMethodService.GetByTypeAsync(CREDIT_CARD_PAYMENT_TYPE, GetToken());
                 ViewBag.PaymentMethods = creditCardPaymentMethods;
                 return View();
             }
@@ -98,8 +95,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = GetToken();
-                var creditCard = await _creditCardService.CreateCreditCardAsync(model, token);
+                var creditCard = await _creditCardService.CreateCreditCardAsync(model, GetToken());
                 TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.CreditCard);
                 return RedirectToAction(nameof(Details), new { id = creditCard.Id });
             }
@@ -121,8 +117,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = GetToken();
-                var creditCard = await _creditCardService.GetCreditCardByIdAsync(id, token);
+                var creditCard = await _creditCardService.GetCreditCardByIdAsync(id, GetToken());
 
                 if (creditCard == null)
                 {
@@ -163,8 +158,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = GetToken();
-                await _creditCardService.UpdateCreditCardAsync(id, model, token);
+                await _creditCardService.UpdateCreditCardAsync(id, model, GetToken());
                 TempData["SuccessMessage"] = MessageHelper.GetUpdateSuccessMessage(EntityNames.CreditCard);
                 return RedirectToAction(nameof(Details), new { id });
             }
@@ -205,8 +199,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = GetToken();
-                var creditCardPaymentMethods = await _paymentMethodService.GetByTypeAsync(CREDIT_CARD_PAYMENT_TYPE, token);
+                var creditCardPaymentMethods = await _paymentMethodService.GetByTypeAsync(CREDIT_CARD_PAYMENT_TYPE, GetToken());
                 ViewBag.PaymentMethods = creditCardPaymentMethods;
             }
             catch

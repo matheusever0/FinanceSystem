@@ -1,7 +1,6 @@
 using Equilibrium.Resources.Web;
 using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
-using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Helpers;
 using Equilibrium.Web.Interfaces;
@@ -33,7 +32,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var users = await _userService.GetAllUsersAsync(token);
                 return View(users);
             }
@@ -53,7 +52,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var user = await _userService.GetUserByIdAsync(id, token);
 
                 if (user == null)
@@ -75,7 +74,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var roles = await _roleService.GetAllRolesAsync(token);
                 ViewBag.Roles = roles;
                 return View();
@@ -107,7 +106,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var user = await _userService.CreateUserAsync(model, token);
                 TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.User);
                 return RedirectToAction(nameof(Details), new { id = user.Id });
@@ -130,7 +129,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var user = await _userService.GetUserByIdAsync(id, token);
 
                 if (user == null)
@@ -192,7 +191,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
 
                 var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var userPermissions = await _permissionService.GetPermissionsByUserIdAsync(currentUserId!, token);
@@ -241,7 +240,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var roles = await _roleService.GetAllRolesAsync(token);
                 ViewBag.Roles = roles;
             }

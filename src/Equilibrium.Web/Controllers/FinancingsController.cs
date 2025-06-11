@@ -13,7 +13,7 @@ namespace Equilibrium.Web.Controllers
 {
     [Authorize]
     [RequirePermission("financings.view")]
-    public class FinancingsController : Controller
+    public class FinancingsController : BaseController
     {
         private readonly IFinancingService _financingService;
         private readonly IPaymentTypeService _paymentTypeService;
@@ -30,7 +30,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var financings = await _financingService.GetAllFinancingsAsync(token);
 
                 return View(financings);
@@ -46,7 +46,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var financings = await _financingService.GetActiveFinancingsAsync(token);
                 ViewBag.Title = "Financiamentos Ativos";
                 return View("Index", financings);
@@ -67,7 +67,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var financing = await _financingService.GetFinancingDetailsAsync(id, token);
                 return financing == null
                     ? NotFound("Financiamento não encontrado")
@@ -85,10 +85,9 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
 
-                // Filtrar tipos de pagamento marcados como de financiamento
                 var financingPaymentTypes = paymentTypes.Where(pt => pt.IsFinancingType).ToList();
 
                 if (financingPaymentTypes.Count == 0)
@@ -123,7 +122,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var financing = await _financingService.CreateFinancingAsync(model, token);
                 TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.Financing);
                 return RedirectToAction(nameof(Details), new { id = financing.Id });
@@ -158,7 +157,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var simulation = await _financingService.SimulateFinancingAsync(model, token);
 
                 ViewBag.Simulation = simulation;
@@ -188,7 +187,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 await _financingService.CancelFinancingAsync(id, token);
                 TempData["SuccessMessage"] = MessageHelper.GetCancelSuccessMessage(EntityNames.Financing);
                 return RedirectToAction(nameof(Details), new { id });
@@ -212,7 +211,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 await _financingService.CompleteFinancingAsync(id, token);
                 TempData["SuccessMessage"] = "Financiamento marcado como concluído com sucesso";
                 return RedirectToAction(nameof(Details), new { id });
@@ -235,7 +234,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var installments = await _financingService.GetFinancingInstallmentsAsync(id, token);
                 return Json(installments);
             }
@@ -256,7 +255,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var installments = await _financingService.GetFinancingInstallmentsAsync(id, token);
                 return Json(installments.Where(e => e.Status == 1));
             }
@@ -283,7 +282,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentTypes = await _paymentTypeService.GetAllPaymentTypesAsync(token);
                 var financingPaymentTypes = paymentTypes.Where(pt => pt.IsFinancingType).ToList();
 

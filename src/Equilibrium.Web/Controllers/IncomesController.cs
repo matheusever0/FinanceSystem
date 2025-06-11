@@ -6,7 +6,6 @@ using Equilibrium.Web.Helpers;
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.Filters;
 using Equilibrium.Web.Models.Income;
-using Equilibrium.Web.Models.Payment;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;

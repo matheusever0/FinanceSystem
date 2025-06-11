@@ -1,6 +1,5 @@
 using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
-using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.Permission;
@@ -28,7 +27,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var permissions = await _permissionService.GetAllPermissionsAsync(token);
                 return View(permissions);
             }
@@ -48,7 +47,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var permission = await _permissionService.GetPermissionByIdAsync(id, token);
 
                 return permission == null ? NotFound("Permissão não encontrada") : View(permission);
@@ -76,7 +75,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var permission = await _permissionService.CreatePermissionAsync(model, token);
                 TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.Permission);
                 return RedirectToAction(nameof(Details), new { id = permission.Id });
@@ -97,7 +96,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var permission = await _permissionService.GetPermissionByIdAsync(id, token);
 
                 if (permission == null)
@@ -136,7 +135,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 await _permissionService.UpdatePermissionAsync(id, model, token);
                 TempData["SuccessMessage"] = MessageHelper.GetUpdateSuccessMessage(EntityNames.Permission);
                 return RedirectToAction(nameof(Details), new { id });
@@ -171,7 +170,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
 
                 if (role == null)
@@ -206,7 +205,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 permissions ??= new List<string>();
 
                 await _roleService.UpdateRolePermissionsAsync(id, permissions, token);

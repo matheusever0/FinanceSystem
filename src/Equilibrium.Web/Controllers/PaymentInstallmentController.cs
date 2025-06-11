@@ -1,6 +1,5 @@
 ﻿using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
-using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +9,7 @@ namespace Equilibrium.Web.Controllers
 {
     [Authorize]
     [RequirePermission("payments.view")]
-    public class PaymentInstallmentsController : Controller
+    public class PaymentInstallmentsController : BaseController
     {
         private readonly IPaymentService _paymentService;
 
@@ -31,7 +30,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
 
                 var paymentId = TempData["PaymentId"]?.ToString() ??
                     (await _paymentService.GetInstallmentParentPaymentAsync(id, token));
@@ -70,7 +69,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
 
                 var paymentId = TempData["PaymentId"]?.ToString() ??
                     (await _paymentService.GetInstallmentParentPaymentAsync(id, token));
@@ -109,7 +108,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
 
                 var paymentId = TempData["PaymentId"]?.ToString() ??
                     (await _paymentService.GetInstallmentParentPaymentAsync(id, token));

@@ -1,6 +1,5 @@
 using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
-using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.Role;
@@ -15,7 +14,6 @@ namespace Equilibrium.Web.Controllers
     {
         private readonly IRoleService _roleService;
         private readonly IPermissionService _permissionService;
-        private readonly IUserService _userService;
 
         public RolesController(
             IRoleService roleService,
@@ -24,14 +22,13 @@ namespace Equilibrium.Web.Controllers
         {
             _roleService = roleService;
             _permissionService = permissionService;
-            _userService = userService;
         }
 
         public async Task<IActionResult> Index()
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var roles = await _roleService.GetAllRolesAsync(token);
                 return View(roles);
             }
@@ -51,7 +48,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
 
                 if (role == null)
@@ -89,7 +86,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var role = await _roleService.CreateRoleAsync(model, token);
                 TempData["SuccessMessage"] = MessageHelper.GetCreationSuccessMessage(EntityNames.Role);
                 return RedirectToAction(nameof(Details), new { id = role.Id });
@@ -111,7 +108,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
 
                 if (role == null)
@@ -151,7 +148,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 await _roleService.UpdateRoleAsync(id, model, token);
                 TempData["SuccessMessage"] = MessageHelper.GetUpdateSuccessMessage(EntityNames.Role);
                 return RedirectToAction(nameof(Details), new { id });
@@ -187,7 +184,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
 
                 if (role == null)
@@ -223,7 +220,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var role = await _roleService.GetRoleByIdAsync(id, token);
 
                 if (role == null)

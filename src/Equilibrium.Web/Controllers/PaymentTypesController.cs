@@ -1,6 +1,5 @@
 using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
-using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models;
@@ -41,7 +40,7 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var paymentTypes = await _paymentTypeService.GetSystemPaymentTypesAsync(token);
                 ViewBag.IsSystemView = true;
                 ViewBag.Title = "Tipos de Pagamento do Sistema";

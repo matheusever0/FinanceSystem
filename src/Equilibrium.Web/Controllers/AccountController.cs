@@ -19,9 +19,9 @@ namespace Equilibrium.Web.Controllers
             IApiService apiService,
             ILogger<AccountController> logger)
         {
-            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-            _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _userService = userService;
+            _apiService = apiService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -73,19 +73,16 @@ namespace Equilibrium.Web.Controllers
                     return View(model);
                 }
 
-                // Configurar as propriedades de autenticação com 24 horas
                 var authProperties = new AuthenticationProperties
                 {
                     IsPersistent = true,
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1), // 24 horas
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1),
                     AllowRefresh = true,
                     IssuedUtc = DateTimeOffset.UtcNow
                 };
 
-                // Definir cookie httpOnly com JWT
                 HttpContext.SetJwtTokenCookie(result.Token);
 
-                // Autenticar com cookie
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     principal,
@@ -112,13 +109,10 @@ namespace Equilibrium.Web.Controllers
             {
                 var username = HttpContext.GetUserName();
 
-                // Limpar autenticação
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-                // Limpar session
                 HttpContext.Session.Clear();
 
-                // Limpar cookie JWT
                 HttpContext.ClearJwtToken();
 
                 _logger.LogInformation("Logout realizado com sucesso para usuário: {Username}", username);
@@ -151,7 +145,6 @@ namespace Equilibrium.Web.Controllers
                     return Unauthorized();
                 }
 
-                // Verificar se o token ainda é válido na API
                 var isValid = await _apiService.VerifyTokenAsync(token);
                 if (!isValid)
                 {
@@ -166,7 +159,6 @@ namespace Equilibrium.Web.Controllers
                     return Unauthorized();
                 }
 
-                // Verificar se ainda está dentro do prazo
                 if (authResult.Properties.ExpiresUtc <= DateTimeOffset.UtcNow)
                 {
                     _logger.LogWarning("Cookie de autenticação expirado para usuário: {User}", HttpContext.GetUserName());
@@ -205,33 +197,28 @@ namespace Equilibrium.Web.Controllers
                     return Unauthorized(new { success = false, message = "Token não encontrado" });
                 }
 
-                // Verificar se o token ainda é válido
                 var isValid = await _apiService.VerifyTokenAsync(token);
                 if (!isValid)
                 {
                     return Unauthorized(new { success = false, message = "Token inválido" });
                 }
 
-                // Renovar o cookie de autenticação
                 var authResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 if (authResult.Succeeded)
                 {
-                    // Criar novas propriedades com 24 horas a partir de agora
                     var newProperties = new AuthenticationProperties
                     {
                         IsPersistent = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1), // Renovar por mais 24 horas
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1),
                         AllowRefresh = true,
                         IssuedUtc = DateTimeOffset.UtcNow
                     };
 
-                    // Re-autenticar com novo tempo
                     await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         authResult.Principal,
                         newProperties);
 
-                    // Renovar cookie JWT também (mesmo token, nova expiração)
                     HttpContext.SetJwtTokenCookie(token);
 
                     _logger.LogInformation("Token renovado com sucesso para usuário: {User}. Nova expiração: {Expiration}",

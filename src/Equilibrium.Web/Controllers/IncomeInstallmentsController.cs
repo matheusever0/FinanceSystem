@@ -10,7 +10,7 @@ namespace Equilibrium.Web.Controllers
 {
     [Authorize]
     [RequirePermission("incomes.view")]
-    public class IncomeInstallmentsController : Controller
+    public class IncomeInstallmentsController : BaseController
     {
         private readonly IIncomeService _incomeService;
 
@@ -31,7 +31,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
 
                 var incomeId = TempData["IncomeId"]?.ToString() ??
                     (await _incomeService.GetInstallmentParentIncomeAsync(id, token));
@@ -78,7 +78,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
                 var incomeId = TempData["IncomeId"]?.ToString() ??
                     (await _incomeService.GetInstallmentParentIncomeAsync(id, token));
 

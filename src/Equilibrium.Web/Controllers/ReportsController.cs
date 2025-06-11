@@ -1,6 +1,5 @@
 ﻿using Equilibrium.Resources.Web.Enums;
 using Equilibrium.Resources.Web.Helpers;
-using Equilibrium.Web.Extensions;
 using Equilibrium.Web.Filters;
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.Generics;
@@ -11,7 +10,7 @@ namespace Equilibrium.Web.Controllers
 {
     [Authorize]
     [RequirePermission("reports.view")]
-    public class ReportsController : Controller
+    public class ReportsController : BaseController
     {
         private readonly IPaymentService _paymentService;
         private readonly IPaymentTypeService _paymentTypeService;
@@ -56,7 +55,7 @@ namespace Equilibrium.Web.Controllers
                 month ??= DateTime.Now.Month;
                 year ??= DateTime.Now.Year;
 
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
 
                 // Carregar pagamentos
                 var payments = await _paymentService.GetPaymentsByMonthAsync(month.Value, year.Value, token);
@@ -131,7 +130,7 @@ namespace Equilibrium.Web.Controllers
             try
             {
                 year ??= DateTime.Now.Year;
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
 
                 // Get payment data
                 var monthlyPaymentsData = await GetMonthlyPaymentsDataForYear(year.Value, token);
@@ -192,7 +191,7 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                var token = HttpContext.GetJwtToken();
+                var token = GetToken();
 
                 // Carregar pagamentos
                 var payments = await _paymentService.GetPaymentsByMonthAsync(month, year, token);
