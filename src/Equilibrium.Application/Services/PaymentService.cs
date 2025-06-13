@@ -109,22 +109,26 @@ namespace Equilibrium.Application.Services
                 }
             }
 
-            if (filter.Month.HasValue && filter.Year.HasValue)
+            if (filter.Month.HasValue)
             {
-                query = query.Where(p => p.DueDate.Month == filter.Month.Value && p.DueDate.Year == filter.Year.Value);
+                query = query.Where(p => p.DueDate.Month == filter.Month.Value);
             }
-            else
-            {
-                if (filter.StartDate.HasValue)
-                {
-                    query = query.Where(p => p.DueDate >= filter.StartDate.Value);
-                }
 
-                if (filter.EndDate.HasValue)
-                {
-                    query = query.Where(p => p.DueDate <= filter.EndDate.Value);
-                }
+            if (filter.Year.HasValue)
+            {
+                query = query.Where(p => p.DueDate.Year == filter.Year.Value);
             }
+
+            if (filter.StartDate.HasValue)
+            {
+                query = query.Where(p => p.DueDate >= filter.StartDate.Value);
+            }
+
+            if (filter.EndDate.HasValue)
+            {
+                query = query.Where(p => p.DueDate <= filter.EndDate.Value);
+            }
+
 
             if (filter.PaymentStartDate.HasValue)
             {

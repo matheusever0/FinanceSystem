@@ -534,7 +534,8 @@ namespace Equilibrium.Web.Controllers
                     Month = month,
                     Year = year,
                     Status = "Pending",
-                    PaymentMethodId = creditCard.PaymentMethodId
+                    PaymentMethodId = creditCard.PaymentMethodId,
+                    CreditCardId = creditCard.Id
                 };
 
                 var pendingPayments = await _paymentService.GetFilteredPaymentsAsync(paymentFilter, token);
