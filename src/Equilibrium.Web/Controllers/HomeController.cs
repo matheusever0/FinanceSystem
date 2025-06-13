@@ -44,7 +44,6 @@ namespace Equilibrium.Web.Controllers
 
             try
             {
-                await LoadDashboardData(GetToken());
                 return View();
             }
             catch (Exception ex)
@@ -77,7 +76,7 @@ namespace Equilibrium.Web.Controllers
                 var totalPaymentsPaid = thisMonthPaidPayments.Sum(p => p.Amount);
 
                 var allReceivedIncomesFilter = new IncomeFilter { Status = "Received", EndDate = DateTime.Today };
-                var allPaidPaymentsFilter = new PaymentFilter { Status = "Paid", EndDate = DateTime.Today };
+                var allPaidPaymentsFilter = new PaymentFilter { Status = "Paid", EndDate = DateTime.MaxValue };
 
                 var allReceivedIncomes = await _incomeService.GetFilteredIncomesAsync(allReceivedIncomesFilter, token);
                 var allPaidPayments = await _paymentService.GetFilteredPaymentsAsync(allPaidPaymentsFilter, token);
@@ -450,7 +449,7 @@ namespace Equilibrium.Web.Controllers
             var thisMonthReceivedIncomes = await _incomeService.GetFilteredIncomesAsync(new IncomeFilter { Month = currentMonth, Year = currentYear, Status = "Received" }, token);
             var thisMonthPaidPayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { Month = currentMonth, Year = currentYear, Status = "Paid" }, token);
             var allReceivedIncomes = await _incomeService.GetFilteredIncomesAsync(new IncomeFilter { Status = "Received", EndDate = DateTime.Today }, token);
-            var allPaidPayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { Status = "Paid", EndDate = DateTime.Today }, token);
+            var allPaidPayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { Status = "Paid", EndDate = DateTime.MaxValue }, token);
 
             ViewBag.TotalBalance = allReceivedIncomes.Sum(i => i.Amount) - allPaidPayments.Sum(p => p.Amount);
             ViewBag.ThisMonthIncomes = thisMonthReceivedIncomes.Sum(i => i.Amount);
