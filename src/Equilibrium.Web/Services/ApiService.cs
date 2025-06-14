@@ -260,5 +260,14 @@ namespace Equilibrium.Web.Services
 
             return JsonSerializer.Deserialize<T>(content, _jsonOptions)!;
         }
+
+        public async Task<string> GetAsync(string endpoint)
+        {
+            var client = CreateClient("");
+            var response = await client.GetAsync(endpoint);
+            var content = await HandleResponse(response);
+
+            return content;
+        }
     }
 }

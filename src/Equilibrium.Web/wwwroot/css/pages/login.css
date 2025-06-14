@@ -280,3 +280,23 @@ body.login-page {
         transform: scale(0.8);
     }
 }
+
+.version-info {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 0.5rem;
+}
+
+    .version-info i {
+        margin-right: 0.25rem;
+    }
+
+    .version-info .text-muted {
+        color: rgba(255, 255, 255, 0.4) !important;
+    }
+
+@media (max-width: 576px) {
+    .version-info {
+        font-size: 0.7rem;
+    }
+}

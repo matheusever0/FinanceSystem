@@ -1,5 +1,6 @@
 using Equilibrium.Web.Models.Login;
 using Equilibrium.Web.Models.User;
+using System.Text.Json;
 
 namespace Equilibrium.Web.Interfaces
 {
@@ -11,6 +12,7 @@ namespace Equilibrium.Web.Interfaces
         Task<UserModel> CreateUserAsync(CreateUserModel model, string token);
         Task<UserModel> UpdateUserAsync(string id, UpdateUserModel model, string token);
         Task DeleteUserAsync(string id, string token);
+        Task<string> GetVersion();
     }
 }
 

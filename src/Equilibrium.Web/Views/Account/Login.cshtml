@@ -60,29 +60,33 @@
         </div>
         <div class="login-footer">
             <small>&copy; 2025 Equilibrium+ | SeveroTech - Todos os direitos reservados</small>
+            <br>
+            <small class="text-muted" data-version="number">Carregando versão...</small>
         </div>
     </div>
 </body>
 </html>
 
+<script src="~/js/modules/version.js" asp-append-version="true"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        if (FinanceSystem && FinanceSystem.Modules && FinanceSystem.Modules.Version) {
+            FinanceSystem.Modules.Version.initialize();
+        }
+
         const loginForm = document.querySelector('form.login-form');
         const loginButton = document.getElementById('login-button');
 
         if (loginForm && loginButton) {
-            // Adiciona ID ao formulário se ainda não tiver
             if (!loginForm.id) {
                 loginForm.id = 'login-form';
             }
 
             loginForm.addEventListener('submit', function(e) {
-                // Verifica se os campos obrigatórios estão preenchidos
                 const username = document.getElementById('Username').value;
                 const password = document.getElementById('Password').value;
 
                 if (username && password) {
-                    // Desabilita o botão e ativa o estado de loading
                     loginButton.disabled = true;
                     loginButton.classList.add('loading');
                 }

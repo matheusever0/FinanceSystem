@@ -29,13 +29,13 @@ namespace Equilibrium.Web.Controllers
             IIncomeService incomeService,
             IFinancingService financingService)
         {
-            _paymentService = paymentService ?? throw new ArgumentNullException(nameof(paymentService));
-            _creditCardService = creditCardService ?? throw new ArgumentNullException(nameof(creditCardService));
-            _incomeService = incomeService ?? throw new ArgumentNullException(nameof(incomeService));
-            _financingService = financingService ?? throw new ArgumentNullException(nameof(financingService));
+            _paymentService = paymentService;
+            _creditCardService = creditCardService;
+            _incomeService = incomeService;
+            _financingService = financingService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             if (!IsUserAuthenticated())
             {
@@ -49,160 +49,6 @@ namespace Equilibrium.Web.Controllers
             catch (Exception ex)
             {
                 return HandleException(ex, EntityNames.Dashboard, "loading");
-            }
-        }
-
-        private async Task LoadDashboardData(string token)
-        {
-            var currentDate = DateTime.Now;
-            var currentMonth = currentDate.Month;
-            var currentYear = currentDate.Year;
-
-            try
-            {
-                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
-                var thisMonthReceivedIncomesFilter = new IncomeFilter { Month = currentMonth, Year = currentYear, Status = "Received" };
-                var thisMonthReceivedIncomes = await _incomeService.GetFilteredIncomesAsync(thisMonthReceivedIncomesFilter, token);
-
-                var thisMonthPaidPaymentsFilter = new PaymentFilter { Month = currentMonth, Year = currentYear, Status = "Paid" };
-                var thisMonthPaidPayments = await _paymentService.GetFilteredPaymentsAsync(thisMonthPaidPaymentsFilter, token);
-
-                var pendingPayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { Status = "Pending", Month = currentMonth, Year = currentYear }, token);
-                var overduePayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { Status = "Overdue", Month = currentMonth, Year = currentYear }, token);
-                var pendingIncomes = await _incomeService.GetFilteredIncomesAsync(new IncomeFilter { Status = "Pending", Month = currentMonth, Year = currentYear }, token);
-                var overdueIncomes = await _incomeService.GetFilteredIncomesAsync(new IncomeFilter { Status = "Pending", EndDate = DateTime.Today.AddDays(-1) }, token);
-
-                var totalIncomeReceived = thisMonthReceivedIncomes.Sum(i => i.Amount);
-                var totalPaymentsPaid = thisMonthPaidPayments.Sum(p => p.Amount);
-
-                var allReceivedIncomesFilter = new IncomeFilter { Status = "Received", EndDate = DateTime.Today };
-                var allPaidPaymentsFilter = new PaymentFilter { Status = "Paid", EndDate = DateTime.MaxValue };
-
-                var allReceivedIncomes = await _incomeService.GetFilteredIncomesAsync(allReceivedIncomesFilter, token);
-                var allPaidPayments = await _paymentService.GetFilteredPaymentsAsync(allPaidPaymentsFilter, token);
-
-                var totalAllIncomeReceived = allReceivedIncomes.Sum(i => i.Amount);
-                var totalAllPaymentsPaid = allPaidPayments.Sum(p => p.Amount);
-                var currentBalance = totalAllIncomeReceived - totalAllPaymentsPaid;
-
-                var upcomingPayments = await GetUpcomingPayments(token, 7);
-                var upcomingIncomes = await GetUpcomingIncomes(token, 7);
-
-                var activeFinancings = await _financingService.GetActiveFinancingsAsync(token);
-
-                ViewBag.TotalBalance = currentBalance;
-                ViewBag.TotalIncomeReceived = totalIncomeReceived;
-                ViewBag.TotalPaymentsPaid = totalPaymentsPaid;
-
-                ViewBag.PendingPayments = pendingPayments;
-                ViewBag.OverduePayments = overduePayments;
-                ViewBag.PendingIncomes = pendingIncomes;
-                ViewBag.OverdueIncomes = overdueIncomes;
-
-                ViewBag.UpcomingPayments = upcomingPayments;
-                ViewBag.UpcomingIncomes = upcomingIncomes;
-
-                ViewBag.CreditCards = creditCards;
-                ViewBag.ActiveFinancings = activeFinancings;
-
-                ViewBag.ThisMonthPayments = totalPaymentsPaid;
-                ViewBag.ThisMonthIncomes = totalIncomeReceived;
-
-                ViewBag.TotalPendingPayments = pendingPayments.Sum(p => p.Amount);
-                ViewBag.TotalOverduePayments = overduePayments.Sum(p => p.Amount);
-                ViewBag.TotalPendingIncomes = pendingIncomes.Sum(i => i.Amount);
-                ViewBag.TotalOverdueIncomes = overdueIncomes.Sum(i => i.Amount);
-
-                await LoadChartData(token);
-            }
-            catch (Exception)
-            {
-                ViewBag.TotalBalance = 0m;
-                ViewBag.TotalIncomeReceived = 0m;
-                ViewBag.TotalPaymentsPaid = 0m;
-                ViewBag.TotalPendingPayments = 0m;
-                ViewBag.TotalOverduePayments = 0m;
-                ViewBag.TotalPendingIncomes = 0m;
-                ViewBag.TotalOverdueIncomes = 0m;
-                ViewBag.PendingPayments = new List<PaymentModel>();
-                ViewBag.OverduePayments = new List<PaymentModel>();
-                ViewBag.PendingIncomes = new List<IncomeModel>();
-                ViewBag.OverdueIncomes = new List<IncomeModel>();
-                ViewBag.UpcomingPayments = new List<PaymentModel>();
-                ViewBag.UpcomingIncomes = new List<IncomeModel>();
-                ViewBag.CreditCards = new List<CreditCardModel>();
-                ViewBag.ActiveFinancings = new List<FinancingModel>();
-                ViewBag.ThisMonthPayments = 0m;
-                ViewBag.ThisMonthIncomes = 0m;
-                throw;
-            }
-        }
-
-        private async Task LoadChartData(string token)
-        {
-            try
-            {
-                var monthlyData = await GetMonthlyComparisonDataAsync(token);
-                ViewBag.MonthlyLabels = JsonSerializer.Serialize(monthlyData.Select(m => m.Month));
-                ViewBag.MonthlyIncomeValues = JsonSerializer.Serialize(monthlyData.Select(m => m.IncomeAmount));
-                ViewBag.MonthlyPaymentValues = JsonSerializer.Serialize(monthlyData.Select(m => m.PaymentAmount));
-
-                var currentMonth = DateTime.Now.Month;
-                var currentYear = DateTime.Now.Year;
-
-                var paymentsByType = await GetPaymentsByTypeCurrentMonth(token, currentMonth, currentYear);
-                var incomesByType = await GetIncomesByTypeCurrentMonth(token, currentMonth, currentYear);
-
-                ViewBag.PaymentsByTypeLabels = JsonSerializer.Serialize(paymentsByType.Keys);
-                ViewBag.PaymentsByTypeValues = JsonSerializer.Serialize(paymentsByType.Values);
-                ViewBag.IncomesByTypeLabels = JsonSerializer.Serialize(incomesByType.Keys);
-                ViewBag.IncomesByTypeValues = JsonSerializer.Serialize(incomesByType.Values);
-            }
-            catch
-            {
-                ViewBag.MonthlyLabels = JsonSerializer.Serialize(Array.Empty<string>());
-                ViewBag.MonthlyIncomeValues = JsonSerializer.Serialize(Array.Empty<decimal>());
-                ViewBag.MonthlyPaymentValues = JsonSerializer.Serialize(Array.Empty<decimal>());
-                ViewBag.PaymentsByTypeLabels = JsonSerializer.Serialize(Array.Empty<string>());
-                ViewBag.PaymentsByTypeValues = JsonSerializer.Serialize(Array.Empty<decimal>());
-                ViewBag.IncomesByTypeLabels = JsonSerializer.Serialize(Array.Empty<string>());
-                ViewBag.IncomesByTypeValues = JsonSerializer.Serialize(Array.Empty<decimal>());
-            }
-        }
-
-        private async Task<Dictionary<string, decimal>> GetPaymentsByTypeCurrentMonth(string token, int month, int year)
-        {
-            try
-            {
-                var filter = new PaymentFilter { Month = month, Year = year, Status = "Paid" };
-
-                var payments = await _paymentService.GetFilteredPaymentsAsync(filter, token);
-
-                return payments
-                    .GroupBy(p => p.PaymentTypeName)
-                    .ToDictionary(g => g.Key, g => g.Sum(p => p.Amount));
-            }
-            catch
-            {
-                return [];
-            }
-        }
-
-        private async Task<Dictionary<string, decimal>> GetIncomesByTypeCurrentMonth(string token, int month, int year)
-        {
-            try
-            {
-                var filter = new IncomeFilter { Month = month, Year = year, Status = "Received" };
-
-                var incomes = await _incomeService.GetFilteredIncomesAsync(filter, token);
-
-                return incomes
-                    .GroupBy(i => i.IncomeTypeName)
-                    .ToDictionary(g => g.Key, g => g.Sum(i => i.Amount));
-            }
-            catch
-            {
-                return [];
             }
         }
 
@@ -517,7 +363,6 @@ namespace Equilibrium.Web.Controllers
                     }
                     catch (Exception ex)
                     {
-                        // Em caso de erro, adicionar dados básicos
                         var totalPaid = financing.TotalAmount - financing.RemainingDebt;
                         var paymentPercentage = financing.TotalAmount > 0 ? (totalPaid / financing.TotalAmount) * 100 : 0;
 

@@ -6,6 +6,7 @@ namespace Equilibrium.Web.Interfaces
     {
         Task<bool> VerifyTokenAsync(string token);
         Task<T> GetAsync<T>(string endpoint, string token);
+        Task<string> GetAsync(string endpoint);
         Task<T> PostAsync<T>(string endpoint, object? data = null, string token = "");
         Task<T> PutAsync<T>(string endpoint, object? data = null, string token = "");
         Task DeleteAsync(string endpoint, string token);

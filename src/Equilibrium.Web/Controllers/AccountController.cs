@@ -5,6 +5,7 @@ using Equilibrium.Web.Models.Login;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace Equilibrium.Web.Controllers
 {
@@ -125,6 +126,24 @@ namespace Equilibrium.Web.Controllers
                 TempData["ErrorMessage"] = string.Format(ResourceFinanceWeb.Error_Logout, ex.Message);
                 return RedirectToAction("Index", "Home");
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetVersion()
+        {
+            var content = await _userService.GetVersion();
+
+            var versionObj = JsonSerializer.Deserialize<JsonElement>(content.ToString());
+
+            var response = new
+            {
+                Version = versionObj.GetProperty("version").GetString(),
+                BuildDate = versionObj.GetProperty("buildDate").GetString(),
+                Environment = versionObj.GetProperty("environment").GetString()
+            };
+
+            return Json(response);
+
         }
 
         [HttpGet]

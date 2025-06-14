@@ -1,10 +1,13 @@
 ﻿using Equilibrium.Domain.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 
 namespace Equilibrium.API.Controllers
 {
-    public class VersionController(IUnitOfWork unitOfWork) : AuthenticatedController<object>(unitOfWork, null)
+    [AllowAnonymous]
+    [Route("api/[controller]")]
+    public class VersionController(IUnitOfWork unitOfWork) : BaseController(unitOfWork)
     {
         [HttpGet]
         public ActionResult<object> Get()

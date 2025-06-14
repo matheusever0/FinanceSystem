@@ -7,6 +7,7 @@ using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
 using System.Security.Claims;
 
 namespace Equilibrium.Web.Controllers
@@ -226,7 +227,8 @@ namespace Equilibrium.Web.Controllers
                 async (service, itemId, token) => await service.GetUserByIdAsync(itemId, token),
                 "usuário",
                 null,
-                async (item) => {
+                async (item) =>
+                {
                     if (item is UserModel user && user.Id == GetCurrentUserId())
                     {
                         return (false, "Você não pode excluir sua própria conta.");

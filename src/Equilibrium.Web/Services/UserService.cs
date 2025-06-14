@@ -1,6 +1,7 @@
 using Equilibrium.Web.Interfaces;
 using Equilibrium.Web.Models.Login;
 using Equilibrium.Web.Models.User;
+using System.Text.Json;
 
 namespace Equilibrium.Web.Services
 {
@@ -64,6 +65,11 @@ namespace Equilibrium.Web.Services
         public async Task DeleteUserAsync(string id, string token)
         {
             await _apiService.DeleteAsync($"/api/Users/{id}", token);
+        }
+
+        public async Task<string> GetVersion()
+        {
+            return await _apiService.GetAsync("/api/Version");
         }
     }
 }
