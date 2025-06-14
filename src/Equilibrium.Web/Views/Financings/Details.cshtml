@@ -1,5 +1,6 @@
 ﻿@model FinancingDetailModel
 @using Equilibrium.Web.Helpers
+@using Equilibrium.Web.Models.Commons
 @using Equilibrium.Web.Models.Financing
 @{
     ViewData["Title"] = "Detalhes do Financiamento";
@@ -226,12 +227,17 @@
                                     <partial name="_Partials/Commons/_StatusBadge" model='(BadgeClass: GetPaymentStatusBadgeClass(payment.Status), Description: payment.StatusDescription)' />
                                 </td>
                                 <td class="text-center">
-                                    <partial name="_Partials/Commons/_ActionButtons" model='(
+                                    @{
+                                        DeleteButtonModel deleteConfig = null;
+                                        <partial name="_Partials/Commons/_ActionButtons" model='(
                                             Id: payment.Id,
                                             CanView: true,
                                             CanEdit: false,
                                             CanDelete: false,
-                                            ControllerName: "Payments")' />
+                                            ControllerName: "Payments",
+                                            DeleteConfig: deleteConfig,
+                                            ExtraButtons: "")' />
+                                    }
                                 </td>
                             </tr>
                         }
