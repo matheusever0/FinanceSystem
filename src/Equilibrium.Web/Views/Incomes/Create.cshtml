@@ -26,7 +26,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label asp-for="Description" class="form-label"></label>
+                                    <label asp-for="Description" class="form-label" ></label>
                                     <input asp-for="Description" class="form-control" />
                                     <span asp-validation-for="Description" class="text-danger"></span>
                                 </div>
@@ -59,7 +59,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label asp-for="DueDate" class="form-label"></label>
-                                    <input asp-for="DueDate" class="form-control" type="date" />
+                                    <input asp-for="DueDate" class="form-control" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
                                     <span asp-validation-for="DueDate" class="text-danger"></span>
                                 </div>
 
@@ -91,7 +91,7 @@
 
                         <div class="mb-3">
                             <label asp-for="Notes" class="form-label"></label>
-                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <textarea asp-for="Notes" class="form-control" rows="3">@($"Receita referente ao mês de {DateTime.Now:MM/yyyy}")</textarea>
                             <span asp-validation-for="Notes" class="text-danger"></span>
                         </div>
 

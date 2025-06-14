@@ -48,13 +48,13 @@
 
                                 <div class="mb-3">
                                     <label asp-for="DueDate" class="form-label"></label>
-                                    <input asp-for="DueDate" class="form-control" type="date" />
+                                    <input asp-for="DueDate" class="form-control" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
                                     <span asp-validation-for="DueDate" class="text-danger"></span>
                                 </div>
 
                                 <div class="mb-3">
                                     <label asp-for="PaymentDate" class="form-label"></label>
-                                    <input asp-for="PaymentDate" class="form-control" type="date" />
+                                    <input asp-for="PaymentDate" class="form-control" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
                                     <span asp-validation-for="PaymentDate" class="text-danger"></span>
                                     <div class="form-text">Se preenchido, o pagamento será marcado como pago nesta data.</div>
                                 </div>

@@ -31,7 +31,6 @@ FinanceSystem.Modules.Tables = (function () {
         }
     }
 
-    // Initialize a specific table with DataTables or fallback to basic sorting
     function initializeTable(tableSelector, options = {}) {
         const defaultOptions = {
             language: {
@@ -40,9 +39,9 @@ FinanceSystem.Modules.Tables = (function () {
             responsive: true,
             pageLength: 10,
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-            order: [[0, 'desc']], // Default order by first column descending
+            order: [[0, 'desc']], 
             columnDefs: [
-                { orderable: false, targets: -1 } // Disable ordering on last column (actions)
+                { orderable: false, targets: -1 } 
             ]
         };
 
@@ -59,7 +58,6 @@ FinanceSystem.Modules.Tables = (function () {
     }
 
     function initializeReportTables() {
-        // Common configuration for report tables
         const reportTableOptions = {
             pageLength: 20,
             lengthMenu: [[20, 40, 60, 80, 100, -1], [20, 40, 60, 80, 100, "Todos"]],

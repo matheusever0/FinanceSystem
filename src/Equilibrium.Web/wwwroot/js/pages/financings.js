@@ -182,12 +182,10 @@ FinanceSystem.Pages.Financings = (function () {
     }
 
     function initializeFinancingsList() {
-        // Initialize the financings table using the Tables module
         FinanceSystem.Modules.Tables.initializeTable('.financings-table', {
-            order: [[3, 'desc']] // Ordena por data de aquisição decrescente
+            order: [[3, 'desc']] 
         });
 
-        // Initialize delete confirmation
         const deleteButtons = document.querySelectorAll('.btn-delete-financing');
         deleteButtons.forEach(button => {
             button.addEventListener('click', function (e) {
@@ -197,7 +195,6 @@ FinanceSystem.Pages.Financings = (function () {
             });
         });
 
-        // Initialize correction modal buttons
         const correctionButtons = document.querySelectorAll('.btn-apply-correction');
         correctionButtons.forEach(button => {
             button.addEventListener('click', function () {
@@ -218,7 +215,6 @@ FinanceSystem.Pages.Financings = (function () {
     function initializeFinancingDetails() {
         initializeCharts();
 
-        // Initialize installments table
         FinanceSystem.Modules.Tables.initializeTable('.installments-table', {
             order: [[0, 'asc']]
         });
