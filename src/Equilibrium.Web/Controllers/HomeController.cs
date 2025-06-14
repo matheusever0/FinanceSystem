@@ -389,6 +389,170 @@ namespace Equilibrium.Web.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> GetFinancingsSummary()
+        {
+            try
+            {
+                var token = GetToken();
+                var financings = await _financingService.GetActiveFinancingsAsync(token);
+
+                var financingSummaryData = new List<object>();
+
+                foreach (var financing in financings)
+                {
+                    try
+                    {
+                        FinancingDetailModel details;
+
+                        details = await _financingService.GetFinancingDetailsAsync(financing.Id, token);
+
+
+                        var currentDate = DateTime.Now;
+                        var startDate = financing.StartDate;
+                        var totalMonths = financing.TermMonths;
+
+                        var elapsedMonths = ((currentDate.Year - startDate.Year) * 12) + currentDate.Month - startDate.Month;
+                        if (currentDate.Day < startDate.Day)
+                        {
+                            elapsedMonths--; 
+                        }
+
+                        elapsedMonths = Math.Max(0, Math.Min(elapsedMonths, totalMonths));
+                        var remainingMonths = Math.Max(0, totalMonths - elapsedMonths);
+
+                        var remainingYears = remainingMonths / 12;
+                        var remainingMonthsOnly = remainingMonths % 12;
+
+                        string remainingTimeText;
+                        if (remainingMonths == 0)
+                        {
+                            remainingTimeText = "Finalizado";
+                        }
+                        else if (remainingYears > 0)
+                        {
+                            remainingTimeText = $"{remainingYears} ano{(remainingYears > 1 ? "s" : "")}";
+                            if (remainingMonthsOnly > 0)
+                            {
+                                remainingTimeText += $" e {remainingMonthsOnly} mês{(remainingMonthsOnly != 1 ? "es" : "")}";
+                            }
+                        }
+                        else
+                        {
+                            remainingTimeText = $"{remainingMonthsOnly} mês{(remainingMonthsOnly != 1 ? "es" : "")}";
+                        }
+
+                        decimal totalPaid;
+                        decimal paymentPercentage;
+                        decimal timeProgressPercentage;
+
+                        if (details != null)
+                        {
+                            totalPaid = details.TotalAmortizationPaid;
+                            paymentPercentage = financing.TotalAmount > 0 ? (totalPaid / financing.TotalAmount) * 100 : 0;
+                        }
+                        else
+                        {
+                            totalPaid = financing.TotalAmount - financing.RemainingDebt;
+                            paymentPercentage = financing.TotalAmount > 0 ? (totalPaid / financing.TotalAmount) * 100 : 0;
+                        }
+
+                        timeProgressPercentage = (decimal)(totalMonths > 0 ? ((double)elapsedMonths / totalMonths) * 100 : 0);
+
+                        DateTime? nextInstallmentDate = null;
+                        decimal? nextInstallmentAmount = null;
+
+                        if (details?.Installments != null && details.Installments.Any())
+                        {
+                            var nextInstallment = details.Installments
+                                .Where(i => i.Status == 1) 
+                                .OrderBy(i => i.DueDate)
+                                .FirstOrDefault();
+
+                            if (nextInstallment != null)
+                            {
+                                nextInstallmentDate = nextInstallment.DueDate;
+                                nextInstallmentAmount = nextInstallment.TotalAmount;
+                            }
+                        }
+                        else
+                        {
+                            if (remainingMonths > 0)
+                            {
+                                nextInstallmentDate = startDate.AddMonths(elapsedMonths + 1);
+                                nextInstallmentAmount = totalMonths > 0 ? financing.TotalAmount / totalMonths : 0;
+                            }
+                        }
+
+                        int totalInstallments = 0;
+                        int paidInstallments = 0;
+                        decimal installmentProgress = 0;
+
+                        if (details?.Installments != null)
+                        {
+                            totalInstallments = details.Installments.Count;
+                            paidInstallments = details.Installments.Count(i => i.Status == 2); // Status pago
+                            installmentProgress = totalInstallments > 0 ? (paidInstallments / (decimal)totalInstallments) * 100 : 0;
+                        }
+
+                        financingSummaryData.Add(new
+                        {
+                            financing.Id,
+                            financing.Description,
+                            financing.TotalAmount,
+                            RemainingAmount = financing.RemainingDebt,
+                            TotalPaid = totalPaid,
+                            PaymentPercentage = Math.Round(Math.Max(0, Math.Min(100, paymentPercentage)), 1),
+                            TimeProgressPercentage = Math.Round(Math.Max(0, Math.Min(100, timeProgressPercentage)), 1),
+                            RemainingTimeText = remainingTimeText,
+                            financing.Status,
+                            financing.StatusDescription,
+                            financing.InterestRate,
+                            financing.TypeDescription,
+                            NextInstallmentDate = nextInstallmentDate,
+                            NextInstallmentAmount = nextInstallmentAmount,
+                            TotalInstallments = totalInstallments,
+                            PaidInstallments = paidInstallments,
+                            InstallmentProgress = Math.Round(installmentProgress, 1)
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        // Em caso de erro, adicionar dados básicos
+                        var totalPaid = financing.TotalAmount - financing.RemainingDebt;
+                        var paymentPercentage = financing.TotalAmount > 0 ? (totalPaid / financing.TotalAmount) * 100 : 0;
+
+                        financingSummaryData.Add(new
+                        {
+                            financing.Id,
+                            financing.Description,
+                            financing.TotalAmount,
+                            RemainingAmount = financing.RemainingDebt,
+                            TotalPaid = totalPaid,
+                            PaymentPercentage = Math.Round(Math.Max(0, Math.Min(100, paymentPercentage)), 1),
+                            TimeProgressPercentage = 0m,
+                            RemainingTimeText = "Calculando...",
+                            financing.Status,
+                            financing.StatusDescription,
+                            financing.InterestRate,
+                            financing.TypeDescription,
+                            NextInstallmentDate = (DateTime?)null,
+                            NextInstallmentAmount = (decimal?)null,
+                            TotalInstallments = 0,
+                            PaidInstallments = 0,
+                            InstallmentProgress = 0m
+                        });
+                    }
+                }
+
+                return PartialView("_Partials/_FinancingsSummary", financingSummaryData);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao carregar resumo dos financiamentos: {ex.Message}");
+            }
+        }
+
+        [HttpGet]
         public async Task<IActionResult> GetTrendAnalysis()
         {
             try

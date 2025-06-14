@@ -48,4 +48,13 @@
     Url = Url.Action("GetPendings", "Home")!,
     InitiallyExpanded = false
 })
+
+
+    @await Html.PartialAsync("~/Views/Shared/_CollapseSection.cshtml", new CollapseSectionModel
+{
+    Id = "financings-summary",
+    Title = "Resumo dos Financiamentos",
+    Url = Url.Action("GetFinancingsSummary", "Home")!,
+    InitiallyExpanded = false
+})
 </div>
