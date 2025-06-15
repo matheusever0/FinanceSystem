@@ -17,12 +17,11 @@ namespace Equilibrium.Web.Controllers
         private readonly ICreditCardService _creditCardService;
         private readonly IPaymentMethodService _paymentMethodService;
         private readonly IPaymentService _paymentService;
-
         private const int CREDIT_CARD_PAYMENT_TYPE = 2;
 
         public CreditCardsController(
-            ICreditCardService creditCardService,
-            IPaymentMethodService paymentMethodService,
+            ICreditCardService creditCardService, 
+            IPaymentMethodService paymentMethodService, 
             IPaymentService paymentService)
         {
             _creditCardService = creditCardService;
@@ -34,8 +33,38 @@ namespace Equilibrium.Web.Controllers
         {
             try
             {
-                var creditCards = await _creditCardService.GetAllCreditCardsAsync(GetToken());
-                return View(creditCards);
+                var token = GetToken();
+                if (string.IsNullOrEmpty(token))
+                {
+                    return RedirectToAction("Login", "Account");
+                }
+
+                var creditCards = await _creditCardService.GetAllCreditCardsAsync(token);
+
+                var updatedCreditCards = new List<CreditCardModel>();
+
+                foreach (var card in creditCards)
+                {
+                    var availableLimit = await CalculateAvailableLimit(card.Id, token);
+
+                    if (card.AvailableLimit != availableLimit)
+                    {
+                        try
+                        {
+                            await _creditCardService.UpdateLimitAsync(card.Id, availableLimit, token);
+
+                            card.AvailableLimit = availableLimit;
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Erro ao atualizar limite do cartão {card.Id}: {ex.Message}");
+                        }
+                    }
+
+                    updatedCreditCards.Add(card);
+                }
+
+                return View(updatedCreditCards);
             }
             catch (Exception ex)
             {
@@ -181,7 +210,8 @@ namespace Equilibrium.Web.Controllers
                 async (service, itemId, token) => await service.GetCreditCardByIdAsync(itemId, token),
                 "cartão de crédito",
                 null,
-                async (item) => {
+                async (item) =>
+                {
                     if (item is CreditCardModel card)
                     {
                         var pendingPayments = await _paymentService.GetFilteredPaymentsAsync(new PaymentFilter { CreditCardId = card.Id }, GetToken());
@@ -205,6 +235,35 @@ namespace Equilibrium.Web.Controllers
             catch
             {
                 ViewBag.PaymentMethods = new List<object>();
+            }
+        }
+
+        /// <summary>
+        /// Calcula o limite disponível baseado no limite total menos os gastos dos payments
+        /// </summary>
+        /// <param name="creditCardId">ID do cartão de crédito</param>
+        /// <param name="token">Token de autenticação</param>
+        /// <returns>Valor do limite disponível</returns>
+        private async Task<decimal> CalculateAvailableLimit(string creditCardId, string token)
+        {
+            try
+            {
+                var creditCard = await _creditCardService.GetCreditCardByIdAsync(creditCardId, token);
+
+                var payments = await _paymentService.GetPaymentsByCreditCardAsync(creditCardId, token);
+
+                var totalSpent = payments
+                    .Where(p => p.Status == 1)
+                    .Sum(p => p.Amount);
+
+                var availableLimit = creditCard.Limit - totalSpent;
+
+                return Math.Max(0, availableLimit);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao calcular limite disponível do cartão {creditCardId}: {ex.Message}");
+                return 0;
             }
         }
     }
